@@ -11,7 +11,4 @@ type NotificationSettings struct {
 	NotificationsPosts []uuid.UUID
 	NotificationsStories []uuid.UUID
 	NotificationsComments []uuid.UUID
-
-
-
 }

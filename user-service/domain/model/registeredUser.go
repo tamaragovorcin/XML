@@ -12,7 +12,7 @@ const (
 	SPORTS
 	NEW_MEDIA
 	BUSINESS
-	BREND
+	BRAND
 	ORGANIZATION
 )
 type RegisteredUser struct {
