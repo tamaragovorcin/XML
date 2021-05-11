@@ -1,11 +1,12 @@
-package domain
+package model
 
 import (
 	"github.com/google/uuid"
 	_ "html/template"
 )
-type Content struct {
+
+type DisposableImage struct {
 	Id uuid.UUID `gorm:"primaryKey"`
-	Video string
-	Image string
+	Opened bool
+	Content string
 }

@@ -25,8 +25,6 @@ type User struct {
 	PhoneNumber int
 	Gender Gender
 	DateOfBirth time.Time
-
-
 }
 
 type UserRequest struct {
