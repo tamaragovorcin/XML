@@ -9,3 +9,9 @@ type Product struct {
 	AvailableQuantity int
 	Picture string
 }
+
+type ChosenProduct struct {
+	Id uuid.UUID `gorm:"primaryKey"`
+	Product Product
+	Quantity int
+}

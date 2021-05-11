@@ -1,4 +1,4 @@
-module magyAgent
+module message-service
 
 go 1.16
 

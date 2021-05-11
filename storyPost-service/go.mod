@@ -1,4 +1,4 @@
-module magyAgent
+module storyPost-service
 
 go 1.16
 

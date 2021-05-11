@@ -1,11 +1,9 @@
-package domain
-
+package model
 import (
 	"github.com/google/uuid"
 	_ "html/template"
 )
-type StoryPost struct {
+type Purchase struct {
 	Id uuid.UUID `gorm:"primaryKey"`
-	Post []uuid.UUID
-	CloseFriends bool
+	ChosenProducts []ChosenProduct
 }

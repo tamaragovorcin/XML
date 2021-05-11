@@ -1,4 +1,4 @@
-module magyAgent
+module feedPost-service
 
 go 1.16
 

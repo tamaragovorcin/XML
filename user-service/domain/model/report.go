@@ -3,9 +3,9 @@ import (
 	"github.com/google/uuid"
 	_ "html/template"
 )
-type Complaint struct {
+type Report struct {
 	Id uuid.UUID `gorm:"primaryKey"`
 	ComplainingUser uuid.UUID
-	AccusedUser uuid.UUID
+	ReportedUser uuid.UUID
 	Post uuid.UUID
 }
