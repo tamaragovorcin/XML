@@ -7,20 +7,20 @@ import (
 func (app *application) routes() *mux.Router {
 	// Register handler functions.
 	r := mux.NewRouter()
-	r.HandleFunc("/api/message/", app.getAllMessages).Methods("GET")
-	r.HandleFunc("/api/message/{id}", app.findMessageByID).Methods("GET")
-	r.HandleFunc("/api/message/", app.insertMessage).Methods("POST")
-	r.HandleFunc("/api/message/{id}", app.deleteMessage).Methods("DELETE")
+	r.HandleFunc("/message/", app.getAllMessages).Methods("GET")
+	r.HandleFunc("/message/{id}", app.findMessageByID).Methods("GET")
+	r.HandleFunc("/message/", app.insertMessage).Methods("POST")
+	r.HandleFunc("/message/{id}", app.deleteMessage).Methods("DELETE")
 
-	r.HandleFunc("/api/chat/", app.getAllChats).Methods("GET")
-	r.HandleFunc("/api/chat/{id}", app.findChatByID).Methods("GET")
-	r.HandleFunc("/api/chat/", app.insertChat).Methods("POST")
-	r.HandleFunc("/api/chat/{id}", app.deleteChat).Methods("DELETE")
+	r.HandleFunc("/chat/", app.getAllChats).Methods("GET")
+	r.HandleFunc("/chat/{id}", app.findChatByID).Methods("GET")
+	r.HandleFunc("/chat/", app.insertChat).Methods("POST")
+	r.HandleFunc("/chat/{id}", app.deleteChat).Methods("DELETE")
 
-	r.HandleFunc("/api/disposableImage/", app.getAllDisposableImages).Methods("GET")
-	r.HandleFunc("/api/disposableImage/{id}", app.findDisposableImageByID).Methods("GET")
-	r.HandleFunc("/api/disposableImage/", app.insertDisposableImage).Methods("POST")
-	r.HandleFunc("/api/disposableImage/{id}", app.deleteDisposableImage).Methods("DELETE")
+	r.HandleFunc("/disposableImage/", app.getAllDisposableImages).Methods("GET")
+	r.HandleFunc("/disposableImage/{id}", app.findDisposableImageByID).Methods("GET")
+	r.HandleFunc("/disposableImage/", app.insertDisposableImage).Methods("POST")
+	r.HandleFunc("/disposableImage/{id}", app.deleteDisposableImage).Methods("DELETE")
 
 	return r
 }
