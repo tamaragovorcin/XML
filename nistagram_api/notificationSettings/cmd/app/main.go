@@ -9,15 +9,16 @@ import (
 	"os"
 	"time"
 
-	"notifications/pkg/models/mongodb"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
+	"notifications/pkg/models/mongodb"
 )
 
 type application struct {
 	errorLog *log.Logger
 	infoLog  *log.Logger
 	notification   *mongodb.NotificationModel
+	settings  *mongodb.SettingsModel
 }
 
 func main() {
@@ -70,6 +71,9 @@ func main() {
 		errorLog: errLog,
 		notification: &mongodb.NotificationModel{
 			C: client.Database(*mongoDatabse).Collection("notifications"),
+		},
+		settings: &mongodb.SettingsModel{
+			C: client.Database(*mongoDatabse).Collection("settings"),
 		},
 	}
 

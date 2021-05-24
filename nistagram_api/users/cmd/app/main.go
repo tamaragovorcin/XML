@@ -20,9 +20,8 @@ type application struct {
 	infoLog  *log.Logger
 	users    *mongodb.UserModel
 	roles    *mongodb.RoleModel
-	reports  *mongodb.ReportModel
 	verifications *mongodb.VerificationModel
-	registredUsers *mongodb.RegistredUserModel
+	profileInformation *mongodb.ProfileInformationModal
 	agents *mongodb.AgentModel
 }
 
@@ -86,11 +85,9 @@ func main() {
 		verifications: &mongodb.VerificationModel{
 			C: client.Database(*mongoDatabse).Collection("verifications"),
 		},
-		reports: &mongodb.ReportModel{
-			C: client.Database(*mongoDatabse).Collection("reports"),
-		},
-		registredUsers: &mongodb.RegistredUserModel{
-			C: client.Database(*mongoDatabse).Collection("registredUsers"),
+
+		profileInformation: &mongodb.ProfileInformationModal{
+			C: client.Database(*mongoDatabse).Collection("profileInformation"),
 		},
 	}
 

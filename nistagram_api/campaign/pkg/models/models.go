@@ -5,30 +5,14 @@ import (
 	"time"
 )
 
-type Ad struct {
-	Id uuid.UUID `bson:"_id,omitempty"`
-	Content uuid.UUID `bson:"content,omitempty"`
-	Link string `bson:"link,omitempty"`
-}
-
 type Campaign struct {
 	Id uuid.UUID `bson:"_id,omitempty"`
-	Ads []uuid.UUID `bson:"ads,omitempty"`
-	TargetGroup []string `bson:"targetGroup,omitempty"`
-	Statistic Statistic `bson:"statistic,omitempty"`
 	User uuid.UUID `bson:"user,omitempty"`
-}
-
-type CampaignPost struct {
-	Id uuid.UUID `bson:"_id,omitempty"`
-	Campaign uuid.UUID `bson:"campaign,omitempty"`
-	Post uuid.UUID `bson:"post,omitempty"`
-}
-
-type CampaignStory struct {
-	Id uuid.UUID `bson:"_id,omitempty"`
-	Campaign uuid.UUID `bson:"campaign,omitempty"`
-	Story uuid.UUID `bson:"story,omitempty"`
+	TargetGroup []string `bson:"targetGroup,omitempty"`
+	Statistic []uuid.UUID `bson:"statistics,omitempty"`
+	Link string `bson:"link,omitempty"`
+	FeedPosts []uuid.UUID `bson:"feedPosts,omitempty"`
+	StoryPosts []uuid.UUID `bson:"storyPosts,omitempty"`
 }
 
 type MultipleTimeCampaign struct {
@@ -39,7 +23,6 @@ type MultipleTimeCampaign struct {
 	DesiredNumber int `bson:"desiredNumber,omitempty"`
 	ModifiedTime time.Time `bson:"modifiedTime,omitempty"`
 	TimesShown int `bson:"timesShown,omitempty"`
-	NumberOfClicks int `bson:"numberOfClicks,omitempty"`
 }
 
 type OneTimeCampaign struct {
@@ -52,6 +35,13 @@ type Statistic struct {
 	Id uuid.UUID `bson:"_id,omitempty"`
 	Influencer uuid.UUID `bson:"influencer,omitempty"`
 	NumberOfClicks int  `bson:"numberOfClicks,omitempty"`
-	Post uuid.UUID  `bson:"post,omitempty"`
+	FeedPost uuid.UUID  `bson:"feedPost,omitempty"`
+	StoryPost uuid.UUID  `bson:"storyPost,omitempty"`
+}
 
+type Partnership struct {
+	ID uuid.UUID `bson:"_id,omitempty"`
+	Agent uuid.UUID `bson:"agent,omitempty"`
+	Influencer  uuid.UUID `bson:"influencer,omitempty"`
+	Approved bool `bson:"approved,omitempty"`
 }

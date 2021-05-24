@@ -3,7 +3,7 @@ package main
 import (
 	"encoding/json"
 	"github.com/gorilla/mux"
-	"gomod/pkg/models"
+	"users/pkg/models"
 	"net/http"
 )
 

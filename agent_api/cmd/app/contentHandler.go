@@ -1,26 +1,26 @@
 package main
 
 import (
+	"AgentApp/pkg/models"
 	"encoding/json"
-	"feedPosts/pkg/models"
 	"github.com/gorilla/mux"
 	"net/http"
 )
 
-func (app *application) getAllComments(w http.ResponseWriter, r *http.Request) {
+func (app *application) getAllContents(w http.ResponseWriter, r *http.Request) {
 	// Get all bookings stored
-	bookings, err := app.comments.All()
+	contents, err := app.contents.All()
 	if err != nil {
 		app.serverError(w, err)
 	}
 
 	// Convert booking list into json encoding
-	b, err := json.Marshal(bookings)
+	b, err := json.Marshal(contents)
 	if err != nil {
 		app.serverError(w, err)
 	}
 
-	app.infoLog.Println("Contents have been listed")
+	app.infoLog.Println("contents have been listed")
 
 	// Send response back
 	w.Header().Set("Content-Type", "application/json")
@@ -28,16 +28,16 @@ func (app *application) getAllComments(w http.ResponseWriter, r *http.Request) {
 	w.Write(b)
 }
 
-func (app *application) findCommentByID(w http.ResponseWriter, r *http.Request) {
+func (app *application) findContentByID(w http.ResponseWriter, r *http.Request) {
 	// Get id from incoming url
 	vars := mux.Vars(r)
 	id := vars["id"]
 
 	// Find booking by id
-	m, err := app.comments.FindByID(id)
+	m, err := app.contents.FindByID(id)
 	if err != nil {
 		if err.Error() == "ErrNoDocuments" {
-			app.infoLog.Println("Booking not found")
+			app.infoLog.Println("content not found")
 			return
 		}
 		// Any other error will send an internal server error
@@ -50,7 +50,7 @@ func (app *application) findCommentByID(w http.ResponseWriter, r *http.Request) 
 		app.serverError(w, err)
 	}
 
-	app.infoLog.Println("Have been found a booking")
+	app.infoLog.Println("Have been found a content")
 
 	// Send response back
 	w.Header().Set("Content-Type", "application/json")
@@ -58,9 +58,9 @@ func (app *application) findCommentByID(w http.ResponseWriter, r *http.Request) 
 	w.Write(b)
 }
 
-func (app *application) insertComment(w http.ResponseWriter, r *http.Request) {
+func (app *application) insertContent(w http.ResponseWriter, r *http.Request) {
 	// Define booking model
-	var m models.Comment
+	var m models.Content
 	// Get request information
 	err := json.NewDecoder(r.Body).Decode(&m)
 	if err != nil {
@@ -68,24 +68,24 @@ func (app *application) insertComment(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Insert new booking
-	insertResult, err := app.comments.Insert(m)
+	insertResult, err := app.contents.Insert(m)
 	if err != nil {
 		app.serverError(w, err)
 	}
 
-	app.infoLog.Printf("New content have been created, id=%s", insertResult.InsertedID)
+	app.infoLog.Printf("New Content have been created, id=%s", insertResult.InsertedID)
 }
 
-func (app *application) deleteComment(w http.ResponseWriter, r *http.Request) {
+func (app *application) deleteContent(w http.ResponseWriter, r *http.Request) {
 	// Get id from incoming url
 	vars := mux.Vars(r)
 	id := vars["id"]
 
 	// Delete booking by id
-	deleteResult, err := app.comments.Delete(id)
+	deleteResult, err := app.contents.Delete(id)
 	if err != nil {
 		app.serverError(w, err)
 	}
 
-	app.infoLog.Printf("Have been eliminated %d content(s)", deleteResult.DeletedCount)
+	app.infoLog.Printf("Have been eliminated %d Content(s)", deleteResult.DeletedCount)
 }

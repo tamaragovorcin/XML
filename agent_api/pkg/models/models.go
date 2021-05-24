@@ -22,33 +22,29 @@ type User struct {
 	DateOfBirth time.Time `bson:"dateOfBirth,omitempty"`
 }
 
-type UserRequest struct {
-	Name  string `bson:"name,omitempty"`
-	Surname string `bson:"surname,omitempty"`
-	Email string `bson:"email,omitempty"`
-	Password string `bson:"password,omitempty"`
-	RepeatedPassword string `bson:"repeatedPassword,omitempty"`
-}
-type LoginRequest struct {
-	Email string `bson:"email,omitempty"`
-	Password string `bson:"password,omitempty"`
-}
 
 type Purchase struct {
 	Id  uuid.UUID `bson:"_id,omitempty"`
-	ChosenProducts []ChosenProduct  `bson:"chosenProducts,omitempty"`
+	ChosenProducts []uuid.UUID  `bson:"chosenProducts,omitempty"`
 	Buyer uuid.UUID `bson:"buyer,omitempty"`
+	Address uuid.UUID `bson:"address,omitempty"`
 }
 type Product struct {
 	Id uuid.UUID `bson:"_id,omitempty"`
 	Price float64 `bson:"price,omitempty"`
 	AvailableQuantity int `bson:"availableQuantity,omitempty"`
-	Picture string `bson:"picture,omitempty"`
+	Media []uuid.UUID `bson:"media,omitempty"`
+}
+
+type Content struct {
+	Id uuid.UUID `bson:"_id,omitempty"`
+	User uuid.UUID `bson:"user,omitempty"`
+	Media string `bson:"media,omitempty"`
 }
 
 type ChosenProduct struct {
 	Id uuid.UUID `bson:"_id,omitempty"`
-	Product Product `bson:"product,omitempty"`
+	Product uuid.UUID `bson:"product,omitempty"`
 	Quantity int `bson:"quantity,omitempty"`
 }
 type Location struct {
