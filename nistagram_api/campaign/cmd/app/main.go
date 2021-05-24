@@ -17,13 +17,12 @@ import (
 type application struct {
 	errorLog *log.Logger
 	infoLog  *log.Logger
-	ad   *mongodb.AdModel
 	campaign  *mongodb.CampaignModel
-	campaignPost  *mongodb.CampaignPostModel
-	campaignStory  *mongodb.CampaignStoryModel
 	multipleTimeCampaign *mongodb.MultipleTimeCampaignModel
 	oneTimeCampaign  *mongodb.OneTimeCampaignModel
 	statistic *mongodb.StatisticModel
+	partnerships *mongodb.PartnershipModel
+
 }
 
 func main() {
@@ -74,17 +73,8 @@ func main() {
 	app := &application{
 		infoLog:  infoLog,
 		errorLog: errLog,
-		ad: &mongodb.AdModel{
-			C: client.Database(*mongoDatabse).Collection("ads"),
-		},
 		campaign: &mongodb.CampaignModel{
 			C: client.Database(*mongoDatabse).Collection("campaign"),
-		},
-		campaignPost: &mongodb.CampaignPostModel{
-			C: client.Database(*mongoDatabse).Collection("campaignPost"),
-		},
-		campaignStory: &mongodb.CampaignStoryModel{
-			C: client.Database(*mongoDatabse).Collection("campaignStory"),
 		},
 		multipleTimeCampaign: &mongodb.MultipleTimeCampaignModel{
 			C: client.Database(*mongoDatabse).Collection("multipleTimeCampaign"),
@@ -94,6 +84,9 @@ func main() {
 		},
 		statistic: &mongodb.StatisticModel{
 			C: client.Database(*mongoDatabse).Collection("statistic"),
+		},
+		partnerships: &mongodb.PartnershipModel{
+			C: client.Database(*mongoDatabse).Collection("partnerships"),
 		},
 	}
 

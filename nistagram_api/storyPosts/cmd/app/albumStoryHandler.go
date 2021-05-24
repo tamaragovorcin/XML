@@ -1,15 +1,17 @@
 package main
+
 import (
 	"encoding/json"
+
 	"net/http"
 
 	"github.com/gorilla/mux"
-	"notifications/pkg/models"
+	"storyPosts/pkg/models"
 )
 
-func (app *application) getAllNotification(w http.ResponseWriter, r *http.Request) {
+func (app *application) getAllStory(w http.ResponseWriter, r *http.Request) {
 	// Get all movie stored
-	ad, err := app.notification.GetAll()
+	ad, err := app.albumStory.All()
 	if err != nil {
 		app.serverError(w, err)
 	}
@@ -20,7 +22,7 @@ func (app *application) getAllNotification(w http.ResponseWriter, r *http.Reques
 		app.serverError(w, err)
 	}
 
-	app.infoLog.Println("Movies have been listed")
+	app.infoLog.Println("albumStory have been listed")
 
 	// Send response back
 	w.Header().Set("Content-Type", "application/json")
@@ -28,16 +30,16 @@ func (app *application) getAllNotification(w http.ResponseWriter, r *http.Reques
 	w.Write(b)
 }
 
-func (app *application) findByIDNotification(w http.ResponseWriter, r *http.Request) {
+func (app *application) findAlbumStoryByID(w http.ResponseWriter, r *http.Request) {
 	// Get id from incoming url
 	vars := mux.Vars(r)
 	id := vars["id"]
 
 	// Find movie by id
-	m, err := app.notification.FindByID(id)
+	m, err := app.albumStory.FindByID(id)
 	if err != nil {
 		if err.Error() == "ErrNoDocuments" {
-			app.infoLog.Println("Movie not found")
+			app.infoLog.Println("albumStory not found")
 			return
 		}
 		// Any other error will send an internal server error
@@ -50,7 +52,7 @@ func (app *application) findByIDNotification(w http.ResponseWriter, r *http.Requ
 		app.serverError(w, err)
 	}
 
-	app.infoLog.Println("Have been found a movie")
+	app.infoLog.Println("Have been found a albumStory")
 
 	// Send response back
 	w.Header().Set("Content-Type", "application/json")
@@ -58,9 +60,9 @@ func (app *application) findByIDNotification(w http.ResponseWriter, r *http.Requ
 	w.Write(b)
 }
 
-func (app *application) insertNotification(w http.ResponseWriter, r *http.Request) {
+func (app *application) insertAlbumStory(w http.ResponseWriter, r *http.Request) {
 	// Define movie model
-	var m models.Notifications
+	var m models.AlbumStory
 	// Get request information
 	err := json.NewDecoder(r.Body).Decode(&m)
 	if err != nil {
@@ -68,24 +70,25 @@ func (app *application) insertNotification(w http.ResponseWriter, r *http.Reques
 	}
 
 	// Insert new movie
-	insertResult, err := app.notification.Insert(m)
+	insertResult, err := app.albumStory.Insert(m)
 	if err != nil {
 		app.serverError(w, err)
 	}
 
-	app.infoLog.Printf("New movie have been created, id=%s", insertResult.InsertedID)
+	app.infoLog.Printf("New albumStory have been created, id=%s", insertResult.InsertedID)
 }
 
-func (app *application) deleteNotification(w http.ResponseWriter, r *http.Request) {
+func (app *application) deleteStory(w http.ResponseWriter, r *http.Request) {
 	// Get id from incoming url
 	vars := mux.Vars(r)
 	id := vars["id"]
 
 	// Delete movie by id
-	deleteResult, err := app.notification.Delete(id)
+	deleteResult, err := app.albumStory.Delete(id)
 	if err != nil {
 		app.serverError(w, err)
 	}
 
-	app.infoLog.Printf("Have been eliminated %d movie(s)", deleteResult.DeletedCount)
+	app.infoLog.Printf("Have been eliminated %d albumStory(s)", deleteResult.DeletedCount)
 }
+

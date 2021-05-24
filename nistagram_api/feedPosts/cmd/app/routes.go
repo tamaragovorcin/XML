@@ -13,11 +13,6 @@ func (app *application) routes() *mux.Router {
 	r.HandleFunc("/comment/", app.insertComment).Methods("POST")
 	r.HandleFunc("/comment/{id}", app.deleteComment).Methods("DELETE")
 
-	r.HandleFunc("/content/", app.getAllContents).Methods("GET")
-	r.HandleFunc("/content/{id}", app.findContentByID).Methods("GET")
-	r.HandleFunc("/content/", app.insertContent).Methods("POST")
-	r.HandleFunc("/content/{id}", app.deleteContent).Methods("DELETE")
-
 	r.HandleFunc("/", app.getAllFeedPosts).Methods("GET")
 	r.HandleFunc("/{id}", app.findFeedPostByID).Methods("GET")
 	r.HandleFunc("/", app.insertFeedPost).Methods("POST")
@@ -33,5 +28,15 @@ func (app *application) routes() *mux.Router {
 	r.HandleFunc("/location/", app.insertLocation).Methods("POST")
 	r.HandleFunc("/location/{id}", app.deleteLocation).Methods("DELETE")
 
+
+	r.HandleFunc("/albumFeed/", app.getAllAlbumFeeds).Methods("GET")
+	r.HandleFunc("/albumFeed/{id}", app.findAlbumFeedByID).Methods("GET")
+	r.HandleFunc("/albumFeed/", app.insertAlbumFeed).Methods("POST")
+	r.HandleFunc("/albumFeed/{id}", app.deleteAlbumFeed).Methods("DELETE")
+
+	r.HandleFunc("/collection/", app.getAllCollections).Methods("GET")
+	r.HandleFunc("/collection/{id}", app.findCollectionByID).Methods("GET")
+	r.HandleFunc("/collection/", app.insertCollection).Methods("POST")
+	r.HandleFunc("/collection/{id}", app.deleteCollection).Methods("DELETE")
 	return r
 }

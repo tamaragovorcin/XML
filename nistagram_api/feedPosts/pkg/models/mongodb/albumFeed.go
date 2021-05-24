@@ -4,22 +4,22 @@ import (
 	"context"
 	"errors"
 
+	"feedPosts/pkg/models"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
-	"notifications/pkg/models"
 )
 
 // MovieModel represent a mgo database session with a movie data model.
-type NotificationModel struct {
+type AlbumFeedModel struct {
 	C *mongo.Collection
 }
 
 // All method will be used to get all records from the movies table.
-func (m *NotificationModel) GetAll() ([]models.Notifications, error) {
+func (m *AlbumFeedModel) All() ([]models.AlbumFeed, error) {
 	// Define variables
 	ctx := context.TODO()
-	mm := []models.Notifications{}
+	mm := []models.AlbumFeed{}
 
 	// Find all movies
 	movieCursor, err := m.C.Find(ctx, bson.M{})
@@ -35,15 +35,15 @@ func (m *NotificationModel) GetAll() ([]models.Notifications, error) {
 }
 
 // FindByID will be used to find a new movie registry by id
-func (m *NotificationModel) FindByID(id string) (*models.Notifications, error) {
+func (m *AlbumFeedModel) FindByID(id string) (*models.AlbumFeed, error) {
 	p, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
 		return nil, err
 	}
 
 	// Find movie by id
-	var notification = models.Notifications{}
-	err = m.C.FindOne(context.TODO(), bson.M{"_id": p}).Decode(&notification)
+	var movie = models.AlbumFeed{}
+	err = m.C.FindOne(context.TODO(), bson.M{"_id": p}).Decode(&movie)
 	if err != nil {
 		// Checks if the movie was not found
 		if err == mongo.ErrNoDocuments {
@@ -52,16 +52,16 @@ func (m *NotificationModel) FindByID(id string) (*models.Notifications, error) {
 		return nil, err
 	}
 
-	return &notification, nil
+	return &movie, nil
 }
 
 // Insert will be used to insert a new movie registry
-func (m *NotificationModel) Insert( notification models.Notifications) (*mongo.InsertOneResult, error) {
-	return m.C.InsertOne(context.TODO(), notification)
+func (m *AlbumFeedModel) Insert(movie models.AlbumFeed) (*mongo.InsertOneResult, error) {
+	return m.C.InsertOne(context.TODO(), movie)
 }
 
 // Delete will be used to delete a movie registry
-func (m *NotificationModel) Delete(id string) (*mongo.DeleteResult, error) {
+func (m *AlbumFeedModel) Delete(id string) (*mongo.DeleteResult, error) {
 	p, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
 		return nil, err

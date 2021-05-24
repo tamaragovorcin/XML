@@ -6,23 +6,25 @@ import (
 )
 
 type Chat struct {
-	ID uuid.UUID `bson:"_id,omitempty"`
-	Receiver uuid.UUID `bson:"receiver,omitempty"`
-	Sender uuid.UUID `bson:"sender,omitempty"`
-	Messages []Message `bson:"messages,omitempty"`
+	Id uuid.UUID `bson:"_id,omitempty"`
+	User1 uuid.UUID `bson:"user1,omitempty"`
+	User2 uuid.UUID `bson:"user2,omitempty"`
+	Messages []uuid.UUID `bson:"messages,omitempty"`
 }
 
 type DisposableImage struct {
-	ID uuid.UUID `bson:"_id,omitempty"`
+	Id uuid.UUID `bson:"_id,omitempty"`
 	Opened bool `bson:"opened,omitempty"`
-	Content string `bson:"content,omitempty"`
+	Media string `bson:"media,omitempty"`
 }
 
 type Message struct {
-	ID uuid.UUID `bson:"_id,omitempty"`
+	Id uuid.UUID `bson:"_id,omitempty"`
 	DateTime  time.Time `bson:"time,omitempty"`
 	Text string `bson:"text,omitempty"`
-	Post uuid.UUID `bson:"post,omitempty"`
-	DisposableImage DisposableImage `bson:"disposableImage,omitempty"`
+	FeedPost uuid.UUID `bson:"feedPost,omitempty"`
+	StoryPost uuid.UUID `bson:"storyPost,omitempty"`
+	DisposableImage uuid.UUID `bson:"disposableImage,omitempty"`
 	Deleted bool `bson:"deleted,omitempty"`
+	Sender uuid.UUID `bson:"sender,omitempty"`
 }

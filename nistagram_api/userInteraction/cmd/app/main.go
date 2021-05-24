@@ -1,38 +1,33 @@
 package main
 
 import (
-	"AgentApp/pkg/models/mongodb"
 	"context"
 	"flag"
 	"fmt"
-	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/options"
 	"log"
 	"net/http"
 	"os"
 	"time"
+
+	"follows/pkg/models/mongodb"
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 type application struct {
 	errorLog *log.Logger
 	infoLog  *log.Logger
-	users    *mongodb.UserModel
-	locations *mongodb.LocationModel
-	contents *mongodb.ContentModel
-	chosenProducts *mongodb.ChosenProductModal
-	purchases *mongodb.PurchaseModel
-	products *mongodb.ProductModel
+	follow   *mongodb.FollowModel
+	reports  *mongodb.ReportModel
 }
 
 func main() {
-
-	fmt.Printf("Found multiple documents (array of pointers): %+v\n")
 
 	// Define command-line flags
 	serverAddr := flag.String("serverAddr", "", "HTTP server network address")
 	serverPort := flag.Int("serverPort", 4000, "HTTP server network port")
 	mongoURI := flag.String("mongoURI", "mongodb://localhost:27017", "Database hostname url")
-	mongoDatabse := flag.String("mongoDatabse", "users", "Database name")
+	mongoDatabse := flag.String("mongoDatabse", "movies", "Database name")
 	enableCredentials := flag.Bool("enableCredentials", false, "Enable the use of credentials for mongo connection")
 	flag.Parse()
 
@@ -48,7 +43,6 @@ func main() {
 			Password: os.Getenv("MONGODB_PASSWORD"),
 		}
 	}
-
 
 	// Establish database connection
 	client, err := mongo.NewClient(co)
@@ -75,20 +69,11 @@ func main() {
 	app := &application{
 		infoLog:  infoLog,
 		errorLog: errLog,
-		users: &mongodb.UserModel{
-			C: client.Database(*mongoDatabse).Collection("users"),
+		follow: &mongodb.FollowModel{
+			C: client.Database(*mongoDatabse).Collection("follow"),
 		},
-		products: &mongodb.ProductModel{
-			C: client.Database(*mongoDatabse).Collection("products"),
-		},
-		purchases: &mongodb.PurchaseModel{
-			C: client.Database(*mongoDatabse).Collection("purchases"),
-		},
-		chosenProducts: &mongodb.ChosenProductModal{
-			C: client.Database(*mongoDatabse).Collection("chosenProducts"),
-		},
-		locations: &mongodb.LocationModel{
-			C: client.Database(*mongoDatabse).Collection("locations"),
+		reports: &mongodb.ReportModel{
+			C: client.Database(*mongoDatabse).Collection("reports"),
 		},
 	}
 
@@ -106,5 +91,4 @@ func main() {
 	infoLog.Printf("Starting server on %s", serverURI)
 	err = srv.ListenAndServe()
 	errLog.Fatal(err)
-
 }

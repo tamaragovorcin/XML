@@ -2,10 +2,8 @@ package main
 
 import (
 	"context"
-	"feedPosts/pkg/models"
 	"flag"
 	"fmt"
-	"go.mongodb.org/mongo-driver/x/mongo/driver/uuid"
 	"log"
 	"net/http"
 	"os"
@@ -20,10 +18,11 @@ type application struct {
 	errorLog *log.Logger
 	infoLog  *log.Logger
 	comments    *mongodb.CommentModel
-	contents    *mongodb.ContentModel
 	feedPosts   *mongodb.FeedPostModel
 	posts       *mongodb.PostsModel
 	locations   *mongodb.LocationModel
+	albumFeeds   *mongodb.AlbumFeedModel
+	collections   *mongodb.CollectionModel
 }
 
 func main() {
@@ -77,9 +76,6 @@ func main() {
 	app := &application{
 		infoLog:  infoLog,
 		errorLog: errLog,
-		contents: &mongodb.ContentModel{
-			C: client.Database(*mongoDatabse).Collection("contents"),
-		},
 		comments: &mongodb.CommentModel{
 			C: client.Database(*mongoDatabse).Collection("comments"),
 		},
@@ -91,6 +87,12 @@ func main() {
 		},
 		feedPosts: &mongodb.FeedPostModel{
 			C: client.Database(*mongoDatabse).Collection("feedPosts"),
+		},
+		albumFeeds: &mongodb.AlbumFeedModel{
+			C: client.Database(*mongoDatabse).Collection("albumFeed"),
+		},
+		collections: &mongodb.CollectionModel{
+			C: client.Database(*mongoDatabse).Collection("collections"),
 		},
 	}
 
@@ -104,7 +106,7 @@ func main() {
 		ReadTimeout:  5 * time.Second,
 		WriteTimeout: 10 * time.Second,
 	}
-
+/*
 	collection := client.Database(*mongoDatabse).Collection("contents")
 	content := models.Content{uuid.UUID{},"Image", "Video"}
 	insertResult, err := collection.InsertOne(context.TODO(), content)
@@ -116,7 +118,7 @@ func main() {
 	fmt.Println("Inserted a single document: ", insertResult.InsertedID)
 
 
-
+*/
 	infoLog.Printf("Starting server on %s", serverURI)
 	err = srv.ListenAndServe()
 	errLog.Fatal(err)

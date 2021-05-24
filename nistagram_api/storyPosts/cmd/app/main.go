@@ -19,6 +19,7 @@ type application struct {
 	infoLog  *log.Logger
 	storyPosts *mongodb.StoryPostModel
 	highlights *mongodb.HighlightModel
+	albumStory   *mongodb.AlbumStoryModel
 }
 
 func main() {
@@ -73,7 +74,10 @@ func main() {
 			C: client.Database(*mongoDatabse).Collection("highlights"),
 		},
 		storyPosts: &mongodb.StoryPostModel{
-			C: client.Database(*mongoDatabse).Collection("highlights"),
+			C: client.Database(*mongoDatabse).Collection("storyPosts"),
+		},
+		albumStory: &mongodb.AlbumStoryModel{
+			C: client.Database(*mongoDatabse).Collection("albumStorys"),
 		},
 	}
 

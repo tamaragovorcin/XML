@@ -18,5 +18,10 @@ func (app *application) routes() *mux.Router {
 	r.HandleFunc("/", app.insertStoryPost).Methods("POST")
 	r.HandleFunc("/{id}", app.deletePost).Methods("DELETE")
 
+	r.HandleFunc("/albumStory/", app.getAllStory).Methods("GET")
+	r.HandleFunc("/albumStory/{id}", app.findAlbumStoryByID).Methods("GET")
+	r.HandleFunc("/albumStory/", app.insertAlbumStory).Methods("POST")
+	r.HandleFunc("/albumStory/{id}", app.deleteStory).Methods("DELETE")
+
 	return r
 }
