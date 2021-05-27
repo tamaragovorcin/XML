@@ -18,6 +18,8 @@ const mapState = {
 
 class UserProfilePage extends Component {
 	state = {
+		gender: "",
+		selectedDate: "",
 		id: "",
 		email: "",
 		password: "",
@@ -54,14 +56,17 @@ class UserProfilePage extends Component {
 		failAllergenHeader: "",
 		failAllergenMessage: "",
 		addressNotFoundError: "none",
-		
+		private: false,
+		biography: "",
 	};
 
 	constructor(props) {
 		super(props);
 		this.addressInput = React.createRef();
 	}
-
+	handleDateChange = (date) => {
+		this.setState({ selectedDate: date });
+	};
 	hasRole = (reqRole) => {
 		let roles = JSON.parse(localStorage.getItem("keyRole"));
 		if (roles === null) return false;
@@ -98,32 +103,32 @@ class UserProfilePage extends Component {
 	};
 
 	componentDidMount() {
-		if (!this.hasRole("ROLE_USER")) {
-			this.setState({ redirect: true });
-		} else {
-			this.addressInput = React.createRef();
-			Axios.get(BASE_URL + "/api/users", { validateStatus: () => true, headers: { Authorization: getAuthHeader() } })
-				.then((res) => {
-					if (res.status !== 401) {
-						console.log(res.data)
-						this.setState({
-							id: res.data.Id,
-							email: res.data.email,
-							firstname: res.data.firstname,
-							surname: res.data.surname,
-							phonenumber: res.data.phonenumber,
-							address: res.data.address,
-						
-						});
+		//if (!this.hasRole("ROLE_USER")) {
+		//	this.setState({ redirect: true });
+		//} else {
+		this.addressInput = React.createRef();
+		Axios.get(BASE_URL + "/api/users", { validateStatus: () => true, headers: { Authorization: getAuthHeader() } })
+			.then((res) => {
+				if (res.status !== 401) {
+					console.log(res.data)
+					this.setState({
+						id: res.data.Id,
+						email: res.data.email,
+						firstname: res.data.firstname,
+						surname: res.data.surname,
+						phonenumber: res.data.phonenumber,
+						address: res.data.address,
 
-					} else {
-						this.setState({ redirect: true });
-					}
-				})
-				.catch((err) => {
-					console.log(err);
-				});
-		}
+					});
+
+				} else {
+					this.setState({ redirect: true });
+				}
+			})
+			.catch((err) => {
+				console.log(err);
+			});
+		//}
 	}
 
 	handleEmailChange = (event) => {
@@ -167,7 +172,7 @@ class UserProfilePage extends Component {
 		} else if (userDTO.phonenumber === "") {
 			this.setState({ phoneError: "initial" });
 			return false;
-	
+
 		}
 		return true;
 	};
@@ -181,9 +186,20 @@ class UserProfilePage extends Component {
 	handlePasswordModalClose = () => {
 		this.setState({ openPasswordModal: false });
 	};
+	handleGenderChange(event) {
 
+		this.setState({ gender: event.target.value });
+	}
+	handleBiographyChange(event) {
+
+		this.setState({ biography: event.target.value });
+	}
+	handlePrivateChange(event) {
+
+		this.setState({ private: true });
+	}
 	handleChangeInfo = () => {
-		
+
 		this.setState({
 			hiddenSuccessAlert: true,
 			successHeader: "",
@@ -369,16 +385,14 @@ class UserProfilePage extends Component {
 						message={this.state.failMessage}
 						handleCloseAlert={this.handleCloseAlertFail}
 					/>
-					<h5 className=" text-center  mb-0 text-uppercase" style={{ marginTop: "2rem" }}>
-						User information
-					</h5>
+
 					<div className="row mt-5">
 						<div className="col shadow p-3 bg-white rounded">
-							<h5 className=" text-center text-uppercase">Personal Information</h5>
+							<h5 className=" text-center text-uppercase">My profile</h5>
 							<form id="contactForm" name="sentMessage">
 								<div className="control-group">
 									<div className="form-group controls mb-0 pb-2" style={{ color: "#6c757d", opacity: 1 }}>
-										
+
 										<input
 											readOnly
 											placeholder="Email address"
@@ -392,7 +406,21 @@ class UserProfilePage extends Component {
 								</div>
 								<div className="control-group">
 									<div className="form-group controls mb-0 pb-2" style={{ color: "#6c757d", opacity: 1 }}>
+
+										<input
+											readOnly={this.state.hiddenEditInfo}
+											className={!this.state.hiddenEditInfo === false ? "form-control-plaintext" : "form-control"}
+											placeholder="Biography"
+											type="text"
+											onChange={this.handleBiographyChange}
+											value={this.state.biography}
+										/>
+									</div>
 									
+								</div>
+								<div className="control-group">
+									<div className="form-group controls mb-0 pb-2" style={{ color: "#6c757d", opacity: 1 }}>
+
 										<input
 											readOnly={this.state.hiddenEditInfo}
 											className={!this.state.hiddenEditInfo === false ? "form-control-plaintext" : "form-control"}
@@ -408,7 +436,7 @@ class UserProfilePage extends Component {
 								</div>
 								<div className="control-group">
 									<div className="form-group controls mb-0 pb-2" style={{ color: "#6c757d", opacity: 1 }}>
-										
+
 										<input
 											readOnly={this.state.hiddenEditInfo}
 											className={!this.state.hiddenEditInfo === false ? "form-control-plaintext" : "form-control"}
@@ -424,7 +452,7 @@ class UserProfilePage extends Component {
 								</div>
 								<div className="control-group">
 									<div className="form-group controls mb-0 pb-2" style={{ color: "#6c757d", opacity: 1 }}>
-									
+
 										<input
 											readOnly={this.state.hiddenEditInfo}
 											className={!this.state.hiddenEditInfo === false ? "form-control-plaintext" : "form-control"}
@@ -455,9 +483,26 @@ class UserProfilePage extends Component {
 										Sorry. Address not found. Try different one.
 									</div>
 								</div>
+
 								<div className="control-group">
 									<div className="form-group controls mb-0 pb-2" style={{ color: "#6c757d", opacity: 1 }}>
-									
+
+										<input
+											readOnly={this.state.hiddenEditInfo}
+											className={!this.state.hiddenEditInfo === false ? "form-control-plaintext" : "form-control"}
+											placeholder="Choose date of birth"
+											type="date"
+											onChange={this.handleDateChange}
+											value={this.state.selectedDate}
+										/>
+									</div>
+									<div className="text-danger" style={{ display: this.state.phoneError }}>
+										Phone number must be entered.
+									</div>
+								</div>
+								<div className="control-group">
+									<div className="form-group controls mb-0 pb-2" style={{ color: "#6c757d", opacity: 1 }}>
+
 										<input
 											readOnly={this.state.hiddenEditInfo}
 											className={!this.state.hiddenEditInfo === false ? "form-control-plaintext" : "form-control"}
@@ -471,7 +516,26 @@ class UserProfilePage extends Component {
 										Phone number must be entered.
 									</div>
 								</div>
-								
+
+								<div style={{ color: "#6c757d", opacity: 1 }}>
+									<p><input type="radio" value="Male" name="gender" onChange={(e) => this.handleGenderChange(e)} /> Male</p>
+									<p><input type="radio" value="Female" name="gender" onChange={(e) => this.handleGenderChange(e)} /> Female</p>
+									<p><input type="radio" value="Other" name="gender" onChange={(e) => this.handleGenderChange(e)} /> Other </p>
+								</div>
+
+
+
+								<div>
+									<p style={{ color: "#6c757d", opacity: 1 }} >Private </p>
+									<label class="switch">
+									<input type="checkbox" onChange={(e) => this.handlePrivateChange(e)}/>
+										<span class="slider round"></span>
+									
+								</label>
+								</div>
+
+
+
 								<div className="form-group text-center" hidden={this.state.hiddenEditInfo}>
 									<button
 										style={{ background: "#1977cc", marginTop: "15px" }}
@@ -517,7 +581,7 @@ class UserProfilePage extends Component {
 
 					</div>
 				</div>
-			
+
 				<PasswordChangeModal
 					handleCloseAlertPassword={this.handleCloseAlertPassword}
 					hiddenPasswordErrorAlert={this.state.hiddenPasswordErrorAlert}

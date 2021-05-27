@@ -32,7 +32,7 @@ class Header extends React.Component {
 					<nav className="nav-menu d-none d-lg-block">
 						<ul>
 							<li>
-								<Link to="/"><VscHome/></Link>
+								<Link ><VscHome/></Link>
 							</li>
 							<li  >
 								<Link to="/messages"><FiSend/></Link>
