@@ -1,11 +1,12 @@
 import './App.css';
 import { HashRouter as Router, Link, Switch } from "react-router-dom";
-import HomePage from './components/HomePage'
-import Login from './components/Login'
-import Registration from './components/Registration'
+import HomePage from './pages/HomePage'
+import Login from './pages/Login'
+import Registration from './pages/Registration'
 import ProfileInfo from './components/Users/ProfileInfo'
 import Unauthorized from './components/Unauthorized'
-
+import UserProfilePage from './pages/UserProfilePage'
+import ProfilePage from './pages/ProfilePage'
 function App() {
   return (
     <Router>
@@ -15,6 +16,8 @@ function App() {
 				<Link exact to="/registration" path="/registration" component={Registration} />
 				<Link exact to="/profile-info" path="/profile-info" component={ProfileInfo} />
 				<Link exact to="/unauthorized" path="/unauthorized" component={Unauthorized} />
+				<Link exact to="/userChangeProfile" path="/userChangeProfile" component={UserProfilePage} />
+				<Link exact to="/profilePage" path="/profilePage" component={ProfilePage} />
 			</Switch>
 	</Router>
   );
