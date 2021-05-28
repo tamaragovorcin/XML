@@ -4,14 +4,12 @@ import (
 	"context"
 	"flag"
 	"fmt"
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 	"log"
 	"net/http"
 	"os"
 	"time"
-	"users/pkg/models"
-
-	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/options"
 	"users/pkg/models/mongodb"
 )
 
@@ -31,7 +29,7 @@ func main() {
 
 	// Define command-line flags
 	serverAddr := flag.String("serverAddr", "", "HTTP server network address")
-	serverPort := flag.Int("serverPort", 4000, "HTTP server network port")
+	serverPort := flag.Int("serverPort", 4006, "HTTP server network port")
 	mongoURI := flag.String("mongoURI", "mongodb://localhost:27017", "Database hostname url")
 	mongoDatabse := flag.String("mongoDatabse", "users", "Database name")
 	enableCredentials := flag.Bool("enableCredentials", false, "Enable the use of credentials for mongo connection")
@@ -105,28 +103,5 @@ func main() {
 	infoLog.Printf("Starting server on %s", serverURI)
 	err = srv.ListenAndServe()
 	errLog.Fatal(err)
-
-	collection := client.Database("test").Collection("roles")
-
-	// Some dummy data to add to the Database
-	admin := models.Role{"1", "ADMIN"}
-	user := models.Role{"2", "USER"}
-
-	// Insert a single document
-	insertResult, err := collection.InsertOne(context.TODO(), admin)
-	if err != nil {
-		log.Fatal(err)
-	}
-	fmt.Println("Inserted a single document: ", insertResult.InsertedID)
-
-	// Insert multiple documents
-	trainers := []interface{}{admin, user}
-
-	insertManyResult, err := collection.InsertMany(context.TODO(), trainers)
-	if err != nil {
-		log.Fatal(err)
-	}
-	fmt.Println("Inserted multiple documents: ", insertManyResult.InsertedIDs)
-
 
 }

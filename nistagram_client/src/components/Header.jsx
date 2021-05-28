@@ -31,8 +31,8 @@ class Header extends React.Component {
 
 					<nav className="nav-menu d-none d-lg-block">
 						<ul>
-							<li  >
-								<Link to="/"><VscHome/></Link>
+							<li>
+								<Link ><VscHome/></Link>
 							</li>
 							<li  >
 								<Link to="/messages"><FiSend/></Link>
@@ -45,7 +45,7 @@ class Header extends React.Component {
 								<a href="#"><CgProfile /></a>
 								<ul>
 
-									<li className="drop-down">
+									<li >
 										<Link to="/profilePage" ><CgProfile /> Profile</Link>
 
 									</li>
