@@ -3,8 +3,8 @@ package main
 import (
 	"encoding/json"
 	"github.com/gorilla/mux"
-	"users/pkg/models"
 	"net/http"
+	"users/pkg/models"
 )
 
 func (app *application) getAllAgents(w http.ResponseWriter, r *http.Request) {
@@ -29,7 +29,7 @@ func (app *application) findAgentByID(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	id := vars["id"]
 
-	m, err := app.reports.FindByID(id)
+	m, err := app.agents.FindByID(id)
 	if err != nil {
 		if err.Error() == "ErrNoDocuments" {
 			app.infoLog.Println("Agent not found")
