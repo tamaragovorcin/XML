@@ -2,13 +2,16 @@
 import React from "react";
 import Header from "../components/Header";
 import TopBar from "../components/TopBar";
-import { Link } from "react-router-dom";
+import { Link,Button } from "react-router-dom";
 import playerLogo from "../static/coach.png";
-import { CgProfile } from 'react-icons/cg';
 
 import { BASE_URL } from "../constants.js";
 import ImageUploader from 'react-images-upload';
-class HomePage extends React.Component {
+import LikesModal from "../components/Posts/LikesModal"
+import DislikesModal from "../components/Posts/DislikesModal"
+import CommentsModal from "../components/Posts/CommentsModal"
+
+class ProfilePage extends React.Component {
 	constructor(props) {
 		super(props);
 
@@ -27,6 +30,12 @@ class HomePage extends React.Component {
 		picture: "",
 		hiddenOne: true,
 		hiddenMultiple: true,
+		peopleLikes : [],
+		peopleDislikes : [],
+		comments : [],
+		showLikesModal : false,
+		showDislikesModal : false,
+		showCommentsModal : false
 	}
 	onDrop(picture) {
 		this.setState({
@@ -131,6 +140,24 @@ class HomePage extends React.Component {
 
 		this.setState({ photos: list });
 
+	}
+	handleLikesModalOpen = ()=> {
+		this.setState({ showLikesModal: true });    
+	}
+	handleDislikesModalOpen = ()=> {
+		this.setState({ showDislikesModal: true });    
+	}
+	handleCommentsModalOpen = ()=> {
+		this.setState({ showCommentsModal: true });    
+	}
+	handleLikesModalClose = ()=> {
+		this.setState({ showLikesModal: false });    
+	}
+	handleDislikesModalClose = ()=> {
+		this.setState({ showDislikesModal: false });    
+	}
+	handleCommentsModalClose = ()=> {
+		this.setState({ showCommentsModal: false });    
 	}
 
 	render() {
@@ -255,14 +282,14 @@ class HomePage extends React.Component {
 										</td>
 
 										<td>
-											<tr>
-												<label ><b>{photo.numLikes}</b> likes</label>
+											<tr >
+												<button onClick={this.handleLikesModalOpen} className="btn btn-outline-secondary btn-sm" style={{ marginBottom: "1rem" }}><label><b>{photo.numLikes}</b>likes</label></button>
 											</tr>
 											<tr>
-												<label ><b>{photo.numDislikes}</b> dislikes</label>
+												<button onClick={this.handleDislikesModalOpen} className="btn btn-outline-secondary btn-sm" style={{ marginBottom: "1rem" }}><label ><b>{photo.numDislikes}</b> dislikes</label></button>
 											</tr>
 											<tr>
-												<label >comments</label>
+												<button onClick={this.handleCommentsModalOpen} className="btn btn-outline-secondary btn-sm" style={{ marginBottom: "1rem" }}><label >Comments</label></button>
 											</tr>
 
 										</td>
@@ -273,10 +300,31 @@ class HomePage extends React.Component {
 						</table>
 					</div>
 				</div>
-
+				<div>
+                        
+                    <LikesModal
+					        show={this.state.showLikesModal}
+					        onCloseModal={this.handleLikesModalClose}
+					        header="People who liked the photo"
+							peopleLikes = {this.state.peopleLikes}
+				    />
+                    <DislikesModal
+                         show={this.state.showDislikesModal}
+						 onCloseModal={this.handleDislikesModalClose}
+						 header="People who disliked the photo"
+						 peopleDislikes = {this.state.peopleDislikes}
+				    />
+                    <CommentsModal
+                        show={this.state.showCommentsModal}
+						onCloseModal={this.handleCommentsModalClose}
+						header="Comments on the photo"
+						comments = {this.state.comments}
+                    />
+                        
+                    </div>
 			</React.Fragment>
 		);
 	}
 }
 
-export default HomePage;
+export default ProfilePage;
