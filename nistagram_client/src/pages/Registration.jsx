@@ -143,13 +143,15 @@ class RegisterPage extends Component {
 		};
 
 		let roleDTO = {
-			Id: 11,
+			Id: 96,
 			Name: "Name"
 		}
 		console.log(userDTO)
 
 			Axios.post(BASE_URL_USER + "/api/role/", roleDTO)
 				.then((res) => {
+					console.log("USPEHHHHHHHHHHH")
+
 					if (res.status === 409) {
 						this.setState({
 							errorHeader: "Resource conflict!",
