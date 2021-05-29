@@ -23,13 +23,13 @@ const (
 
 // User is used to represent user profile data
 type ProfileInformation struct {
-	Id       uuid.UUID `bson:"_id,omitempty"`
+	Id       int `bson:"_id,omitempty"`
 	Name     string             `bson:"name,omitempty"`
 	LastName string             `bson:"lastname,omitempty"`
 	Email string `validate:"required,email" bson:"email,omitempty"`
 	Username string `bson:"username,omitempty"`
 	Password string `bson:"password,omitempty"`
-	Roles []uuid.UUID `bson:"roles,omitempty"`
+	Roles []Role `bson:"roles,omitempty"`
 	PhoneNumber int `bson:"phoneNumber,omitempty"`
 	Gender Gender `bson:"gender,omitempty"`
 	DateOfBirth time.Time `bson:"dateOfBirth,omitempty"`
@@ -37,7 +37,7 @@ type ProfileInformation struct {
 
 
 type Role struct {
-	Id uuid.UUID `bson:"_id,omitempty"`
+	Id int `bson:"_id,omitempty"`
 	Name  string `bson:"name,omitempty"`
 
 }
@@ -49,8 +49,8 @@ type Agent struct {
 }
 
 type User struct {
-	Id uuid.UUID `bson:"_id,omitempty"`
-	ProfileInformation uuid.UUID `bson:"profileInformation,omitempty"`
+	Id int `bson:"_id,omitempty"`
+	ProfileInformation ProfileInformation `bson:"profileInformation,omitempty"`
 	Private bool `bson:"private,omitempty"`
 	Website string `bson:"approved,omitempty"`
 	Biography string `bson:"biography,omitempty"`

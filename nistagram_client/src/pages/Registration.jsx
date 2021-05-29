@@ -1,11 +1,11 @@
 import React, { Component } from "react";
 import Header from "../components/Header";
 import TopBar from "../components/TopBar";
-import { BASE_URL } from "../constants.js";
 import Axios from "axios";
 import { Redirect } from "react-router-dom";
 import HeadingAlert from "../components/HeadingAlert";
 
+import { BASE_URL_USER } from "../constants.js";
 
 class RegisterPage extends Component {
 	state = {
@@ -13,6 +13,7 @@ class RegisterPage extends Component {
 		errorMessage: "",
 		hiddenErrorAlert: true,
 		email: "",
+		date: "",
 		password: "",
 		repeatPassword: "",
 		name: "",
@@ -20,6 +21,7 @@ class RegisterPage extends Component {
 		phoneNumber: "",
 		emailError: "none",
 		passwordError: "none",
+		dateError: "none",
 		repeatPasswordError: "none",
 		repeatPasswordSameError: "none",
 		nameError: "none",
@@ -28,16 +30,27 @@ class RegisterPage extends Component {
 		emailNotValid: "none",
 		openModal: false,
 		coords: [],
+		gender: "",
+		biography: "",
+		username: "",
+		usernameError: "none",
+		usernameNotValid: "none",
+
 	};
 
+	handleDateChange = (date) => {
+		this.setState({ selectedDate: date });
+	};
 	handleEmailChange = (event) => {
 		this.setState({ email: event.target.value });
 	};
-
+	handleUsernameChange = (event) => {
+		this.setState({ username: event.target.value });
+	};
 	handlePasswordChange = (event) => {
 		this.setState({ password: event.target.value });
 	};
-	
+
 	handleRepeatPasswordChange = (event) => {
 		this.setState({ repeatPassword: event.target.value });
 	};
@@ -53,81 +66,122 @@ class RegisterPage extends Component {
 	handlePhoneNumberChange = (event) => {
 		this.setState({ phoneNumber: event.target.value });
 	};
-
-	validateForm = (completeDTO) => {
+	handleBiographyChange = (event) => {
+		this.setState({ biography: event.target.value });
+	};
+	validateForm = (userDTO) => {
 		this.setState({
 			emailError: "none",
 			emailNotValid: "none",
 			nameError: "none",
+			dateError: "none",
 			surnameError: "none",
 			phoneError: "none",
 			passwordError: "none",
 			repeatPasswordError: "none",
 			repeatPasswordSameError: "none",
+			usernameError: "none",
+			usernameNotValid: "none"
 		});
 
-		if (completeDTO.user.email === "") {
+		if (this.state.email === "") {
 			this.setState({ emailError: "initial" });
 			return false;
-		} else if (!completeDTO.user.email.includes("@")) {
+		} else if (!this.state.email.includes("@")) {
 			this.setState({ emailNotValid: "initial" });
 			return false;
-		} else if (completeDTO.user.name === "") {
+		}
+
+		else if (!this.state.username.includes("@")) {
+			this.setState({ usernameError: "initial" });
+			return false;
+		}
+		else if (!this.state.username.includes("@")) {
+			this.setState({ usernameNotValid: "initial" });
+			return false;
+		}
+		else if (this.state.name === "") {
 			this.setState({ nameError: "initial" });
 			return false;
-		} else if (completeDTO.user.surname === "") {
+		} else if (this.state.date === "") {
+			this.setState({ dateError: "initial" });
+			return false;
+
+		} else if (this.state.surname === "") {
 			this.setState({ surnameError: "initial" });
 			return false;
-		}  else if (completeDTO.user.phoneNumber === "") {
+		} else if (this.state.phoneNumber === "") {
 			this.setState({ phoneError: "initial" });
 			return false;
-		} else if (completeDTO.user.password === "") {
+		} else if (this.state.password === "") {
 			this.setState({ passwordError: "initial" });
 			return false;
 		} else if (this.state.repeatPassword === "") {
 			this.setState({ repeatPasswordError: "initial" });
 			return false;
-		}else if (completeDTO.user.password !== this.state.repeatPassword) {
+		} else if (this.state.password !== this.state.repeatPassword) {
 			this.setState({ repeatPasswordSameError: "initial" });
 			return false;
-		} 
+		}
 		return true;
 	};
 
 
-	handleSignUp = () => {		
-		let userDTO = {
-			email: this.state.email,
-			name: this.state.name,
-			surname: this.state.surname,
-			phoneNumber: this.state.phoneNumber,
-			password: this.state.password,
-		};
-	
-		if (this.validateForm(userDTO)) {
-			
-			Axios.post(BASE_URL + "/api/manager/signup", userDTO, { validateStatus: () => true })
-					.then((res) => {
-						if (res.status === 409) {
-							this.setState({
-								errorHeader: "Resource conflict!",
-								errorMessage: "Email already exist.",
-								hiddenErrorAlert: false,
-							});
-						} else if (res.status === 500) {
-							this.setState({ errorHeader: "Internal server error!", errorMessage: "Server error.", hiddenErrorAlert: false });
-						} else {
-							this.setState({ openModal: true });
-							this.setState({ redirect: true })
-						}
-					})
-					.catch((err) => {
-						console.log(err);
-					});
-		}
+	handleSignUp = () => {
 		
-	};
+		let userDTO = {
+			Email: this.state.email,
+			Username: this.state.username,
+			Name: this.state.name,
+			LastName: this.state.surname,
+			PhoneNumber: this.state.phoneNumber,
+			Gender: this.state.gender,
+			DateOfBirth: this.state.date,
+			Password: this.state.password,
+			Biography: this.state.biography,
+			Private: this.state.private,
+		};
 
+		let roleDTO = {
+			Id: 11,
+			Name: "Name"
+		}
+		console.log(userDTO)
+
+			Axios.post(BASE_URL_USER + "/api/role/", roleDTO)
+				.then((res) => {
+					if (res.status === 409) {
+						this.setState({
+							errorHeader: "Resource conflict!",
+							errorMessage: "Email already exist.",
+							hiddenErrorAlert: false,
+						});
+					} else if (res.status === 500) {
+						this.setState({ errorHeader: "Internal server error!", errorMessage: "Server error.", hiddenErrorAlert: false });
+					} else {
+						//this.setState({ openModal: true });
+						//this.setState({ redirect: true })
+						console.log(res.data)
+					}
+				})
+				.catch((err) => {
+					console.log(err);
+				});
+		
+
+	};
+	handleGenderChange(event) {
+
+		this.setState({ gender: event.target.value });
+	}
+	handleBiographyChange(event) {
+
+		this.setState({ biography: event.target.value });
+	}
+	handlePrivateChange(event) {
+
+		this.setState({ private: true });
+	}
 	handleCloseAlert = () => {
 		this.setState({ hiddenErrorAlert: true });
 	};
@@ -141,6 +195,7 @@ class RegisterPage extends Component {
 				<Header />
 
 				<div className="container" style={{ marginTop: "10%" }}>
+
 					<HeadingAlert
 						hidden={this.state.hiddenErrorAlert}
 						header={this.state.errorHeader}
@@ -155,7 +210,26 @@ class RegisterPage extends Component {
 						<div className="col-lg-8 mx-auto">
 							<br />
 							<form id="contactForm" name="sentMessage" noValidate="novalidate">
-							
+
+								<div className="control-group">
+									<div className="form-group controls mb-0 pb-2" style={{ color: "#6c757d", opacity: 1 }}>
+										<label>Username</label>
+										<input
+											placeholder="Username"
+											className="form-control"
+											id="email"
+											type="text"
+											onChange={this.handleUsernameChange}
+											value={this.state.username}
+										/>
+									</div>
+									<div className="text-danger" style={{ display: this.state.usernameError }}>
+										Username must be entered.
+									</div>
+									<div className="text-danger" style={{ display: this.state.usernameNotValid }}>
+										Username is not valid.
+									</div>
+								</div>
 								<div className="control-group">
 									<div className="form-group controls mb-0 pb-2" style={{ color: "#6c757d", opacity: 1 }}>
 										<label>Email address:</label>
@@ -175,10 +249,23 @@ class RegisterPage extends Component {
 										Email address is not valid.
 									</div>
 								</div>
-                                
 								<div className="control-group">
 									<div className="form-group controls mb-0 pb-2" style={{ color: "#6c757d", opacity: 1 }}>
-										<label>Manager name:</label>
+										<label>Biography:</label>
+										<input
+											readOnly={this.state.hiddenEditInfo}
+											className={!this.state.hiddenEditInfo === false ? "form-control-plaintext" : "form-control"}
+											placeholder="Biography"
+											type="text"
+											onChange={this.handleBiographyChange}
+											value={this.state.biography}
+										/>
+									</div>
+
+								</div>
+								<div className="control-group">
+									<div className="form-group controls mb-0 pb-2" style={{ color: "#6c757d", opacity: 1 }}>
+										<label>First name:</label>
 										<input
 											placeholder="Name"
 											class="form-control"
@@ -194,7 +281,7 @@ class RegisterPage extends Component {
 								</div>
 								<div className="control-group">
 									<div className="form-group controls mb-0 pb-2" style={{ color: "#6c757d", opacity: 1 }}>
-										<label> Manager surname:</label>
+										<label>Surname:</label>
 										<input
 											placeholder="Surname"
 											class="form-control"
@@ -208,7 +295,7 @@ class RegisterPage extends Component {
 										Surname must be entered.
 									</div>
 								</div>
-								
+
 								<div className="control-group">
 									<div className="form-group controls mb-0 pb-2" style={{ color: "#6c757d", opacity: 1 }}>
 										<label>Phone number:</label>
@@ -225,6 +312,38 @@ class RegisterPage extends Component {
 										Phone number must be entered.
 									</div>
 								</div>
+
+								<div className="control-group">
+									<div className="form-group controls mb-0 pb-2" style={{ color: "#6c757d", opacity: 1 }}>
+										<label>Date of birth:</label>
+										<input
+											placeholder="Date of birth"
+											class="form-control"
+											id="phone"
+											type="date"
+											onChange={this.handleDateChange}
+											value={this.state.date}
+										/>
+									</div>
+									<div className="text-danger" style={{ display: this.state.dateError }}>
+										Date of birth must be entered.
+									</div>
+								</div>
+
+								<div style={{ color: "#6c757d", opacity: 1 }}>
+									<p><input type="radio" value="Male" name="gender" onChange={(e) => this.handleGenderChange(e)} /> Male</p>
+									<p><input type="radio" value="Female" name="gender" onChange={(e) => this.handleGenderChange(e)} /> Female</p>
+									<p><input type="radio" value="Other" name="gender" onChange={(e) => this.handleGenderChange(e)} /> Other </p>
+								</div>
+								<div>
+									<p style={{ color: "#6c757d", opacity: 1 }} >Private </p>
+									<label class="switch">
+										<input type="checkbox" onChange={(e) => this.handlePrivateChange(e)} />
+										<span class="slider round"></span>
+
+									</label>
+								</div>
+
 								<div className="control-group">
 									<label>Password:</label>
 									<div className="form-group controls mb-0 pb-2" style={{ color: "#6c757d", opacity: 1 }}>
@@ -279,7 +398,7 @@ class RegisterPage extends Component {
 						</div>
 					</div>
 				</div>
-				
+
 			</React.Fragment>
 		);
 	}

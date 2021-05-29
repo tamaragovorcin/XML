@@ -1,11 +1,23 @@
 package dtos
 
+import "time"
+
+type Gender int
+const (
+	MALE Gender = iota
+	FEMALE
+)
 type UserRequest struct {
 	Name  string
-	Surname string
+	LastName string
 	Email string
+	Username string
 	Password string
-	RepeatedPassword string
+	PhoneNumber int
+	Gender Gender
+	DateOfBirth time.Time
+	Private bool
+	Biography string
 }
 
 type LoginRequest struct {
