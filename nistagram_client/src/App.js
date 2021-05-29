@@ -8,6 +8,7 @@ import UserProfilePage from './pages/UserProfilePage'
 import ProfilePage from './pages/ProfilePage'
 import EditProfile from './pages/EditProfile';
 import PasswordChange from './pages/PasswordChange'
+import Follows from './pages/Follows'
 function App() {
   return (
     <Router>
@@ -20,6 +21,7 @@ function App() {
 				<Link exact to="/profilePage" path="/profilePage" component={ProfilePage} />
 
 				<Link exact to="/passwordChange" path="/passwordChange" component={PasswordChange} />
+				<Link exact to="/follows" path="/follows" component={Follows} />
 				<Link exact to="/settings" path="/settings" component={EditProfile} />
 			</Switch>
 	</Router>

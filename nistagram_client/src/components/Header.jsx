@@ -6,6 +6,7 @@ import { BiBookmark } from 'react-icons/bi';
 import { FiSettings, FiSend } from 'react-icons/fi';
 import { VscHome } from 'react-icons/vsc';
 import { AiOutlineHeart } from 'react-icons/ai';
+import { Search } from "@material-ui/icons";
 
 class Header extends React.Component {
 	hasRole = (reqRole) => {
@@ -20,6 +21,7 @@ class Header extends React.Component {
 		}
 		return false;
 	};
+	
 	render() {
 
 		return (
@@ -27,6 +29,27 @@ class Header extends React.Component {
 				<div className="container d-flex align-items-center">
 					<h1 className="logo mr-auto">
 						<Link to="/">NISTAGRAM</Link>
+						<div class = "row justify-content-md-center">
+						<div class="col-30">
+						<input type="text" style={{ width : "80%" }} class="form-control" placeholder="Search people"></input>
+                        <Link><Search/></Link>
+						</div>
+						
+						 
+                                        
+						<div class="col-30">
+						<input type="text" style={{ width : "80%" }} class="form-control" placeholder="Search tags"></input>
+                        <Link><Search/></Link>
+						</div>
+						
+						 
+						<div class="col-30">
+						<input type="text" style={{ width : "80%" }} class="form-control" placeholder="Search location"></input>
+						<Link><Search/></Link>
+					    </div>
+						
+						</div>
+						
 					</h1>
 
 					<nav className="nav-menu d-none d-lg-block">
@@ -38,7 +61,9 @@ class Header extends React.Component {
 								<Link to="/messages"><FiSend/></Link>
 							</li>
 							<li  >
-								<Link to="/follows"><AiOutlineHeart/></Link>
+							<Link to="/follows"><AiOutlineHeart/></Link>
+								
+								
 							</li>
 
 							<li className="drop-down">
