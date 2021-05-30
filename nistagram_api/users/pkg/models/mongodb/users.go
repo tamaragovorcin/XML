@@ -3,6 +3,7 @@ package mongodb
 import (
 	"context"
 	"errors"
+	"fmt"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -56,7 +57,7 @@ func (m *UserModel) FindByID(id int) (*models.User, error) {
 	return &user, nil
 }
 
-func (m *UserModel) FindByUsername(username string) (*models.User, error) {
+func (m *UserModel)  FindByUsername(username string) (*models.User, error) {
 	/*p, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
 		return nil, err
@@ -65,6 +66,7 @@ func (m *UserModel) FindByUsername(username string) (*models.User, error) {
 	// Find user by id*/
 	var user = models.User{}
 	err := m.C.FindOne(context.TODO(), bson.M{"profileInformation.username": username}).Decode(&user)
+
 	if err != nil {
 		// Checks if the user was not found
 
@@ -89,4 +91,13 @@ func (m *UserModel) Delete(id string) (*mongo.DeleteResult, error) {
 		return nil, err
 	}
 	return m.C.DeleteOne(context.TODO(), bson.M{"_id": p})
+}
+
+func (m *UserModel) Update(user models.User) (*mongo.UpdateResult, error) {
+	fmt.Println("LUNAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA %s" , user.Id)
+
+	return m.C.UpdateOne(context.TODO(),bson.M{"_id":user.Id},bson.D{{"$set",bson.M{"biography":user.Biography,"profileInformation.name":user.ProfileInformation.Name,
+		"profileInformation.lastName":user.ProfileInformation.LastName, "profileInformation.username":user.ProfileInformation.Username,"profileInformation.email":user.ProfileInformation.Email,
+		"profileInformation.phoneNumber":user.ProfileInformation.PhoneNumber,"profileInformation.dateOfBirth":user.ProfileInformation.DateOfBirth,
+		"webSite":user.Website,"private":user.Private,"profileInformation.gender":user.ProfileInformation.Gender}}})
 }

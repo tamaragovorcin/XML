@@ -8,7 +8,7 @@ class SidebarSettings extends Component{
 		return (
 			<React.Fragment>
 			
-				<div className="container">
+				<div className="container-fluid" >
 					 
                     <div class="sidenav shadow p-3 bg-white rounded">
 					<Link to="/settings">Edit profile</Link>
