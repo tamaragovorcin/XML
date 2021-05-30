@@ -55,6 +55,26 @@ func (m *UserModel) FindByID(id string) (*models.User, error) {
 	return &user, nil
 }
 
+func (m *UserModel) FindByUsername(id string) (*models.User, error) {
+	p, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		return nil, err
+	}
+
+	// Find user by id
+	var user = models.User{}
+	err = m.C.FindOne(context.TODO(), bson.M{"username": p}).Decode(&user)
+	if err != nil {
+		// Checks if the user was not found
+		if err == mongo.ErrNoDocuments {
+			return nil, errors.New("ErrNoDocuments")
+		}
+		return nil, err
+	}
+
+	return &user, nil
+}
+
 // Insert will be used to insert a new user
 func (m *UserModel) Insert(user models.User) (*mongo.InsertOneResult, error) {
 	return m.C.InsertOne(context.TODO(), user)

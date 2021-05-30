@@ -2,7 +2,7 @@ import React, { Component } from "react";
 import Header from "../components/Header";
 import TopBar from "../components/TopBar";
 import Axios from "axios";
-import { BASE_URL } from "../constants.js";
+import { BASE_URL, BASE_URL_USER } from "../constants.js";
 import { Button } from "react-bootstrap";
 import { Redirect } from "react-router-dom";
 import HeadingAlert from "../components/HeadingAlert";
@@ -32,7 +32,7 @@ class Login extends Component {
 
 		if (this.validateForm()) {
 			let loginDTO = { email: this.state.email, password: this.state.password };
-			Axios.post(BASE_URL + "/api/auth/login", loginDTO, { validateStatus: () => true })
+			Axios.post(BASE_URL_USER + "/api/auth/login", loginDTO, { validateStatus: () => true })
 				.then((res) => {
 					if (res.status === 401) {
 						this.setState({ errorHeader: "Bad credentials!", errorMessage: "Wrong username or password.", hiddenErrorAlert: false });

@@ -5,7 +5,7 @@ import Axios from "axios";
 import { Redirect } from "react-router-dom";
 import HeadingAlert from "../components/HeadingAlert";
 
-import { BASE_URL_USER } from "../constants.js";
+import { constants } from "../constants.js";
 
 class RegisterPage extends Component {
 	state = {
@@ -143,12 +143,12 @@ class RegisterPage extends Component {
 		};
 
 		let roleDTO = {
-			Id: 11,
-			Name: "Name"
+			id: 11,
+			name: "Name"
 		}
 		console.log(userDTO)
 
-			Axios.post(BASE_URL_USER + "/api/role/", roleDTO)
+			Axios.put(`${constants.BASE_URL_USER}/api/role/`, roleDTO)
 				.then((res) => {
 					if (res.status === 409) {
 						this.setState({
