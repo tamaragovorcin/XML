@@ -143,13 +143,17 @@ class RegisterPage extends Component {
 		};
 
 		let roleDTO = {
-			id: 11,
-			name: "Name"
+
+
+			Id: 96,
+			Name: "Name"
 		}
 		console.log(userDTO)
 
 			Axios.put(`${constants.BASE_URL_USER}/api/role/`, roleDTO)
 				.then((res) => {
+					console.log("USPEHHHHHHHHHHH")
+
 					if (res.status === 409) {
 						this.setState({
 							errorHeader: "Resource conflict!",
