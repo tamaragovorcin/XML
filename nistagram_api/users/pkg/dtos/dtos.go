@@ -1,11 +1,10 @@
 package dtos
 
-import "time"
-
 type Gender int
 const (
-	MALE Gender = iota
-	FEMALE
+	Male Gender = iota
+	Female
+	Other
 )
 type UserRequest struct {
 	Name  string
@@ -13,9 +12,9 @@ type UserRequest struct {
 	Email string
 	Username string
 	Password string
-	PhoneNumber int
-	Gender Gender
-	DateOfBirth time.Time
+	PhoneNumber string
+	Gender string
+	DateOfBirth string
 	Private bool
 	Biography string
 }

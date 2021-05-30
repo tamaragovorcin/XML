@@ -2,13 +2,13 @@ package models
 
 import (
 	"go.mongodb.org/mongo-driver/x/mongo/driver/uuid"
-	"time"
 )
 //ENUMS
 type Gender int
 const (
-	MALE Gender = iota
-	FEMALE
+	Male Gender = iota
+	Female
+	Other
 )
 
 type Category int
@@ -30,9 +30,9 @@ type ProfileInformation struct {
 	Username string `bson:"username,omitempty"`
 	Password string `bson:"password,omitempty"`
 	Roles []Role `bson:"roles,omitempty"`
-	PhoneNumber int `bson:"phoneNumber,omitempty"`
-	Gender Gender `bson:"gender,omitempty"`
-	DateOfBirth time.Time `bson:"dateOfBirth,omitempty"`
+	PhoneNumber string `bson:"phoneNumber,omitempty"`
+	Gender string `bson:"gender,omitempty"`
+	DateOfBirth string `bson:"dateOfBirth,omitempty"`
 }
 
 

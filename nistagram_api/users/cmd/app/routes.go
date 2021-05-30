@@ -13,7 +13,7 @@ func (app *application) routes() *mux.Router {
 	r.HandleFunc("/api/", app.insertUser).Methods("POST")
 	r.HandleFunc("/api/{id}", app.deleteUser).Methods("DELETE")
 
-	r.HandleFunc("/api/login", app.loginUser).Methods("POST")
+	//r.HandleFunc("/api/login", app.loginUser).Methods("POST")
 
 	r.HandleFunc("/profileInformation/", app.getAllProfileInformation).Methods("GET")
 	r.HandleFunc("/profileInformation/{id}", app.findProfileInformationByID).Methods("GET")
@@ -27,7 +27,7 @@ func (app *application) routes() *mux.Router {
 
 	r.HandleFunc("/api/role/", app.getAllRoles).Methods("GET")
 	r.HandleFunc("/api/role/{id}", app.findRoleByID).Methods("GET")
-	r.HandleFunc("/api/role/", app.insertRole).Methods("PUT")
+	r.HandleFunc("/api/role/", app.insertRole).Methods("POST")
 	r.HandleFunc("/api/role/{id}", app.deleteRole).Methods("DELETE")
 
 	r.HandleFunc("/agent/", app.getAllAgents).Methods("GET")

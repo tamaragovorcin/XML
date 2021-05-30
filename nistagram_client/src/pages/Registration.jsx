@@ -5,6 +5,7 @@ import Axios from "axios";
 import { Redirect } from "react-router-dom";
 import HeadingAlert from "../components/HeadingAlert";
 
+import ModalDialog from "../components/ModalDialog";
 import { constants } from "../constants.js";
 
 class RegisterPage extends Component {
@@ -62,7 +63,9 @@ class RegisterPage extends Component {
 	handleSurnameChange = (event) => {
 		this.setState({ surname: event.target.value });
 	};
-
+	handleModalClose = () => {
+		this.setState({ openModal: false, redirect: true });
+	};
 	handlePhoneNumberChange = (event) => {
 		this.setState({ phoneNumber: event.target.value });
 	};
@@ -142,15 +145,9 @@ class RegisterPage extends Component {
 			Private: this.state.private,
 		};
 
-		let roleDTO = {
-
-
-			Id: 96,
-			Name: "Name"
-		}
 		console.log(userDTO)
 
-			Axios.put(`${constants.BASE_URL_USER}/api/role/`, roleDTO)
+			Axios.post(`${constants.BASE_URL_USER}/api/`, userDTO)
 				.then((res) => {
 					console.log("USPEHHHHHHHHHHH")
 
@@ -163,7 +160,7 @@ class RegisterPage extends Component {
 					} else if (res.status === 500) {
 						this.setState({ errorHeader: "Internal server error!", errorMessage: "Server error.", hiddenErrorAlert: false });
 					} else {
-						//this.setState({ openModal: true });
+						this.setState({ openModal: true });
 						//this.setState({ redirect: true })
 						console.log(res.data)
 					}
@@ -402,7 +399,12 @@ class RegisterPage extends Component {
 						</div>
 					</div>
 				</div>
-
+				<ModalDialog
+					show={this.state.openModal}
+					onCloseModal={this.handleModalClose}
+					header="Successful registration"
+					text="You have successfully registrated."
+				/>
 			</React.Fragment>
 		);
 	}

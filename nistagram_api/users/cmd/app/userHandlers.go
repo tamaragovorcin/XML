@@ -1,12 +1,12 @@
 package main
 
 import (
-	"context"
+	//"context"
 	"encoding/json"
-	"errors"
+	//"errors"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gorilla/mux"
-	"github.com/labstack/echo"
+	//"github.com/labstack/echo"
 	"golang.org/x/crypto/bcrypt"
 	"log"
 	"net/http"
@@ -35,16 +35,16 @@ func equalPasswords(hashedPwd string, passwordRequest string) bool {
 
 
 
-func (app *application) loginUser(w http.ResponseWriter, r *http.Request) error  {
+/*func (app *application) loginUser(w http.ResponseWriter, r *http.Request) error  {
 
-//c echo.Context,ctx context.Context
+c echo.Context,ctx context.Context
 
 	loginRequest := &dtos.LoginRequest{}
-	/*if err := c.Bind(loginRequest); err != nil {
+	if err := c.Bind(loginRequest); err != nil {
 		return err
 	}
 
-	ctx = c.Request().Context()*/
+	ctx = c.Request().Context()
 	user, err := app.users.FindByUsername(loginRequest.Email)
 	if err != nil {
 		return errors.New("invalid email address")
@@ -64,7 +64,7 @@ func (app *application) loginUser(w http.ResponseWriter, r *http.Request) error 
 		"accessToken": token,
 		"roles" : string(rolesString),
 	})
-}
+}*/
 
 func generateToken(user *models.User) (string, error) {
 	token := jwt.New(jwt.SigningMethodHS256)
@@ -156,14 +156,14 @@ func (app *application) insertUser(w http.ResponseWriter, r *http.Request) {
 		Email:       m.Email,
 		Username:    m.Username,
 		Password:    hashAndSalt,
-		Roles:       []models.Role{{ Id: 20, Name: "USER"}},
+		Roles:       []models.Role{{ Id: 26, Name: "USER"}},
 		PhoneNumber: m.PhoneNumber,
-		Gender: models.Gender(m.Gender),
+		Gender:  m.Gender,//models.Gender(m.Gender),
 		DateOfBirth: m.DateOfBirth,
 	}
 
 
-	var user = models.User{Id: 1,
+	var user = models.User{Id: 7,
 		ProfileInformation: profileInformation,
 		Biography: m.Biography,
 		Private: m.Private,
