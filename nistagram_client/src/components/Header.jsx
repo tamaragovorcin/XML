@@ -8,7 +8,17 @@ import { VscHome } from 'react-icons/vsc';
 import { AiOutlineHeart } from 'react-icons/ai';
 import { Search } from "@material-ui/icons";
 
+
+
 class Header extends React.Component {
+	state = {
+		username : "", 
+		tags : "",
+		location : "",
+		usernameError: "none",
+		tagsError: "none",
+		locationError: "none",
+	};
 	hasRole = (reqRole) => {
 		let roles = JSON.parse(localStorage.getItem("keyRole"));
 
@@ -20,8 +30,32 @@ class Header extends React.Component {
 			if (role === reqRole) return true;
 		}
 		return false;
+		
 	};
+	handlePeoples = (event) => {
+		this.setState({ username: event.target.value });
+	};
+	handleTags = (event) => {
+		this.setState({ tags: event.target.value });
+	};
+	handleLocation = (event) => {
+		this.setState({ location: event.target.value });
+	};
+	validateForm = () => {
+		if (this.state.username === "") {
+			this.setState({ usernameError: "inline" });
+			return false;
+		} else if (this.state.tags === "") {
+			this.setState({ tagsError: "inline" });
+			return false;
+		} else if (this.state.location === "") {
+			this.setState({ locationError: "inline" });
+			return false;
+		}
 	
+		return true;
+	};
+
 	render() {
 
 		return (
@@ -31,21 +65,24 @@ class Header extends React.Component {
 						<Link to="/">NISTAGRAM</Link>
 						<div class = "row justify-content-md-center">
 						<div class="col-30">
-						<input type="text" style={{ width : "80%" }} class="form-control" placeholder="Search people"></input>
-                        <Link><Search/></Link>
+						<input type="text" value={this.state.username} style={{ width : "80%" }} class="form-control" placeholder="Search people"></input>
+                        <div className="text-danger" style={{ display: this.state.usernameError }}>
+									Username must be entered.
+									</div>
+						<Link onClick={this.handlePeoples}><Search/></Link>
 						</div>
 						
 						 
                                         
 						<div class="col-30">
-						<input type="text" style={{ width : "80%" }} class="form-control" placeholder="Search tags"></input>
-                        <Link><Search/></Link>
+						<input type="text" value={this.state.tags} style={{ width : "80%" }} class="form-control" placeholder="Search tags"></input>
+                        <Link onClick={this.handleTags}><Search/></Link>
 						</div>
 						
 						 
 						<div class="col-30">
-						<input type="text" style={{ width : "80%" }} class="form-control" placeholder="Search location"></input>
-						<Link><Search/></Link>
+						<input type="text" value={this.state.location} style={{ width : "80%" }} class="form-control" placeholder="Search location"></input>
+						<Link onClick={this.handleLocation}><Search/></Link>
 					    </div>
 						
 						</div>
