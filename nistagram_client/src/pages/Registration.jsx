@@ -195,8 +195,7 @@ class RegisterPage extends Component {
 				<TopBar />
 				<Header />
 
-				<div className="container" style={{ marginTop: "10%" }}>
-
+				<div className="container" style={{ marginTop: "10%", border:"1px solid black"}}>
 					<HeadingAlert
 						hidden={this.state.hiddenErrorAlert}
 						header={this.state.errorHeader}
@@ -207,7 +206,7 @@ class RegisterPage extends Component {
 						Registration
 					</h5>
 
-					<div className="row section-design">
+					<div className="row section-design"  style={{ border:"1 solid black"}}>
 						<div className="col-lg-8 mx-auto">
 							<br />
 							<form id="contactForm" name="sentMessage" noValidate="novalidate">

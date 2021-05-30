@@ -8,6 +8,7 @@
 /*--------------------------------------------------------------
 # General
 --------------------------------------------------------------*/
+
 body {
   font-family: "Open Sans", sans-serif;
   color: #444444;
@@ -1802,4 +1803,59 @@ section {
 #map {
   width: 200px;
   height: 200px;
+}
+/* SIDENAV FOR SETTINGS */
+
+.sidenav {
+  width: 300px;
+  background-color: rgb(252, 247, 247);
+  overflow-x: hidden;
+  padding-top: 20px;
+  
+}
+
+.sidenav a {
+  padding: 6px 6px 6px 6px;
+  text-decoration: none;
+  font-size: 23px;
+  color: #2c4964;
+  display: block;
+}
+
+.sidenav a:hover {
+  color: #818080;
+}
+
+input[type=text], select {
+  width: 100%;
+  padding: 12px 20px;
+  margin: 8px 0;
+  display: inline-block;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-sizing: border-box;
+}
+input[type=date] {
+  width: 100%;
+  padding: 12px 20px;
+  margin: 8px 0;
+  display: inline-block;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-sizing: border-box;
+}
+textarea {
+  width: 100%;
+  padding: 12px 20px;
+  margin: 8px 0;
+  display: inline-block;
+  border: 2px solid #ccc;
+  border-radius: 4px;
+  box-sizing: border-box;
+  background-color: #ccc;
+}
+
+label{
+  font-size: 20px;
+  color: #2c4964;
 }
