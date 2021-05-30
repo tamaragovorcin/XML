@@ -171,7 +171,10 @@ class EditProfile extends Component {
 	handleCloseAlertFail = () => {
 		this.setState({ hiddenFailAlert: true });
 	};
+	handlePrivateChange(event) {
 
+		this.setState({ private: true });
+	}
 
 
 	render() {
@@ -195,13 +198,12 @@ class EditProfile extends Component {
 						Profile settings
 					</h2>
                     <br />
-					<div className="row section-design" style={{ marginLeft: "5%",marginRight:"5%"}}>
+					<div className="row section-design" style={{ marginLeft: "2%",marginRight:"2%"}}>
 							
                             <div className="col-md-2 padding-0">
                             <SidebarSettings/></div>
                             <div className="col-md-8 padding-0">
-							<TopBar />
-							<Header />
+							
 
 				<div className="container" style={{ marginTop: "0%" }}>
 					<HeadingSuccessAlert
@@ -331,16 +333,41 @@ class EditProfile extends Component {
 									</div>
 									
 								</div>
-								
+								<div className="control-group">
+									<div className="form-group controls mb-0 pb-2" style={{ color: "#6c757d", opacity: 1 }}>
+										<label>Gender:</label>
+										<br/>
+								<div class="form-check-inline">
+									<label class="form-check-label" for="radio1">
+									<input type="radio" class="form-check-input" id="radio1" name="optradio" value="option1" checked/>Male
+								</label>
+								</div>
+								<div class="form-check-inline">
+								<label class="form-check-label" for="radio2">
+									<input type="radio" class="form-check-input" id="radio2" name="optradio" value="option2"/>Female
+								</label>
+								</div>
+								</div>
+								</div>
 								<br />
+								<div>
+								<label>Private:</label>
+									<br/>
+									<label class="switch">
+									<input type="checkbox" onChange={(e) => this.handlePrivateChange(e)}/>
+										<span class="slider round"></span>
+									
+								</label>
+								</div>
 
 								<div className="form-group">
 									<div className="form-group controls mb-0 pb-2">
 										<div className="form-row justify-content-center">
 											<div className="form-col" hidden={!this.state.hiddenEditInfo}>
 												<button
+													style={{ background: "#1977cc", marginTop: "15px" }}
 													onClick={this.handleEditInfoClick}
-													className="btn btn-outline-primary btn-xl"
+													className="btn btn-primary btn-xl"
 													id="sendMessageButton"
 													type="button"
 												>

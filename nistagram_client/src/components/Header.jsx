@@ -1,13 +1,17 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { CgProfile } from 'react-icons/cg';
-import { BiBookmark } from 'react-icons/bi';
+import { BiBookmark, BiSearch } from 'react-icons/bi';
+import Select from 'react-select';
 
 import { FiSettings, FiSend } from 'react-icons/fi';
 import { VscHome } from 'react-icons/vsc';
 import { AiOutlineHeart } from 'react-icons/ai';
 
 class Header extends React.Component {
+	state = {
+		options:["mladenka","vojna"]
+	}
 	hasRole = (reqRole) => {
 		let roles = JSON.parse(localStorage.getItem("keyRole"));
 
@@ -25,14 +29,21 @@ class Header extends React.Component {
 		return (
 			<header id="header" className="fixed-top">
 				<div className="container d-flex align-items-center">
-					<h1 className="logo mr-auto">
-						<Link to="/">NISTAGRAM</Link>
-					</h1>
+					<label className="logo mr-auto" style={{fontFamily:"Trattatello, fantasy"}}>
+						<Link to="/">Ništagram</Link>
+					</label>
+					<div class="input-group rounded" style={{marginLeft:"10%",marginRight:"10%"}}>
+					<input type="search" class="form-control rounded" placeholder="Search" aria-label="Search"
+						aria-describedby="search-addon" />
+					<span class="input-group-text border-0" id="search-addon">
+					<BiSearch/>
+					</span>
+					</div>
 
 					<nav className="nav-menu d-none d-lg-block">
 						<ul>
 							<li>
-								<Link ><VscHome/></Link>
+								<Link to="" ><VscHome/></Link>
 							</li>
 							<li  >
 								<Link to="/messages"><FiSend/></Link>
@@ -52,7 +63,7 @@ class Header extends React.Component {
 									<li>
 
 
-										<Link to="/saved"><BiBookmark /> Saved </Link>
+										<Link to="/favorites"><BiBookmark /> Saved </Link>
 
 
 
