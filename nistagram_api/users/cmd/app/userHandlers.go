@@ -5,6 +5,8 @@ import (
 	"encoding/json"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gorilla/mux"
+	"strconv"
+
 	//"github.com/labstack/echo"
 	"golang.org/x/crypto/bcrypt"
 	"log"
@@ -32,16 +34,7 @@ func equalPasswords(hashedPwd string, passwordRequest string) bool {
 }
 
 
-
-
 func (app *application) loginUser(w http.ResponseWriter, r *http.Request)  {
-
-//c echo.Context,ctx context.Context
-
-	//loginRequest := &dtos.LoginRequest{}
-	/*if err := c.Bind(loginRequest); err != nil {
-		return err
-	}*/
 
 	var loginRequest dtos.LoginRequest
 	err := json.NewDecoder(r.Body).Decode(&loginRequest)
@@ -58,12 +51,6 @@ func (app *application) loginUser(w http.ResponseWriter, r *http.Request)  {
 		app.infoLog.Println("Invalid email")
 	}
 
-	/*if err != nil && user != nil {
-		return c.JSON(http.StatusForbidden, map[string]string{
-			"userId" : string(user.Id),
-		})
-	}*/
-
 	token, err := generateToken(user)
 
 
@@ -79,7 +66,7 @@ func (app *application) loginUser(w http.ResponseWriter, r *http.Request)  {
 	w.WriteHeader(http.StatusOK)
 
 
-	userToken := dtos.UserTokenState{ AccessToken: token, Roles: string(rolesString),
+	userToken := dtos.UserTokenState{ AccessToken: token, Roles: string(rolesString), UserId: user.Id,
 
 	}
 	bb, err := json.Marshal(userToken)
@@ -122,12 +109,13 @@ func (app *application) getAllUsers(w http.ResponseWriter, r *http.Request) {
 	w.Write(b)
 }
 
-/*func (app *application) findUserByID(w http.ResponseWriter, r *http.Request) {
+
+func (app *application) findUserByID(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	vars := mux.Vars(r)
 	id := vars["id"]
-
-	m, err := app.users.FindByID(id)
+	intVar, err := strconv.Atoi(id)
+	m, err := app.users.FindByID(intVar)
 	if err != nil {
 		if err.Error() == "ErrNoDocuments" {
 			app.infoLog.Println("User not found")
@@ -147,7 +135,7 @@ func (app *application) getAllUsers(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 	w.Write(b)
 }
-*/
+
 
 func HashAndSaltPasswordIfStrong(password string) (string, error) {
 
