@@ -3,8 +3,10 @@ package main
 import (
 	//"context"
 	"encoding/json"
+	"fmt"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gorilla/mux"
+	"os"
 	"strconv"
 
 	//"github.com/labstack/echo"
@@ -163,14 +165,14 @@ func (app *application) insertUser(w http.ResponseWriter, r *http.Request) {
 		Email:       m.Email,
 		Username:    m.Username,
 		Password:    hashAndSalt,
-		Roles:       []models.Role{{ Id: 2, Name: "USER"}},
+		Roles:       []models.Role{{ Id: 5, Name: "USER"}},
 		PhoneNumber: m.PhoneNumber,
 		Gender:  m.Gender,//models.Gender(m.Gender),
 		DateOfBirth: m.DateOfBirth,
 	}
 
 
-	var user = models.User{Id: 2,
+	var user = models.User{Id: 5,
 		ProfileInformation: profileInformation,
 		Biography: m.Biography,
 		Private: m.Private,
@@ -197,4 +199,58 @@ func (app *application) deleteUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	app.infoLog.Printf("Have been eliminated %d users(s)", deleteResult.DeletedCount)
+}
+func (app *application) updateUser(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	app.infoLog.Printf("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
+
+
+		var m dtos.UserUpdateRequest
+		err := json.NewDecoder(r.Body).Decode(&m)
+		if err != nil {
+			app.serverError(w, err)
+		}
+		intId, err := strconv.Atoi(m.Id)
+		if err != nil {
+			// handle error
+			fmt.Println(err)
+			os.Exit(2)
+		}
+		uss, err := app.users.FindByID(intId)
+		if uss == nil {
+			app.infoLog.Println("User not found")
+		}
+
+		if err != nil {
+			app.infoLog.Println("Invalid email")
+		}
+		app.infoLog.Printf("USERNAMEEE, %s",uss.ProfileInformation.Username)
+		var profileInformation = models.ProfileInformation{
+			Id: uss.Id,
+			Name: m.Name,
+			LastName: m.LastName,
+			Email:       m.Email,
+			Username:    m.Username,
+			PhoneNumber: m.PhoneNumber,
+			Gender:  m.Gender,//models.Gender(m.Gender),
+			DateOfBirth: m.DateOfBirth,
+		}
+
+
+		var user = models.User{
+			Id: uss.Id,
+			ProfileInformation: profileInformation,
+			Biography: m.Biography,
+			Private: m.Private,
+			Verified: false,
+		}
+
+
+		insertResult, err := app.users.Update(user)
+		if err != nil {
+			app.serverError(w, err)
+		}
+
+	app.infoLog.Printf("New user have been created, id=%s", insertResult.UpsertedID)
+
 }

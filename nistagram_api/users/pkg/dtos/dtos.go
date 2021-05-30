@@ -18,6 +18,18 @@ type UserRequest struct {
 	Private bool
 	Biography string
 }
+type UserUpdateRequest struct {
+	Id string `bson:"_id,omitempty"`
+	Name  string `bson:"name,omitempty"`
+	LastName string `bson:"lastName,omitempty"`
+	Email string `bson:"email,omitempty"`
+	Username string `bson:"username,omitempty"`
+	PhoneNumber string `bson:"phoneNumber,omitempty"`
+	Gender string `bson:"gender,omitempty"`
+	DateOfBirth string `bson:"dateOfBirth,omitempty"`
+	Private bool `bson:"private,omitempty"`
+	Biography string `bson:"biography,omitempty"`
+}
 
 type LoginRequest struct {
 	Username string `bson:"username,omitempty"`

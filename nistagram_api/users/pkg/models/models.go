@@ -25,7 +25,7 @@ const (
 type ProfileInformation struct {
 	Id       int `bson:"_id,omitempty"`
 	Name     string             `bson:"name,omitempty"`
-	LastName string             `bson:"lastname,omitempty"`
+	LastName string             `bson:"lastName,omitempty"`
 	Email string `validate:"required,email" bson:"email,omitempty"`
 	Username string `bson:"username,omitempty"`
 	Password string `bson:"password,omitempty"`
@@ -52,7 +52,7 @@ type User struct {
 	Id int `bson:"_id,omitempty"`
 	ProfileInformation ProfileInformation `bson:"profileInformation,omitempty"`
 	Private bool `bson:"private,omitempty"`
-	Website string `bson:"approved,omitempty"`
+	Website string `bson:"webSite,omitempty"`
 	Biography string `bson:"biography,omitempty"`
 	Verified bool `bson:"verified,omitempty"`
 	Category Category `bson:"category,omitempty"`
