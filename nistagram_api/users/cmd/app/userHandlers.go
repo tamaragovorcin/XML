@@ -156,14 +156,14 @@ func (app *application) insertUser(w http.ResponseWriter, r *http.Request) {
 		Email:       m.Email,
 		Username:    m.Username,
 		Password:    hashAndSalt,
-		Roles:       []models.Role{{ Id: 26, Name: "USER"}},
+		Roles:       []models.Role{{ Id: 1, Name: "USER"}},
 		PhoneNumber: m.PhoneNumber,
 		Gender:  m.Gender,//models.Gender(m.Gender),
 		DateOfBirth: m.DateOfBirth,
 	}
 
 
-	var user = models.User{Id: 7,
+	var user = models.User{Id: 1,
 		ProfileInformation: profileInformation,
 		Biography: m.Biography,
 		Private: m.Private,
