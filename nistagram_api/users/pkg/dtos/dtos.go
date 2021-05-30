@@ -27,6 +27,7 @@ type UserTokenState struct {
 	AccessToken string
 	ExpiresIn int64
 	Roles string
+	UserId int
 }
 
 
