@@ -20,13 +20,13 @@ type UserRequest struct {
 }
 
 type LoginRequest struct {
-	Email string `bson:"email,omitempty"`
+	Username string `bson:"username,omitempty"`
 	Password string `bson:"password,omitempty"`
 }
 type UserTokenState struct {
 	AccessToken string
 	ExpiresIn int64
-	Roles []string
+	Roles string
 }
 
 

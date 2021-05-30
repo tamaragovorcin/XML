@@ -31,18 +31,20 @@ class Login extends Component {
 		this.setState({ hiddenErrorAlert: true, emailError: "none", passwordError: "none" });
 
 		if (this.validateForm()) {
-			let loginDTO = { email: this.state.email, password: this.state.password };
-			Axios.post(BASE_URL_USER + "/api/auth/login", loginDTO, { validateStatus: () => true })
+			let loginDTO = { username: this.state.email, password: this.state.password };
+			console.log(loginDTO)
+			Axios.post(BASE_URL_USER + "/api/login", loginDTO)
 				.then((res) => {
 					if (res.status === 401) {
 						this.setState({ errorHeader: "Bad credentials!", errorMessage: "Wrong username or password.", hiddenErrorAlert: false });
 					} else if (res.status === 500) {
 						this.setState({ errorHeader: "Internal server error!", errorMessage: "Server error.", hiddenErrorAlert: false });
 					} else {
-						localStorage.setItem("keyToken", res.data.accessToken);
-						localStorage.setItem("keyRole", JSON.stringify(res.data.roles));
-						localStorage.setItem("expireTime", new Date(new Date().getTime() + res.data.expiresIn).getTime());
+						localStorage.setItem("keyToken", res.data.AccessToken);
+						localStorage.setItem("keyRole", JSON.stringify(res.data.Roles));
+						//localStorage.setItem("expireTime", new Date(new Date().getTime() + res.data.expiresIn).getTime());
 
+						console.log(res.data)
 						this.setState({ redirect: true });
 					}
 				})

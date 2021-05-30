@@ -9,11 +9,11 @@ func (app *application) routes() *mux.Router {
 	r := mux.NewRouter()
 
 	r.HandleFunc("/api/", app.getAllUsers).Methods("GET")
-	r.HandleFunc("/api/{id}", app.findUserByID).Methods("GET")
+	//r.HandleFunc("/api/{id}", app.findUserByID).Methods("GET")
 	r.HandleFunc("/api/", app.insertUser).Methods("POST")
 	r.HandleFunc("/api/{id}", app.deleteUser).Methods("DELETE")
 
-	//r.HandleFunc("/api/login", app.loginUser).Methods("POST")
+	r.HandleFunc("/api/login", app.loginUser).Methods("POST")
 
 	r.HandleFunc("/profileInformation/", app.getAllProfileInformation).Methods("GET")
 	r.HandleFunc("/profileInformation/{id}", app.findProfileInformationByID).Methods("GET")

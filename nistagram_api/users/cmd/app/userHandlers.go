@@ -3,7 +3,6 @@ package main
 import (
 	//"context"
 	"encoding/json"
-	//"errors"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gorilla/mux"
 	//"github.com/labstack/echo"
@@ -35,36 +34,57 @@ func equalPasswords(hashedPwd string, passwordRequest string) bool {
 
 
 
-/*func (app *application) loginUser(w http.ResponseWriter, r *http.Request) error  {
+func (app *application) loginUser(w http.ResponseWriter, r *http.Request)  {
 
-c echo.Context,ctx context.Context
+//c echo.Context,ctx context.Context
 
-	loginRequest := &dtos.LoginRequest{}
-	if err := c.Bind(loginRequest); err != nil {
+	//loginRequest := &dtos.LoginRequest{}
+	/*if err := c.Bind(loginRequest); err != nil {
 		return err
-	}
+	}*/
 
-	ctx = c.Request().Context()
-	user, err := app.users.FindByUsername(loginRequest.Email)
+	var loginRequest dtos.LoginRequest
+	err := json.NewDecoder(r.Body).Decode(&loginRequest)
 	if err != nil {
-		return errors.New("invalid email address")
+		app.serverError(w, err)
+	}
+	//ctx = c.Request().Context()
+	user, err := app.users.FindByUsername(loginRequest.Username)
+	if user == nil {
+		app.infoLog.Println("User not found")
 	}
 
-	if err != nil && user != nil {
+	if err != nil {
+		app.infoLog.Println("Invalid email")
+	}
+
+	/*if err != nil && user != nil {
 		return c.JSON(http.StatusForbidden, map[string]string{
 			"userId" : string(user.Id),
 		})
-	}
+	}*/
 
 	token, err := generateToken(user)
 
 
 	rolesString, _ := json.Marshal(user.ProfileInformation.Roles)
-	return c.JSON(http.StatusOK, map[string]string{
-		"accessToken": token,
-		"roles" : string(rolesString),
-	})
-}*/
+
+	//b, err := json.Marshal(user)
+	if err != nil {
+		app.serverError(w, err)
+	}
+
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+
+
+	userToken := dtos.UserTokenState{ AccessToken: token, Roles: string(rolesString),
+
+	}
+	bb, err := json.Marshal(userToken)
+	w.Write(bb)
+}
 
 func generateToken(user *models.User) (string, error) {
 	token := jwt.New(jwt.SigningMethodHS256)
@@ -102,7 +122,7 @@ func (app *application) getAllUsers(w http.ResponseWriter, r *http.Request) {
 	w.Write(b)
 }
 
-func (app *application) findUserByID(w http.ResponseWriter, r *http.Request) {
+/*func (app *application) findUserByID(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	vars := mux.Vars(r)
 	id := vars["id"]
@@ -127,7 +147,7 @@ func (app *application) findUserByID(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 	w.Write(b)
 }
-
+*/
 
 func HashAndSaltPasswordIfStrong(password string) (string, error) {
 
@@ -142,7 +162,6 @@ func HashAndSaltPasswordIfStrong(password string) (string, error) {
 
 func (app *application) insertUser(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Access-Control-Allow-Origin", "*")
-	app.infoLog.Println("Users ssssssssssssssss")
 	var m dtos.UserRequest
 	err := json.NewDecoder(r.Body).Decode(&m)
 	if err != nil {
