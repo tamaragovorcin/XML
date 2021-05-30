@@ -63,7 +63,7 @@ class Header extends React.Component {
 									<li>
 
 
-										<Link to="/saved"><BiBookmark /> Saved </Link>
+										<Link to="/favorites"><BiBookmark /> Saved </Link>
 
 
 

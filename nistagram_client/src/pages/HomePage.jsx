@@ -3,18 +3,20 @@ import Header from "../components/Header";
 import TopBar from "../components/TopBar";
 import { Link } from "react-router-dom";
 import playerLogo from "../static/me.jpg";
+import profileImage from "../static/profileImage.jpg"
 import LikesModal from "../components/Posts/LikesModal"
 import DislikesModal from "../components/Posts/DislikesModal"
 import CommentsModal from "../components/Posts/CommentsModal"
 import WriteCommentModal from "../components/Posts/WriteCommentModal"
 import { FiHeart } from "react-icons/fi";
 import {FaHeartBroken,FaRegCommentDots} from "react-icons/fa"
+import {BsBookmark} from "react-icons/bs"
 
 
 class HomePage extends React.Component {
 	
 	state = {
-		highlihts: [],
+		stories: [],
 		photos: [],
 		pictures: [],
 		picture: "",
@@ -59,9 +61,12 @@ class HomePage extends React.Component {
 	handleDislike = ()=>{
 		
 	}
+	handleSave = ()=>{
+
+	}
 	componentDidMount() {
 		this.handleGetBasicInfo()
-		this.handleGetHighlights()
+		this.handleGetStories()
 		this.handleGetPhotos()
 
 	}
@@ -69,7 +74,7 @@ class HomePage extends React.Component {
 		this.setState({ username: "USERNAME" });
 	}
 
-	handleGetHighlights = () => {
+	handleGetStories= () => {
 		let highliht1 = { id: 1, username: "mladenkak" };
 		let highliht2 = { id: 2, username: "tamarag" };
 		let highliht3 = { id: 3, username: "lunaz" };
@@ -124,7 +129,7 @@ class HomePage extends React.Component {
 		list.push(highliht13)
 		list.push(highliht13)
 
-		this.setState({ highlihts: list });
+		this.setState({ stories: list });
 	}
 
 	handleGetPhotos = () => {
@@ -145,10 +150,10 @@ class HomePage extends React.Component {
 		comments2.push(comment22)
 		comments2.push(comment222)
 
-		let photo1 = { id: 1, username:"mladenkak", photo: playerLogo, numLikes: 52, numDislikes: 2, comments: comments1 }
-		let photo2 = { id: 2, username:"mladenkak", photo: playerLogo, numLikes: 45, numDislikes: 0, comments: comments2 }
-		let photo3 = { id: 3, username:"mladenkak", photo: playerLogo, numLikes: 52, numDislikes: 2, comments: comments1 }
-		let photo4 = { id: 4, username:"mladenkak", photo: playerLogo, numLikes: 45, numDislikes: 0, comments: comments2 }
+		let photo1 = { id: 1, username:"mladenkak", photo: playerLogo, numLikes: 52, numDislikes: 2, comments: comments1, profilePhoto: profileImage }
+		let photo2 = { id: 2, username:"mladenkak", photo: playerLogo, numLikes: 45, numDislikes: 0, comments: comments2 ,  profilePhoto: profileImage}
+		let photo3 = { id: 3, username:"mladenkak", photo: playerLogo, numLikes: 52, numDislikes: 2, comments: comments1,  profilePhoto: profileImage }
+		let photo4 = { id: 4, username:"mladenkak", photo: playerLogo, numLikes: 45, numDislikes: 0, comments: comments2,  profilePhoto: profileImage }
 		list.push(photo1)
 		list.push(photo2)
 		list.push(photo3)
@@ -170,14 +175,15 @@ class HomePage extends React.Component {
 								<table className="table-responsive" style={{ width: "100%" }}>
 									<tbody>
 
-										<tr>
-											{this.state.highlihts.map((high) => (
-												<td id={high.id} key={high.id} width="30em">
+										<tr >
+											{this.state.stories.map((high) => (
+												<td id={high.id} key={high.id} style={{width:"60em", marginLeft:"10em"}}>
 													<tr width="100em">
 														<img
 															className="img-fluid"
 															src={playerLogo}
-															width="30em"
+															style ={{borderRadius:"50%",margin:"2%"}}
+															width="60em"
 															alt="description"
 														/>
 													</tr>
@@ -208,8 +214,9 @@ class HomePage extends React.Component {
 										<img
 												className="img-fluid"
 												src={photo.profilePhoto}
-												style={{marginRight:"2%"}}
+												style={{margin:"2%",borderRadius: "50%"}}
 												alt="profile"
+												width ="60em"
 											/>
 										<label style={{fontSize:"20px",fontWeight:"bold"}}>{photo.username}</label>
 										<tr  style={{ width: "100%"}}>
@@ -232,6 +239,9 @@ class HomePage extends React.Component {
 												</td>
 												<td>
 												<button onClick={this.handleWriteCommentModal}  className="btn btn-outline-secondary btn-sm" style={{ marginBottom: "1rem", height:"40px",marginLeft:"6rem" }}><FaRegCommentDots/></button>
+												</td>
+												<td>
+												<button onClick={this.handleSave}  className="btn btn-outline-secondary btn-sm" style={{ marginBottom: "1rem", height:"40px" }}><BsBookmark/></button>
 												</td>
 										</tr>
 										<tr  style={{ width: "100%" }}>
@@ -256,8 +266,21 @@ class HomePage extends React.Component {
 						</table>
 					</div>
 				</div>
+
+
+
+				
+
+
+
+
+
+
 				</div>
 					
+
+
+
 				</section>
 				<div>
                         
