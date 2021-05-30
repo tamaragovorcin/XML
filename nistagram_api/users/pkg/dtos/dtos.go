@@ -1,11 +1,22 @@
 package dtos
 
+type Gender int
+const (
+	Male Gender = iota
+	Female
+	Other
+)
 type UserRequest struct {
 	Name  string
-	Surname string
+	LastName string
 	Email string
+	Username string
 	Password string
-	RepeatedPassword string
+	PhoneNumber string
+	Gender string
+	DateOfBirth string
+	Private bool
+	Biography string
 }
 
 type LoginRequest struct {

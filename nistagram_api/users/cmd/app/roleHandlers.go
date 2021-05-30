@@ -8,6 +8,7 @@ import (
 )
 
 func (app *application) getAllRoles(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Access-Control-Allow-Origin", "*")
 	chats, err := app.roles.GetAll()
 	if err != nil {
 		app.serverError(w, err)
@@ -26,6 +27,7 @@ func (app *application) getAllRoles(w http.ResponseWriter, r *http.Request) {
 }
 
 func (app *application) findRoleByID(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Access-Control-Allow-Origin", "*")
 	vars := mux.Vars(r)
 	id := vars["id"]
 
@@ -50,7 +52,9 @@ func (app *application) findRoleByID(w http.ResponseWriter, r *http.Request) {
 	w.Write(b)
 }
 
+
 func (app *application) insertRole(w http.ResponseWriter, r *http.Request) {
+
 	var m models.Role
 	err := json.NewDecoder(r.Body).Decode(&m)
 	if err != nil {
@@ -66,6 +70,7 @@ func (app *application) insertRole(w http.ResponseWriter, r *http.Request) {
 }
 
 func (app *application) deleteRole(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Access-Control-Allow-Origin", "*")
 	vars := mux.Vars(r)
 	id := vars["id"]
 
