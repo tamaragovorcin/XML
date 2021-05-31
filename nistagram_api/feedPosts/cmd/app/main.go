@@ -23,6 +23,7 @@ type application struct {
 	locations   *mongodb.LocationModel
 	albumFeeds   *mongodb.AlbumFeedModel
 	collections   *mongodb.CollectionModel
+	images   *mongodb.ImageModel
 }
 
 func main() {
@@ -94,33 +95,32 @@ func main() {
 		collections: &mongodb.CollectionModel{
 			C: client.Database(*mongoDatabse).Collection("collections"),
 		},
+		images: &mongodb.ImageModel{
+			C: client.Database(*mongoDatabse).Collection("images"),
+		},
 	}
 
-	// Initialize a new http.Server struct.
 	serverURI := fmt.Sprintf("%s:%d", *serverAddr, *serverPort)
-	srv := &http.Server{
-		Addr:         serverURI,
-		ErrorLog:     errLog,
-		Handler:      app.routes(),
-		IdleTimeout:  time.Minute,
-		ReadTimeout:  5 * time.Second,
-		WriteTimeout: 10 * time.Second,
-	}
-/*
-	collection := client.Database(*mongoDatabse).Collection("contents")
-	content := models.Content{uuid.UUID{},"Image", "Video"}
-	insertResult, err := collection.InsertOne(context.TODO(), content)
+	router := app.routes();
+	http.ListenAndServe(serverURI, setHeaders(router))
 
-	if err != nil {
-		log.Fatal(err)
-	}
+}
+func setHeaders(h http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		//anyone can make a CORS request (not recommended in production)
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+		//only allow GET, POST, and OPTIONS
+		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, OPTIONS, FETCH")
+		//Since I was building a REST API that returned JSON, I set the content type to JSON here.
+		w.Header().Set("Content-Type", "application/json")
+		//Allow requests to have the following headers
+		w.Header().Set("Access-Control-Allow-Headers", "Origin, Content-Type, Authorization, cache-control")
+		//if it's just an OPTIONS request, nothing other than the headers in the response is needed.
+		//This is essential because you don't need to handle the OPTIONS requests in your handlers now
+		if r.Method == "OPTIONS" {
+			return
+		}
 
-	fmt.Println("Inserted a single document: ", insertResult.InsertedID)
-
-
-*/
-	infoLog.Printf("Starting server on %s", serverURI)
-	err = srv.ListenAndServe()
-	errLog.Fatal(err)
-
+		h.ServeHTTP(w, r)
+	})
 }
