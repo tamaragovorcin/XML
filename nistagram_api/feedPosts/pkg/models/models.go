@@ -6,12 +6,11 @@ import (
 )
 
 type Post struct {
-	Id uuid.UUID `bson:"_id,omitempty"`
-	Media string `bson:"media,omitempty"`
-	User uuid.UUID `bson:"user,omitempty"`
+	Id int `bson:"_id,omitempty"`
+	User int `bson:"user,omitempty"`
 	DateTime time.Time `bson:"dateTime,omitempty"`
-	Tagged []uuid.UUID `bson:"tagged,omitempty"`
-	Location uuid.UUID `bson:"location,omitempty"`
+	Tagged []int `bson:"tagged,omitempty"`
+	Location Location `bson:"location,omitempty"`
 	Description string `bson:"description,omitempty"`
 	Blocked bool `bson:"blocked,omitempty"`
 	Hashtags []string `bson:"hashtags,omitempty"`
@@ -25,8 +24,8 @@ type Comment struct {
 }
 
 type FeedPost struct {
-	Id uuid.UUID `bson:"_id,omitempty"`
-	Post uuid.UUID `bson:"post,omitempty"`
+	Id int `bson:"_id,omitempty"`
+	Post Post `bson:"post,omitempty"`
 	Likes []uuid.UUID `bson:"likes,omitempty"`
 	Dislikes []uuid.UUID `bson:"dislikes,omitempty"`
 	Comments []uuid.UUID `bson:"comments,omitempty"`
@@ -53,4 +52,10 @@ type Collection struct {
 	User uuid.UUID  `bson:"user,omitempty"`
 	Name string  `bson:"name,omitempty"`
 	SavedPosts []uuid.UUID  `bson:"savedPosts,omitempty"`
+}
+type Image struct {
+	Id  int `bson:"_id,omitempty"`
+	Media string `bson:"media,omitempty"`
+	UserId int `bson:"userId,omitempty"`
+	PostId int `bson:"postId,omitempty"`
 }

@@ -2,19 +2,19 @@ package main
 
 import (
 	"encoding/json"
+	"feedPosts/pkg/dtos"
 	"feedPosts/pkg/models"
 	"github.com/gorilla/mux"
 	"net/http"
+	"time"
 )
 
 func (app *application) getAllFeedPosts(w http.ResponseWriter, r *http.Request) {
-	// Get all bookings stored
 	bookings, err := app.feedPosts.All()
 	if err != nil {
 		app.serverError(w, err)
 	}
 
-	// Convert booking list into json encoding
 	b, err := json.Marshal(bookings)
 	if err != nil {
 		app.serverError(w, err)
@@ -22,14 +22,12 @@ func (app *application) getAllFeedPosts(w http.ResponseWriter, r *http.Request) 
 
 	app.infoLog.Println("Contents have been listed")
 
-	// Send response back
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	w.Write(b)
 }
 
 func (app *application) findFeedPostByID(w http.ResponseWriter, r *http.Request) {
-	// Get id from incoming url
 	vars := mux.Vars(r)
 	id := vars["id"]
 
@@ -40,11 +38,9 @@ func (app *application) findFeedPostByID(w http.ResponseWriter, r *http.Request)
 			app.infoLog.Println("Booking not found")
 			return
 		}
-		// Any other error will send an internal server error
 		app.serverError(w, err)
 	}
 
-	// Convert booking to json encoding
 	b, err := json.Marshal(m)
 	if err != nil {
 		app.serverError(w, err)
@@ -52,23 +48,39 @@ func (app *application) findFeedPostByID(w http.ResponseWriter, r *http.Request)
 
 	app.infoLog.Println("Have been found a booking")
 
-	// Send response back
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	w.Write(b)
 }
 
-func (app *application) insertFeedPost(w http.ResponseWriter, r *http.Request) {
-	// Define booking model
-	var m models.FeedPost
-	// Get request information
-	err := json.NewDecoder(r.Body).Decode(&m)
+func (app *application) insertFeedPost(w http.ResponseWriter, req *http.Request) {
+	app.infoLog.Printf("888888888888888888888888888888888888888888888")
+
+	var m dtos.FeedPostDTO
+	err := json.NewDecoder(req.Body).Decode(&m)
 	if err != nil {
 		app.serverError(w, err)
 	}
+	var post = models.Post{
+		Id : 15,
+		User : m.User,
+		DateTime : time.Now(),
+		Tagged : m.Tagged,
+		Description: m.Description,
+		Hashtags: m.Hashtags,
+		Location : m.Location,
+		Blocked : false,
+	}
+	var feedPost = models.FeedPost{
+		Id : 15,
+		Post : post,
+		Likes : nil,
+		Dislikes: nil,
+		Comments: nil,
+	}
 
-	// Insert new booking
-	insertResult, err := app.feedPosts.Insert(m)
+
+	insertResult, err := app.feedPosts.Insert(feedPost)
 	if err != nil {
 		app.serverError(w, err)
 	}

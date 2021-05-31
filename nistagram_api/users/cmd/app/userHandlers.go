@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gorilla/mux"
+
+  "net/http"
 	"os"
 	"strconv"
 	"strings"
@@ -14,7 +16,6 @@ import (
 	//"github.com/labstack/echo"
 	"golang.org/x/crypto/bcrypt"
 	"log"
-	"net/http"
 	"time"
 	"users/pkg/dtos"
 	"users/pkg/models"

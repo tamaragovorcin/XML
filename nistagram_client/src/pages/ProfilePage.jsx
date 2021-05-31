@@ -5,12 +5,13 @@ import TopBar from "../components/TopBar";
 import { Link,Button } from "react-router-dom";
 import playerLogo from "../static/coach.png";
 
-import { BASE_URL } from "../constants.js";
+import { BASE_URL, BASE_URL_FEED } from "../constants.js";
 import ImageUploader from 'react-images-upload';
 import LikesModal from "../components/Posts/LikesModal"
 import DislikesModal from "../components/Posts/DislikesModal"
 import CommentsModal from "../components/Posts/CommentsModal"
 import Axios from "axios";
+
 import { BASE_URL_USER } from "../constants.js";
 
 class ProfilePage extends React.Component {
@@ -32,9 +33,12 @@ class ProfilePage extends React.Component {
 		picture: "",
 		hiddenOne: true,
 		hiddenMultiple: true,
+		noPicture : true,
 		peopleLikes : [],
 		peopleDislikes : [],
 		comments : [],
+		description : "",
+		hashtags : [],
 		showLikesModal : false,
 		showDislikesModal : false,
 		showCommentsModal : false
@@ -46,7 +50,16 @@ class ProfilePage extends React.Component {
 
 		let pomoc = this.state.pictures.length;
 		pomoc = pomoc + 1;
-	
+		if(pomoc===0) {
+			this.setState({
+				noPicture: true,
+			});
+		}
+		else {
+			this.setState({
+				noPicture: false,
+			});
+		}
 		if(pomoc === 1){
 			this.setState({
 				hiddenOne: false,
@@ -69,7 +82,7 @@ class ProfilePage extends React.Component {
 
 	
 
-	test(pic) {
+	test(pic,id) {
 
 		this.setState({
 			fileUploadOngoing: true
@@ -86,7 +99,7 @@ class ProfilePage extends React.Component {
 			body: formData
 
 		};
-		fetch(BASE_URL + "/api/items/upload", options);
+		fetch(BASE_URL_FEED + "/api/image/"+id , options);
 	}
 
 
@@ -115,6 +128,7 @@ class ProfilePage extends React.Component {
 
 	}
 	handleGetBasicInfo = () => {
+
 		this.setState({ numberPosts: 10 });
 		this.setState({ numberFollowing: 600 });
 		this.setState({ numberFollowers: 750 });
@@ -179,6 +193,92 @@ class ProfilePage extends React.Component {
 	handleCommentsModalClose = ()=> {
 		this.setState({ showCommentsModal: false });    
 	}
+	handleDescriptionChange = (event) => {
+		this.setState({ description: event.target.value });
+	};
+	handleHashtagsChange = (event)=> {
+		var hashtags2 =[]
+		hashtags2 = this.state.hashtags
+		hashtags2.push(event.target.value)
+		this.setState({hashtags : hashtags2 });
+	}
+	handleAddFeedPost = ()=> {
+		const formData = new FormData();
+
+		formData.append("file", this.state.pictures[0]);
+		formData.append("test", "StringValueTest");
+
+		let feedPostDTO = {
+			user: 12,
+			tagged: [],
+			description: this.state.description,
+			hashtags: this.state.hashtags,
+			media: "",
+			location : null
+		};
+		let pics = []
+
+						this.state.pictures.forEach((p)=>{
+							console.log(p.name)
+							pics.push(p.name)
+
+						});
+						this.state.pictures.forEach((pic) => {
+							this.test(pic,15);
+						});
+				
+						this.setState({
+							pictures: []
+							
+						});
+		/*
+		Axios.post(BASE_URL_FEED + "/api/feed/", feedPostDTO)
+					.then((res) => {
+						if (res.status === 409) {
+							this.setState({
+								errorHeader: "Resource conflict!",
+								errorMessage: "Email already exist.",
+								hiddenErrorAlert: false,
+							});
+						} else if (res.status === 500) {
+							this.setState({ errorHeader: "Internal server error!", errorMessage: "Server error.", hiddenErrorAlert: false });
+						} else {
+							this.setState({ openModal: true });
+							this.setState({ redirect: true })
+						}
+						let pics = []
+
+						this.state.pictures.forEach((p)=>{
+							console.log(p.name)
+							pics.push(p.name)
+
+						});
+						this.state.pictures.forEach((pic) => {
+							this.test(pic,15);
+						});
+				
+						this.setState({
+							pictures: []
+							
+						});
+					})
+					.catch((err) => {
+						console.log(err);
+			});*/
+		
+	}
+	handleAddStoryPost = ()=> {
+
+	}
+	handleAddFeedPostAlbum = ()=> {
+
+	}
+	handleAddStoryPostAlbum = ()=> {
+		
+	}
+
+
+	
 
 	render() {
 		return (
@@ -230,30 +330,62 @@ class ProfilePage extends React.Component {
 											</td>
 										</div>
 
-										<div style={{ marginLeft: "0rem" }}><ImageUploader
-											withIcon={false}
-											buttonText='Add new photo/video'
-											onChange={this.onDrop}
-											imgExtension={['.jpg', '.gif', '.png', '.gif']}
-											withPreview={true}
-										/>
-										<div style={{ marginLeft: "19rem" }} hidden={this.state.hiddenOne}>
-												<Link style={{ width: "10rem" }} to="/userChangeProfile" className="btn btn-outline-secondary btn-sm">Add as feed post </Link>
-												<a style={{ padding: "25px" }}></a>
-												<Link style={{ width: "10rem" }} to="/userChangeProfile" className="btn btn-outline-secondary btn-sm">Add as story </Link>
-												</div>
-									
-										<div style={{ marginLeft: "19rem" }} hidden={this.state.hiddenMultiple}>
-												<Link style={{ width: "10rem" }} to="/userChangeProfile" className="btn btn-outline-secondary btn-sm">Add as feed album </Link>
-												<a style={{ padding: "25px" }}></a>
-												<Link style={{ width: "10rem" }} to="/userChangeProfile" className="btn btn-outline-secondary btn-sm">Add as album story </Link>
-												</div>
-												</div>
+										
 									</td>
 									
 								</tr>
 							</tbody>
 						</table>
+					</div>
+				</div>
+				<div style={{marginBottom: "2rem"}}>
+					<div style={{ marginLeft: "0rem" }}>
+						<ImageUploader
+											withIcon={false}
+											buttonText='Add new photo/video'
+											onChange={this.onDrop}
+											imgExtension={['.jpg', '.gif', '.png', '.gif']}
+											withPreview={true}
+						/>
+					<div className="row section-design"  style={{ border:"1 solid black", marginLeft: "35rem"}} hidden={this.state.noPicture}>
+								<div className="control-group">
+									<div className="form-group controls mb-0 pb-2" style={{ color: "#6c757d", opacity: 1 }}>
+										<label>Description:</label>
+										<input
+											placeholder="Description"
+											className="form-control"
+											id="email"
+											type="text"
+											onChange={this.handleDescriptionChange}
+											value={this.state.description}
+										/>
+									</div>
+								</div>
+                                
+								<div className="control-group">
+									<div className="form-group controls mb-0 pb-2" style={{ color: "#6c757d", opacity: 1 }}>
+										<label>Hashtags:</label>
+										<input
+											placeholder="Hashtags"
+											class="form-control"
+											type="text"
+											id="name"
+											onChange={this.handleHashtagsChange}
+											value={this.state.hashtags}
+										/>
+									</div>
+								</div>
+						</div>
+						<div style={{ marginLeft: "36rem" }} hidden={this.state.hiddenOne}>					
+							<button style={{ width: "10rem" }}  onClick={this.handleAddFeedPost} className="btn btn-outline-secondary btn-sm">Add as feed post </button>
+							<button style={{ width: "10rem" }} onClick={this.handleAddStoryPost} className="btn btn-outline-secondary btn-sm">Add as story </button>
+						</div>
+										
+						<div style={{ marginLeft: "19rem" }} hidden={this.state.hiddenMultiple}>
+							<button style={{ width: "10rem" }} onClick={this.handleAddFeedPostAlbum} className="btn btn-outline-secondary btn-sm">Add as feed album </button>
+							<button style={{ width: "10rem" }} onClick={this.handleAddStoryPostAlbum} className="btn btn-outline-secondary btn-sm">Add as album story </button>
+						</div>
+						
 					</div>
 				</div>
 
