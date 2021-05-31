@@ -5,6 +5,7 @@ import (
 	"feedPosts/pkg/models"
 	"fmt"
 	"github.com/gorilla/mux"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"io"
 	"net/http"
 	"os"
@@ -61,11 +62,10 @@ func (app *application) findImageByID(w http.ResponseWriter, r *http.Request) {
 	w.Write(b)
 }
 func (app *application) saveImage(w http.ResponseWriter, r *http.Request)  {
-		app.infoLog.Printf("3131111111111111111111131313")
 
 		vars := mux.Vars(r)
-		id := vars["id"]
-		fmt.Printf("method is post")
+		userId := vars["userId"]
+		feedId := vars["feedId"]
 		r.ParseMultipartForm(32 << 20)
 		file, hander, err := r.FormFile("file")
 		if err != nil {
@@ -74,20 +74,20 @@ func (app *application) saveImage(w http.ResponseWriter, r *http.Request)  {
 
 		}
 		defer file.Close()
-		var path = "./images/feed/"+id+ "_"+hander.Filename
+		var path = "./images/feed/"+hander.Filename
 		f, err := os.OpenFile(path, os.O_WRONLY|os.O_CREATE, 777)
 		if err != nil {
-			fmt.Println("--------------------------------------")
-
 			fmt.Println(err.Error())
 		}
 		defer f.Close()
 		io.Copy(f, file)
 
+		userIdPrimitive, _ := primitive.ObjectIDFromHex(userId)
+		postIdPrimitive, _ :=primitive.ObjectIDFromHex(feedId)
 		var image =models.Image {
 			Media : path,
-			UserId : 10,
-			PostId : 453,
+			UserId : userIdPrimitive,
+			PostId : postIdPrimitive,
 		}
 
 	insertResult, err  := app.images.Insert(image)

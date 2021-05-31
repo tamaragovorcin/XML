@@ -5,7 +5,9 @@ import (
 	"feedPosts/pkg/dtos"
 	"feedPosts/pkg/models"
 	"github.com/gorilla/mux"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"net/http"
+	"strings"
 	"time"
 )
 
@@ -54,25 +56,24 @@ func (app *application) findFeedPostByID(w http.ResponseWriter, r *http.Request)
 }
 
 func (app *application) insertFeedPost(w http.ResponseWriter, req *http.Request) {
-	app.infoLog.Printf("888888888888888888888888888888888888888888888")
-
+	vars := mux.Vars(req)
+	userId := vars["userId"]
 	var m dtos.FeedPostDTO
 	err := json.NewDecoder(req.Body).Decode(&m)
 	if err != nil {
 		app.serverError(w, err)
 	}
+	userIdPrimitive, _ := primitive.ObjectIDFromHex(userId)
 	var post = models.Post{
-		Id : 15,
-		User : m.User,
+		User : userIdPrimitive,
 		DateTime : time.Now(),
 		Tagged : m.Tagged,
 		Description: m.Description,
-		Hashtags: m.Hashtags,
+		Hashtags: parseHashTags(m.Hashtags),
 		Location : m.Location,
 		Blocked : false,
 	}
 	var feedPost = models.FeedPost{
-		Id : 15,
 		Post : post,
 		Likes : nil,
 		Dislikes: nil,
@@ -86,6 +87,17 @@ func (app *application) insertFeedPost(w http.ResponseWriter, req *http.Request)
 	}
 
 	app.infoLog.Printf("New content have been created, id=%s", insertResult.InsertedID)
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+
+	idMarshaled, err := json.Marshal(insertResult.InsertedID)
+	w.Write(idMarshaled)
+}
+
+func parseHashTags(hashtags string) []string {
+	a := strings.Split(hashtags, "#")
+	a = a[1:]
+	return a
 }
 
 func (app *application) deleteFeedPost(w http.ResponseWriter, r *http.Request) {
