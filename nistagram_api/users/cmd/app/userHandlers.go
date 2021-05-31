@@ -8,7 +8,9 @@ import (
 	"github.com/gorilla/mux"
 	"os"
 	"strconv"
+	"strings"
 
+	"errors"
 	//"github.com/labstack/echo"
 	"golang.org/x/crypto/bcrypt"
 	"log"
@@ -111,6 +113,42 @@ func (app *application) getAllUsers(w http.ResponseWriter, r *http.Request) {
 	w.Write(b)
 }
 
+func (app *application) search(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	vars := mux.Vars(r)
+	name := vars["name"]
+
+	users, err := app.users.GetAll()
+	if err != nil {
+		if err.Error() == "ErrNoDocuments" {
+			app.infoLog.Println("User not found")
+			return
+		}
+		app.serverError(w, err)
+	}
+
+	var u = []models.User{}
+
+	for i, s := range users {
+		fmt.Println(i, s)
+		if(strings.Contains(s.ProfileInformation.Username, name)){
+			u = append(u, s)
+		}
+	}
+
+
+
+
+	b, err := json.Marshal(u)
+	if err != nil {
+		app.serverError(w, err)
+	}
+
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	w.Write(b)
+}
 
 func (app *application) findUserByID(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Access-Control-Allow-Origin", "*")
@@ -153,39 +191,93 @@ func HashAndSaltPasswordIfStrong(password string) (string, error) {
 func (app *application) insertUser(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	var m dtos.UserRequest
+	var able = true
 	err := json.NewDecoder(r.Body).Decode(&m)
 	if err != nil {
 		app.serverError(w, err)
 	}
 
-	hashAndSalt, err := HashAndSaltPasswordIfStrong(m.Password)
-	var profileInformation = models.ProfileInformation{
-		Id: 1,
-		Name: m.Name, LastName: m.LastName,
-		Email:       m.Email,
-		Username:    m.Username,
-		Password:    hashAndSalt,
-		Roles:       []models.Role{{ Id: 5, Name: "USER"}},
-		PhoneNumber: m.PhoneNumber,
-		Gender:  m.Gender,//models.Gender(m.Gender),
-		DateOfBirth: m.DateOfBirth,
-	}
 
-
-	var user = models.User{Id: 5,
-		ProfileInformation: profileInformation,
-		Biography: m.Biography,
-		Private: m.Private,
-		Verified: false,
-	}
-
-
-	insertResult, err := app.users.Insert(user)
+	users, err := app.users.GetAll()
 	if err != nil {
 		app.serverError(w, err)
 	}
 
-	app.infoLog.Printf("New user have been created, id=%s", insertResult.InsertedID)
+	for i, s := range users {
+		fmt.Println(i, s)
+		if(s.ProfileInformation.Username == m.Username){
+			app.infoLog.Printf("This username is already taken")
+
+			able = false
+
+
+			var e = errors.New("This username is already taken")
+			b, err := json.Marshal(e)
+			if err != nil {
+				app.serverError(w, err)
+			}
+
+
+
+			w.Header().Set("Content-Type", "text")
+			w.WriteHeader(http.StatusInternalServerError)
+			w.Write(b)
+			app.serverError(w, errors.New("This username is already taken"))
+			break
+
+		}
+
+		if( s.ProfileInformation.Email == m.Email){
+			app.infoLog.Printf("User with this email already exists")
+			able = false
+
+			var e = errors.New("User with this email already exists")
+			b, err := json.Marshal(e)
+			if err != nil {
+				app.serverError(w, err)
+			}
+
+
+
+			w.Header().Set("Content-Type", "text")
+			w.WriteHeader(http.StatusConflict)
+			w.Write(b)
+			app.serverError(w, errors.New("User with this email already exists"))
+			break
+
+		}
+
+	}
+
+
+
+	if able  {
+		hashAndSalt, err := HashAndSaltPasswordIfStrong(m.Password)
+		var profileInformation = models.ProfileInformation{
+			Name: m.Name, LastName: m.LastName,
+			Email:       m.Email,
+			Username:    m.Username,
+			Password:    hashAndSalt,
+			Roles:       []models.Role{{Name: "USER"}},
+			PhoneNumber: m.PhoneNumber,
+			Gender:      m.Gender, //models.Gender(m.Gender),
+			DateOfBirth: m.DateOfBirth,
+		}
+
+		var user = models.User{
+			ProfileInformation: profileInformation,
+			Biography:          m.Biography,
+			Private:            m.Private,
+			Verified:           false,
+		}
+
+		insertResult, err := app.users.Insert(user)
+		if err != nil {
+			app.serverError(w, err)
+		}
+
+		app.infoLog.Printf("New user have been created, id=%s", insertResult.InsertedID)
+	}
 }
 
 func (app *application) deleteUser(w http.ResponseWriter, r *http.Request) {

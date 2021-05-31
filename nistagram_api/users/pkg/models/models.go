@@ -1,6 +1,7 @@
 package models
 
 import (
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/x/mongo/driver/uuid"
 )
 //ENUMS
@@ -23,7 +24,7 @@ const (
 
 // User is used to represent user profile data
 type ProfileInformation struct {
-	Id       int `bson:"_id,omitempty"`
+	Id       primitive.ObjectID `bson:"_id,omitempty"`
 	Name     string             `bson:"name,omitempty"`
 	LastName string             `bson:"lastName,omitempty"`
 	Email string `validate:"required,email" bson:"email,omitempty"`
@@ -37,7 +38,7 @@ type ProfileInformation struct {
 
 
 type Role struct {
-	Id int `bson:"_id,omitempty"`
+	Id primitive.ObjectID `bson:"_id,omitempty"`
 	Name  string `bson:"name,omitempty"`
 
 }
@@ -49,7 +50,7 @@ type Agent struct {
 }
 
 type User struct {
-	Id int `bson:"_id,omitempty"`
+	Id primitive.ObjectID `bson:"_id,omitempty"`
 	ProfileInformation ProfileInformation `bson:"profileInformation,omitempty"`
 	Private bool `bson:"private,omitempty"`
 	Website string `bson:"webSite,omitempty"`

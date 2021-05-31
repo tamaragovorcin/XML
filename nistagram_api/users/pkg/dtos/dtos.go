@@ -1,5 +1,7 @@
 package dtos
 
+import "go.mongodb.org/mongo-driver/bson/primitive"
+
 type Gender int
 const (
 	Male Gender = iota
@@ -39,7 +41,7 @@ type UserTokenState struct {
 	AccessToken string
 	ExpiresIn int64
 	Roles string
-	UserId int
+	UserId primitive.ObjectID
 }
 
 
