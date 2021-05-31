@@ -14,7 +14,6 @@ import (
 	//"github.com/labstack/echo"
 	"golang.org/x/crypto/bcrypt"
 	"log"
-	"net/http"
 	"time"
 	"users/pkg/dtos"
 	"users/pkg/models"
