@@ -3,8 +3,8 @@ package main
 import (
 	"encoding/json"
 	"github.com/gorilla/mux"
-	"users/pkg/models"
 	"net/http"
+	"users/pkg/models"
 )
 
 func (app *application) getAllUsers(w http.ResponseWriter, r *http.Request) {
