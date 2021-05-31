@@ -36,11 +36,13 @@ class RegisterPage extends Component {
 		username: "",
 		usernameError: "none",
 		usernameNotValid: "none",
+		selectedDate: "",
+
 
 	};
 
-	handleDateChange = (date) => {
-		this.setState({ selectedDate: date });
+	handleDateChange = (event) => {
+		this.setState({ selectedDate: event.target.value });
 	};
 	handleEmailChange = (event) => {
 		this.setState({ email: event.target.value });
@@ -87,34 +89,37 @@ class RegisterPage extends Component {
 			usernameNotValid: "none"
 		});
 
-		if (this.state.email === "") {
+		if (this.state.username === "") {
+			this.setState({ usernameError: "initial" });
+			return false;
+		}
+
+		else if (!this.state.email === "") {
 			this.setState({ emailError: "initial" });
 			return false;
-		} else if (!this.state.email.includes("@")) {
+		}
+		else if (!this.state.email.includes("@")) {
+			this.setState({ emailNotValid: "initial" });
+			return false;
+		}
+		else if (!this.state.email.includes(".com")) {
 			this.setState({ emailNotValid: "initial" });
 			return false;
 		}
 
-		else if (!this.state.username.includes("@")) {
-			this.setState({ usernameError: "initial" });
-			return false;
-		}
-		else if (!this.state.username.includes("@")) {
-			this.setState({ usernameNotValid: "initial" });
-			return false;
-		}
 		else if (this.state.name === "") {
 			this.setState({ nameError: "initial" });
 			return false;
-		} else if (this.state.date === "") {
-			this.setState({ dateError: "initial" });
-			return false;
-
 		} else if (this.state.surname === "") {
 			this.setState({ surnameError: "initial" });
 			return false;
+
+
 		} else if (this.state.phoneNumber === "") {
 			this.setState({ phoneError: "initial" });
+			return false;
+		} else if (this.state.selectedDate === "") {
+			this.setState({ dateError: "initial" });
 			return false;
 		} else if (this.state.password === "") {
 			this.setState({ passwordError: "initial" });
@@ -131,7 +136,7 @@ class RegisterPage extends Component {
 
 
 	handleSignUp = () => {
-		
+
 		let userDTO = {
 			Email: this.state.email,
 			Username: this.state.username,
@@ -139,19 +144,20 @@ class RegisterPage extends Component {
 			LastName: this.state.surname,
 			PhoneNumber: this.state.phoneNumber,
 			Gender: this.state.gender,
-			DateOfBirth: this.state.date,
+			DateOfBirth: this.state.selectedDate,
 			Password: this.state.password,
 			Biography: this.state.biography,
 			Private: this.state.private,
 		};
 
 		console.log(userDTO)
-
+		if (this.validateForm(userDTO)) {
 			Axios.post(`${constants.BASE_URL_USER}/api/`, userDTO)
 				.then((res) => {
 					console.log("USPEHHHHHHHHHHH")
 
 					if (res.status === 409) {
+						console.log("jsfhbjsfs")
 						this.setState({
 							errorHeader: "Resource conflict!",
 							errorMessage: "Email already exist.",
@@ -166,9 +172,19 @@ class RegisterPage extends Component {
 					}
 				})
 				.catch((err) => {
-					console.log(err);
+					if (err.response.status === 409) {
+						this.setState({
+							errorHeader: "Email taken",
+							errorMessage: "Email already exist.",
+							hiddenErrorAlert: false,
+						});
+					}
+					else if (err.response.status === 500) {
+						this.setState({ errorHeader: "Username taken", errorMessage: "User with this username already exists", hiddenErrorAlert: false });}
+
 				});
-		
+		}
+
 
 	};
 	handleGenderChange(event) {
@@ -195,7 +211,7 @@ class RegisterPage extends Component {
 				<TopBar />
 				<Header />
 
-				<div className="container" style={{ marginTop: "10%", border:"1px solid black"}}>
+				<div className="container" style={{ marginTop: "10%", border: "1px solid black" }}>
 					<HeadingAlert
 						hidden={this.state.hiddenErrorAlert}
 						header={this.state.errorHeader}
@@ -206,7 +222,7 @@ class RegisterPage extends Component {
 						Registration
 					</h5>
 
-					<div className="row section-design"  style={{ border:"1 solid black"}}>
+					<div className="row section-design" style={{ border: "1 solid black" }}>
 						<div className="col-lg-8 mx-auto">
 							<br />
 							<form id="contactForm" name="sentMessage" noValidate="novalidate">
@@ -217,7 +233,7 @@ class RegisterPage extends Component {
 										<input
 											placeholder="Username"
 											className="form-control"
-											id="email"
+											id="username"
 											type="text"
 											onChange={this.handleUsernameChange}
 											value={this.state.username}
@@ -319,10 +335,10 @@ class RegisterPage extends Component {
 										<input
 											placeholder="Date of birth"
 											class="form-control"
-											id="phone"
+											id="date"
 											type="date"
 											onChange={this.handleDateChange}
-											value={this.state.date}
+											value={this.state.selectedDate}
 										/>
 									</div>
 									<div className="text-danger" style={{ display: this.state.dateError }}>
@@ -331,7 +347,7 @@ class RegisterPage extends Component {
 								</div>
 
 								<div style={{ color: "#6c757d", opacity: 1 }}>
-									<p><input type="radio" value="Male" name="gender" onChange={(e) => this.handleGenderChange(e)} /> Male</p>
+									<p><input type="radio" checked value="Male" name="gender" onChange={(e) => this.handleGenderChange(e)} /> Male</p>
 									<p><input type="radio" value="Female" name="gender" onChange={(e) => this.handleGenderChange(e)} /> Female</p>
 									<p><input type="radio" value="Other" name="gender" onChange={(e) => this.handleGenderChange(e)} /> Other </p>
 								</div>
