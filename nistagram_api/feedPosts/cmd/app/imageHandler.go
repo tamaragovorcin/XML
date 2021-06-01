@@ -64,12 +64,11 @@ func (app *application) findImageByID(w http.ResponseWriter, r *http.Request) {
 func (app *application) saveImage(w http.ResponseWriter, r *http.Request)  {
 
 		vars := mux.Vars(r)
-		userId := vars["userId"]
+		userId := vars["userIdd"]
 		feedId := vars["feedId"]
 		r.ParseMultipartForm(32 << 20)
 		file, hander, err := r.FormFile("file")
 		if err != nil {
-			fmt.Println("**************************************")
 			fmt.Println(err.Error())
 
 		}
@@ -100,36 +99,26 @@ func (app *application) saveImage(w http.ResponseWriter, r *http.Request)  {
 	app.infoLog.Printf("New image has been created, id=%s", insertResult.InsertedID)
 }
 
-func imgPath(carID int) string {
-	return fmt.Sprintf("../../images/feed/%v/", carID)
+
+func findImagesByUserId(images []models.Image, idPrimitive primitive.ObjectID) ([]models.Image, error) {
+		imagesUser := []models.Image{}
+
+		for _, image := range images {
+			if	image.UserId==idPrimitive {
+				imagesUser = append(imagesUser, image)
+			}
+		}
+		return imagesUser, nil
 }
+func findImageByPostId(images []models.Image, idFeedPost primitive.ObjectID) (models.Image, error) {
+	imageFeedPost := models.Image{}
 
-func imagePath(carID int) (string, error) {
-	carPath := imgPath(carID)
-	err := os.Mkdir(carPath, 0755)
-	if err != nil {
-		return "", err
+	for _, image := range images {
+		if	image.PostId==idFeedPost {
+			imageFeedPost = image
+		}
 	}
-	return carPath, nil
-}
-
-
-func (app *application) insertImage(w http.ResponseWriter, r *http.Request) {
-	// Define booking model
-	var m models.Image
-	// Get request information
-	err := json.NewDecoder(r.Body).Decode(&m)
-	if err != nil {
-		app.serverError(w, err)
-	}
-
-	// Insert new booking
-	insertResult, err := app.images.Insert(m)
-	if err != nil {
-		app.serverError(w, err)
-	}
-
-	app.infoLog.Printf("New image have been created, id=%s", insertResult.InsertedID)
+	return imageFeedPost, nil
 }
 
 func (app *application) deleteImage(w http.ResponseWriter, r *http.Request) {

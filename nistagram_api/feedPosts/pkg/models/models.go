@@ -10,7 +10,7 @@ type Post struct {
 	Id primitive.ObjectID `bson:"_id,omitempty"`
 	User primitive.ObjectID `bson:"user"`
 	DateTime time.Time `bson:"dateTime,omitempty"`
-	Tagged []int `bson:"tagged,omitempty"`
+	Tagged []primitive.ObjectID `bson:"tagged,omitempty"`
 	Location Location `bson:"location,omitempty"`
 	Description string `bson:"description,omitempty"`
 	Blocked bool `bson:"blocked,omitempty"`
