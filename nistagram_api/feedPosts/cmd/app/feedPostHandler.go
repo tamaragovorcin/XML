@@ -124,7 +124,6 @@ func (app *application) getUsersFeedPosts(w http.ResponseWriter, r *http.Request
 	userId := vars["userIdd"]
 	userIdPrimitive, _ := primitive.ObjectIDFromHex(userId)
 	allImages,_ := app.images.All()
-	//usersImages, err := findImagesByUserId(allImages,userIdPrimitive)
 	allPosts, _ :=app.feedPosts.All()
 	usersFeedPosts,err :=findFeedPostsByUserId(allPosts,userIdPrimitive)
 	if err != nil {
@@ -153,7 +152,6 @@ func (app *application) getUsersFeedPosts(w http.ResponseWriter, r *http.Request
 
 func toResponse(feedPost models.FeedPost, image2 string) dtos.FeedPostInfoDTO {
 	f, _ := os.Open(image2)
-
 	defer f.Close()
 	image, _, _ := image.Decode(f)
 	buffer := new(bytes.Buffer)
@@ -161,16 +159,6 @@ func toResponse(feedPost models.FeedPost, image2 string) dtos.FeedPostInfoDTO {
 		log.Println("unable to encode image.")
 	}
 
-	/*buffer := make([]byte,512)
-
-	f.Read(buffer)
-	fileBytes := bytes.NewReader(buffer)
-*/
-
-	/*defer f.Close()
-	fileHeader := make([]byte, 64)
-	f.Read(fileHeader)
-*/
 	return dtos.FeedPostInfoDTO{
 		Id: feedPost.Id,
 		Comments: feedPost.Comments,

@@ -13,9 +13,12 @@ import CommentsModal from "../components/Posts/CommentsModal"
 import Axios from "axios";
 import ModalDialog from "../components/ModalDialog";
 import AddPostModal from "../components/Posts/AddPostModal";
+import WriteCommentModal from "../components/Posts/WriteCommentModal"
 
 import { BASE_URL_USER } from "../constants.js";
-
+import { FiHeart } from "react-icons/fi";
+import {FaHeartBroken,FaRegCommentDots} from "react-icons/fa"
+import {BsBookmark} from "react-icons/bs"
 class ProfilePage extends React.Component {
 	constructor(props) {
 		super(props);
@@ -52,6 +55,7 @@ class ProfilePage extends React.Component {
 		foundLocation : true,
 		description : "",
 		hashtags :"",
+		showWriteCommentModal : false
 	}
 	onYmapsLoad = (ymaps) => {
 		this.ymaps = ymaps;
@@ -220,6 +224,21 @@ class ProfilePage extends React.Component {
 		this.setState({ showCommentsModal: false });    
 	}
 	
+	handleWriteCommentModalClose = ()=>{
+		this.setState({showWriteCommentModal : false});
+	}
+	handleWriteCommentModal = ()=>{
+		this.setState({showWriteCommentModal : true});
+	}
+	handleLike = ()=>{
+		
+	}
+	handleDislike = ()=>{
+		
+	}
+	handleSave = ()=>{
+
+	}
 	handleAddFeedPost = ()=> {
 		
 		if (this.state.addressInput === "") {
@@ -343,7 +362,8 @@ class ProfilePage extends React.Component {
 				<TopBar />
 				<Header />
 
-
+				<section id="hero" className="d-flex align-items-top">
+				<div className="container">
 				<div className="d-flex align-items-top">
 					<div className="container" style={{ marginTop: "10rem", marginRight: "10rem" }}>
 						<table className="table" style={{ width: "100%" }}>
@@ -402,72 +422,108 @@ class ProfilePage extends React.Component {
 				</div>
 				
 
-				<div className="d-flex align-items-top">
-					<div className="container" style={{ marginRight: "10rem" }}>
-						<table className="table" style={{ width: "100%" }}>
-							<tbody>
+				<div className="container-fluid testimonial-group d-flex align-items-top">
+							<div className="container-fluid scrollable" style={{ marginRight: "10rem" , marginBottom:"5rem",marginTop:"5rem"}}>
+								<table className="table-responsive" style={{ width: "100%" }}>
+									<tbody>
 
-								<tr >
-									{this.state.highlihts.map((high) => (
-										<td id={high.id} key={high.id} width="30em">
-											<tr width="100em">
-												<img
-													className="img-fluid"
-													src={playerLogo}
-													width="40em"
-													alt="description"
-												/>
-											</tr>
-											<tr>
-												<label>{high.name}</label>
-											</tr>
-										</td>
-									))}
-								</tr>
+										<tr >
+											{this.state.highlihts.map((high) => (
+												<td id={high.id} key={high.id} style={{width:"60em", marginLeft:"10em"}}>
+													<tr width="100em">
+														<img
+															className="img-fluid"
+															src={playerLogo}
+															style ={{borderRadius:"50%",margin:"2%"}}
+															width="60em"
+															alt="description"
+														/>
+													</tr>
+													<tr>
+														<label style={{marginRight:"15px"}}>{high.username}</label>
+													</tr>
+												</td>
+												
+											))}
+										</tr>
 
 
-							</tbody>
-						</table>
-					</div>
+									</tbody>
+								</table>
+							</div>
 				</div>
 				<div className="d-flex align-items-top">
-					<div className="container" style={{ marginLeft: "30rem" }}>
-						<table className="table" style={{ width: "100%" }}>
+					<div className="container-fluid">
+						
+						<table className="table">
 							<tbody>
 								{this.state.photos.map((post) => (
+									
 									<tr id={post.id} key={post.id}>
-
-										<td width="400em">
+										
+										<tr  style={{ width: "100%"}}>
+											<td colSpan="3">
 											<img
 												className="img-fluid"
 												src={`data:image/jpg;base64,${post.Media}`}
-												width="400em"
-												alt=""
+												width="100%"
+												alt="description"
 											/>
-										</td>
-										
-										<td>
-											<tr>
-												<label>{post.Description}</label>
-											</tr>
-											<tr >
-												<button onClick={this.handleLikesModalOpen} className="btn btn-outline-secondary btn-sm" style={{ marginBottom: "1rem" }}><label><b>{post.numLikes}</b>likes</label></button>
-											</tr>
-											<tr>
-												<button onClick={this.handleDislikesModalOpen} className="btn btn-outline-secondary btn-sm" style={{ marginBottom: "1rem" }}><label ><b>{post.numDislikes}</b> dislikes</label></button>
-											</tr>
-											<tr>
-												<button onClick={this.handleCommentsModalOpen} className="btn btn-outline-secondary btn-sm" style={{ marginBottom: "1rem" }}><label >Comments</label></button>
-											</tr>
+											</td>
+										</tr>
+										<tr  style={{ width: "100%" }}>
+												<td>
+												<button onClick={this.handleLike}  className="btn btn-outline-secondary btn-sm" style={{ marginBottom: "1rem", height:"40px",marginLeft:"6rem" }}><FiHeart/></button>
+												</td>
+												<td>
+												<button onClick={this.handleDislike}  className="btn btn-outline-secondary btn-sm" style={{ marginBottom: "1rem", height:"40px",marginLeft:"6rem" }}><FaHeartBroken/></button>
 
-										</td>
+												</td>
+												<td>
+												<button onClick={this.handleWriteCommentModal}  className="btn btn-outline-secondary btn-sm" style={{ marginBottom: "1rem", height:"40px",marginLeft:"6rem" }}><FaRegCommentDots/></button>
+												</td>
+												<td>
+												<button onClick={this.handleSave}  className="btn btn-outline-secondary btn-sm" style={{ marginBottom: "1rem", height:"40px" }}><BsBookmark/></button>
+												</td>
+										</tr>
+										<tr  style={{ width: "100%" }}>
+												<td>
+												<button onClick={this.handleLikesModalOpen} className="btn btn-outline-secondary btn-sm" style={{ marginBottom: "1rem" , marginLeft:"4rem"}}><label>likes</label></button>
+												</td>
+												<td>
+												<button onClick={this.handleDislikesModalOpen} className="btn btn-outline-secondary btn-sm" style={{ marginBottom: "1rem",marginLeft:"4rem" }}><label > dislikes</label></button>
+												</td>
+												<td>
+												<button onClick={this.handleCommentsModalOpen} className="btn btn-outline-secondary btn-sm" style={{ marginBottom: "1rem",marginLeft:"4rem" }}><label >Comments</label></button>
+												</td>
+										</tr>
+										<br/>
+										<br/>
+										<br/>
 									</tr>
+									
 								))}
 
 							</tbody>
 						</table>
 					</div>
 				</div>
+
+
+
+				
+
+
+
+
+
+
+				</div>
+					
+
+
+
+				</section>
 				<div>
                         
                     <LikesModal
@@ -494,6 +550,11 @@ class ProfilePage extends React.Component {
 						header="Successful publishing"
 						text={this.state.textSuccessfulModal}
 					/>
+					<WriteCommentModal
+                        show={this.state.showWriteCommentModal}
+						onCloseModal={this.handleWriteCommentModalClose}
+						header="Leave your comment"
+                    />
 					<AddPostModal
 						show={this.state.showImageModal}
 						onCloseModal={this.handlePostModalClose}
