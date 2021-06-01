@@ -1,13 +1,14 @@
 package models
 
 import (
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/x/mongo/driver/uuid"
 	"time"
 )
 
 type Post struct {
-	Id int `bson:"_id,omitempty"`
-	User int `bson:"user,omitempty"`
+	Id primitive.ObjectID `bson:"_id,omitempty"`
+	User primitive.ObjectID `bson:"user"`
 	DateTime time.Time `bson:"dateTime,omitempty"`
 	Tagged []int `bson:"tagged,omitempty"`
 	Location Location `bson:"location,omitempty"`
@@ -17,22 +18,22 @@ type Post struct {
 
 }
 type Comment struct {
-	Id uuid.UUID `bson:"_id,omitempty"`
+	Id primitive.ObjectID`bson:"_id,omitempty"`
 	Content string  `bson:"content,omitempty"`
-	Writer uuid.UUID `bson:"writer,omitempty"`
+	Writer primitive.ObjectID `bson:"writer"`
 	DateTime time.Time `bson:"dateTime,omitempty"`
 }
 
 type FeedPost struct {
-	Id int `bson:"_id,omitempty"`
+	Id primitive.ObjectID `bson:"_id,omitempty"`
 	Post Post `bson:"post,omitempty"`
-	Likes []uuid.UUID `bson:"likes,omitempty"`
-	Dislikes []uuid.UUID `bson:"dislikes,omitempty"`
-	Comments []uuid.UUID `bson:"comments,omitempty"`
+	Likes []primitive.ObjectID `bson:"likes"`
+	Dislikes []primitive.ObjectID `bson:"dislikes"`
+	Comments []primitive.ObjectID `bson:"comments"`
 }
 
 type Location struct {
-	Id uuid.UUID `bson:"_id,omitempty"`
+	Id primitive.ObjectID `bson:"_id,omitempty"`
 	Country string `bson:"country,omitempty"`
 	Town string `bson:"town,omitempty"`
 	Street string `bson:"street,omitempty"`
@@ -42,20 +43,20 @@ type Location struct {
 
 type AlbumFeed struct {
 	Id uuid.UUID `bson:"_id,omitempty"`
-	Posts []string   `bson:"posts,omitempty"`
-	Likes []uuid.UUID `bson:"likes,omitempty"`
-	Dislikes []uuid.UUID `bson:"dislikes,omitempty"`
-	Comments []uuid.UUID `bson:"comments,omitempty"`
+	Posts []string   `bson:"posts"`
+	Likes []primitive.ObjectID `bson:"likes"`
+	Dislikes []primitive.ObjectID `bson:"dislikes"`
+	Comments []primitive.ObjectID `bson:"comments"`
 }
 type Collection struct {
-	Id  uuid.UUID   `bson:"_id,omitempty"`
-	User uuid.UUID  `bson:"user,omitempty"`
+	Id  primitive.ObjectID   `bson:"_id,omitempty"`
+	User primitive.ObjectID  `bson:"user"`
 	Name string  `bson:"name,omitempty"`
 	SavedPosts []uuid.UUID  `bson:"savedPosts,omitempty"`
 }
 type Image struct {
-	Id  int `bson:"_id,omitempty"`
+	Id  primitive.ObjectID `bson:"_id,omitempty"`
 	Media string `bson:"media,omitempty"`
-	UserId int `bson:"userId,omitempty"`
-	PostId int `bson:"postId,omitempty"`
+	UserId primitive.ObjectID `bson:"userId"`
+	PostId primitive.ObjectID `bson:"postId"`
 }

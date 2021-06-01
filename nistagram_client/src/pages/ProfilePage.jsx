@@ -6,11 +6,13 @@ import { Link,Button } from "react-router-dom";
 import playerLogo from "../static/coach.png";
 
 import { BASE_URL, BASE_URL_FEED } from "../constants.js";
-import ImageUploader from 'react-images-upload';
+
 import LikesModal from "../components/Posts/LikesModal"
 import DislikesModal from "../components/Posts/DislikesModal"
 import CommentsModal from "../components/Posts/CommentsModal"
 import Axios from "axios";
+import ModalDialog from "../components/ModalDialog";
+import AddPostModal from "../components/Posts/AddPostModal";
 
 import { BASE_URL_USER } from "../constants.js";
 
@@ -19,6 +21,7 @@ class ProfilePage extends React.Component {
 		super(props);
 
 		this.onDrop = this.onDrop.bind(this);
+		this.addressInput = React.createRef();
 
 	}
 	state = {
@@ -37,12 +40,27 @@ class ProfilePage extends React.Component {
 		peopleLikes : [],
 		peopleDislikes : [],
 		comments : [],
-		description : "",
-		hashtags : [],
+		coords: [],
+		addressNotFoundError: "none",
+		textSuccessfulModal : "",
 		showLikesModal : false,
 		showDislikesModal : false,
-		showCommentsModal : false
+		showCommentsModal : false,
+		showImageModal : false,
+		openModal : false,
+		addressLocation :null,
+		foundLocation : true,
+		description : "",
+		hashtags :"",
 	}
+	onYmapsLoad = (ymaps) => {
+		this.ymaps = ymaps;
+		new this.ymaps.SuggestView(this.addressInput.current, {
+			provider: {
+				suggest: (request, options) => this.ymaps.suggest(request),
+			},
+		});
+	};
 	onDrop(picture) {
 		this.setState({
 			pictures: this.state.pictures.concat(picture),
@@ -54,10 +72,16 @@ class ProfilePage extends React.Component {
 			this.setState({
 				noPicture: true,
 			});
+			this.setState({
+				showImageModal: false,
+			});
 		}
 		else {
 			this.setState({
 				noPicture: false,
+			});
+			this.setState({
+				showImageModal: true,
 			});
 		}
 		if(pomoc === 1){
@@ -82,7 +106,7 @@ class ProfilePage extends React.Component {
 
 	
 
-	test(pic,id) {
+	test(pic,userId, feedId) {
 
 		this.setState({
 			fileUploadOngoing: true
@@ -99,7 +123,7 @@ class ProfilePage extends React.Component {
 			body: formData
 
 		};
-		fetch(BASE_URL_FEED + "/api/image/"+id , options);
+		fetch(BASE_URL_FEED + "/api/image/"+userId+"/"+feedId , options);
 	}
 
 
@@ -107,7 +131,7 @@ class ProfilePage extends React.Component {
 
 		let id =localStorage.getItem("userId")
 
-	Axios.get(BASE_URL_USER + "/api/" + id)
+		Axios.get(BASE_URL_USER + "/api/" + id)
 				.then((res) => {
 					if (res.status === 401) {
 						this.setState({ errorHeader: "Bad credentials!", errorMessage: "Wrong username or password.", hiddenErrorAlert: false });
@@ -175,6 +199,21 @@ class ProfilePage extends React.Component {
 		this.setState({ photos: list });
 
 	}
+	handleDescriptionChange = (event) => {
+		this.setState({ description: event.target.value });
+	};
+	handleHashtagsChange = (event)=> {
+		this.setState({hashtags : event.target.value });
+	}
+	handleModalClose = () => {
+		this.setState({ openModal: false });
+	};
+	handlePostModalClose = () => {
+		this.setState({ showImageModal: false });
+	};
+	handlePostModalOpen = () => {
+		this.setState({ showImageModal: true });
+	};
 	handleLikesModalOpen = ()=> {
 		this.setState({ showLikesModal: true });    
 	}
@@ -193,78 +232,67 @@ class ProfilePage extends React.Component {
 	handleCommentsModalClose = ()=> {
 		this.setState({ showCommentsModal: false });    
 	}
-	handleDescriptionChange = (event) => {
-		this.setState({ description: event.target.value });
-	};
-	handleHashtagsChange = (event)=> {
-		var hashtags2 =[]
-		hashtags2 = this.state.hashtags
-		hashtags2.push(event.target.value)
-		this.setState({hashtags : hashtags2 });
-	}
+	
 	handleAddFeedPost = ()=> {
-		const formData = new FormData();
+		
+		if (this.state.addressInput === "") {
+			const feedPostDTO = {
+				tagged: [],
+				description: this.state.description,
+				hashtags: this.state.hashtags,
+				location : this.state.addressLocation
+			};
+			this.sendRequestForFeed(feedPostDTO);
 
-		formData.append("file", this.state.pictures[0]);
-		formData.append("test", "StringValueTest");
+		}
+		else {
+			let street;
+			let city;
+			let country;
+			let latitude;
+			let longitude;
+			this.ymaps
+				.geocode(this.addressInput.current.value, {
+					results: 1,
+				})
+				.then(function (res) {
+	
+					if (typeof res.geoObjects.get(0) === "undefined")  {this.setState({ foundLocation:false});}
+					else {
+						var firstGeoObject = res.geoObjects.get(0),
+							coords = firstGeoObject.geometry.getCoordinates();
+						latitude = coords[0];
+						longitude = coords[1];
+						country = firstGeoObject.getCountry();
+						street = firstGeoObject.getThoroughfare();
+						city = firstGeoObject.getLocalities().join(", ");
+					}
+				}).then((res) => {
+					var locationDTO = {
+						street : street,
+						country : country,
+						town : city,
+						latitude : latitude,
+						longitude : longitude
+					}
+					let feedPostDTO = {
+						tagged: [],
+						description: this.state.description,
+						hashtags: this.state.hashtags,
+						location : locationDTO
+					};
+					
+					if (this.state.foundLocation === false) {
+							this.setState({ addressNotFoundError: "initial" });
+					} else {
+							this.sendRequestForFeed(feedPostDTO);
+					}
 
-		let feedPostDTO = {
-			user: 12,
-			tagged: [],
-			description: this.state.description,
-			hashtags: this.state.hashtags,
-			media: "",
-			location : null
-		};
-		let pics = []
-
-						this.state.pictures.forEach((p)=>{
-							console.log(p.name)
-							pics.push(p.name)
-
-						});
-						this.state.pictures.forEach((pic) => {
-							this.test(pic,15);
-						});
+				});
 				
-						this.setState({
-							pictures: []
-							
-						});
-		/*
-		Axios.post(BASE_URL_FEED + "/api/feed/", feedPostDTO)
-					.then((res) => {
-						if (res.status === 409) {
-							this.setState({
-								errorHeader: "Resource conflict!",
-								errorMessage: "Email already exist.",
-								hiddenErrorAlert: false,
-							});
-						} else if (res.status === 500) {
-							this.setState({ errorHeader: "Internal server error!", errorMessage: "Server error.", hiddenErrorAlert: false });
-						} else {
-							this.setState({ openModal: true });
-							this.setState({ redirect: true })
-						}
-						let pics = []
 
-						this.state.pictures.forEach((p)=>{
-							console.log(p.name)
-							pics.push(p.name)
-
-						});
-						this.state.pictures.forEach((pic) => {
-							this.test(pic,15);
-						});
-				
-						this.setState({
-							pictures: []
-							
-						});
-					})
-					.catch((err) => {
-						console.log(err);
-			});*/
+		}
+		
 		
 	}
 	handleAddStoryPost = ()=> {
@@ -279,6 +307,47 @@ class ProfilePage extends React.Component {
 
 
 	
+
+	sendRequestForFeed(feedPostDTO) {
+		let id = localStorage.getItem("userId");
+
+		Axios.post(BASE_URL_FEED + "/api/feed/" + id, feedPostDTO)
+			.then((res) => {
+				if (res.status === 409) {
+					this.setState({
+						errorHeader: "Resource conflict!",
+						errorMessage: "Email already exist.",
+						hiddenErrorAlert: false,
+					});
+				} else if (res.status === 500) {
+					this.setState({ errorHeader: "Internal server error!", errorMessage: "Server error.", hiddenErrorAlert: false });
+				} else {
+					this.setState({ openModal: true });
+					this.setState({ redirect: true });
+				}
+				let feedId = res.data;
+				console.log(res.data);
+				console.log(res.status);
+				let userid = localStorage.getItem("userId");
+				let pics = [];
+
+				this.state.pictures.forEach((p) => {
+					pics.push(p.name);
+				});
+				this.state.pictures.forEach((pic) => {
+					this.test(pic, userid, feedId);
+				});
+
+				this.setState({ pictures: [] });
+				this.setState({ showImageModal: false, });
+				this.setState({ openModal: true });
+				this.setState({ textSuccessfulModal: "You have successfully added feed post." });
+
+			})
+			.catch((err) => {
+				console.log(err);
+			});
+	}
 
 	render() {
 		return (
@@ -311,6 +380,10 @@ class ProfilePage extends React.Component {
 												<Link to="/userChangeProfile" className="btn btn-outline-secondary btn-sm">Edit profile</Link>
 
 											</td>
+											<td>
+												<button onClick={this.handlePostModalOpen} className="btn btn-outline-secondary btn-sm" style={{ marginBottom: "1rem" }}>Add new post/video</button>
+
+											</td>
 										</div>
 										<div>
 											<td>
@@ -333,61 +406,13 @@ class ProfilePage extends React.Component {
 										
 									</td>
 									
+									
 								</tr>
 							</tbody>
 						</table>
 					</div>
 				</div>
-				<div style={{marginBottom: "2rem"}}>
-					<div style={{ marginLeft: "0rem" }}>
-						<ImageUploader
-											withIcon={false}
-											buttonText='Add new photo/video'
-											onChange={this.onDrop}
-											imgExtension={['.jpg', '.gif', '.png', '.gif']}
-											withPreview={true}
-						/>
-					<div className="row section-design"  style={{ border:"1 solid black", marginLeft: "35rem"}} hidden={this.state.noPicture}>
-								<div className="control-group">
-									<div className="form-group controls mb-0 pb-2" style={{ color: "#6c757d", opacity: 1 }}>
-										<label>Description:</label>
-										<input
-											placeholder="Description"
-											className="form-control"
-											id="email"
-											type="text"
-											onChange={this.handleDescriptionChange}
-											value={this.state.description}
-										/>
-									</div>
-								</div>
-                                
-								<div className="control-group">
-									<div className="form-group controls mb-0 pb-2" style={{ color: "#6c757d", opacity: 1 }}>
-										<label>Hashtags:</label>
-										<input
-											placeholder="Hashtags"
-											class="form-control"
-											type="text"
-											id="name"
-											onChange={this.handleHashtagsChange}
-											value={this.state.hashtags}
-										/>
-									</div>
-								</div>
-						</div>
-						<div style={{ marginLeft: "36rem" }} hidden={this.state.hiddenOne}>					
-							<button style={{ width: "10rem" }}  onClick={this.handleAddFeedPost} className="btn btn-outline-secondary btn-sm">Add as feed post </button>
-							<button style={{ width: "10rem" }} onClick={this.handleAddStoryPost} className="btn btn-outline-secondary btn-sm">Add as story </button>
-						</div>
-										
-						<div style={{ marginLeft: "19rem" }} hidden={this.state.hiddenMultiple}>
-							<button style={{ width: "10rem" }} onClick={this.handleAddFeedPostAlbum} className="btn btn-outline-secondary btn-sm">Add as feed album </button>
-							<button style={{ width: "10rem" }} onClick={this.handleAddStoryPostAlbum} className="btn btn-outline-secondary btn-sm">Add as album story </button>
-						</div>
-						
-					</div>
-				</div>
+				
 
 				<div className="d-flex align-items-top">
 					<div className="container" style={{ marginRight: "10rem" }}>
@@ -472,8 +497,32 @@ class ProfilePage extends React.Component {
 						header="Comments on the photo"
 						comments = {this.state.comments}
                     />
-                        
+                    <ModalDialog
+						show={this.state.openModal}
+						onCloseModal={this.handleModalClose}
+						header="Successful publishing"
+						text={this.state.textSuccessfulModal}
+					/>
+					<AddPostModal
+						show={this.state.showImageModal}
+						onCloseModal={this.handlePostModalClose}
+						header="New post/story"
+						hiddenMultiple = {this.state.hiddenMultiple}
+						hiddenOne = {this.state.hiddenOne}
+						noPicture = {this.state.noPicture}
+						onDrop = {this.onDrop}
+						addressInput = {this.addressInput}
+						onYmapsLoad = {this.onYmapsLoad}
+						handleAddFeedPost = {this.handleAddFeedPost}
+						handleAddStoryPost = {this.handleAddStoryPost}
+						handleAddFeedPostAlbum = {this.handleAddFeedPostAlbum}
+						handleAddStoryPostAlbum= {this.handleAddStoryPostAlbum}
+						addressNotFoundError = {this.state.addressNotFoundError}
+						handleDescriptionChange = {this.handleDescriptionChange}
+						handleHashtagsChange = {this.handleHashtagsChange}
+					/>
                     </div>
+
 			</React.Fragment>
 		);
 	}
