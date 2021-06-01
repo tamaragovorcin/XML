@@ -2,10 +2,10 @@
 import React from "react";
 import Header from "../components/Header";
 import TopBar from "../components/TopBar";
-import { Link,Button } from "react-router-dom";
+import { Link } from "react-router-dom";
 import playerLogo from "../static/coach.png";
 
-import { BASE_URL, BASE_URL_FEED } from "../constants.js";
+import { BASE_URL_FEED } from "../constants.js";
 
 import LikesModal from "../components/Posts/LikesModal"
 import DislikesModal from "../components/Posts/DislikesModal"
@@ -174,29 +174,16 @@ class ProfilePage extends React.Component {
 	}
 
 	handleGetPhotos = () => {
-		let list = []
-		let comments1 = []
-		let comments2 = []
-		let comment1 = { id: 1, user: "USER 1 ", text: "very nice" }
-		let comment11 = { id: 2, user: "USER 2 ", text: "cool" }
-		let comment111 = { id: 3, user: "USER 3 ", text: "vau" }
-		comments1.push(comment1)
-		comments1.push(comment11)
-		comments1.push(comment111)
-
-		let comment2 = { id: 4, user: "USER 55443 ", text: "i like it" }
-		let comment22 = { id: 5, user: "USER 11111 ", text: "ugly" }
-		let comment222 = { id: 6, user: "USER 33333 ", text: "awesome" }
-		comments2.push(comment2)
-		comments2.push(comment22)
-		comments2.push(comment222)
-
-		let photo1 = { id: 1, photo: playerLogo, numLikes: 52, numDislikes: 2, comments: comments1 }
-		let photo2 = { id: 2, photo: playerLogo, numLikes: 45, numDislikes: 0, comments: comments2 }
-		list.push(photo1)
-		list.push(photo2)
-
-		this.setState({ photos: list });
+		let id =localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length-1);
+		Axios.get(BASE_URL_FEED + "/api/feed/usersImages/"+id)
+			.then((res) => {
+				this.setState({ photos: res.data });
+				console.log(res.data);
+			})
+			.catch((err) => {
+				console.log(err);
+			});
+		
 
 	}
 	handleDescriptionChange = (event) => {
@@ -309,7 +296,8 @@ class ProfilePage extends React.Component {
 	
 
 	sendRequestForFeed(feedPostDTO) {
-		let id = localStorage.getItem("userId");
+		let id = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length-1);;
+		console.log(id)
 
 		Axios.post(BASE_URL_FEED + "/api/feed/" + id, feedPostDTO)
 			.then((res) => {
@@ -446,24 +434,27 @@ class ProfilePage extends React.Component {
 					<div className="container" style={{ marginLeft: "30rem" }}>
 						<table className="table" style={{ width: "100%" }}>
 							<tbody>
-								{this.state.photos.map((photo) => (
-									<tr id={photo.id} key={photo.id}>
+								{this.state.photos.map((post) => (
+									<tr id={post.id} key={post.id}>
 
-										<td width="200em">
+										<td width="400em">
 											<img
 												className="img-fluid"
-												src={photo.photo}
-												width="100em"
-												alt="description"
+												src={`data:image/jpg;base64,${post.Media}`}
+												width="400em"
+												alt=""
 											/>
 										</td>
-
+										
 										<td>
+											<tr>
+												<label>{post.Description}</label>
+											</tr>
 											<tr >
-												<button onClick={this.handleLikesModalOpen} className="btn btn-outline-secondary btn-sm" style={{ marginBottom: "1rem" }}><label><b>{photo.numLikes}</b>likes</label></button>
+												<button onClick={this.handleLikesModalOpen} className="btn btn-outline-secondary btn-sm" style={{ marginBottom: "1rem" }}><label><b>{post.numLikes}</b>likes</label></button>
 											</tr>
 											<tr>
-												<button onClick={this.handleDislikesModalOpen} className="btn btn-outline-secondary btn-sm" style={{ marginBottom: "1rem" }}><label ><b>{photo.numDislikes}</b> dislikes</label></button>
+												<button onClick={this.handleDislikesModalOpen} className="btn btn-outline-secondary btn-sm" style={{ marginBottom: "1rem" }}><label ><b>{post.numDislikes}</b> dislikes</label></button>
 											</tr>
 											<tr>
 												<button onClick={this.handleCommentsModalOpen} className="btn btn-outline-secondary btn-sm" style={{ marginBottom: "1rem" }}><label >Comments</label></button>
