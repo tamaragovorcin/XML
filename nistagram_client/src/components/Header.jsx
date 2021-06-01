@@ -2,20 +2,25 @@ import React from "react";
 import { Link } from "react-router-dom";
 import { CgProfile } from 'react-icons/cg';
 import { BiBookmark, BiSearch } from 'react-icons/bi';
-import Select from 'react-select';
 import Axios from "axios";
 import { FiSettings, FiSend } from 'react-icons/fi';
 import { VscHome } from 'react-icons/vsc';
 import { AiOutlineHeart } from 'react-icons/ai';
 import { BASE_URL_USER } from "../constants.js";
 import SelectSearch from 'react-select-search';
+import Select from 'react-select';
+
+import { Redirect } from "react-router-dom";
 class Header extends React.Component {
 	state = {
 		options: ["mladenka", "vojna"],
 		search: "",
 		users: [],
-
+		redirect: false,
+		options: [],
+		optionDTO: { value: "", label: "" }
 	}
+
 	hasRole = (reqRole) => {
 		let roles = JSON.parse(localStorage.getItem("keyRole"));
 
@@ -33,18 +38,27 @@ class Header extends React.Component {
 		this.setState({ search: event.target.value });
 	};
 
-	handleChange = () => {
-		alert("skfjhksfu")
+	handleChange = (event) => {
+		alert(event.value)
+		this.setState({ redirect: true });
 	};
 
 
 	componentDidMount() {
+		let help = []
 		Axios.get(BASE_URL_USER + "/api/")
 			.then((res) => {
 
 				console.log(res.data)
 				this.setState({ users: res.data });
 
+				res.data.forEach((user) => {
+					let optionDTO = { label: user.ProfileInformation.Username, value: user.Id }
+					help.push(optionDTO)
+				});
+
+				this.setState({ options: help });
+				console.log(help)
 			})
 			.catch((err) => {
 
@@ -56,36 +70,32 @@ class Header extends React.Component {
 	};
 
 	render() {
-
+		if (this.state.redirect) return <Redirect push to="/login" />;
 		return (
 			<header id="header" className="fixed-top">
 				<div className="container d-flex align-items-center">
 					<label className="logo mr-auto" style={{ fontFamily: "Trattatello, fantasy" }}>
 						<Link to="/">Ništagram</Link>
 					</label>
-					<div class="input-group rounded" style={{ marginLeft: "10%", marginRight: "10%" }}>
+					<div class="input-group rounded" style={{ marginLeft: "20%", marginRight: "10%" }}>
+
+						<div style={{ width: '300px' }}>
+							<Select
+								style={{ width: `$500px` }}
+								className="select-custom-class"
+								label="Single select"
+								options={this.state.options}
+								onChange ={e => this.handleChange(e)}
+							/>
 
 
-
-
-						<input type="search" class="form-control rounded" placeholder="Search" aria-label="Search" onChange={this.handleSearchChange}
-							aria-describedby="search-addon" />
-
+						</div>
 
 					</div>
-					<div>
 
 						
 					
 
-						<select class="selectpicker" data-live-search="true"  >
-							{this.state.users.map((user) => (
-								<option data-tokens="luna" onChange={this.handleChange} key={user.Id} value={user.ProfileInformation.Username} >{user.ProfileInformation.Username}</option>
-
-							))}
-						</select>
-
-					</div>
 
 
 
