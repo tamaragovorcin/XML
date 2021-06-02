@@ -1,5 +1,5 @@
 import './App.css';
-import { HashRouter as Router, Link, Switch } from "react-router-dom";
+import { HashRouter as Router, Link, Switch, Route  } from "react-router-dom";
 import HomePage from './pages/HomePage'
 import Login from './pages/Login'
 import Registration from './pages/Registration'
@@ -9,6 +9,7 @@ import ProfilePage from './pages/ProfilePage'
 import EditProfile from './pages/EditProfile';
 import PasswordChange from './pages/PasswordChange'
 import Favorites from './pages/Favorites';
+import PharmacyProfilePage from './pages/FollowerProfilePage';
 function App() {
   return (
     <Router>
@@ -23,6 +24,7 @@ function App() {
 
 				<Link exact to="/passwordChange" path="/passwordChange" component={PasswordChange} />
 				<Link exact to="/settings" path="/settings" component={EditProfile} />
+				<Route path="/followerProfilePage/:id" children={<PharmacyProfilePage />} />
 			</Switch>
 	</Router>
   );

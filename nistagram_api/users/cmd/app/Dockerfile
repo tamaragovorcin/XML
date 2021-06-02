@@ -8,6 +8,6 @@ COPY go.mod .
 COPY go.sum .
 RUN go mod download
 COPY . .
-RUN go build -o feedPosts
-EXPOSE 8080
-CMD ["./feedPosts"]
+RUN go build -o users/cmd/app
+EXPOSE 8081
+CMD ["./users"]

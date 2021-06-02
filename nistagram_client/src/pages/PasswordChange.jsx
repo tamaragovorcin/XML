@@ -108,7 +108,7 @@ class PasswordChange extends Component {
 	};
 
 	render() {
-		if (this.state.redirect) return <Redirect push to="/login" />;
+		//if (this.state.redirect) return <Redirect push to="/login" />;
 
 		return (
 			<React.Fragment>
@@ -200,7 +200,7 @@ class PasswordChange extends Component {
 
 
 
-></div>
+</div>
 
 
 

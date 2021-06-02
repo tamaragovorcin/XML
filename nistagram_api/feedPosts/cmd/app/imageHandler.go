@@ -83,7 +83,7 @@ func (app *application) saveImage(w http.ResponseWriter, r *http.Request)  {
 
 		userIdPrimitive, _ := primitive.ObjectIDFromHex(userId)
 		postIdPrimitive, _ :=primitive.ObjectIDFromHex(feedId)
-		var image =models.Image {
+		var image = models.Image{
 			Media : path,
 			UserId : userIdPrimitive,
 			PostId : postIdPrimitive,

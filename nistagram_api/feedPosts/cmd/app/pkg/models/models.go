@@ -7,14 +7,14 @@ import (
 )
 
 type Post struct {
-	Id primitive.ObjectID `bson:"_id,omitempty"`
-	User primitive.ObjectID `bson:"user"`
-	DateTime time.Time `bson:"dateTime,omitempty"`
-	Tagged []primitive.ObjectID `bson:"tagged,omitempty"`
-	Location Location `bson:"location,omitempty"`
-	Description string `bson:"description,omitempty"`
-	Blocked bool `bson:"blocked,omitempty"`
-	Hashtags []string `bson:"hashtags,omitempty"`
+	Id          primitive.ObjectID   `bson:"_id,omitempty"`
+	User        primitive.ObjectID   `bson:"user"`
+	DateTime    time.Time            `bson:"dateTime,omitempty"`
+	Tagged      []primitive.ObjectID `bson:"tagged,omitempty"`
+	Location    Location             `bson:"location,omitempty"`
+	Description string               `bson:"description,omitempty"`
+	Blocked     bool                 `bson:"blocked,omitempty"`
+	Hashtags    []string             `bson:"hashtags,omitempty"`
 
 }
 type Comment struct {
@@ -25,9 +25,9 @@ type Comment struct {
 }
 
 type FeedPost struct {
-	Id primitive.ObjectID `bson:"_id,omitempty"`
-	Post Post `bson:"post,omitempty"`
-	Likes []primitive.ObjectID `bson:"likes"`
+	Id       primitive.ObjectID   `bson:"_id,omitempty"`
+	Post     Post                 `bson:"post,omitempty"`
+	Likes    []primitive.ObjectID `bson:"likes"`
 	Dislikes []primitive.ObjectID `bson:"dislikes"`
 	Comments []primitive.ObjectID `bson:"comments"`
 }

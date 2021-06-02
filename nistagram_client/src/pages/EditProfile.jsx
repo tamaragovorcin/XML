@@ -245,7 +245,7 @@ class EditProfile extends Component {
 
 
 	render() {
-		if (this.state.redirect) return <Redirect push to="/login" />;
+		//if (this.state.redirect) return <Redirect push to="/login" />;
 
 		return (
 			<React.Fragment>

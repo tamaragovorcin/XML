@@ -8,6 +8,6 @@ COPY go.mod .
 COPY go.sum .
 RUN go mod download
 COPY . .
-RUN go build -o campaigns
+RUN go build -o userInteraction/cmd/app
 EXPOSE 8080
-CMD ["./campaigns"]
+CMD ["./userInteraction"]

@@ -8,6 +8,6 @@ COPY go.mod .
 COPY go.sum .
 RUN go mod download
 COPY . .
-RUN go build -o notificationSettings
+RUN go build -o messages/cmd/app
 EXPOSE 8080
-CMD ["./notificationSettings"]
+CMD ["./messages"]
