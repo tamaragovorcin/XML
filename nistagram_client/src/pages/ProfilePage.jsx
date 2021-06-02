@@ -4,9 +4,7 @@ import Header from "../components/Header";
 import TopBar from "../components/TopBar";
 import { Link } from "react-router-dom";
 import playerLogo from "../static/coach.png";
-
-import { BASE_URL_FEED } from "../constants.js";
-
+import { BASE_URL_FEED, BASE_URL_STORY } from "../constants.js";
 import LikesModal from "../components/Posts/LikesModal"
 import DislikesModal from "../components/Posts/DislikesModal"
 import CommentsModal from "../components/Posts/CommentsModal"
@@ -14,7 +12,6 @@ import Axios from "axios";
 import ModalDialog from "../components/ModalDialog";
 import AddPostModal from "../components/Posts/AddPostModal";
 import WriteCommentModal from "../components/Posts/WriteCommentModal"
-
 import { BASE_URL_USER } from "../constants.js";
 import { FiHeart } from "react-icons/fi";
 import {FaHeartBroken,FaRegCommentDots} from "react-icons/fa"
@@ -87,23 +84,24 @@ class ProfilePage extends React.Component {
 			this.setState({
 				showImageModal: true,
 			});
+			if(pomoc === 1){
+				this.setState({
+					hiddenOne: false,
+				});
+				this.setState({
+					hiddenMultiple: true,
+				});
+			}
+			else if(pomoc >= 2){
+				this.setState({
+					hiddenOne: true,
+				});
+				this.setState({
+					hiddenMultiple: false,
+				});
+			}
 		}
-		if(pomoc === 1){
-			this.setState({
-				hiddenOne: false,
-			});
-			this.setState({
-				hiddenMultiple: true,
-			});
-		}
-		else if(pomoc >= 2){
-			this.setState({
-				hiddenOne: true,
-			});
-			this.setState({
-				hiddenMultiple: false,
-			});
-		}
+		
 
 
 	}
@@ -111,7 +109,6 @@ class ProfilePage extends React.Component {
 	
 
 	test(pic,userId, feedId) {
-
 		this.setState({
 			fileUploadOngoing: true
 		});
@@ -128,6 +125,25 @@ class ProfilePage extends React.Component {
 
 		};
 		fetch(BASE_URL_FEED + "/api/image/"+userId+"/"+feedId , options);
+	}
+	testStory(pic,userId, storyId) {
+
+		this.setState({
+			fileUploadOngoing: true
+		});
+
+		const fileInput = document.querySelector("#fileInput");
+		const formData = new FormData();
+
+		formData.append("file", pic);
+		formData.append("test", "StringValueTest");
+
+		const options = {
+			method: "POST",
+			body: formData
+
+		};
+		fetch(BASE_URL_STORY + "/api/image/"+userId+"/"+storyId , options);
 	}
 
 
@@ -223,7 +239,67 @@ class ProfilePage extends React.Component {
 	handleCommentsModalClose = ()=> {
 		this.setState({ showCommentsModal: false });    
 	}
-	
+	handleAddStoryPostCloseFriends =()=>{
+		if (this.state.addressInput === "") {
+			const storyPostDTO = {
+				tagged: [],
+				description: this.state.description,
+				hashtags: this.state.hashtags,
+				location : this.state.addressLocation,
+				onlyCloseFriends : true
+			};
+			this.sendRequestForStory(storyPostDTO);
+
+		}
+		else {
+			let street;
+			let city;
+			let country;
+			let latitude;
+			let longitude;
+			this.ymaps
+				.geocode(this.addressInput.current.value, {
+					results: 1,
+				})
+				.then(function (res) {
+					if (typeof res.geoObjects.get(0) === "undefined")  {this.setState({ foundLocation:false});}
+					else {
+						var firstGeoObject = res.geoObjects.get(0),
+							coords = firstGeoObject.geometry.getCoordinates();
+						latitude = coords[0];
+						longitude = coords[1];
+						country = firstGeoObject.getCountry();
+						street = firstGeoObject.getThoroughfare();
+						city = firstGeoObject.getLocalities().join(", ");
+					}
+				}).then((res) => {
+					var locationDTO = {
+						street : street,
+						country : country,
+						town : city,
+						latitude : latitude,
+						longitude : longitude
+					}
+					let storyPostDTO = {
+						tagged: [],
+						description: this.state.description,
+						hashtags: this.state.hashtags,
+						location : locationDTO,
+						onlyCloseFriends : true
+					};
+					
+					if (this.state.foundLocation === false) {
+							this.setState({ addressNotFoundError: "initial" });
+					} else {
+							this.sendRequestForStory(storyPostDTO);
+					}
+
+				});
+				
+
+		}
+
+	};
 	handleWriteCommentModalClose = ()=>{
 		this.setState({showWriteCommentModal : false});
 	}
@@ -303,21 +379,258 @@ class ProfilePage extends React.Component {
 	}
 	handleAddStoryPost = ()=> {
 
+		if (this.state.addressInput === "") {
+			const storyPostDTO = {
+				tagged: [],
+				description: this.state.description,
+				hashtags: this.state.hashtags,
+				location : this.state.addressLocation,
+				onlyCloseFriends : false
+			};
+			this.sendRequestForStory(storyPostDTO);
+
+		}
+		else {
+			let street;
+			let city;
+			let country;
+			let latitude;
+			let longitude;
+			this.ymaps
+				.geocode(this.addressInput.current.value, {
+					results: 1,
+				})
+				.then(function (res) {
+	
+					if (typeof res.geoObjects.get(0) === "undefined")  {this.setState({ foundLocation:false});}
+					else {
+						var firstGeoObject = res.geoObjects.get(0),
+							coords = firstGeoObject.geometry.getCoordinates();
+						latitude = coords[0];
+						longitude = coords[1];
+						country = firstGeoObject.getCountry();
+						street = firstGeoObject.getThoroughfare();
+						city = firstGeoObject.getLocalities().join(", ");
+					}
+				}).then((res) => {
+					var locationDTO = {
+						street : street,
+						country : country,
+						town : city,
+						latitude : latitude,
+						longitude : longitude
+					}
+					let storyPostDTO = {
+						tagged: [],
+						description: this.state.description,
+						hashtags: this.state.hashtags,
+						location : locationDTO,
+						onlyCloseFriends : false
+					};
+					alert(storyPostDTO.onlyCloseFriends)
+					if (this.state.foundLocation === false) {
+							this.setState({ addressNotFoundError: "initial" });
+					} else {
+							this.sendRequestForStory(storyPostDTO);
+					}
+
+				});
+				
+
+		}
+
 	}
 	handleAddFeedPostAlbum = ()=> {
+		if (this.state.addressInput === "") {
+			const feedPostDTO = {
+				tagged: [],
+				description: this.state.description,
+				hashtags: this.state.hashtags,
+				location : this.state.addressLocation
+			};
+			this.sendRequestForFeedAlbum(feedPostDTO);
+
+		}
+		else {
+			let street;
+			let city;
+			let country;
+			let latitude;
+			let longitude;
+			this.ymaps
+				.geocode(this.addressInput.current.value, {
+					results: 1,
+				})
+				.then(function (res) {
+	
+					if (typeof res.geoObjects.get(0) === "undefined")  {this.setState({ foundLocation:false});}
+					else {
+						var firstGeoObject = res.geoObjects.get(0),
+							coords = firstGeoObject.geometry.getCoordinates();
+						latitude = coords[0];
+						longitude = coords[1];
+						country = firstGeoObject.getCountry();
+						street = firstGeoObject.getThoroughfare();
+						city = firstGeoObject.getLocalities().join(", ");
+					}
+				}).then((res) => {
+					var locationDTO = {
+						street : street,
+						country : country,
+						town : city,
+						latitude : latitude,
+						longitude : longitude
+					}
+					let feedPostDTO = {
+						tagged: [],
+						description: this.state.description,
+						hashtags: this.state.hashtags,
+						location : locationDTO
+					};
+					
+					if (this.state.foundLocation === false) {
+							this.setState({ addressNotFoundError: "initial" });
+					} else {
+							this.sendRequestForFeedAlbum(feedPostDTO);
+					}
+
+				});
+				
+
+		}
 
 	}
 	handleAddStoryPostAlbum = ()=> {
-		
-	}
+		if (this.state.addressInput === "") {
+			const storyPostDTO = {
+				tagged: [],
+				description: this.state.description,
+				hashtags: this.state.hashtags,
+				location : this.state.addressLocation,
+				onlyCloseFriends : false
+			};
+			this.sendRequestForAlbumStory(storyPostDTO);
 
+		}
+		else {
+			let street;
+			let city;
+			let country;
+			let latitude;
+			let longitude;
+			this.ymaps
+				.geocode(this.addressInput.current.value, {
+					results: 1,
+				})
+				.then(function (res) {
+	
+					if (typeof res.geoObjects.get(0) === "undefined")  {this.setState({ foundLocation:false});}
+					else {
+						var firstGeoObject = res.geoObjects.get(0),
+							coords = firstGeoObject.geometry.getCoordinates();
+						latitude = coords[0];
+						longitude = coords[1];
+						country = firstGeoObject.getCountry();
+						street = firstGeoObject.getThoroughfare();
+						city = firstGeoObject.getLocalities().join(", ");
+					}
+				}).then((res) => {
+					var locationDTO = {
+						street : street,
+						country : country,
+						town : city,
+						latitude : latitude,
+						longitude : longitude
+					}
+					let storyPostDTO = {
+						tagged: [],
+						description: this.state.description,
+						hashtags: this.state.hashtags,
+						location : locationDTO,
+						onlyCloseFriends : false
+					};
+					
+					if (this.state.foundLocation === false) {
+							this.setState({ addressNotFoundError: "initial" });
+					} else {
+							this.sendRequestForAlbumStory(storyPostDTO);
+					}
+
+				});
+				
+
+		}
+	}
+	handleAddStoryPostAlbumCloseFriends = ()=> {
+		if (this.state.addressInput === "") {
+			const storyPostDTO = {
+				tagged: [],
+				description: this.state.description,
+				hashtags: this.state.hashtags,
+				location : this.state.addressLocation,
+				onlyCloseFriends : true
+			};
+			this.sendRequestForAlbumStory(storyPostDTO);
+
+		}
+		else {
+			let street;
+			let city;
+			let country;
+			let latitude;
+			let longitude;
+			this.ymaps
+				.geocode(this.addressInput.current.value, {
+					results: 1,
+				})
+				.then(function (res) {
+	
+					if (typeof res.geoObjects.get(0) === "undefined")  {this.setState({ foundLocation:false});}
+					else {
+						var firstGeoObject = res.geoObjects.get(0),
+							coords = firstGeoObject.geometry.getCoordinates();
+						latitude = coords[0];
+						longitude = coords[1];
+						country = firstGeoObject.getCountry();
+						street = firstGeoObject.getThoroughfare();
+						city = firstGeoObject.getLocalities().join(", ");
+					}
+				}).then((res) => {
+					var locationDTO = {
+						street : street,
+						country : country,
+						town : city,
+						latitude : latitude,
+						longitude : longitude
+					}
+					let storyPostDTO = {
+						tagged: [],
+						description: this.state.description,
+						hashtags: this.state.hashtags,
+						location : locationDTO,
+						onlyCloseFriends : true
+					};
+					
+					if (this.state.foundLocation === false) {
+							this.setState({ addressNotFoundError: "initial" });
+					} else {
+							this.sendRequestForAlbumStory(storyPostDTO);
+					}
+
+				});
+				
+
+		}
+	}
 
 	
 
 	sendRequestForFeed(feedPostDTO) {
-		let id = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length-1);;
+		let id = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length-1)
+		alert("OCAJ")
+		alert(id)
 		console.log(id)
-
+		
 		Axios.post(BASE_URL_FEED + "/api/feed/" + id, feedPostDTO)
 			.then((res) => {
 				if (res.status === 409) {
@@ -355,7 +668,125 @@ class ProfilePage extends React.Component {
 				console.log(err);
 			});
 	}
+	sendRequestForFeedAlbum(feedPostDTO){
+		let id = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length-1)
+		alert("HALOS")
+		Axios.post(BASE_URL_FEED + "/api/feedAlbum/" + id, feedPostDTO)
+			.then((res) => {
+				if (res.status === 409) {
+					this.setState({
+						errorHeader: "Resource conflict!",
+						errorMessage: "Email already exist.",
+						hiddenErrorAlert: false,
+					});
+				} else if (res.status === 500) {
+					this.setState({ errorHeader: "Internal server error!", errorMessage: "Server error.", hiddenErrorAlert: false });
+				} else {
+					this.setState({ openModal: true });
+					this.setState({ redirect: true });
+				}
+				let feedId = res.data;
+				console.log(res.data);
+				console.log(res.status);
+				let userid = localStorage.getItem("userId");
+				let pics = [];
+				alert(feedId)
+				this.state.pictures.forEach((p) => {
+					pics.push(p.name);
+				});
+				this.state.pictures.forEach((pic) => {
+					this.test(pic, userid, feedId);
+				});
 
+				this.setState({ pictures: [] });
+				this.setState({ showImageModal: false, });
+				this.setState({ openModal: true });
+				this.setState({ textSuccessfulModal: "You have successfully added album feed post." });
+
+			})
+			.catch((err) => {
+				console.log(err);
+			});
+	}
+	sendRequestForStory(storyPostDTO) {
+		let id = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length-1)
+
+		Axios.post(BASE_URL_STORY + "/api/story/" + id, storyPostDTO)
+			.then((res) => {
+				if (res.status === 409) {
+					this.setState({
+						errorHeader: "Resource conflict!",
+						errorMessage: "Email already exist.",
+						hiddenErrorAlert: false,
+					});
+				} else if (res.status === 500) {
+					this.setState({ errorHeader: "Internal server error!", errorMessage: "Server error.", hiddenErrorAlert: false });
+				} else {
+					this.setState({ openModal: true });
+					this.setState({ redirect: true });
+				}
+				let storyId = res.data;
+				console.log(res.data);
+				console.log(res.status);
+				let userid = localStorage.getItem("userId");
+				let pics = [];
+
+				this.state.pictures.forEach((p) => {
+					pics.push(p.name);
+				});
+				this.state.pictures.forEach((pic) => {
+					this.testStory(pic, userid, storyId);
+				});
+
+				this.setState({ pictures: [] });
+				this.setState({ showImageModal: false, });
+				this.setState({ openModal: true });
+				this.setState({ textSuccessfulModal: "You have successfully added story post." });
+
+			})
+			.catch((err) => {
+				console.log(err);
+			});
+	}
+	sendRequestForAlbumStory(storyPostDTO){
+		let id = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length-1)
+		Axios.post(BASE_URL_STORY + "/api/storyAlbum/" + id, storyPostDTO)
+			.then((res) => {
+				if (res.status === 409) {
+					this.setState({
+						errorHeader: "Resource conflict!",
+						errorMessage: "Email already exist.",
+						hiddenErrorAlert: false,
+					});
+				} else if (res.status === 500) {
+					this.setState({ errorHeader: "Internal server error!", errorMessage: "Server error.", hiddenErrorAlert: false });
+				} else {
+					this.setState({ openModal: true });
+					this.setState({ redirect: true });
+				}
+				let storyId = res.data;
+				console.log(res.data);
+				console.log(res.status);
+				let userid = localStorage.getItem("userId");
+				let pics = [];
+
+				this.state.pictures.forEach((p) => {
+					pics.push(p.name);
+				});
+				this.state.pictures.forEach((pic) => {
+					this.testStory(pic, userid, storyId);
+				});
+
+				this.setState({ pictures: [] });
+				this.setState({ showImageModal: false, });
+				this.setState({ openModal: true });
+				this.setState({ textSuccessfulModal: "You have successfully added album story post." });
+
+			})
+			.catch((err) => {
+				console.log(err);
+			});
+	}
 	render() {
 		return (
 			<React.Fragment>
@@ -567,8 +998,10 @@ class ProfilePage extends React.Component {
 						onYmapsLoad = {this.onYmapsLoad}
 						handleAddFeedPost = {this.handleAddFeedPost}
 						handleAddStoryPost = {this.handleAddStoryPost}
+						handleAddStoryPostCloseFriends = {this.handleAddStoryPostCloseFriends}
 						handleAddFeedPostAlbum = {this.handleAddFeedPostAlbum}
 						handleAddStoryPostAlbum= {this.handleAddStoryPostAlbum}
+						handleAddStoryPostAlbumCloseFriends = {this.handleAddStoryPostAlbumCloseFriends}
 						addressNotFoundError = {this.state.addressNotFoundError}
 						handleDescriptionChange = {this.handleDescriptionChange}
 						handleHashtagsChange = {this.handleHashtagsChange}

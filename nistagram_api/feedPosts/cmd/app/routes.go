@@ -15,6 +15,7 @@ func (app *application) routes() *mux.Router {
 
 	r.HandleFunc("/", app.getAllFeedPosts).Methods("GET")
 	r.HandleFunc("/{id}", app.findFeedPostByID).Methods("GET")
+	r.HandleFunc("/api/feedAlbum/{userId}", app.insertAlbumFeed).Methods("POST")
 	r.HandleFunc("/api/feed/{userIdd}", app.insertFeedPost).Methods("POST")
 	r.HandleFunc("/{id}", app.deleteFeedPost).Methods("DELETE")
 
