@@ -6,10 +6,9 @@ import (
 	"fmt"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gorilla/mux"
-
-  "net/http"
+	"go.mongodb.org/mongo-driver/bson/primitive"
+	"net/http"
 	"os"
-	"strconv"
 	"strings"
 
 	"errors"
@@ -155,7 +154,8 @@ func (app *application) findUserByID(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	vars := mux.Vars(r)
 	id := vars["id"]
-	intVar, err := strconv.Atoi(id)
+	//intVar, err := strconv.Atoi(id)
+	intVar, err := primitive.ObjectIDFromHex(id)
 	m, err := app.users.FindByID(intVar)
 	if err != nil {
 		if err.Error() == "ErrNoDocuments" {
@@ -303,12 +303,14 @@ func (app *application) updateUser(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			app.serverError(w, err)
 		}
-		intId, err := strconv.Atoi(m.Id)
+		//intId, err := strconv.Atoi(m.Id)
+	intId, err := primitive.ObjectIDFromHex(m.Id)
 		if err != nil {
 			// handle error
 			fmt.Println(err)
 			os.Exit(2)
 		}
+
 		uss, err := app.users.FindByID(intId)
 		if uss == nil {
 			app.infoLog.Println("User not found")
