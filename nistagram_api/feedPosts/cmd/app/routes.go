@@ -17,6 +17,7 @@ func (app *application) routes() *mux.Router {
 	r.HandleFunc("/{id}", app.findFeedPostByID).Methods("GET")
 	r.HandleFunc("/api/feed/{userId}", app.insertFeedPost).Methods("POST")
 	r.HandleFunc("/api/feedAlbum/{userId}", app.insertAlbumFeed).Methods("POST")
+	r.HandleFunc("/api/feed/{userIdd}", app.insertFeedPost).Methods("POST")
 	r.HandleFunc("/{id}", app.deleteFeedPost).Methods("DELETE")
 
 	r.HandleFunc("/post/", app.getAllPosts).Methods("GET")
@@ -40,6 +41,8 @@ func (app *application) routes() *mux.Router {
 	r.HandleFunc("/collection/", app.insertCollection).Methods("POST")
 	r.HandleFunc("/collection/{id}", app.deleteCollection).Methods("DELETE")
 
-	r.HandleFunc("/api/image/{userId}/{feedId}", app.saveImage).Methods("POST")
+	r.HandleFunc("/api/image/{userIdd}/{feedId}", app.saveImage).Methods("POST")
+	r.HandleFunc("/api/feed/usersImages/{userIdd}", app.getUsersFeedPosts).Methods("GET")
+
 	return r
 }
