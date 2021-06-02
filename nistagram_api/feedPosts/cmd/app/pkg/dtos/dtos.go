@@ -17,6 +17,10 @@ type IdDTO struct {
 	User primitive.ObjectID
 }
 
+type HashTagDTO struct {
+	 HashTags string
+}
+
 type PostInfoDTO struct {
 	DateTime    string
 	Tagged      []primitive.ObjectID

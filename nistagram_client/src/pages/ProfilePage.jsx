@@ -333,8 +333,7 @@ class ProfilePage extends React.Component {
 					this.setState({ redirect: true });
 				}
 				let feedId = res.data;
-				console.log(res.data);
-				console.log(res.status);
+				
 				let userid = localStorage.getItem("userId");
 				let pics = [];
 
@@ -349,6 +348,7 @@ class ProfilePage extends React.Component {
 				this.setState({ showImageModal: false, });
 				this.setState({ openModal: true });
 				this.setState({ textSuccessfulModal: "You have successfully added feed post." });
+				this.handleGetPhotos()
 
 			})
 			.catch((err) => {
