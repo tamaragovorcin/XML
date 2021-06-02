@@ -19,16 +19,21 @@ type application struct {
 	infoLog  *log.Logger
 	storyPosts *mongodb.StoryPostModel
 	highlights *mongodb.HighlightModel
-	albumStory   *mongodb.AlbumStoryModel
+	albumStories   *mongodb.AlbumStoryModel
+	posts       *mongodb.PostsModel
+	locations   *mongodb.LocationModel
+	images   *mongodb.ImageModel
+
 }
 
 func main() {
+	fmt.Printf("Found multiple documents (array of pointers): %+v\n")
 
 	// Define command-line flags
 	serverAddr := flag.String("serverAddr", "", "HTTP server network address")
 	serverPort := flag.Int("serverPort", 4004, "HTTP server network port")
 	mongoURI := flag.String("mongoURI", "mongodb://localhost:27017", "Database hostname url")
-	mongoDatabse := flag.String("mongoDatabse", "bookings", "Database name")
+	mongoDatabse := flag.String("mongoDatabse", "storyPosts", "Database name")
 	enableCredentials := flag.Bool("enableCredentials", false, "Enable the use of credentials for mongo connection")
 	flag.Parse()
 
@@ -44,6 +49,7 @@ func main() {
 			Password: os.Getenv("MONGODB_PASSWORD"),
 		}
 	}
+
 
 	// Establish database connection
 	client, err := mongo.NewClient(co)
@@ -70,29 +76,46 @@ func main() {
 	app := &application{
 		infoLog:  infoLog,
 		errorLog: errLog,
-		highlights: &mongodb.HighlightModel{
-			C: client.Database(*mongoDatabse).Collection("highlights"),
+		locations: &mongodb.LocationModel{
+			C: client.Database(*mongoDatabse).Collection("locations"),
+		},
+		posts: &mongodb.PostsModel{
+			C: client.Database(*mongoDatabse).Collection("posts"),
 		},
 		storyPosts: &mongodb.StoryPostModel{
 			C: client.Database(*mongoDatabse).Collection("storyPosts"),
 		},
-		albumStory: &mongodb.AlbumStoryModel{
-			C: client.Database(*mongoDatabse).Collection("albumStorys"),
+		highlights: &mongodb.HighlightModel{
+			C: client.Database(*mongoDatabse).Collection("highlights"),
+		},
+		albumStories: &mongodb.AlbumStoryModel{
+			C: client.Database(*mongoDatabse).Collection("albumStories"),
+		},
+		images: &mongodb.ImageModel{
+			C: client.Database(*mongoDatabse).Collection("images"),
 		},
 	}
 
-	// Initialize a new http.Server struct.
 	serverURI := fmt.Sprintf("%s:%d", *serverAddr, *serverPort)
-	srv := &http.Server{
-		Addr:         serverURI,
-		ErrorLog:     errLog,
-		Handler:      app.routes(),
-		IdleTimeout:  time.Minute,
-		ReadTimeout:  5 * time.Second,
-		WriteTimeout: 10 * time.Second,
-	}
+	router := app.routes();
+	http.ListenAndServe(serverURI, setHeaders(router))
+}
+func setHeaders(h http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		//anyone can make a CORS request (not recommended in production)
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+		//only allow GET, POST, and OPTIONS
+		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, OPTIONS, FETCH")
+		//Since I was building a REST API that returned JSON, I set the content type to JSON here.
+		w.Header().Set("Content-Type", "application/json")
+		//Allow requests to have the following headers
+		w.Header().Set("Access-Control-Allow-Headers", "Origin, Content-Type, Authorization, cache-control")
+		//if it's just an OPTIONS request, nothing other than the headers in the response is needed.
+		//This is essential because you don't need to handle the OPTIONS requests in your handlers now
+		if r.Method == "OPTIONS" {
+			return
+		}
 
-	infoLog.Printf("Starting server on %s", serverURI)
-	err = srv.ListenAndServe()
-	errLog.Fatal(err)
+		h.ServeHTTP(w, r)
+	})
 }

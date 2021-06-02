@@ -2,6 +2,9 @@ import React, { Component } from "react";
 import { Button, Modal } from "react-bootstrap";
 import ImageUploader from 'react-images-upload';
 import { YMaps, Map } from "react-yandex-maps";
+import {GiThreeFriends} from "react-icons/gi"
+import {MdPublic} from "react-icons/md"
+import {CgFeed} from "react-icons/cg"
 
 const mapState = {
 	center: [44, 21],
@@ -98,14 +101,16 @@ class AddPostModal extends Component {
                         
 							<div hidden={this.props.hiddenOne} >
 						
-								<button style={{ width: "10rem" }}  onClick={this.props.handleAddFeedPost} className="btn btn-outline-secondary btn-sm">Add as feed post </button>
-								<button style={{ width: "10rem" }} onClick={this.props.handleAddStoryPost} className="btn btn-outline-secondary btn-sm">Add as story </button>
+								<button style={{ width: "10rem", margin : "1rem",background:"#37FF33" }}  onClick={this.props.handleAddFeedPost} className="btn btn-outline-secondary btn-sm">Add as feed post<br/> <CgFeed/> </button>
+								<button style={{ width: "10rem", margin : "1rem" ,background:"#37FF33"}} onClick={this.props.handleAddStoryPost} className="btn btn-outline-secondary btn-sm">Add as story<br/> <MdPublic/> </button>
+								<button style={{ width: "10rem", margin : "1rem", background:"#37FF33" }} onClick={this.props.handleAddStoryPostCloseFriends} className="btn btn-outline-secondary btn-sm">Story for close friends<GiThreeFriends/> </button>
 							</div>
 					
 							<div  hidden={this.props.hiddenMultiple}>
 
-								<button style={{ width: "10rem" }} onClick={this.props.handleAddFeedPostAlbum} className="btn btn-outline-secondary btn-sm">Add as feed album </button>
-								<button style={{ width: "10rem" }} onClick={this.props.handleAddStoryPostAlbum} className="btn btn-outline-secondary btn-sm">Add as album story </button>
+								<button style={{ width: "10rem" , margin : "1rem", background:"#37FF33" }} onClick={this.props.handleAddFeedPostAlbum} className="btn btn-outline-secondary btn-sm">Feed album<br/> <CgFeed/> </button>
+								<button style={{ width: "10rem", margin : "1rem", background:"#37FF33"  }} onClick={this.props.handleAddStoryPostAlbum} className="btn btn-outline-secondary btn-sm">Story album<br/> <MdPublic/> </button>
+								<button style={{ width: "10rem", margin : "1rem", background:"#37FF33"  }} onClick={this.props.handleAddStoryPostAlbumCloseFriends} className="btn btn-outline-secondary btn-sm">Story album close friends<GiThreeFriends/> </button>
 							</div>
 						</div>
 					</div>
