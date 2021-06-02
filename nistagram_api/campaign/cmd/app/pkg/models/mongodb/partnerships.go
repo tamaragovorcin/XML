@@ -1,12 +1,12 @@
 package mongodb
 
 import (
+	"campaigns/pkg/models"
 	"context"
 	"errors"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
-	"campaigns/pkg/models"
 )
 
 type PartnershipModel struct {

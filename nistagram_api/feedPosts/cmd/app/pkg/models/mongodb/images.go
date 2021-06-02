@@ -3,7 +3,7 @@ package mongodb
 import (
 	"context"
 	"errors"
-	"feedPosts/pkg/models"
+	models2 "feedPosts/pkg/models"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -14,10 +14,10 @@ type ImageModel struct {
 }
 
 // All method will be used to get all records from the users table.
-func (m *ImageModel) All() ([]models.Image, error) {
+func (m *ImageModel) All() ([]models2.Image, error) {
 	// Define variables
 	ctx := context.TODO()
-	uu := []models.Image{}
+	uu := []models2.Image{}
 
 	// Find all users
 	userCursor, err := m.C.Find(ctx, bson.M{})
@@ -33,14 +33,14 @@ func (m *ImageModel) All() ([]models.Image, error) {
 }
 
 // FindByID will be used to find a new user registry by id
-func (m *ImageModel) FindByID(id string) (*models.Image, error) {
+func (m *ImageModel) FindByID(id string) (*models2.Image, error) {
 	p, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
 		return nil, err
 	}
 
 	// Find user by id
-	var user = models.Image{}
+	var user = models2.Image{}
 	err = m.C.FindOne(context.TODO(), bson.M{"_id": p}).Decode(&user)
 	if err != nil {
 		// Checks if the user was not found
@@ -54,7 +54,7 @@ func (m *ImageModel) FindByID(id string) (*models.Image, error) {
 }
 
 // Insert will be used to insert a new user
-func (m *ImageModel) Insert(user models.Image) (*mongo.InsertOneResult, error) {
+func (m *ImageModel) Insert(user models2.Image) (*mongo.InsertOneResult, error) {
 	return m.C.InsertOne(context.TODO(), user)
 }
 

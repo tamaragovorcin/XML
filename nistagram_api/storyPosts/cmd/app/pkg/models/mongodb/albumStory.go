@@ -4,10 +4,10 @@ import (
 	"context"
 	"errors"
 
-	"storyPosts/pkg/models"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
+	"storyPosts/pkg/models"
 )
 
 // MovieModel represent a mgo database session with a movie data model.

@@ -14,62 +14,66 @@ services:
   campaign:
     image: campaign:compose_build
     build:
-      context: ./campaign
-      dockerfile: Dockerfile
+      context: ./campaign/cmd/app
     networks:
       - backend
     environment:
-      PORT: 8081
+      PORT: 8080
 
   feedPosts:
-    image: feedPosts:compose_build
+    image: feedposts:compose_build
     build:
-      context: ./feedPosts
-      dockerfile: Dockerfile
+      context: ./feedPosts/cmd/app
     networks:
       - backend
     environment:
-      PORT: 8081
+      PORT: 8080
+
+  messages:
+    image: messages:compose_build
+    build:
+      context: ./messages/cmd/app
+    networks:
+      - backend
+    environment:
+      PORT: 8080
 
   notificationSettings:
-    image: notificationSettings:compose_build
+    image: notificationsettings:compose_build
     build:
-      context: ./notificationSettings
-      dockerfile: Dockerfile
+      context: ./notificationSettings/cmd/app
     networks:
       - backend
     environment:
-      PORT: 8081
+      PORT: 8080
 
   storyPosts:
-    image: storyPosts:compose_build
+    image: storyposts:compose_build
     build:
-      context: ./storyPosts
-      dockerfile: Dockerfile
+      context: ./storyPosts/cmd/app
     networks:
       - backend
     environment:
-      PORT: 8081
+      PORT: 8080
 
   userInteraction:
-    image: userInteraction:compose_build
+    image: userinteraction:compose_build
     build:
-      context: ./userInteraction
-      dockerfile: Dockerfile
+      context: ./userInteraction/cmd/app
     networks:
       - backend
     environment:
-      PORT: 8081
+      PORT: 8080
 
   users:
     image: users:compose_build
     build:
-      context: ./users
-      dockerfile: Dockerfile
+      context: ./users/cmd/app
+
     networks:
       - backend
     environment:
-      PORT: 8081
+      PORT: 8080
 
 networks:
   backend:

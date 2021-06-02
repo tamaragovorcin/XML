@@ -1,24 +1,22 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { CgProfile } from 'react-icons/cg';
-import { BiBookmark, BiSearch } from 'react-icons/bi';
+import { BiBookmark } from 'react-icons/bi';
 import Axios from "axios";
 import { FiSettings, FiSend } from 'react-icons/fi';
 import { VscHome } from 'react-icons/vsc';
 import { AiOutlineHeart } from 'react-icons/ai';
 import { BASE_URL_USER } from "../constants.js";
-import SelectSearch from 'react-select-search';
 import Select from 'react-select';
 
-import { Redirect } from "react-router-dom";
 class Header extends React.Component {
 	state = {
 		options: ["mladenka", "vojna"],
 		search: "",
 		users: [],
-		redirect: false,
 		options: [],
-		optionDTO: { value: "", label: "" }
+		optionDTO: { value: "", label: "" },
+		userId: "",
 	}
 
 	hasRole = (reqRole) => {
@@ -39,8 +37,10 @@ class Header extends React.Component {
 	};
 
 	handleChange = (event) => {
-		alert(event.value)
-		this.setState({ redirect: true });
+		alert("mvmvmvmv")
+		this.setState({ userId: event.value });
+		window.location = "#/followerProfilePage/" + event.value;
+		
 	};
 
 
@@ -53,7 +53,7 @@ class Header extends React.Component {
 				this.setState({ users: res.data });
 
 				res.data.forEach((user) => {
-					let optionDTO = { label: user.ProfileInformation.Username, value: user.Id }
+					let optionDTO = { id: user.ID, label: user.ProfileInformation.Username, value: user.Id }
 					help.push(optionDTO)
 				});
 
@@ -70,7 +70,8 @@ class Header extends React.Component {
 	};
 
 	render() {
-		if (this.state.redirect) return <Redirect push to="/login" />;
+		
+		
 		return (
 			<header id="header" className="fixed-top">
 				<div className="container d-flex align-items-center">
