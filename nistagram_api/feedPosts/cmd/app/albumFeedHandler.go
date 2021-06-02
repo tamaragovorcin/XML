@@ -2,9 +2,12 @@ package main
 
 import (
 	"encoding/json"
+	"feedPosts/pkg/dtos"
 	"feedPosts/pkg/models"
 	"github.com/gorilla/mux"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"net/http"
+	"time"
 )
 
 func (app *application) getAllAlbumFeeds(w http.ResponseWriter, r *http.Request) {
@@ -58,22 +61,43 @@ func (app *application) findAlbumFeedByID(w http.ResponseWriter, r *http.Request
 	w.Write(b)
 }
 
-func (app *application) insertAlbumFeed(w http.ResponseWriter, r *http.Request) {
-	// Define booking model
-	var m models.AlbumFeed
-	// Get request information
-	err := json.NewDecoder(r.Body).Decode(&m)
+func (app *application) insertAlbumFeed(w http.ResponseWriter, req *http.Request) {
+	vars := mux.Vars(req)
+	userId := vars["userId"]
+	var m dtos.FeedPostDTO
+	err := json.NewDecoder(req.Body).Decode(&m)
+	if err != nil {
+		app.serverError(w, err)
+	}
+	userIdPrimitive, _ := primitive.ObjectIDFromHex(userId)
+	var post = models.Post{
+		User : userIdPrimitive,
+		DateTime : time.Now(),
+		Tagged : m.Tagged,
+		Description: m.Description,
+		Hashtags: parseHashTags(m.Hashtags),
+		Location : m.Location,
+		Blocked : false,
+	}
+	var feedPost = models.AlbumFeed{
+		Post : post,
+		Likes : nil,
+		Dislikes: nil,
+		Comments: nil,
+	}
+
+
+	insertResult, err := app.albumFeeds.Insert(feedPost)
 	if err != nil {
 		app.serverError(w, err)
 	}
 
-	// Insert new booking
-	insertResult, err := app.albumFeeds.Insert(m)
-	if err != nil {
-		app.serverError(w, err)
-	}
+	app.infoLog.Printf("New content have been created, id=%s", insertResult.InsertedID)
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
 
-	app.infoLog.Printf("New albumFeeds have been created, id=%s", insertResult.InsertedID)
+	idMarshaled, err := json.Marshal(insertResult.InsertedID)
+	w.Write(idMarshaled)
 }
 
 func (app *application) deleteAlbumFeed(w http.ResponseWriter, r *http.Request) {

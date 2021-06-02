@@ -42,8 +42,8 @@ type Location struct {
 }
 
 type AlbumFeed struct {
-	Id uuid.UUID `bson:"_id,omitempty"`
-	Posts []string   `bson:"posts"`
+	Id primitive.ObjectID `bson:"_id,omitempty"`
+	Post Post `bson:"post,omitempty"`
 	Likes []primitive.ObjectID `bson:"likes"`
 	Dislikes []primitive.ObjectID `bson:"dislikes"`
 	Comments []primitive.ObjectID `bson:"comments"`

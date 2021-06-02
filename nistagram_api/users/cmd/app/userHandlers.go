@@ -295,7 +295,6 @@ func (app *application) deleteUser(w http.ResponseWriter, r *http.Request) {
 }
 func (app *application) updateUser(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Access-Control-Allow-Origin", "*")
-	app.infoLog.Printf("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
 
 
 		var m dtos.UserUpdateRequest
