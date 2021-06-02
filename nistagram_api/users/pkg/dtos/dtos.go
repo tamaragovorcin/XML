@@ -1,21 +1,33 @@
 package dtos
 
+type Gender int
+const (
+	Male Gender = iota
+	Female
+	Other
+)
 type UserRequest struct {
 	Name  string
-	Surname string
+	LastName string
 	Email string
+	Username string
 	Password string
-	RepeatedPassword string
+	PhoneNumber string
+	Gender string
+	DateOfBirth string
+	Private bool
+	Biography string
 }
 
 type LoginRequest struct {
-	Email string `bson:"email,omitempty"`
+	Username string `bson:"username,omitempty"`
 	Password string `bson:"password,omitempty"`
 }
 type UserTokenState struct {
 	AccessToken string
 	ExpiresIn int64
-	Roles []string
+	Roles string
+	UserId int
 }
 
 

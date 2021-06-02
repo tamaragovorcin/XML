@@ -2,7 +2,7 @@ import React, { Component } from "react";
 import Header from "../components/Header";
 import TopBar from "../components/TopBar";
 import Axios from "axios";
-import { BASE_URL } from "../constants.js";
+import { BASE_URL, BASE_URL_USER } from "../constants.js";
 import { Button } from "react-bootstrap";
 import { Redirect } from "react-router-dom";
 import HeadingAlert from "../components/HeadingAlert";
@@ -31,18 +31,21 @@ class Login extends Component {
 		this.setState({ hiddenErrorAlert: true, emailError: "none", passwordError: "none" });
 
 		if (this.validateForm()) {
-			let loginDTO = { email: this.state.email, password: this.state.password };
-			Axios.post(BASE_URL + "/api/auth/login", loginDTO, { validateStatus: () => true })
+			let loginDTO = { username: this.state.email, password: this.state.password };
+			console.log(loginDTO)
+			Axios.post(BASE_URL_USER + "/api/login", loginDTO)
 				.then((res) => {
 					if (res.status === 401) {
 						this.setState({ errorHeader: "Bad credentials!", errorMessage: "Wrong username or password.", hiddenErrorAlert: false });
 					} else if (res.status === 500) {
 						this.setState({ errorHeader: "Internal server error!", errorMessage: "Server error.", hiddenErrorAlert: false });
 					} else {
-						localStorage.setItem("keyToken", res.data.accessToken);
-						localStorage.setItem("keyRole", JSON.stringify(res.data.roles));
-						localStorage.setItem("expireTime", new Date(new Date().getTime() + res.data.expiresIn).getTime());
+						localStorage.setItem("keyToken", res.data.AccessToken);
+						localStorage.setItem("keyRole", JSON.stringify(res.data.Roles));
+						localStorage.setItem("userId", JSON.stringify(res.data.UserId));
+						//localStorage.setItem("expireTime", new Date(new Date().getTime() + res.data.expiresIn).getTime());
 
+						console.log(res.data)
 						this.setState({ redirect: true });
 					}
 				})
@@ -50,6 +53,7 @@ class Login extends Component {
 			console.log(err);
 		});
 	}
+	
 };
 
 validateForm = () => {

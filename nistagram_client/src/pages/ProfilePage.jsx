@@ -10,6 +10,9 @@ import ImageUploader from 'react-images-upload';
 import LikesModal from "../components/Posts/LikesModal"
 import DislikesModal from "../components/Posts/DislikesModal"
 import CommentsModal from "../components/Posts/CommentsModal"
+import Axios from "axios";
+import { BASE_URL_USER } from "../constants.js";
+import { ThumbUpSharp } from "@material-ui/icons";
 
 class ProfilePage extends React.Component {
 	constructor(props) {
@@ -35,7 +38,12 @@ class ProfilePage extends React.Component {
 		comments : [],
 		showLikesModal : false,
 		showDislikesModal : false,
-		showCommentsModal : false
+		showCommentsModal : false,
+		gender: "Female",
+		id : "",
+		name : "",
+		surnanme : "",
+		
 	}
 	onDrop(picture) {
 		this.setState({
@@ -89,6 +97,36 @@ class ProfilePage extends React.Component {
 
 
 	componentDidMount() {
+
+		let id =localStorage.getItem("userId")
+
+	Axios.get(BASE_URL_USER + "/api/" + id)
+				.then((res) => {
+					if (res.status === 401) {
+						this.setState({ errorHeader: "Bad credentials!", errorMessage: "Wrong username or password.", hiddenErrorAlert: false });
+					} else if (res.status === 500) {
+						this.setState({ errorHeader: "Internal server error!", errorMessage: "Server error.", hiddenErrorAlert: false });
+					} else {
+						this.setState({ 
+										id: res.data.Id,
+										username : res.data.ProfileInformation.Username,
+										name: res.data.ProfileInformation.Name,
+										lastName : res.data.ProfileInformation.LastName,
+										email : res.data.ProfileInformation.Email,
+										phoneNumber : res.data.ProfileInformation.PhoneNumber,
+										gender : res.data.ProfileInformation.Gender,
+										dateOfBirth  : res.data.ProfileInformation.DateOfBirth,
+										webSite : res.data.WebSite,
+										biography : res.data.Biography,
+										private : res.data.Private
+						});
+						console.log(res.data)
+					}
+				})
+				.catch ((err) => {
+			console.log(err);
+		});
+
 		this.handleGetBasicInfo()
 		this.handleGetHighlights()
 		this.handleGetPhotos()
@@ -98,8 +136,7 @@ class ProfilePage extends React.Component {
 		this.setState({ numberPosts: 10 });
 		this.setState({ numberFollowing: 600 });
 		this.setState({ numberFollowers: 750 });
-		this.setState({ biography: "bla bla bla" });
-		this.setState({ username: "USERNAME" });
+	
 	}
 
 	handleGetHighlights = () => {
@@ -185,7 +222,7 @@ class ProfilePage extends React.Component {
 									<td>
 										<div>
 											<td>
-												<label >{this.state.username}</label>
+											<label >{this.state.username}</label>
 											</td>
 											<td>
 												<Link to="/userChangeProfile" className="btn btn-outline-secondary btn-sm">Edit profile</Link>
@@ -206,10 +243,19 @@ class ProfilePage extends React.Component {
 										</div>
 										<div>
 											<td>
-												<label >{this.state.biography}</label>
+
+												<label><b>{this.state.name}</b> <b>{this.state.lastName}</b> </label>
+											
+										
 											</td>
 										</div>
-
+										<div>
+											<td>
+												<label >{this.state.biography}</label>
+												
+												</td>
+											
+										</div>
 										<div style={{ marginLeft: "0rem" }}><ImageUploader
 											withIcon={false}
 											buttonText='Add new photo/video'
