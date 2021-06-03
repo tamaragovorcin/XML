@@ -195,10 +195,10 @@ func (app *application) getFeedPostsByLocation(w http.ResponseWriter, r *http.Re
 	city :=vars["city"]
 	street :=vars["street"]
 	allImages,_ := app.images.All()
-	allPosts, _ :=app.feedPosts.All()
-	locationFeedPosts,err :=findFeedPostsByLocation(allPosts,country,city,street)
-	if err != nil {
-		app.serverError(w, err)
+	locationFeedPosts, _ :=app.feedPosts.All()
+
+	if country!="n" || city!="n" || street!="n" {
+		locationFeedPosts,_ =findFeedPostsByLocation(locationFeedPosts,country,city,street)
 	}
 	feedPostResponse := []dtos.FeedPostInfoDTO{}
 	for _, feedPost := range locationFeedPosts {
@@ -225,6 +225,10 @@ func findFeedPostsByLocation(posts []models.FeedPost, country string, city strin
 	feedPostsLocation := []models.FeedPost{}
 
 	for _, feedPost := range posts {
+		print(feedPost.Post.Location.Country)
+		print(country)
+		print(city)
+		print(street)
 		if	feedPost.Post.Location.Country==country {
 			if city=="n" {
 				feedPostsLocation = append(feedPostsLocation, feedPost)
@@ -292,10 +296,14 @@ func findFeedPostsByHashTags(posts []models.FeedPost, hashtags []string) ([]mode
 func postContainsAllHashTags(list []string, hashtags []string) bool {
 
 	for _, hash := range hashtags {
+		found :=false
 		for _, itemInList := range list {
-			if hash != itemInList {
-				return false
+			if hash == itemInList {
+				found= true
 			}
+		}
+		if found==false {
+			return false
 		}
 	}
 	return true
