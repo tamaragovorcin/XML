@@ -8,6 +8,6 @@ COPY go.mod .
 COPY go.sum .
 RUN go mod download
 COPY . .
-RUN go build -o users/cmd/app
-EXPOSE 8081
+RUN go build -o users
+EXPOSE 4006
 CMD ["./users"]
