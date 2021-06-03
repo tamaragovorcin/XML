@@ -1,20 +1,25 @@
 package main
 
 import (
+	"bytes"
 	"encoding/json"
-	"feedPosts/pkg/models"
 	"fmt"
 	"github.com/gorilla/mux"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	"image"
+	"image/jpeg"
 	"io"
+	"log"
 	"net/http"
 	"os"
 	"strings"
+	"users/pkg/dtos"
+	"users/pkg/models"
 )
 
 func (app *application) getAllImages(w http.ResponseWriter, r *http.Request) {
 	// Get all bookings stored
-	bookings, err := app.images.All()
+	bookings, err := app.profileImage.All()
 	if err != nil {
 		app.serverError(w, err)
 	}
@@ -39,7 +44,7 @@ func (app *application) findImageByID(w http.ResponseWriter, r *http.Request) {
 	id := vars["id"]
 
 	// Find booking by id
-	m, err := app.images.FindByID(id)
+	m, err := app.profileImage.FindByID(id)
 	if err != nil {
 		if err.Error() == "ErrNoDocuments" {
 			app.infoLog.Println("Image not found")
@@ -62,11 +67,44 @@ func (app *application) findImageByID(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 	w.Write(b)
 }
+func (app *application) getUsersProfileImage(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	userId := vars["userIdd"]
+	userIdPrimitive, _ := primitive.ObjectIDFromHex(userId)
+	allImages,_ := app.profileImage.All()
+	usersFeedPosts,err :=findImageByUserId(allImages,userIdPrimitive)
+	if err != nil {
+		app.serverError(w, err)
+	}
+	feedPostResponse := []dtos.ProfileImageInfoDTO{}
+	feedPostResponse = append(feedPostResponse, toResponse(usersFeedPosts.Media))
+
+
+	imagesMarshaled, err := json.Marshal(feedPostResponse)
+	if err != nil {
+		app.serverError(w, err)
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	w.Write(imagesMarshaled)
+}
+func toResponse(image2 string) dtos.ProfileImageInfoDTO {
+	f, _ := os.Open(image2)
+	defer f.Close()
+	image, _, _ := image.Decode(f)
+	buffer := new(bytes.Buffer)
+	if err := jpeg.Encode(buffer, image, nil); err != nil {
+		log.Println("unable to encode image.")
+	}
+
+	return dtos.ProfileImageInfoDTO{
+		Media: buffer.Bytes(),
+	}
+}
 func (app *application) saveImage(w http.ResponseWriter, r *http.Request)  {
 
 	vars := mux.Vars(r)
-	userId := vars["userIdd"]
-	feedId := vars["feedId"]
+	userId := vars["userId"]
 	r.ParseMultipartForm(32 << 20)
 	file, hander, err := r.FormFile("file")
 	if err != nil {
@@ -80,7 +118,7 @@ func (app *application) saveImage(w http.ResponseWriter, r *http.Request)  {
 	}
 
 	defer file.Close()
-	var path = "images/feed/"+hander.Filename
+	var path = "profileImages/"+hander.Filename
 	f, err := os.OpenFile(path, os.O_WRONLY|os.O_CREATE, 777)
 	if err != nil {
 		fmt.Println(err.Error())
@@ -89,14 +127,12 @@ func (app *application) saveImage(w http.ResponseWriter, r *http.Request)  {
 	io.Copy(f, file)
 
 	userIdPrimitive, _ := primitive.ObjectIDFromHex(userId)
-	postIdPrimitive, _ :=primitive.ObjectIDFromHex(feedId)
-	var image =models.Image {
+	var image =models.ProfileImage {
 		Media : path,
 		UserId : userIdPrimitive,
-		PostId : postIdPrimitive,
 	}
 
-	insertResult, err  := app.images.Insert(image)
+	insertResult, err  := app.profileImage.Insert(image)
 
 
 	if err != nil {
@@ -107,25 +143,15 @@ func (app *application) saveImage(w http.ResponseWriter, r *http.Request)  {
 }
 
 
-func findImagesByUserId(images []models.Image, idPrimitive primitive.ObjectID) ([]models.Image, error) {
-	imagesUser := []models.Image{}
+func findImageByUserId(images []models.ProfileImage, idPrimitive primitive.ObjectID) (models.ProfileImage, error) {
+	imagesUser := models.ProfileImage{}
 
 	for _, image := range images {
 		if	image.UserId==idPrimitive {
-			imagesUser = append(imagesUser, image)
+			imagesUser = image
 		}
 	}
 	return imagesUser, nil
-}
-func findImageByPostId(images []models.Image, idFeedPost primitive.ObjectID) (models.Image, error) {
-	imageFeedPost := models.Image{}
-
-	for _, image := range images {
-		if	image.PostId==idFeedPost {
-			imageFeedPost = image
-		}
-	}
-	return imageFeedPost, nil
 }
 
 func (app *application) deleteImage(w http.ResponseWriter, r *http.Request) {
@@ -134,10 +160,11 @@ func (app *application) deleteImage(w http.ResponseWriter, r *http.Request) {
 	id := vars["id"]
 
 	// Delete booking by id
-	deleteResult, err := app.images.Delete(id)
+	deleteResult, err := app.profileImage.Delete(id)
 	if err != nil {
 		app.serverError(w, err)
 	}
 
 	app.infoLog.Printf("Have been eliminated %d image(s)", deleteResult.DeletedCount)
 }
+

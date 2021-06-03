@@ -3,7 +3,6 @@ package mongodb
 import (
 	"context"
 	"errors"
-	"fmt"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -94,7 +93,6 @@ func (m *UserModel) Delete(id string) (*mongo.DeleteResult, error) {
 }
 
 func (m *UserModel) Update(user models.User) (*mongo.UpdateResult, error) {
-	fmt.Println("LUNAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA %s" , user.Id)
 
 	return m.C.UpdateOne(context.TODO(),bson.M{"_id":user.Id},bson.D{{"$set",bson.M{"biography":user.Biography,"profileInformation.name":user.ProfileInformation.Name,
 		"profileInformation.lastName":user.ProfileInformation.LastName, "profileInformation.username":user.ProfileInformation.Username,"profileInformation.email":user.ProfileInformation.Email,

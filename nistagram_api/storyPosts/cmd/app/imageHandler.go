@@ -66,8 +66,6 @@ func (app *application) saveImage(w http.ResponseWriter, r *http.Request)  {
 		vars := mux.Vars(r)
 		userId := vars["userId"]
 		feedId := vars["storyId"]
-	fmt.Println("prviii puuutt")
-	fmt.Println(userId)
 		r.ParseMultipartForm(32 << 20)
 		file, hander, err := r.FormFile("file")
 		if err != nil {
@@ -79,9 +77,6 @@ func (app *application) saveImage(w http.ResponseWriter, r *http.Request)  {
 		userId = userId[1:]
 		userId = userId[:len(userId)-1]
 	}
-	fmt.Println("POGODIOOOOOOO")
-	fmt.Println(userId)
-	fmt.Println(res1)
 		defer file.Close()
 		var path = "images/story/"+hander.Filename
 		f, err := os.OpenFile(path, os.O_WRONLY|os.O_CREATE, 777)

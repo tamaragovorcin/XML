@@ -21,6 +21,7 @@ type application struct {
 	verifications *mongodb.VerificationModel
 	profileInformation *mongodb.ProfileInformationModal
 	agents *mongodb.AgentModel
+	profileImage *mongodb.ProfileImageModel
 }
 
 func main() {
@@ -86,6 +87,9 @@ func main() {
 
 		profileInformation: &mongodb.ProfileInformationModal{
 			C: client.Database(*mongoDatabse).Collection("profileInformation"),
+		},
+		profileImage:  &mongodb.ProfileImageModel{
+			C: client.Database(*mongoDatabse).Collection("profileImages"),
 		},
 	}
 
