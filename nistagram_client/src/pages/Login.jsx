@@ -92,7 +92,7 @@ render() {
 							<div className="control-group">
 								<div className="form-group controls mb-0 pb-2" style={{ color: "#6c757d", opacity: 1 }}>
 									<input
-										placeholder="Email address"
+										placeholder="Username"
 										className="form-control"
 										id="name"
 										type="text"

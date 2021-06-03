@@ -627,10 +627,7 @@ class ProfilePage extends React.Component {
 
 	sendRequestForFeed(feedPostDTO) {
 		let id = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length-1)
-		alert("OCAJ")
-		alert(id)
-		console.log(id)
-		
+				
 		Axios.post(BASE_URL_FEED + "/api/feed/" + id, feedPostDTO)
 			.then((res) => {
 				if (res.status === 409) {
@@ -646,8 +643,7 @@ class ProfilePage extends React.Component {
 					this.setState({ redirect: true });
 				}
 				let feedId = res.data;
-				console.log(res.data);
-				console.log(res.status);
+				
 				let userid = localStorage.getItem("userId");
 				let pics = [];
 
@@ -662,6 +658,7 @@ class ProfilePage extends React.Component {
 				this.setState({ showImageModal: false, });
 				this.setState({ openModal: true });
 				this.setState({ textSuccessfulModal: "You have successfully added feed post." });
+				this.handleGetPhotos()
 
 			})
 			.catch((err) => {
@@ -670,7 +667,6 @@ class ProfilePage extends React.Component {
 	}
 	sendRequestForFeedAlbum(feedPostDTO){
 		let id = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length-1)
-		alert("HALOS")
 		Axios.post(BASE_URL_FEED + "/api/feedAlbum/" + id, feedPostDTO)
 			.then((res) => {
 				if (res.status === 409) {
