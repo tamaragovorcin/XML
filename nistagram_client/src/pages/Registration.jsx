@@ -37,7 +37,7 @@ class RegisterPage extends Component {
 		usernameError: "none",
 		usernameNotValid: "none",
 		selectedDate: "",
-
+		private : false,
 
 	};
 
@@ -154,10 +154,8 @@ class RegisterPage extends Component {
 		if (this.validateForm(userDTO)) {
 			Axios.post(`${constants.BASE_URL_USER}/api/`, userDTO)
 				.then((res) => {
-					console.log("USPEHHHHHHHHHHH")
 
 					if (res.status === 409) {
-						console.log("jsfhbjsfs")
 						this.setState({
 							errorHeader: "Resource conflict!",
 							errorMessage: "Email already exist.",
@@ -196,8 +194,12 @@ class RegisterPage extends Component {
 		this.setState({ biography: event.target.value });
 	}
 	handlePrivateChange(event) {
-
-		this.setState({ private: true });
+		if(this.state.private=== true) {
+			this.setState({ private: false });
+		}
+		if(this.state.private=== false) {
+			this.setState({ private: true });
+		}
 	}
 	handleCloseAlert = () => {
 		this.setState({ hiddenErrorAlert: true });

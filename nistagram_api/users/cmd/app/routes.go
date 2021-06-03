@@ -16,6 +16,7 @@ func (app *application) routes() *mux.Router {
 
 	r.HandleFunc("/api/search/{name}", app.search).Methods("GET")
 	r.HandleFunc("/api/login", app.loginUser).Methods("POST")
+	r.HandleFunc("/api/user/privacy/{userId}", app.findUserPrivacy).Methods("GET")
 
 	//r.HandleFunc("/api/getLoggedIn", app.getLoggedIn).Methods("GET")
 
