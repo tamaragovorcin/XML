@@ -62,7 +62,7 @@ class EditProfile extends Component {
 	
 	componentDidMount() {
 	
-		let id =localStorage.getItem("userId")
+		let id = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length-1)
 	Axios.get(BASE_URL_USER + "/api/" + id)
 				.then((res) => {
 					if (res.status === 401) {
