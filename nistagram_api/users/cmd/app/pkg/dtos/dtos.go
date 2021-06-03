@@ -20,6 +20,7 @@ type UserRequest struct {
 	Private bool
 	Biography string
 }
+
 type UserUpdateRequest struct {
 	Id string `bson:"_id,omitempty"`
 	Name  string `bson:"name,omitempty"`
@@ -37,6 +38,7 @@ type LoginRequest struct {
 	Username string `bson:"username,omitempty"`
 	Password string `bson:"password,omitempty"`
 }
+
 type UserTokenState struct {
 	AccessToken string
 	ExpiresIn int64
@@ -44,5 +46,6 @@ type UserTokenState struct {
 	UserId primitive.ObjectID
 }
 
-
-
+type ProfileImageInfoDTO struct {
+	Media       []byte
+}

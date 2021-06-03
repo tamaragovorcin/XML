@@ -70,3 +70,8 @@ type Verification struct {
 	Document string    `bson:"document,omitempty"`
 	Category Category  `bson:"category,omitempty"`
 }
+type ProfileImage struct {
+	Id  primitive.ObjectID `bson:"_id,omitempty"`
+	Media string `bson:"media,omitempty"`
+	UserId primitive.ObjectID `bson:"userId"`
+}

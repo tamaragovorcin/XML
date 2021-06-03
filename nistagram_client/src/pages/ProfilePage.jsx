@@ -8,6 +8,7 @@ import { BASE_URL_FEED, BASE_URL_STORY } from "../constants.js";
 import LikesModal from "../components/Posts/LikesModal"
 import DislikesModal from "../components/Posts/DislikesModal"
 import CommentsModal from "../components/Posts/CommentsModal"
+import ImageUploader from 'react-images-upload';
 import Axios from "axios";
 import ModalDialog from "../components/ModalDialog";
 import AddPostModal from "../components/Posts/AddPostModal";
@@ -22,14 +23,25 @@ class ProfilePage extends React.Component {
 
 		this.onDrop = this.onDrop.bind(this);
 		this.addressInput = React.createRef();
+		this.handleAddProfileImage = this.handleAddProfileImage.bind(this);
 
 	}
 	state = {
+		id: "",
 		username: "",
+		name: "",
+		lastName : "",
+		email: "",
+		phoneNumber: "",
+		gender : "Female",
+		dateOfBirth : "",
+		webSite : "",
+		biography : "",
+		private : true,
+		profilePicture : [],
 		numberPosts: 0,
 		numberFollowing: 0,
 		numberFollowers: 0,
-		biography: "",
 		highlihts: [],
 		photos: [],
 		pictures: [],
@@ -149,8 +161,7 @@ class ProfilePage extends React.Component {
 
 	componentDidMount() {
 
-		let id =localStorage.getItem("userId")
-
+		let id = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length-1)
 		Axios.get(BASE_URL_USER + "/api/" + id)
 				.then((res) => {
 					if (res.status === 401) {
@@ -158,8 +169,19 @@ class ProfilePage extends React.Component {
 					} else if (res.status === 500) {
 						this.setState({ errorHeader: "Internal server error!", errorMessage: "Server error.", hiddenErrorAlert: false });
 					} else {
-						
-						console.log(res.data)
+						this.setState({
+							id: res.data.Id,
+							username : res.data.ProfileInformation.Username,
+							name: res.data.ProfileInformation.Name,
+							lastName : res.data.ProfileInformation.LastName,
+							email : res.data.ProfileInformation.Email,
+							phoneNumber : res.data.ProfileInformation.PhoneNumber,
+							gender : res.data.ProfileInformation.Gender,
+							dateOfBirth  : res.data.ProfileInformation.DateOfBirth,
+							webSite : res.data.WebSite,
+							biography : res.data.Biography,
+							private : res.data.Private
+						});
 					}
 				})
 				.catch ((err) => {
@@ -787,6 +809,30 @@ class ProfilePage extends React.Component {
 				console.log(err);
 			});
 	}
+	handleAddProfileImage(picture){
+		alert(picture)
+		let userId = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length-1)
+		this.setState({
+			profilePicture: this.state.profilePicture.concat(picture),
+		});
+		this.setState({
+			fileUploadOngoing: true
+		});
+
+		const fileInput = document.querySelector("#fileInput");
+		const formData = new FormData();
+		formData.append("file", picture);
+		formData.append("test", "StringValueTest");
+
+		const options = {
+			method: "POST",
+			body: formData
+
+		};
+		fetch(BASE_URL_STORY + "/api/user/profileImage/"+userId, options);
+
+
+	}
 	render() {
 		return (
 			<React.Fragment>
@@ -804,10 +850,17 @@ class ProfilePage extends React.Component {
 									<td width="130em">
 										<img
 											className="img-fluid"
-											src={playerLogo}
+											src={this.state.profilePhoto}
 											width="70em"
 											alt="description"
 										/>
+										<ImageUploader
+											withIcon={false}
+											buttonText='Add profile picture'
+											onChange={this.handleAddProfileImage}
+											imgExtension={['.jpg', '.gif', '.png', '.gif']}
+											withPreview={true}
+						/>
 									</td>
 
 									<td>
@@ -816,7 +869,7 @@ class ProfilePage extends React.Component {
 												<label >{this.state.username}</label>
 											</td>
 											<td>
-												<Link to="/userChangeProfile" className="btn btn-outline-secondary btn-sm">Edit profile</Link>
+												<Link to="/settings" className="btn btn-outline-secondary btn-sm">Edit profile</Link>
 
 											</td>
 											<td>
@@ -871,7 +924,7 @@ class ProfilePage extends React.Component {
 														/>
 													</tr>
 													<tr>
-														<label style={{marginRight:"15px"}}>{high.username}</label>
+														<label style={{marginRight:"15px"}}>{high.name}</label>
 													</tr>
 												</td>
 												

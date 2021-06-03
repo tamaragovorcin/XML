@@ -39,5 +39,8 @@ func (app *application) routes() *mux.Router {
 	r.HandleFunc("/agent/", app.insertAgent).Methods("POST")
 	r.HandleFunc("/agent/{id}", app.deleteAgent).Methods("DELETE")
 
+	r.HandleFunc("/api/user/profileImage/{userId}", app.saveImage).Methods("POST")
+	r.HandleFunc("/api/user/profileImage/{userId}", app.getUsersProfileImage).Methods("GET")
+
 	return r
 }
