@@ -13,8 +13,8 @@ type Post struct {
 	Tagged      []primitive.ObjectID `bson:"tagged,omitempty"`
 	Location    Location             `bson:"location,omitempty"`
 	Description string               `bson:"description,omitempty"`
-	Blocked     bool                 `bson:"blocked,omitempty"`
-	Hashtags    []string             `bson:"hashtags,omitempty"`
+	Blocked     bool                 `bson:"blocked"`
+	Hashtags    []string             `bson:"hashtags"`
 
 }
 type Comment struct {
