@@ -109,6 +109,9 @@ func (app *application) insertFeedPost(w http.ResponseWriter, req *http.Request)
 }
 
 func parseHashTags(hashtags string) []string {
+	if hashtags=="" {
+		return nil
+	}
 	a := strings.Split(hashtags, "#")
 	a = a[1:]
 	return a
@@ -187,12 +190,129 @@ func findFeedPostsByUserId(posts []models.FeedPost, idPrimitive primitive.Object
 	feedPostUser := []models.FeedPost{}
 
 	for _, feedPost := range posts {
-		print(feedPost.Post.User.String())
-		print(idPrimitive.String())
-
 		if	feedPost.Post.User.String()==idPrimitive.String() {
 			feedPostUser = append(feedPostUser, feedPost)
 		}
 	}
 	return feedPostUser, nil
+}
+
+func (app *application) getFeedPostsByLocation(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	country := vars["country"]
+	city :=vars["city"]
+	street :=vars["street"]
+	allImages,_ := app.images.All()
+	locationFeedPosts, _ :=app.feedPosts.All()
+
+	if country!="n" || city!="n" || street!="n" {
+		locationFeedPosts,_ =findFeedPostsByLocation(locationFeedPosts,country,city,street)
+	}
+	feedPostResponse := []dtos.FeedPostInfoDTO{}
+	for _, feedPost := range locationFeedPosts {
+
+		images, err := findImageByPostId(allImages,feedPost.Id)
+		if err != nil {
+			app.serverError(w, err)
+		}
+
+		feedPostResponse = append(feedPostResponse, toResponse(feedPost, images.Media))
+
+	}
+
+	imagesMarshaled, err := json.Marshal(feedPostResponse)
+	if err != nil {
+		app.serverError(w, err)
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	w.Write(imagesMarshaled)
+}
+
+func findFeedPostsByLocation(posts []models.FeedPost, country string, city string, street string)([]models.FeedPost, error) {
+	feedPostsLocation := []models.FeedPost{}
+
+	for _, feedPost := range posts {
+		print(feedPost.Post.Location.Country)
+		print(country)
+		print(city)
+		print(street)
+		if	feedPost.Post.Location.Country==country {
+			if city=="n" {
+				feedPostsLocation = append(feedPostsLocation, feedPost)
+			} else if feedPost.Post.Location.Town==city {
+				if street== "n" {
+					feedPostsLocation = append(feedPostsLocation, feedPost)
+				} else if feedPost.Post.Location.Street==street {
+					feedPostsLocation = append(feedPostsLocation, feedPost)
+				}
+			}
+		}
+	}
+	return feedPostsLocation, nil
+}
+
+func (app *application) getFeedPostsByHashTags(w http.ResponseWriter, r *http.Request) {
+	var hashtags dtos.HashTagDTO
+	err := json.NewDecoder(r.Body).Decode(&hashtags)
+	if err != nil {
+		app.serverError(w, err)
+	}
+	allImages,_ := app.images.All()
+	hashTagsFeedPosts, _ :=app.feedPosts.All()
+
+	if hashtags.HashTags!="n" {
+		hashTagsFeedPosts,_ =findFeedPostsByHashTags(hashTagsFeedPosts,parseHashTags(hashtags.HashTags))
+	}
+
+	feedPostResponse := []dtos.FeedPostInfoDTO{}
+	for _, feedPost := range hashTagsFeedPosts {
+
+		images, err := findImageByPostId(allImages,feedPost.Id)
+		if err != nil {
+			app.serverError(w, err)
+		}
+
+		feedPostResponse = append(feedPostResponse, toResponse(feedPost, images.Media))
+
+	}
+
+	imagesMarshaled, err := json.Marshal(feedPostResponse)
+	if err != nil {
+		app.serverError(w, err)
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	w.Write(imagesMarshaled)
+}
+
+func findFeedPostsByHashTags(posts []models.FeedPost, hashtags []string) ([]models.FeedPost, error) {
+	feedPostsHashTags := []models.FeedPost{}
+
+	for _, feedPost := range posts {
+		feedPostsHashTagsList := feedPost.Post.Hashtags
+		if feedPostsHashTagsList !=nil {
+			if postContainsAllHashTags(feedPostsHashTagsList,hashtags) {
+				feedPostsHashTags = append(feedPostsHashTags, feedPost)
+			}
+		}
+
+	}
+	return feedPostsHashTags, nil
+}
+
+func postContainsAllHashTags(list []string, hashtags []string) bool {
+
+	for _, hash := range hashtags {
+		found :=false
+		for _, itemInList := range list {
+			if hash == itemInList {
+				found= true
+			}
+		}
+		if found==false {
+			return false
+		}
+	}
+	return true
 }

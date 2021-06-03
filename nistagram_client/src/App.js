@@ -10,6 +10,8 @@ import EditProfile from './pages/EditProfile';
 import PasswordChange from './pages/PasswordChange'
 import Favorites from './pages/Favorites';
 import PharmacyProfilePage from './pages/FollowerProfilePage';
+import Search from './pages/Search';
+
 function App() {
   return (
     <Router>
@@ -25,6 +27,8 @@ function App() {
 				<Link exact to="/passwordChange" path="/passwordChange" component={PasswordChange} />
 				<Link exact to="/settings" path="/settings" component={EditProfile} />
 				<Route path="/followerProfilePage/:id" children={<PharmacyProfilePage />} />
+				<Link exact to="/seacrh" path="/seacrh" component={Search} />
+
 			</Switch>
 	</Router>
   );

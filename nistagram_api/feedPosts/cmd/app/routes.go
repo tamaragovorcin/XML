@@ -42,6 +42,9 @@ func (app *application) routes() *mux.Router {
 
 	r.HandleFunc("/api/image/{userIdd}/{feedId}", app.saveImage).Methods("POST")
 	r.HandleFunc("/api/feed/usersImages/{userIdd}", app.getUsersFeedPosts).Methods("GET")
+	r.HandleFunc("/api/feed/searchByLocation/{country}/{city}/{street}", app.getFeedPostsByLocation).Methods("GET")
+	r.HandleFunc("/api/feed/searchByHashTags/", app.getFeedPostsByHashTags).Methods("POST")
+
 
 	return r
 }

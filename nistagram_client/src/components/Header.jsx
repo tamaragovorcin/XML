@@ -5,13 +5,14 @@ import { BiBookmark } from 'react-icons/bi';
 import Axios from "axios";
 import { FiSettings, FiSend } from 'react-icons/fi';
 import { VscHome } from 'react-icons/vsc';
+import {FaSearch } from 'react-icons/fa';
+
 import { AiOutlineHeart } from 'react-icons/ai';
 import { BASE_URL_USER } from "../constants.js";
 import Select from 'react-select';
 
 class Header extends React.Component {
 	state = {
-		options: ["mladenka", "vojna"],
 		search: "",
 		users: [],
 		options: [],
@@ -103,6 +104,9 @@ class Header extends React.Component {
 						<ul>
 							<li>
 								<Link to="" ><VscHome /></Link>
+							</li>
+							<li  >
+								<Link to="/seacrh"><FaSearch /></Link>
 							</li>
 							<li  >
 								<Link to="/messages"><FiSend /></Link>

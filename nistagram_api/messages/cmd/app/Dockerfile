@@ -8,6 +8,6 @@ COPY go.mod .
 COPY go.sum .
 RUN go mod download
 COPY . .
-RUN go build -o messages/cmd/app
-EXPOSE 8080
+RUN go build -o messages
+EXPOSE 4002
 CMD ["./messages"]
