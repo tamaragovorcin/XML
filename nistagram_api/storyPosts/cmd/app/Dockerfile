@@ -8,6 +8,6 @@ COPY go.mod .
 COPY go.sum .
 RUN go mod download
 COPY . .
-RUN go build -o storyPosts/cmd/app
-EXPOSE 8080
+RUN go build -o storyPosts
+EXPOSE 4004
 CMD ["./storyPosts"]

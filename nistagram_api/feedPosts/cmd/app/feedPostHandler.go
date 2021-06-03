@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"feedPosts/pkg/dtos"
 	"feedPosts/pkg/models"
+	"fmt"
 	"github.com/gorilla/mux"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"image"
@@ -63,8 +64,15 @@ func (app *application) findFeedPostByID(w http.ResponseWriter, r *http.Request)
 func (app *application) insertFeedPost(w http.ResponseWriter, req *http.Request) {
 	vars := mux.Vars(req)
 	userId := vars["userIdd"]
-	print(userId)
 	var m dtos.FeedPostDTO
+	res1 := strings.HasPrefix(userId, "\"")
+	if res1 == true {
+		userId = userId[1:]
+		userId = userId[:len(userId)-1]
+	}
+	fmt.Println(res1)
+	fmt.Println(res1)
+	fmt.Println(userId)
 	err := json.NewDecoder(req.Body).Decode(&m)
 	if err != nil {
 		app.serverError(w, err)

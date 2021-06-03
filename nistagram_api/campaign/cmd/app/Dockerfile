@@ -8,6 +8,6 @@ COPY go.mod .
 COPY go.sum .
 RUN go mod download
 COPY . .
-RUN go build -o campaigns/cmd/app
-EXPOSE 8080
-CMD ["./campaigns"]
+RUN go build -o campaign
+EXPOSE 4000
+CMD ["./campaign"]

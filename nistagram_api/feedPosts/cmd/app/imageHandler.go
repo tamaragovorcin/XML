@@ -9,6 +9,7 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"strings"
 )
 
 func (app *application) getAllImages(w http.ResponseWriter, r *http.Request) {
@@ -63,31 +64,37 @@ func (app *application) findImageByID(w http.ResponseWriter, r *http.Request) {
 }
 func (app *application) saveImage(w http.ResponseWriter, r *http.Request)  {
 
-		vars := mux.Vars(r)
-		userId := vars["userIdd"]
-		feedId := vars["feedId"]
-		r.ParseMultipartForm(32 << 20)
-		file, hander, err := r.FormFile("file")
-		if err != nil {
-			fmt.Println(err.Error())
+	vars := mux.Vars(r)
+	userId := vars["userIdd"]
+	feedId := vars["feedId"]
+	r.ParseMultipartForm(32 << 20)
+	file, hander, err := r.FormFile("file")
+	if err != nil {
+		fmt.Println(err.Error())
 
-		}
-		defer file.Close()
-		var path = "feedPosts/cmd/app/images/feed/"+hander.Filename
-		f, err := os.OpenFile(path, os.O_WRONLY|os.O_CREATE, 777)
-		if err != nil {
-			fmt.Println(err.Error())
-		}
-		defer f.Close()
-		io.Copy(f, file)
+	}
+	res1 := strings.HasPrefix(userId, "\"")
+	if res1 == true {
+		userId = userId[1:]
+		userId = userId[:len(userId)-1]
+	}
 
-		userIdPrimitive, _ := primitive.ObjectIDFromHex(userId)
-		postIdPrimitive, _ :=primitive.ObjectIDFromHex(feedId)
-		var image = models.Image{
-			Media : path,
-			UserId : userIdPrimitive,
-			PostId : postIdPrimitive,
-		}
+	defer file.Close()
+	var path = "feedPosts/cmd/app/images/feed/"+hander.Filename
+	f, err := os.OpenFile(path, os.O_WRONLY|os.O_CREATE, 777)
+	if err != nil {
+		fmt.Println(err.Error())
+	}
+	defer f.Close()
+	io.Copy(f, file)
+
+	userIdPrimitive, _ := primitive.ObjectIDFromHex(userId)
+	postIdPrimitive, _ :=primitive.ObjectIDFromHex(feedId)
+	var image =models.Image {
+		Media : path,
+		UserId : userIdPrimitive,
+		PostId : postIdPrimitive,
+	}
 
 	insertResult, err  := app.images.Insert(image)
 
@@ -101,14 +108,14 @@ func (app *application) saveImage(w http.ResponseWriter, r *http.Request)  {
 
 
 func findImagesByUserId(images []models.Image, idPrimitive primitive.ObjectID) ([]models.Image, error) {
-		imagesUser := []models.Image{}
+	imagesUser := []models.Image{}
 
-		for _, image := range images {
-			if	image.UserId==idPrimitive {
-				imagesUser = append(imagesUser, image)
-			}
+	for _, image := range images {
+		if	image.UserId==idPrimitive {
+			imagesUser = append(imagesUser, image)
 		}
-		return imagesUser, nil
+	}
+	return imagesUser, nil
 }
 func findImageByPostId(images []models.Image, idFeedPost primitive.ObjectID) (models.Image, error) {
 	imageFeedPost := models.Image{}

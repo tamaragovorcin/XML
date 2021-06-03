@@ -38,7 +38,6 @@ class Header extends React.Component {
 	};
 
 	handleChange = (event) => {
-		alert("mvmvmvmv")
 		this.setState({ userId: event.value });
 		window.location = "#/followerProfilePage/" + event.value;
 		

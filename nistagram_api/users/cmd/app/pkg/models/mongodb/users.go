@@ -35,7 +35,7 @@ func (m *UserModel) GetAll() ([]models.User, error) {
 }
 
 // FindByID will be used to find a new user registry by id
-func (m *UserModel) FindByID(id int) (*models.User, error) {
+func (m *UserModel) FindByID(id primitive.ObjectID) (*models.User, error) {
 
 	/*p, err := primitive.ObjectIDFromHex(id)
 	fmt.Println("LUNAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA %s" , p)
