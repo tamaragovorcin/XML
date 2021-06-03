@@ -177,6 +177,37 @@ func (app *application) findUserByID(w http.ResponseWriter, r *http.Request) {
 	w.Write(b)
 }
 
+func (app *application) findUserPrivacy(w http.ResponseWriter, r *http.Request) {
+
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	vars := mux.Vars(r)
+	userId := vars["userId"]
+	intVar, err := primitive.ObjectIDFromHex(userId)
+	m, err := app.users.FindByID(intVar)
+	if err != nil {
+	if err.Error() == "ErrNoDocuments" {
+		app.infoLog.Println("User not found")
+		return
+	}
+	app.serverError(w, err)
+	}
+	writing := ""
+	if m.Private==true {
+		writing="private"
+	}else if m.Private==false {
+		writing = "public"
+	}
+	b, err := json.Marshal(writing)
+	if err != nil {
+		app.serverError(w, err)
+	}
+
+	app.infoLog.Println("Have been found a user")
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	w.Write(b)
+}
 
 func HashAndSaltPasswordIfStrong(password string) (string, error) {
 
@@ -249,8 +280,6 @@ func (app *application) insertUser(w http.ResponseWriter, r *http.Request) {
 		}
 
 	}
-
-
 
 	if able  {
 		hashAndSalt, err := HashAndSaltPasswordIfStrong(m.Password)

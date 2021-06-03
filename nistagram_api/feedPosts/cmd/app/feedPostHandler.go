@@ -10,6 +10,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"image"
 	"image/jpeg"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
@@ -233,23 +234,44 @@ func findFeedPostsByLocation(posts []models.FeedPost, country string, city strin
 	feedPostsLocation := []models.FeedPost{}
 
 	for _, feedPost := range posts {
-		print(feedPost.Post.Location.Country)
-		print(country)
-		print(city)
-		print(street)
-		if	feedPost.Post.Location.Country==country {
-			if city=="n" {
-				feedPostsLocation = append(feedPostsLocation, feedPost)
-			} else if feedPost.Post.Location.Town==city {
-				if street== "n" {
+		if userIsPublic(feedPost.Post.User)==true {
+			if	feedPost.Post.Location.Country==country {
+				if city=="n" {
 					feedPostsLocation = append(feedPostsLocation, feedPost)
-				} else if feedPost.Post.Location.Street==street {
-					feedPostsLocation = append(feedPostsLocation, feedPost)
+				} else if feedPost.Post.Location.Town==city {
+					if street== "n" {
+						feedPostsLocation = append(feedPostsLocation, feedPost)
+					} else if feedPost.Post.Location.Street==street {
+						feedPostsLocation = append(feedPostsLocation, feedPost)
+					}
 				}
 			}
 		}
+		
 	}
 	return feedPostsLocation, nil
+}
+
+func userIsPublic(user primitive.ObjectID) bool {
+
+	stringObjectID := user.Hex()
+	fmt.Println(stringObjectID)
+	resp, err := http.Get("http://localhost:4006/api/user/privacy/"+stringObjectID)
+	if err != nil {
+		log.Fatalln(err)
+	}
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		log.Fatalln(err)
+	}
+	sb := string(body)
+	sb = sb[1:]
+	sb = sb[:len(sb)-1]
+	if sb == "public" {
+		return true
+	}
+
+	return false
 }
 
 func (app *application) getFeedPostsByHashTags(w http.ResponseWriter, r *http.Request) {
@@ -290,10 +312,12 @@ func findFeedPostsByHashTags(posts []models.FeedPost, hashtags []string) ([]mode
 	feedPostsHashTags := []models.FeedPost{}
 
 	for _, feedPost := range posts {
-		feedPostsHashTagsList := feedPost.Post.Hashtags
-		if feedPostsHashTagsList !=nil {
-			if postContainsAllHashTags(feedPostsHashTagsList,hashtags) {
-				feedPostsHashTags = append(feedPostsHashTags, feedPost)
+		if userIsPublic(feedPost.Post.User)==true {
+			feedPostsHashTagsList := feedPost.Post.Hashtags
+			if feedPostsHashTagsList != nil {
+				if postContainsAllHashTags(feedPostsHashTagsList, hashtags) {
+					feedPostsHashTags = append(feedPostsHashTags, feedPost)
+				}
 			}
 		}
 

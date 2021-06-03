@@ -46,29 +46,29 @@ type Agent struct {
 	Id  uuid.UUID `bson:"_id,omitempty"`
 	User uuid.UUID `bson:"user,omitempty"`
 	Website string `bson:"website,omitempty"`
-	ApprovedAgent bool `bson:"approvedAgent,omitempty"`
+	ApprovedAgent bool `bson:"approvedAgent"`
 }
 
 type User struct {
 	Id                 primitive.ObjectID `bson:"_id,omitempty"`
 	ProfileInformation ProfileInformation `bson:"profileInformation,omitempty"`
-	Private            bool               `bson:"private,omitempty"`
-	Website            string             `bson:"webSite,omitempty"`
-	Biography          string             `bson:"biography,omitempty"`
-	Verified           bool               `bson:"verified,omitempty"`
-	Category           Category           `bson:"category,omitempty"`
-	LikedPosts         []uuid.UUID        `bson:"likedPosts,omitempty"`
-	DislikedPosts      []uuid.UUID        `bson:"disliked,omitempty"`
+	Private            bool               `bson:"private"`
+	Website            string             `bson:"webSite"`
+	Biography          string             `bson:"biography"`
+	Verified           bool               `bson:"verified"`
+	Category           Category           `bson:"category"`
+	LikedPosts         []uuid.UUID        `bson:"likedPosts"`
+	DislikedPosts      []uuid.UUID        `bson:"disliked"`
 }
 
 type Verification struct {
 	Id       uuid.UUID `bson:"_id,omitempty"`
-	User     uuid.UUID `bson:"user,omitempty"`
-	Name     string    `bson:"name,omitempty"`
-	LastName string    `bson:"lastname,omitempty"`
-	Approved bool      `bson:"approved,omitempty"`
-	Document string    `bson:"document,omitempty"`
-	Category Category  `bson:"category,omitempty"`
+	User     uuid.UUID `bson:"user"`
+	Name     string    `bson:"name"`
+	LastName string    `bson:"lastname"`
+	Approved bool      `bson:"approved"`
+	Document string    `bson:"document"`
+	Category Category  `bson:"category"`
 }
 type ProfileImage struct {
 	Id  primitive.ObjectID `bson:"_id,omitempty"`
