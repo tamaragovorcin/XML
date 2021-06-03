@@ -102,9 +102,11 @@ func toResponse(image2 string) dtos.ProfileImageInfoDTO {
 	}
 }
 func (app *application) saveImage(w http.ResponseWriter, r *http.Request)  {
+	fmt.Println("USAOOOOOOOOOOOOOOO JE")
 
 	vars := mux.Vars(r)
 	userId := vars["userId"]
+	fmt.Println(userId)
 	r.ParseMultipartForm(32 << 20)
 	file, hander, err := r.FormFile("file")
 	if err != nil {
