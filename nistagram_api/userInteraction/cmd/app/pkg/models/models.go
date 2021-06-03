@@ -20,3 +20,46 @@ type Report struct {
 	FeedPost uuid.UUID `bson:"feedPost,omitempty"`
 	StoryPost uuid.UUID `bson:"storyPost,omitempty"`
 }
+type MovieResult struct {
+	Movie `json:"movie"`
+}
+
+type VoteResult struct {
+	Updates int `json:"updates"`
+}
+
+type Movie struct {
+	Released int64    `json:"released"`
+	Title    string   `json:"title,omitempty"`
+	Tagline  string   `json:"tagline,omitempty"`
+	Votes    int64    `json:"votes,omitempty"`
+	Cast     []Person `json:"cast,omitempty"`
+}
+
+type Person struct {
+	Job  string   `json:"job"`
+	Role []string `json:"role"`
+	Name string   `json:"name"`
+}
+
+type D3Response struct {
+	Nodes []Node `json:"nodes"`
+	Links []Link `json:"links"`
+}
+
+type Node struct {
+	Title string `json:"title"`
+	Label string `json:"label"`
+}
+
+type Link struct {
+	Source int `json:"source"`
+	Target int `json:"target"`
+}
+
+type Neo4jConfiguration struct {
+	Url      string
+	Username string
+	Password string
+	Database string
+}
