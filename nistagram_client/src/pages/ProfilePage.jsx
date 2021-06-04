@@ -17,6 +17,8 @@ import { BASE_URL_USER } from "../constants.js";
 import { FiHeart } from "react-icons/fi";
 import {FaHeartBroken,FaRegCommentDots} from "react-icons/fa"
 import {BsBookmark} from "react-icons/bs"
+import IconTabsProfile from "../components/Posts/IconTabsProfile"
+
 class ProfilePage extends React.Component {
 	constructor(props) {
 		super(props);
@@ -930,6 +932,9 @@ class ProfilePage extends React.Component {
 									</tbody>
 								</table>
 							</div>
+				</div>
+				<div>
+					<IconTabsProfile/>
 				</div>
 				<div className="d-flex align-items-top">
 					<div className="container-fluid">
