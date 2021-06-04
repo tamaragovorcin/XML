@@ -34,19 +34,21 @@ func (app *application) routes() *mux.Router {
 	r.HandleFunc("/albumFeed/{id}", app.findAlbumFeedByID).Methods("GET")
 	r.HandleFunc("/albumFeed/", app.insertAlbumFeed).Methods("POST")
 	r.HandleFunc("/albumFeed/{id}", app.deleteAlbumFeed).Methods("DELETE")
+	r.HandleFunc("/api/feedAlbum/usersAlbums/{userIdd}", app.getUsersFeedAlbums).Methods("GET")
 
-	r.HandleFunc("/collection/", app.getAllCollections).Methods("GET")
-	r.HandleFunc("/collection/{id}", app.findCollectionByID).Methods("GET")
-	r.HandleFunc("/collection/{id}", app.deleteCollection).Methods("DELETE")
+
 
 	r.HandleFunc("/api/image/{userIdd}/{feedId}", app.saveImage).Methods("POST")
 	r.HandleFunc("/api/feed/usersImages/{userIdd}", app.getUsersFeedPosts).Methods("GET")
 	r.HandleFunc("/api/feed/searchByLocation/{country}/{city}/{street}", app.getFeedPostsByLocation).Methods("GET")
 	r.HandleFunc("/api/feed/searchByHashTags/", app.getFeedPostsByHashTags).Methods("POST")
 
-	r.HandleFunc("/api/collection/{id}", app.insertCollection).Methods("POST")
-	r.HandleFunc("/api/addToFavourites/{userId}/{feedId}", app.addToFavourites).Methods("POST")
-	r.HandleFunc("/api/getCollections/{userId}", app.getUsersSavedPosts).Methods("GET")
+	r.HandleFunc("/api/collection/allData/{userId}", app.insertAllDataCollection).Methods("POST")
+	r.HandleFunc("/collection/", app.getAllCollections).Methods("GET")
+	r.HandleFunc("/api/collection/{userId}", app.insertCollection).Methods("POST")
+	r.HandleFunc("/api/collection/{id}", app.deleteCollection).Methods("DELETE")
+	r.HandleFunc("/api/collection/user/{userId}", app.getUsersCollections).Methods("GET")
+	r.HandleFunc("/api/collection/addPost/", app.insetPostInCollection).Methods("POST")
 
 	return r
 }

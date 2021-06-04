@@ -34,16 +34,10 @@ func (m *HighlightModel) All() ([]models.HighLight, error) {
 	return uu, err
 }
 
-// FindByID will be used to find a new user registry by id
-func (m *HighlightModel) FindByID(id string) (*models.HighLight, error) {
-	p, err := primitive.ObjectIDFromHex(id)
-	if err != nil {
-		return nil, err
-	}
+func (m *HighlightModel) FindByID(id primitive.ObjectID) (*models.HighLight, error) {
 
-	// Find user by id
-	var user = models.HighLight{}
-	err = m.C.FindOne(context.TODO(), bson.M{"_id": p}).Decode(&user)
+	var highlight = models.HighLight{}
+	err := m.C.FindOne(context.TODO(), bson.M{"_id": id}).Decode(&highlight)
 	if err != nil {
 		// Checks if the user was not found
 		if err == mongo.ErrNoDocuments {
@@ -52,7 +46,7 @@ func (m *HighlightModel) FindByID(id string) (*models.HighLight, error) {
 		return nil, err
 	}
 
-	return &user, nil
+	return &highlight, nil
 }
 
 // Insert will be used to insert a new user
@@ -67,4 +61,9 @@ func (m *HighlightModel) Delete(id string) (*mongo.DeleteResult, error) {
 		return nil, err
 	}
 	return m.C.DeleteOne(context.TODO(), bson.M{"_id": p})
+}
+
+func (m *HighlightModel) Update(highlight models.HighLight) (*mongo.UpdateResult, error) {
+	return m.C.UpdateOne(context.TODO(),bson.M{"_id":highlight.Id},bson.D{{"$set",bson.M{"name":highlight.Name,"user":highlight.User,
+		"stories":highlight.Stories}}})
 }

@@ -32,28 +32,47 @@ type PostInfoDTO struct {
 
 type FeedPostInfoDTO struct {
 	Id          primitive.ObjectID
-	Post        PostInfoDTO
 	Likes       []primitive.ObjectID
 	Dislikes    []primitive.ObjectID
 	Comments    []primitive.ObjectID
 	DateTime    string
 	Tagged      []primitive.ObjectID
-	Location    models2.Location
+	Location    string
 	Description string
-	Hashtags    []string
+	Hashtags    string
 	Media       []byte
 }
+
 type CollectionInfoDTO struct {
-	Id          primitive.ObjectID
-	User primitive.ObjectID
+	Id  primitive.ObjectID
+	Posts []FeedPostInfoDTO
 	Name string
 }
 type SavedPostDTO struct {
 	User       string
 	FeedPost   string
 }
-type UserCollectionsDTO struct{
-	Id primitive.ObjectID
-	Name string
+type UserCollectionsDTO struct {
+	Id         primitive.ObjectID
+	Name       string
 	SavedPosts []models2.SavedPost
+}
+type FeedAlbumInfoDTO struct {
+	Id          primitive.ObjectID
+	Likes       []primitive.ObjectID
+	Dislikes    []primitive.ObjectID
+	Comments    []primitive.ObjectID
+	DateTime    string
+	Tagged      []primitive.ObjectID
+	Location    string
+	Description string
+	Hashtags    string
+	Media       [][]byte
+}
+type CollectionDTO struct {
+	Name string
+}
+type CollectionPostDTO struct {
+	PostId primitive.ObjectID
+	CollectionId primitive.ObjectID
 }

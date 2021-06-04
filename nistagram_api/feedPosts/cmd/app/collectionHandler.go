@@ -1,13 +1,18 @@
 package main
 
 import (
+	"bytes"
 	"encoding/json"
 	"feedPosts/pkg/dtos"
 	"feedPosts/pkg/models"
 	"fmt"
 	"github.com/gorilla/mux"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	"image"
+	"image/jpeg"
+	"log"
 	"net/http"
+	"os"
 	"strings"
 )
 
@@ -58,9 +63,10 @@ func (app *application) findCollectionByID(w http.ResponseWriter, r *http.Reques
 	// Get id from incoming url
 	vars := mux.Vars(r)
 	id := vars["id"]
+	idPrim, _ := primitive.ObjectIDFromHex(id)
 
 	// Find movie by id
-	m, err := app.collections.FindByID(id)
+	m, err := app.collections.FindByID(idPrim)
 	if err != nil {
 		if err.Error() == "ErrNoDocuments" {
 			app.infoLog.Println("collections not found")
@@ -118,9 +124,9 @@ func (app *application) addToFavourites(w http.ResponseWriter, req *http.Request
 	w.Write(idMarshaled)
 }
 
-func (app *application) insertCollection(w http.ResponseWriter, req *http.Request) {
+func (app *application) insertAllDataCollection(w http.ResponseWriter, req *http.Request) {
 	vars := mux.Vars(req)
-	userId := vars["id"]
+	userId := vars["userId"]
 	res1 := strings.HasPrefix(userId, "\"")
 	if res1 == true {
 		userId = userId[1:]
@@ -135,7 +141,7 @@ func (app *application) insertCollection(w http.ResponseWriter, req *http.Reques
 	var collection = models.Collection{
 		User : userIdPrimitive,
 		Name: "All data",
-
+		Posts : []models.FeedPost{},
 	}
 
 	insertResult, err := app.collections.Insert(collection)
@@ -150,6 +156,34 @@ func (app *application) insertCollection(w http.ResponseWriter, req *http.Reques
 	idMarshaled, err := json.Marshal(insertResult.InsertedID)
 	w.Write(idMarshaled)
 	}
+}
+func (app *application) insertCollection(w http.ResponseWriter, req *http.Request) {
+	vars := mux.Vars(req)
+	userId := vars["userId"]
+	var m dtos.CollectionDTO
+	res1 := strings.HasPrefix(userId, "\"")
+	if res1 == true {
+		userId = userId[1:]
+		userId = userId[:len(userId)-1]
+	}
+
+	userIdPrimitive, _ := primitive.ObjectIDFromHex(userId)
+	err := json.NewDecoder(req.Body).Decode(&m)
+	if err != nil {
+		app.serverError(w, err)
+	}
+	var collection = models.Collection{
+		User : userIdPrimitive,
+		Name : m.Name,
+		Posts : []models.FeedPost{},
+	}
+
+	insertResult, err := app.collections.Insert(collection)
+	if err != nil {
+		app.serverError(w, err)
+	}
+	app.infoLog.Printf("New highlight have been created, id=%s", insertResult.InsertedID)
+
 }
 
 func (app *application) deleteCollection(w http.ResponseWriter, r *http.Request) {
@@ -180,17 +214,18 @@ func (app *application) getUsersCollections(w http.ResponseWriter, r *http.Reque
 	userId := vars["userId"]
 	userIdPrimitive, _ := primitive.ObjectIDFromHex(userId)
 	allCollections, _ :=app.collections.All()
-	usersCollections,err :=findCollectionsByUserId(allCollections,userIdPrimitive)
+	allImages,_ := app.images.All()
+	usersHighlights,err :=findCollectionsByUserId(allCollections,userIdPrimitive)
 	if err != nil {
 		app.serverError(w, err)
 	}
-	collectionResponse := []dtos.CollectionInfoDTO{}
-	for _, collection := range usersCollections {
-		collectionResponse = append(collectionResponse, collectionToResponse(collection))
+	highlightsResponse := []dtos.CollectionInfoDTO{}
+	for _, highlight := range usersHighlights {
 
+		images := highlight.Posts
+		highlightsResponse = append(highlightsResponse, toResponseCollections(highlight, images, allImages))
 	}
-
-	imagesMarshaled, err := json.Marshal(collectionResponse)
+	imagesMarshaled, err := json.Marshal(highlightsResponse)
 	if err != nil {
 		app.serverError(w, err)
 	}
@@ -198,12 +233,79 @@ func (app *application) getUsersCollections(w http.ResponseWriter, r *http.Reque
 	w.WriteHeader(http.StatusOK)
 	w.Write(imagesMarshaled)
 }
+func getImageByFeedPost(images []models.Image,highlightsId primitive.ObjectID) string {
+	storyImage := models.Image{}
 
-func collectionToResponse(collection models.Collection) dtos.CollectionInfoDTO {
+	for _, image := range images {
+		if	image.PostId==highlightsId {
+			storyImage = image
+		}
+	}
+	return storyImage.Media
+}
+func toResponseFeedPost(storyPost models.FeedPost, image2 string) dtos.FeedPostInfoDTO {
+	f, _ := os.Open(image2)
+	defer f.Close()
+	image, _, _ := image.Decode(f)
+	buffer := new(bytes.Buffer)
+	if err := jpeg.Encode(buffer, image, nil); err != nil {
+		log.Println("unable to encode image.")
+	}
+
+	return dtos.FeedPostInfoDTO{
+		Id: storyPost.Id,
+		DateTime : strings.Split(storyPost.Post.DateTime.String(), " ")[0],
+		Tagged :  storyPost.Post.Tagged,
+		Location : locationToString(storyPost.Post.Location),
+		Description : storyPost.Post.Description,
+		Hashtags : hashTagsToString(storyPost.Post.Hashtags),
+		Media : buffer.Bytes(),
+
+	}
+}
+func toResponseCollections(highlight models.Collection, storyPosts []models.FeedPost, images []models.Image) dtos.CollectionInfoDTO {
+	storiesInfoDtos := []dtos.FeedPostInfoDTO{}
+	for _, storyPost := range storyPosts {
+		image := getImageByFeedPost(images,storyPost.Id)
+		storyPostInfoDTO :=toResponseFeedPost(storyPost,image)
+		storiesInfoDtos = append(storiesInfoDtos,storyPostInfoDTO)
+	}
 
 	return dtos.CollectionInfoDTO{
-		Id: collection.Id,
-		User: collection.User,
-		Name : collection.Name,
+		Id: highlight.Id,
+		Posts: storiesInfoDtos,
+		Name : highlight.Name,
 	}
+}
+
+func (app *application) insetPostInCollection(w http.ResponseWriter, r *http.Request) {
+
+	var m dtos.CollectionPostDTO
+	err := json.NewDecoder(r.Body).Decode(&m)
+	if err != nil {
+		app.serverError(w, err)
+	}
+
+	collection, err := app.collections.FindByID(m.CollectionId)
+	if collection == nil {
+		app.infoLog.Println("Collection not found")
+	}
+	feedPosts, err := app.feedPosts.FindByID(m.PostId)
+	if feedPosts == nil {
+		app.infoLog.Println("Posts not found")
+	}
+
+
+	var collectionUpdate = models.Collection{
+		Id: m.CollectionId,
+		User:collection.User,
+		Name : collection.Name,
+		Posts: append(collection.Posts, *feedPosts),
+	}
+
+	insertResult, err := app.collections.Update(collectionUpdate)
+	if err != nil {
+		app.serverError(w, err)
+	}
+	app.infoLog.Printf("New user have been created, id=%s", insertResult.UpsertedID)
 }

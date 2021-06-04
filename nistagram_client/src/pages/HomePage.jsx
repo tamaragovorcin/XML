@@ -68,7 +68,7 @@ class HomePage extends React.Component {
 	}
 	componentDidMount() {
 		let id = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length-1)
-		Axios.post(BASE_URL_FEED + "/api/collection/"+id)
+		Axios.post(BASE_URL_FEED + "/api/collection/allData/"+id)
 								.then((res) => {
 									if (res.status === 409) {
 										this.setState({
@@ -287,20 +287,8 @@ class HomePage extends React.Component {
 					</div>
 				</div>
 
-
-
-				
-
-
-
-
-
-
 				</div>
 					
-
-
-
 				</section>
 				<div>
                         
