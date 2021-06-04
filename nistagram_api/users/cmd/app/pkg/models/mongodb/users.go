@@ -36,13 +36,6 @@ func (m *UserModel) GetAll() ([]models.User, error) {
 // FindByID will be used to find a new user registry by id
 func (m *UserModel) FindByID(id primitive.ObjectID) (*models.User, error) {
 
-	/*p, err := primitive.ObjectIDFromHex(id)
-	fmt.Println("LUNAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA %s" , p)
-	if err != nil {
-		return nil, err
-	}
-*/
-	// Find user by id
 	var user = models.User{}
 	err := m.C.FindOne(context.TODO(), bson.M{"_id": id}).Decode(&user)
 	if err != nil {
@@ -57,12 +50,7 @@ func (m *UserModel) FindByID(id primitive.ObjectID) (*models.User, error) {
 }
 
 func (m *UserModel)  FindByUsername(username string) (*models.User, error) {
-	/*p, err := primitive.ObjectIDFromHex(id)
-	if err != nil {
-		return nil, err
-	}
-	fmt.Println("dsgsrgrsgd  %s", p)
-	// Find user by id*/
+
 	var user = models.User{}
 	err := m.C.FindOne(context.TODO(), bson.M{"profileInformation.username": username}).Decode(&user)
 

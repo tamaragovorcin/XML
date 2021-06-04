@@ -1,12 +1,18 @@
 package main
 
 import (
+	"bytes"
 	"encoding/json"
 	"feedPosts/pkg/dtos"
 	"feedPosts/pkg/models"
 	"github.com/gorilla/mux"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	"image"
+	"image/jpeg"
+	"log"
 	"net/http"
+	"os"
+	"strings"
 	"time"
 )
 
@@ -112,4 +118,87 @@ func (app *application) deleteAlbumFeed(w http.ResponseWriter, r *http.Request) 
 	}
 
 	app.infoLog.Printf("Have been eliminated %d albumFeeds(s)", deleteResult.DeletedCount)
+}
+
+func (app *application) getUsersFeedAlbums(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	userId := vars["userIdd"]
+	userIdPrimitive, _ := primitive.ObjectIDFromHex(userId)
+	allImages, _ := app.images.All()
+	allAlbums, _ := app.albumFeeds.All()
+	usersFeedAlbums, err := findFeedAlbumsByUserId(allAlbums, userIdPrimitive)
+	if err != nil {
+		app.serverError(w, err)
+	}
+
+	feedAlbumResponse := []dtos.FeedAlbumInfoDTO{}
+	for _, album := range usersFeedAlbums {
+
+		images, err := findAlbumByPostId(allImages,album.Id)
+		if err != nil {
+			app.serverError(w, err)
+		}
+
+		feedAlbumResponse = append(feedAlbumResponse, toResponseAlbum(album, images))
+
+	}
+
+	imagesMarshaled, err := json.Marshal(feedAlbumResponse)
+	if err != nil {
+		app.serverError(w, err)
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	w.Write(imagesMarshaled)
+}
+func findFeedAlbumsByUserId(albums []models.AlbumFeed, idPrimitive primitive.ObjectID) ([]models.AlbumFeed, error){
+	feedAlbumsUser := []models.AlbumFeed{}
+
+	for _, album := range albums {
+		if	album.Post.User.String()==idPrimitive.String() {
+			feedAlbumsUser = append(feedAlbumsUser, album)
+		}
+	}
+	return feedAlbumsUser, nil
+}
+func findAlbumByPostId(images []models.Image, idFeedAlbum primitive.ObjectID) ([]string, error) {
+	imageAlbumPost := []string{}
+
+	for _, image := range images {
+
+		if	image.PostId==idFeedAlbum {
+			imageAlbumPost= append(imageAlbumPost, image.Media)
+		}
+	}
+	return imageAlbumPost, nil
+}
+func toResponseAlbum(feedAlbum models.AlbumFeed, imageList []string) dtos.FeedAlbumInfoDTO {
+	imagesBuffered := [][]byte{}
+	for _, image2 := range imageList {
+		f, _ := os.Open(image2)
+		defer f.Close()
+		image, _, _ := image.Decode(f)
+		buffer := new(bytes.Buffer)
+		if err := jpeg.Encode(buffer, image, nil); err != nil {
+			log.Println("unable to encode image.")
+		}
+		imageBuffered :=buffer.Bytes()
+		imagesBuffered= append(imagesBuffered, imageBuffered)
+	}
+
+
+	return dtos.FeedAlbumInfoDTO{
+		Id: feedAlbum.Id,
+		Comments: feedAlbum.Comments,
+		Likes: feedAlbum.Likes,
+		Dislikes: feedAlbum.Dislikes,
+
+		DateTime : strings.Split(feedAlbum.Post.DateTime.String(), " ")[0],
+		Tagged :feedAlbum.Post.Tagged,
+		Location : locationToString(feedAlbum.Post.Location),
+		Description : feedAlbum.Post.Description,
+		Hashtags : hashTagsToString(feedAlbum.Post.Hashtags),
+		Media : imagesBuffered,
+
+	}
 }

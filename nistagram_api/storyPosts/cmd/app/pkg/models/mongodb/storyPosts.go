@@ -34,16 +34,9 @@ func (m *StoryPostModel) All() ([]models.StoryPost, error) {
 	return uu, err
 }
 
-// FindByID will be used to find a new user registry by id
-func (m *StoryPostModel) FindByID(id string) (*models.StoryPost, error) {
-	p, err := primitive.ObjectIDFromHex(id)
-	if err != nil {
-		return nil, err
-	}
-
-	// Find user by id
-	var user = models.StoryPost{}
-	err = m.C.FindOne(context.TODO(), bson.M{"_id": p}).Decode(&user)
+func (m *StoryPostModel) FindByID(id primitive.ObjectID) (*models.StoryPost, error) {
+	var story = models.StoryPost{}
+	err := m.C.FindOne(context.TODO(), bson.M{"_id": id}).Decode(&story)
 	if err != nil {
 		// Checks if the user was not found
 		if err == mongo.ErrNoDocuments {
@@ -52,7 +45,7 @@ func (m *StoryPostModel) FindByID(id string) (*models.StoryPost, error) {
 		return nil, err
 	}
 
-	return &user, nil
+	return &story, nil
 }
 
 // Insert will be used to insert a new user

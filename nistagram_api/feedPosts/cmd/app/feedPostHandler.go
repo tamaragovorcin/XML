@@ -71,9 +71,7 @@ func (app *application) insertFeedPost(w http.ResponseWriter, req *http.Request)
 		userId = userId[1:]
 		userId = userId[:len(userId)-1]
 	}
-	fmt.Println(res1)
-	fmt.Println(res1)
-	fmt.Println(userId)
+
 	err := json.NewDecoder(req.Body).Decode(&m)
 	if err != nil {
 		app.serverError(w, err)
@@ -90,9 +88,9 @@ func (app *application) insertFeedPost(w http.ResponseWriter, req *http.Request)
 	}
 	var feedPost = models.FeedPost{
 		Post : post,
-		Likes : nil,
-		Dislikes: nil,
-		Comments: nil,
+		Likes : []primitive.ObjectID{},
+		Dislikes: []primitive.ObjectID{},
+		Comments: []primitive.ObjectID{},
 	}
 
 
@@ -176,15 +174,34 @@ func toResponse(feedPost models.FeedPost, image2 string) dtos.FeedPostInfoDTO {
 		Comments: feedPost.Comments,
 		Likes: feedPost.Likes,
 		Dislikes: feedPost.Dislikes,
-
-			DateTime : strings.Split(feedPost.Post.DateTime.String(), " ")[0],
-			Tagged :feedPost.Post.Tagged,
-			Location : feedPost.Post.Location,
-			Description : feedPost.Post.Description,
-			Hashtags : feedPost.Post.Hashtags,
-			Media : buffer.Bytes(),
+		DateTime : strings.Split(feedPost.Post.DateTime.String(), " ")[0],
+		Tagged :feedPost.Post.Tagged,
+		Location : locationToString(feedPost.Post.Location),
+		Description : feedPost.Post.Description,
+		Hashtags : hashTagsToString(feedPost.Post.Hashtags),
+		Media : buffer.Bytes(),
 
 	}
+}
+
+func locationToString(location models.Location) string {
+	if location.Country=="" {
+		return ""
+	}else if location.Country!="" && location.Town=="" {
+		return "Location: " +location.Country
+	} else if location.Country!="" && location.Town!="" && location.Street==""{
+		return "Location: " + location.Country + ", " + location.Town
+	}
+	return "Location: " + location.Country + ", " + location.Town + ", " + location.Street
+
+}
+
+func hashTagsToString(hashtags []string) string {
+	hashTagString :=""
+	for _, hash := range hashtags {
+		hashTagString+="#"+hash
+	}
+	return hashTagString
 }
 
 func findFeedPostsByUserId(posts []models.FeedPost, idPrimitive primitive.ObjectID) ([]models.FeedPost, error){
