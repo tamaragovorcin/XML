@@ -16,8 +16,11 @@ import WriteCommentModal from "../components/Posts/WriteCommentModal"
 
 import { BASE_URL_USER } from "../constants.js";
 import { FiHeart } from "react-icons/fi";
+
 import { FaHeartBroken, FaRegCommentDots } from "react-icons/fa"
 import { BsBookmark } from "react-icons/bs"
+import { Lock } from "@material-ui/icons";
+import { Icon } from "@material-ui/core";
 class FollowerProfilePage extends React.Component {
 	constructor(props) {
 		super(props);
@@ -563,6 +566,15 @@ class FollowerProfilePage extends React.Component {
 					<div hidden={!this.state.following}>
 
 													NE PRATITE SE
+						<div className="d-flex align-items-top p-3 mb-2 d-flex justify-content-center">
+							
+							<label><b>This Account is Private</b></label>
+							
+						</div>
+
+						<div className="d-flex justify-content-center h-100">
+							<Icon className="d-flex justify-content-center h-100 w-100"><Lock /></Icon>
+						</div>
 
 					</div>
 
