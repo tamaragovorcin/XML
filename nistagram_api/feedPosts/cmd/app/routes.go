@@ -34,6 +34,8 @@ func (app *application) routes() *mux.Router {
 	r.HandleFunc("/albumFeed/{id}", app.findAlbumFeedByID).Methods("GET")
 	r.HandleFunc("/albumFeed/", app.insertAlbumFeed).Methods("POST")
 	r.HandleFunc("/albumFeed/{id}", app.deleteAlbumFeed).Methods("DELETE")
+	r.HandleFunc("/api/feedAlbum/usersAlbums/{userIdd}", app.getUsersFeedAlbums).Methods("GET")
+
 
 	r.HandleFunc("/collection/", app.getAllCollections).Methods("GET")
 	r.HandleFunc("/collection/{id}", app.findCollectionByID).Methods("GET")
