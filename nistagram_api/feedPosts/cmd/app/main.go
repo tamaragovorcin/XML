@@ -24,6 +24,7 @@ type application struct {
 	albumFeeds   *mongodb.AlbumFeedModel
 	collections   *mongodb.CollectionModel
 	images   *mongodb.ImageModel
+	savedPosts *mongodb.SavedPostsModel
 }
 
 func main() {
@@ -97,6 +98,9 @@ func main() {
 		},
 		images: &mongodb.ImageModel{
 			C: client.Database(*mongoDatabse).Collection("images"),
+		},
+		savedPosts: &mongodb.SavedPostsModel{
+			C: client.Database(*mongoDatabse).Collection("savedPosts"),
 		},
 	}
 

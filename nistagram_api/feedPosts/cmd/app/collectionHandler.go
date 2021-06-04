@@ -2,10 +2,13 @@ package main
 
 import (
 	"encoding/json"
-	"net/http"
-
+	"feedPosts/pkg/dtos"
 	"feedPosts/pkg/models"
+	"fmt"
 	"github.com/gorilla/mux"
+	"go.mongodb.org/mongo-driver/bson/primitive"
+	"net/http"
+	"strings"
 )
 
 func (app *application) getAllCollections(w http.ResponseWriter, r *http.Request) {
@@ -28,7 +31,29 @@ func (app *application) getAllCollections(w http.ResponseWriter, r *http.Request
 	w.WriteHeader(http.StatusOK)
 	w.Write(b)
 }
+func findUsersCollectionByName(collections []models.Collection, idPrimitive primitive.ObjectID, Name string) (models.Collection, error){
+	collectionUser := models.Collection{}
 
+	for _, collection := range collections {
+		if	collection.User.String()==idPrimitive.String() {
+			if(collection.Name == Name) {
+				collectionUser = collection
+			}
+		}
+	}
+	return collectionUser, nil
+}
+func findUsersCollectionByNameBoolean(collections []models.Collection, idPrimitive primitive.ObjectID, Name string) (bool, error){
+	response := false
+	for _, collection := range collections {
+		if	collection.User.String()==idPrimitive.String() {
+			if(collection.Name == Name) {
+				response = true
+			}
+		}
+	}
+	return response, nil
+}
 func (app *application) findCollectionByID(w http.ResponseWriter, r *http.Request) {
 	// Get id from incoming url
 	vars := mux.Vars(r)
@@ -58,23 +83,73 @@ func (app *application) findCollectionByID(w http.ResponseWriter, r *http.Reques
 	w.WriteHeader(http.StatusOK)
 	w.Write(b)
 }
+func (app *application) addToFavourites(w http.ResponseWriter, req *http.Request) {
+	vars := mux.Vars(req)
+	userId := vars["userId"]
+	feedId := vars["feedId"]
+	res1 := strings.HasPrefix(userId, "\"")
+	if res1 == true {
+		userId = userId[1:]
+		userId = userId[:len(userId)-1]
+	}
+	fmt.Println(res1)
+	fmt.Println(userId)
+	userIdPrimitive, _ := primitive.ObjectIDFromHex(userId)
+	feedIdPrimitive, _ := primitive.ObjectIDFromHex(feedId)
+	allCollections, _ :=app.collections.All()
+	allDataCollection,err :=findUsersCollectionByName(allCollections,userIdPrimitive,"All data")
+	var savedPost = models.SavedPost{
+		User: userIdPrimitive,
+		FeedPost: feedIdPrimitive,
+		Collection: allDataCollection,
+	}
 
-func (app *application) insertCollection(w http.ResponseWriter, r *http.Request) {
-	// Define movie model
-	var m models.Collection
-	// Get request information
-	err := json.NewDecoder(r.Body).Decode(&m)
+
+	insertResult, err := app.savedPosts.Insert(savedPost)
 	if err != nil {
 		app.serverError(w, err)
 	}
 
-	// Insert new movie
-	insertResult, err := app.collections.Insert(m)
+	app.infoLog.Printf("New content have been created, id=%s", insertResult.InsertedID)
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+
+	idMarshaled, err := json.Marshal(insertResult.InsertedID)
+	w.Write(idMarshaled)
+}
+
+func (app *application) insertCollection(w http.ResponseWriter, req *http.Request) {
+	vars := mux.Vars(req)
+	userId := vars["id"]
+	res1 := strings.HasPrefix(userId, "\"")
+	if res1 == true {
+		userId = userId[1:]
+		userId = userId[:len(userId)-1]
+	}
+
+
+	userIdPrimitive, _ := primitive.ObjectIDFromHex(userId)
+	allCollections, _ :=app.collections.All()
+	col, _ := findUsersCollectionByNameBoolean(allCollections,userIdPrimitive,"All data")
+	if col == false{
+	var collection = models.Collection{
+		User : userIdPrimitive,
+		Name: "All data",
+
+	}
+
+	insertResult, err := app.collections.Insert(collection)
 	if err != nil {
 		app.serverError(w, err)
 	}
 
-	app.infoLog.Printf("New collections have been created, id=%s", insertResult.InsertedID)
+	app.infoLog.Printf("New content have been created, id=%s", insertResult.InsertedID)
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+
+	idMarshaled, err := json.Marshal(insertResult.InsertedID)
+	w.Write(idMarshaled)
+	}
 }
 
 func (app *application) deleteCollection(w http.ResponseWriter, r *http.Request) {
@@ -89,4 +164,46 @@ func (app *application) deleteCollection(w http.ResponseWriter, r *http.Request)
 	}
 
 	app.infoLog.Printf("Have been eliminated %d collections(s)", deleteResult.DeletedCount)
+}
+func findCollectionsByUserId(collections []models.Collection, idPrimitive primitive.ObjectID) ([]models.Collection, error){
+	collectionUser := []models.Collection{}
+
+	for _, collection := range collections {
+		if	collection.User.String()==idPrimitive.String() {
+			collectionUser = append(collectionUser, collection)
+		}
+	}
+	return collectionUser, nil
+}
+func (app *application) getUsersCollections(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	userId := vars["userId"]
+	userIdPrimitive, _ := primitive.ObjectIDFromHex(userId)
+	allCollections, _ :=app.collections.All()
+	usersCollections,err :=findCollectionsByUserId(allCollections,userIdPrimitive)
+	if err != nil {
+		app.serverError(w, err)
+	}
+	collectionResponse := []dtos.CollectionInfoDTO{}
+	for _, collection := range usersCollections {
+		collectionResponse = append(collectionResponse, collectionToResponse(collection))
+
+	}
+
+	imagesMarshaled, err := json.Marshal(collectionResponse)
+	if err != nil {
+		app.serverError(w, err)
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	w.Write(imagesMarshaled)
+}
+
+func collectionToResponse(collection models.Collection) dtos.CollectionInfoDTO {
+
+	return dtos.CollectionInfoDTO{
+		Id: collection.Id,
+		User: collection.User,
+		Name : collection.Name,
+	}
 }

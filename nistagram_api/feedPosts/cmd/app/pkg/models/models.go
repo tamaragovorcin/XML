@@ -2,7 +2,6 @@ package models
 
 import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
-	"go.mongodb.org/mongo-driver/x/mongo/driver/uuid"
 	"time"
 )
 
@@ -52,7 +51,12 @@ type Collection struct {
 	Id  primitive.ObjectID   `bson:"_id,omitempty"`
 	User primitive.ObjectID  `bson:"user"`
 	Name string  `bson:"name"`
-	SavedPosts []uuid.UUID  `bson:"savedPosts"`
+}
+type SavedPost struct {
+	Id  primitive.ObjectID   `bson:"_id,omitempty"`
+	User primitive.ObjectID  `bson:"user"`
+	FeedPost primitive.ObjectID `bson:"feedPost"`
+	Collection Collection `bson:"collection"`
 }
 type Image struct {
 	Id  primitive.ObjectID `bson:"_id,omitempty"`

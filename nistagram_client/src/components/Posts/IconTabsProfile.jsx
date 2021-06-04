@@ -1,5 +1,6 @@
 import React from "react";
 import {Tabs, Tab} from 'react-bootstrap';
+import SavedPosts from "./SavedPosts"
 
 
 
@@ -36,8 +37,10 @@ render(){
             <Tab eventKey={4} title="Highlights">
             Tab 4 content
             </Tab>
-            <Tab eventKey={5} title="Saved">
-            Tab 5 content
+            <Tab eventKey={5} title="Saved posts">
+            <SavedPosts
+            collections = {this.props.collections}
+            />
             </Tab>
         </Tabs>
     );

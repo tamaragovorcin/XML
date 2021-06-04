@@ -43,3 +43,17 @@ type FeedPostInfoDTO struct {
 	Hashtags    []string
 	Media       []byte
 }
+type CollectionInfoDTO struct {
+	Id          primitive.ObjectID
+	User primitive.ObjectID
+	Name string
+}
+type SavedPostDTO struct {
+	User       string
+	FeedPost   string
+}
+type UserCollectionsDTO struct{
+	Id primitive.ObjectID
+	Name string
+	SavedPosts []models2.SavedPost
+}

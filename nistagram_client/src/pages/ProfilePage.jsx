@@ -66,7 +66,8 @@ class ProfilePage extends React.Component {
 		foundLocation : true,
 		description : "",
 		hashtags :"",
-		showWriteCommentModal : false
+		showWriteCommentModal : false,
+		collections : []
 	}
 	onYmapsLoad = (ymaps) => {
 		this.ymaps = ymaps;
@@ -192,6 +193,7 @@ class ProfilePage extends React.Component {
 
 
 	componentDidMount() {
+		
 
 		let id = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length-1)
 		Axios.get(BASE_URL_USER + "/api/" + id)
@@ -223,7 +225,26 @@ class ProfilePage extends React.Component {
 		this.handleGetBasicInfo()
 		this.handleGetHighlights()
 		this.handleGetPhotos()
+		this.handleGetCollections()
 
+	}
+	handleGetCollections = ()=>{
+		let userId =localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length-1);
+		Axios.get(BASE_URL_FEED + "/api/getCollections/" + userId)
+		.then((res) => {
+			if (res.status === 401) {
+				this.setState({ errorHeader: "Bad credentials!", errorMessage: "Wrong username or password.", hiddenErrorAlert: false });
+			} else if (res.status === 500) {
+				this.setState({ errorHeader: "Internal server error!", errorMessage: "Server error.", hiddenErrorAlert: false });
+			} else {
+				this.setState({
+					collections : res.data
+				});
+			}
+		})
+		.catch ((err) => {
+	console.log(err);
+});
 	}
 	handleGetBasicInfo = () => {
 
@@ -366,9 +387,30 @@ class ProfilePage extends React.Component {
 	handleDislike = ()=>{
 		
 	}
-	handleSave = ()=>{
+	handleSave= (postId) => {
+		let id = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length-1)
 
-	}
+		Axios.post(BASE_URL_FEED + "/api/addToFavourites/"+id+"/"+postId)
+			.then((res) => {
+				if (res.status === 409) {
+					this.setState({
+						errorHeader: "Resource conflict!",
+						errorMessage: "Email already exist.",
+						hiddenErrorAlert: false,
+					});
+				} else if (res.status === 500) {
+					this.setState({ errorHeader: "Internal server error!", errorMessage: "Server error.", hiddenErrorAlert: false });
+				} 
+				this.setState({openModal:true})
+				this.setState({ textSuccessfulModal: "You have successfully added post to collection." });
+
+			})
+			.catch((err) => {
+				console.log(err);
+			});
+
+
+	};
 	handleAddFeedPost = ()=> {
 		
 		if (this.state.addressInput === "") {
@@ -934,7 +976,10 @@ class ProfilePage extends React.Component {
 							</div>
 				</div>
 				<div>
-					<IconTabsProfile/>
+					<IconTabsProfile
+						collections = {this.state.collections}
+					
+					/>
 				</div>
 				<div className="d-flex align-items-top">
 					<div className="container-fluid">
@@ -967,7 +1012,7 @@ class ProfilePage extends React.Component {
 												<button onClick={this.handleWriteCommentModal}  className="btn btn-outline-secondary btn-sm" style={{ marginBottom: "1rem", height:"40px",marginLeft:"6rem" }}><FaRegCommentDots/></button>
 												</td>
 												<td>
-												<button onClick={this.handleSave}  className="btn btn-outline-secondary btn-sm" style={{ marginBottom: "1rem", height:"40px" }}><BsBookmark/></button>
+												<button onClick={() => this.handleSave(post.Id)}  className="btn btn-outline-secondary btn-sm" style={{ marginBottom: "1rem", height:"40px" }}><BsBookmark/></button>
 												</td>
 										</tr>
 										<tr  style={{ width: "100%" }}>
@@ -1031,7 +1076,7 @@ class ProfilePage extends React.Component {
                     <ModalDialog
 						show={this.state.openModal}
 						onCloseModal={this.handleModalClose}
-						header="Successful publishing"
+						header="Success"
 						text={this.state.textSuccessfulModal}
 					/>
 					<WriteCommentModal
