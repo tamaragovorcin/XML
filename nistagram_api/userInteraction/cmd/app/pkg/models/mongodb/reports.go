@@ -4,7 +4,7 @@ import (
 	"context"
 	"errors"
 
-	"follows/pkg/models"
+	"userInteraction/pkg/models"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"

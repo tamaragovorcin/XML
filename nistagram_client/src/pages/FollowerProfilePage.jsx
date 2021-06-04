@@ -333,7 +333,21 @@ class FollowerProfilePage extends React.Component {
 	handleAddStoryPostAlbum = () => {
 
 	}
+	handleFollow = () => {
+		let id = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length-1);
+		const followReguestDTO = { followerId: id, followingId: id};
+		Axios.post(BASE_URL_USER + "/api/followRequest", followReguestDTO)
+				.then((res) => {
+					
+						console.log(res.data)
+						this.setState({ redirect: true });
+					
+				})
+				.catch ((err) => {
+			console.log(err);
+		});
 
+	}
 
 
 
@@ -408,7 +422,8 @@ class FollowerProfilePage extends React.Component {
 														<label >{this.state.username}</label>
 													</td>
 													<td>
-														<Link to="/userChangeProfile" className="btn btn-outline-secondary btn-sm">Follow</Link>
+														<Link to="/userChangeProfile" className="btn btn-outline-secondary btn-sm">Edit profile</Link>
+													<Link onClick={this.handleFollow} className="btn btn-outline-success btn-sm">Follow</Link>
 
 													</td>
 

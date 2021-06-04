@@ -17,6 +17,8 @@ import { BASE_URL_USER } from "../constants.js";
 import { FiHeart } from "react-icons/fi";
 import {FaHeartBroken,FaRegCommentDots} from "react-icons/fa"
 import {BsBookmark} from "react-icons/bs"
+import IconTabsProfile from "../components/Posts/IconTabsProfile"
+
 class ProfilePage extends React.Component {
 	constructor(props) {
 		super(props);
@@ -117,10 +119,20 @@ class ProfilePage extends React.Component {
 
 
 	}
+	handleAddProfileImage(picture) {
+		alert(picture)
+		let userid = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length-1)
+		this.setState({
+			profilePicture: this.state.profilePicture.concat(picture),
+		});
+		this.testProfileImage(picture, userid);
+
+	}
 
 	
 
 	test(pic,userId, feedId) {
+		alert(pic)
 		this.setState({
 			fileUploadOngoing: true
 		});
@@ -137,6 +149,26 @@ class ProfilePage extends React.Component {
 
 		};
 		fetch(BASE_URL_FEED + "/api/image/"+userId+"/"+feedId , options);
+	}
+	testProfileImage(pic,userId) {
+		alert("USAOAOOO")
+		alert(pic)
+		this.setState({
+			fileUploadOngoing: true
+		});
+
+		const fileInput = document.querySelector("#fileInput");
+		const formData = new FormData();
+
+		formData.append("file", pic);
+		formData.append("test", "StringValueTest");
+
+		const options = {
+			method: "POST",
+			body: formData
+
+		};
+		fetch(BASE_URL_USER + "/api/user/profileImage/"+userId , options);
 	}
 	testStory(pic,userId, storyId) {
 
@@ -667,11 +699,7 @@ class ProfilePage extends React.Component {
 				let feedId = res.data;
 				
 				let userid = localStorage.getItem("userId");
-				let pics = [];
-
-				this.state.pictures.forEach((p) => {
-					pics.push(p.name);
-				});
+			
 				this.state.pictures.forEach((pic) => {
 					this.test(pic, userid, feedId);
 				});
@@ -707,11 +735,7 @@ class ProfilePage extends React.Component {
 				console.log(res.data);
 				console.log(res.status);
 				let userid = localStorage.getItem("userId");
-				let pics = [];
-				alert(feedId)
-				this.state.pictures.forEach((p) => {
-					pics.push(p.name);
-				});
+				
 				this.state.pictures.forEach((pic) => {
 					this.test(pic, userid, feedId);
 				});
@@ -805,30 +829,7 @@ class ProfilePage extends React.Component {
 				console.log(err);
 			});
 	}
-	handleAddProfileImage(picture){
-		alert(picture)
-		let userId = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length-1)
-		this.setState({
-			profilePicture: this.state.profilePicture.concat(picture),
-		});
-		this.setState({
-			fileUploadOngoing: true
-		});
-
-		const fileInput = document.querySelector("#fileInput");
-		const formData = new FormData();
-		formData.append("file", picture);
-		formData.append("test", "StringValueTest");
-
-		const options = {
-			method: "POST",
-			body: formData
-
-		};
-		fetch(BASE_URL_STORY + "/api/user/profileImage/"+userId, options);
-
-
-	}
+	
 	render() {
 		return (
 			<React.Fragment>
@@ -931,6 +932,9 @@ class ProfilePage extends React.Component {
 									</tbody>
 								</table>
 							</div>
+				</div>
+				<div>
+					<IconTabsProfile/>
 				</div>
 				<div className="d-flex align-items-top">
 					<div className="container-fluid">
