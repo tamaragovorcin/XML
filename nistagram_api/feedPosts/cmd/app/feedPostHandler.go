@@ -39,9 +39,10 @@ func (app *application) getAllFeedPosts(w http.ResponseWriter, r *http.Request) 
 func (app *application) findFeedPostByID(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	id := vars["id"]
+	idd, _ := primitive.ObjectIDFromHex(id)
 
 	// Find booking by id
-	m, err := app.feedPosts.FindByID(id)
+	m, err := app.feedPosts.FindByID(idd)
 	if err != nil {
 		if err.Error() == "ErrNoDocuments" {
 			app.infoLog.Println("Booking not found")

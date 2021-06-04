@@ -35,15 +35,9 @@ func (m *FeedPostModel) All() ([]models.FeedPost, error) {
 }
 
 // FindByID will be used to find a new user registry by id
-func (m *FeedPostModel) FindByID(id string) (*models.FeedPost, error) {
-	p, err := primitive.ObjectIDFromHex(id)
-	if err != nil {
-		return nil, err
-	}
-
-	// Find user by id
-	var user = models.FeedPost{}
-	err = m.C.FindOne(context.TODO(), bson.M{"_id": p}).Decode(&user)
+func (m *FeedPostModel) FindByID(id primitive.ObjectID) (*models.FeedPost, error) {
+	var feedPosts = models.FeedPost{}
+	err := m.C.FindOne(context.TODO(), bson.M{"_id": id}).Decode(&feedPosts)
 	if err != nil {
 		// Checks if the user was not found
 		if err == mongo.ErrNoDocuments {
@@ -52,7 +46,7 @@ func (m *FeedPostModel) FindByID(id string) (*models.FeedPost, error) {
 		return nil, err
 	}
 
-	return &user, nil
+	return &feedPosts, nil
 }
 
 // Insert will be used to insert a new user

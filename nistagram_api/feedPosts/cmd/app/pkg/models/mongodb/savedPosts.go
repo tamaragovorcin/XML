@@ -3,23 +3,21 @@ package mongodb
 import (
 	"context"
 	"errors"
-
 	"feedPosts/pkg/models"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
-
-type CollectionModel struct {
+type SavedPostsModel struct {
 	C *mongo.Collection
 }
 
 // All method will be used to get all records from the users table.
-func (m *CollectionModel) All() ([]models.Collection, error) {
+func (m *SavedPostsModel) All() ([]models.SavedPost, error) {
 	// Define variables
 	ctx := context.TODO()
-	uu := []models.Collection{}
+	uu := []models.SavedPost{}
 
 	// Find all users
 	userCursor, err := m.C.Find(ctx, bson.M{})
@@ -35,9 +33,15 @@ func (m *CollectionModel) All() ([]models.Collection, error) {
 }
 
 // FindByID will be used to find a new user registry by id
-func (m *CollectionModel) FindByID(id primitive.ObjectID) (*models.Collection, error) {
-	var collection = models.Collection{}
-	err := m.C.FindOne(context.TODO(), bson.M{"_id": id}).Decode(&collection)
+func (m *SavedPostsModel) FindByID(id string) (*models.SavedPost, error) {
+	p, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		return nil, err
+	}
+
+	// Find user by id
+	var user = models.SavedPost{}
+	err = m.C.FindOne(context.TODO(), bson.M{"_id": p}).Decode(&user)
 	if err != nil {
 		// Checks if the user was not found
 		if err == mongo.ErrNoDocuments {
@@ -46,23 +50,20 @@ func (m *CollectionModel) FindByID(id primitive.ObjectID) (*models.Collection, e
 		return nil, err
 	}
 
-	return &collection, nil
+	return &user, nil
 }
 
 // Insert will be used to insert a new user
-func (m *CollectionModel) Insert(user models.Collection) (*mongo.InsertOneResult, error) {
+func (m *SavedPostsModel) Insert(user models.SavedPost) (*mongo.InsertOneResult, error) {
 	return m.C.InsertOne(context.TODO(), user)
 }
 
 // Delete will be used to delete a user
-func (m *CollectionModel) Delete(id string) (*mongo.DeleteResult, error) {
+func (m *SavedPostsModel) Delete(id string) (*mongo.DeleteResult, error) {
 	p, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
 		return nil, err
 	}
 	return m.C.DeleteOne(context.TODO(), bson.M{"_id": p})
-}
-func (m *CollectionModel) Update(collection models.Collection) (*mongo.UpdateResult, error) {
-	return m.C.UpdateOne(context.TODO(),bson.M{"_id":collection.Id},bson.D{{"$set",bson.M{"name":collection.Name,"user":collection.User,
-		"posts":collection.Posts}}})
+
 }

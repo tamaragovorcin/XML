@@ -1,12 +1,14 @@
 
 import React from "react";
 import {Tabs, Tab} from 'react-bootstrap';
+import SavedPosts from "./SavedPosts"
 import { FiHeart } from "react-icons/fi";
 import {FaHeartBroken,FaRegCommentDots} from "react-icons/fa"
 import {BsBookmark} from "react-icons/bs"
 import "react-responsive-carousel/lib/styles/carousel.min.css"; // requires a loader
 import { Carousel } from 'react-responsive-carousel';
 import playerLogo from "../../static/coach.png";
+import logo from "../../static/collection.png";
 
 class IconTabsProfile extends React.Component {
   constructor(props){
@@ -75,7 +77,7 @@ render(){
                               <button onClick={this.props.handleWriteCommentModal}  className="btn btn-outline-secondary btn-sm" style={{ marginBottom: "1rem", height:"40px",marginLeft:"6rem" }}><FaRegCommentDots/></button>
                               </td>
                               <td>
-                              <button onClick={this.props.handleSave}  className="btn btn-outline-secondary btn-sm" style={{ marginBottom: "1rem", height:"40px" }}><BsBookmark/></button>
+                              <button onClick={() =>  this.props.handleOpenAddPostToCollectionModal(post.Id)} style={{ marginBottom: "1rem", height:"40px" }} className="btn btn-outline-secondary btn-sm"><label ><BsBookmark/></label></button>
                               </td>
                           </tr>
                           <tr  style={{ width: "100%" }}>
@@ -312,8 +314,90 @@ render(){
                     </div>
                 </div>
             </Tab>
-            <Tab eventKey={5} title="Saved">
-            Tab 5 content
+            <Tab eventKey={5} title="Saved posts">
+            <button onClick={() =>  this.props.handleAddCollectionClick()} className="btn btn-outline-secondary btn-sm" style={{ marginTop: "3rem",marginLeft:"2rem",marginBottom: "2rem" }}><label >Add new highlight</label></button>
+                 <div className="container">
+                    <div className="container-fluid testimonial-group d-flex align-items-top">
+                        <div className="container-fluid scrollable" style={{ marginRight: "10rem" , marginBottom:"5rem",marginTop:"5rem"}}>
+                          <table className="table-responsive" style={{ width: "100%" }}>
+                            <tbody>
+
+                              <tr >
+                                {this.props.collections.map((collection) => (
+                                  <td id={collection.Id} key={collection.Id} style={{width:"60em", marginLeft:"10em"}}>
+                                    <tr width="100em">
+                                      <button onClick={() =>  this.props.seePostsInCollection(collection.Posts)} className="btn btn-outline-secondary btn-sm" style={{ marginTop: "3rem",marginLeft:"2rem",marginBottom: "3rem" }}>
+
+                                        <img
+                                          className="img-fluid"
+                                          src={logo}
+                                          style ={{borderRadius:"50%",margin:"2%"}}
+                                          width="60em"
+                                          alt="description"
+                                        />
+                                        </button>
+                                    </tr>
+                                    <tr>
+                                      <label style={{marginRight:"15px"}}>{collection.Name}</label>
+                                    </tr>
+                                  </td>
+                                  
+                                ))}
+                              </tr>
+
+
+                            </tbody>
+                          </table>
+                        </div>
+                  </div>
+                </div>
+                <div className="d-flex align-items-top" hidden={this.props.hiddenPostsForCollection}>
+                    <div className="container-fluid">
+                    <table className="table">
+                        <tbody>
+                        {this.props.postsForCollection.map((post) => (
+                            
+                            <tr id={post.Id} key={post.Id}>
+                            
+                            <tr  style={{ width: "100%"}}>
+                                <td colSpan="3">
+                                <img
+                                className="img-fluid"
+                                src={`data:image/jpg;base64,${post.Media}`}
+                                width="100%"
+                                alt="description"
+                                />
+                                </td>
+                            </tr>
+                            <tr>
+                                <td colSpan="3">
+                                    {post.Location}
+                                </td>
+                            </tr>
+                            <tr>
+                                <td colSpan="3">
+                                    {post.Description}
+                                </td>
+                            </tr>
+                            <tr>
+                                <td colSpan="3">
+                                    {post.Hashtags}
+                                </td>
+                            </tr>
+                          
+                            <br/>
+                            <br/>
+                            <br/>
+                            </tr>
+                            
+                        ))}
+
+                        </tbody>
+                    </table>
+                   
+                    </div>
+                </div>
+				
             </Tab>
         </Tabs>
     );

@@ -11,7 +11,6 @@ import (
 	"net/http"
 	"net/url"
 	"os"
-	"strings"
 	"time"
 
 	"github.com/neo4j/neo4j-go-driver/v4/neo4j"
@@ -26,9 +25,9 @@ func routes() *mux.Router {
 	if err != nil {
 		log.Fatal(err)
 	}
-	defer unsafeClose(driver)
 	r := mux.NewRouter()
 	r.HandleFunc("/api/followRequest", CreateFollow(driver, configuration.Database)).Methods("POST")
+	r.HandleFunc("/api/createUser", CreateUser(driver, configuration.Database)).Methods("POST")
 	r.HandleFunc("/movie/vote/{id}", voteInMovieHandlerFunc(driver, configuration.Database)).Methods("GET")
 
 
@@ -54,6 +53,12 @@ func setHeaders(h http.Handler) http.Handler {
 	})
 }
 func main(){
+	configuration := parseConfiguration()
+	driver, err := configuration.newDriver()
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	serverAddr := flag.String("serverAddr", "", "HTTP server network address")
 	serverPort := flag.Int("serverPort", 4006, "HTTP server network port")
 
@@ -61,18 +66,16 @@ func main(){
 	router := routes()
 	http.ListenAndServe(serverURI, setHeaders(router))
 
+	defer unsafeClose(driver)
+
 }
 
 func parseConfiguration() *Neo4jConfiguration {
-	database := lookupEnvOrGetDefault("NEO4J_DATABASE", "no-waiter-userInteraction")
-	if !strings.HasPrefix(lookupEnvOrGetDefault("NEO4J_VERSION", "4"), "4") {
-		database = ""
-	}
+
 	return &Neo4jConfiguration{
 		Url:      lookupEnvOrGetDefault("NEO4J_URI", "bolt://localhost:7687"),
 		Username: lookupEnvOrGetDefault("NEO4J_USER", "neo4j"),
-		Password: lookupEnvOrGetDefault("NEO4J_PASSWORD", "neo4jdb"),
-		Database: database,
+		Password: lookupEnvOrGetDefault("NEO4J_PASSWORD", "root"),
 	}
 }
 
@@ -89,14 +92,24 @@ func unsafeClose(closeable io.Closer) {
 		log.Fatal(fmt.Errorf("could not close resource: %w", err))
 	}
 }
-type FollowRequest struct {
+type Follow struct {
 	Id uuid.UUID  `json:"_id,omitempty"`
-	Following  uuid.UUID `json:"following,omitempty"`
-	Follower   uuid.UUID `json:"follower,omitempty"`
+	Following  User`json:"following,omitempty"`
+	Follower   User`json:"follower,omitempty"`
 	Approved  bool `json:"approved,omitempty"`
 	DateTime time.Time `json:"dateTime,omitempty"`
 }
+type FollowRequest struct {
+	Follower string `json:"follower"`
+	Following string `json:"following"`
+}
+type User struct {
+	Id string `json:"id"`
+}
 
+type Users struct {
+	Users []string `json:"users"`
+}
 type Report struct {
 	Id uuid.UUID `json:"_id,omitempty"`
 	ComplainingUser uuid.UUID `json:"complainingUser,omitempty"`
@@ -140,9 +153,48 @@ func CreateFollow(driver neo4j.Driver, database string) func(w http.ResponseWrit
 		voteResult, err := session.WriteTransaction(func(tx neo4j.Transaction) (interface{}, error) {
 			result, err := tx.Run(
 				"MATCH (follower:User), (following:User) WHERE follower.id = $followerId AND following.id = $followingId CREATE (follower)-[:FOLLOW]->(following)",
-				map[string]interface{}{"follower": m.Follower,
-					"following": m.Following,
+				map[string]interface{}{"followerId": m.Follower,
+					"followingId": m.Following,
 					})
+			if err != nil {
+				return nil, err
+			}
+			var summary, _ = result.Consume()
+			var voteResult VoteResult
+			voteResult.Updates = summary.Counters().PropertiesSet()
+
+			return voteResult, nil
+		})
+		if err != nil {
+			log.Println("error voting for movie:", err)
+			return
+		}
+		err = json.NewEncoder(w).Encode(voteResult)
+		if err != nil {
+			log.Println("error writing volte result response:", err)
+		}
+	}
+}
+func CreateUser(driver neo4j.Driver, database string) func(w http.ResponseWriter,r *http.Request) {
+	return func(w http.ResponseWriter, req *http.Request) {
+		fmt.Println("POGODIIOOOO")
+		var m User
+		err := json.NewDecoder(req.Body).Decode(&m)
+		if err != nil {
+			fmt.Println("Error")
+		}
+		session := driver.NewSession(neo4j.SessionConfig{
+			AccessMode:   neo4j.AccessModeWrite,
+			DatabaseName: database,
+		})
+		defer unsafeClose(session)
+
+		voteResult, err := session.WriteTransaction(func(tx neo4j.Transaction) (interface{}, error) {
+			result, err := tx.Run(
+				"CREATE (:User{id:$uId})",
+				map[string]interface{}{
+					"uId": m.Id,
+				})
 			if err != nil {
 				return nil, err
 			}

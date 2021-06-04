@@ -2,6 +2,7 @@ import React from "react";
 import Header from "../components/Header";
 import TopBar from "../components/TopBar";
 import { Link } from "react-router-dom";
+import { BASE_URL_FEED} from "../constants.js";
 import playerLogo from "../static/me.jpg";
 import profileImage from "../static/profileImage.jpg"
 import LikesModal from "../components/Posts/LikesModal"
@@ -11,6 +12,7 @@ import WriteCommentModal from "../components/Posts/WriteCommentModal"
 import { FiHeart } from "react-icons/fi";
 import {FaHeartBroken,FaRegCommentDots} from "react-icons/fa"
 import {BsBookmark} from "react-icons/bs"
+import Axios from "axios";
 
 
 class HomePage extends React.Component {
@@ -65,6 +67,24 @@ class HomePage extends React.Component {
 
 	}
 	componentDidMount() {
+		let id = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length-1)
+		Axios.post(BASE_URL_FEED + "/api/collection/allData/"+id)
+								.then((res) => {
+									if (res.status === 409) {
+										this.setState({
+											errorHeader: "Resource conflict!",
+											errorMessage: "Email already exist.",
+											hiddenErrorAlert: false,
+										});
+									} else if (res.status === 500) {
+										this.setState({ errorHeader: "Internal server error!", errorMessage: "Server error.", hiddenErrorAlert: false });
+									} 
+									
+
+								})
+								.catch((err) => {
+									console.log(err);
+								});
 		this.handleGetBasicInfo()
 		this.handleGetStories()
 		this.handleGetPhotos()
