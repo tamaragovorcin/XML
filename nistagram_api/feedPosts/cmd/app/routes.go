@@ -15,8 +15,8 @@ func (app *application) routes() *mux.Router {
 
 	r.HandleFunc("/", app.getAllFeedPosts).Methods("GET")
 	r.HandleFunc("/{id}", app.findFeedPostByID).Methods("GET")
-	r.HandleFunc("/api/feedAlbum/{userId}", app.insertAlbumFeed).Methods("POST")
-	r.HandleFunc("/api/feed/{userIdd}", app.insertFeedPost).Methods("POST")
+	r.HandleFunc("/feedAlbum/{userId}", app.insertAlbumFeed).Methods("POST")
+	r.HandleFunc("/feed/{userIdd}", app.insertFeedPost).Methods("POST")
 	r.HandleFunc("/{id}", app.deleteFeedPost).Methods("DELETE")
 
 	r.HandleFunc("/post/", app.getAllPosts).Methods("GET")
@@ -34,21 +34,21 @@ func (app *application) routes() *mux.Router {
 	r.HandleFunc("/albumFeed/{id}", app.findAlbumFeedByID).Methods("GET")
 	r.HandleFunc("/albumFeed/", app.insertAlbumFeed).Methods("POST")
 	r.HandleFunc("/albumFeed/{id}", app.deleteAlbumFeed).Methods("DELETE")
-	r.HandleFunc("/api/feedAlbum/usersAlbums/{userIdd}", app.getUsersFeedAlbums).Methods("GET")
+	r.HandleFunc("/feedAlbum/usersAlbums/{userIdd}", app.getUsersFeedAlbums).Methods("GET")
 
 
 
-	r.HandleFunc("/api/image/{userIdd}/{feedId}", app.saveImage).Methods("POST")
-	r.HandleFunc("/api/feed/usersImages/{userIdd}", app.getUsersFeedPosts).Methods("GET")
-	r.HandleFunc("/api/feed/searchByLocation/{country}/{city}/{street}", app.getFeedPostsByLocation).Methods("GET")
-	r.HandleFunc("/api/feed/searchByHashTags/", app.getFeedPostsByHashTags).Methods("POST")
+	r.HandleFunc("/image/{userIdd}/{feedId}", app.saveImage).Methods("POST")
+	r.HandleFunc("/feed/usersImages/{userIdd}", app.getUsersFeedPosts).Methods("GET")
+	r.HandleFunc("/feed/searchByLocation/{country}/{city}/{street}", app.getFeedPostsByLocation).Methods("GET")
+	r.HandleFunc("/feed/searchByHashTags/", app.getFeedPostsByHashTags).Methods("POST")
 
-	r.HandleFunc("/api/collection/allData/{userId}", app.insertAllDataCollection).Methods("POST")
+	r.HandleFunc("/collection/allData/{userId}", app.insertAllDataCollection).Methods("POST")
 	r.HandleFunc("/collection/", app.getAllCollections).Methods("GET")
-	r.HandleFunc("/api/collection/{userId}", app.insertCollection).Methods("POST")
-	r.HandleFunc("/api/collection/{id}", app.deleteCollection).Methods("DELETE")
-	r.HandleFunc("/api/collection/user/{userId}", app.getUsersCollections).Methods("GET")
-	r.HandleFunc("/api/collection/addPost/", app.insetPostInCollection).Methods("POST")
+	r.HandleFunc("/collection/{userId}", app.insertCollection).Methods("POST")
+	r.HandleFunc("/collection/{id}", app.deleteCollection).Methods("DELETE")
+	r.HandleFunc("/collection/user/{userId}", app.getUsersCollections).Methods("GET")
+	r.HandleFunc("/collection/addPost/", app.insetPostInCollection).Methods("POST")
 
 	return r
 }

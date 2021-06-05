@@ -1,80 +1,91 @@
 version: "3.8"
 services:
 
-
-  gateway:
-    image: nginx:1.19.8-alpine
+  nginx:
+    restart: always
+    build:
+      context: ./nginx
     ports:
-      - 8081:4007
+      - '80:80'
     networks:
       - backend
-    volumes:
-      - ./gateway/nginx.conf:/etc/nginx/nginx.conf
-      - ./gateway/api_gateway.conf:/etc/nginx/api_gateway.conf
-
-  campaign:
-    image: campaign:compose_build
-    build:
-      context: ./campaign/cmd/app
-    networks:
-      - backend
-    environment:
-      PORT: 4000
-
-  feedPosts:
-    image: feedposts:compose_build
-    build:
-      context: ./feedPosts/cmd/app
-    networks:
-      - backend
-    environment:
-      PORT: 4001
-
-  messages:
-    image: messages:compose_build
-    build:
-      context: ./messages/cmd/app
-    networks:
-      - backend
-    environment:
-      PORT: 4002
-
-  notificationSettings:
-    image: notificationsettings:compose_build
-    build:
-      context: ./notificationSettings/cmd/app
-    networks:
-      - backend
-    environment:
-      PORT: 4003
-
-  storyPosts:
-    image: storyposts:compose_build
-    build:
-      context: ./storyPosts/cmd/app
-    networks:
-      - backend
-    environment:
-      PORT: 4004
-
-  userInteraction:
-    image: userinteraction:compose_build
-    build:
-      context: ./userInteraction/cmd/app
-    networks:
-      - backend
-    environment:
-      PORT: 4005
 
   users:
-    image: users:compose_build
+    restart: always
     build:
       context: ./users/cmd/app
-
+    ports:
+      - '4006:4006'
     networks:
       - backend
-    environment:
-      PORT: 4006
+
+  mongo:
+    image: mongo
+    container_name: db_users
+    ports:
+      - 27017:27017
+    volumes:
+      - mongodb:/data/dbs
+    networks:
+      - backend
+
+  campaign:
+    restart: always
+    build:
+      context: ./campaign/cmd/app
+    ports:
+      - '4000:4000'
+    networks:
+      - backend
+
+
+  feedposts:
+    restart: always
+    build:
+      context: ./feedPosts/cmd/app
+    ports:
+      - '4001:4001'
+    networks:
+      - backend
+
+  messages:
+    restart: always
+    build:
+      context: ./messages/cmd/app
+    ports:
+      - '4002:4002'
+    networks:
+      - backend
+
+  notificationsettings:
+    restart: always
+    build:
+      context: ./notificationSettings/cmd/app
+    ports:
+      - '4003:4003'
+    networks:
+      - backend
+
+  storyposts:
+    restart: always
+    build:
+      context: ./storyPosts/cmd/app
+    ports:
+      - '4004:4004'
+    networks:
+      - backend
+
+  userinteraction:
+    restart: always
+    build:
+      context: ./userInteraction/cmd/app
+    ports:
+      - '4005:4005'
+    networks:
+      - backend
+
+volumes:
+  mongodb:
 
 networks:
   backend:
