@@ -35,15 +35,9 @@ func (m *CollectionModel) All() ([]models.Collection, error) {
 }
 
 // FindByID will be used to find a new user registry by id
-func (m *CollectionModel) FindByID(id string) (*models.Collection, error) {
-	p, err := primitive.ObjectIDFromHex(id)
-	if err != nil {
-		return nil, err
-	}
-
-	// Find user by id
-	var user = models.Collection{}
-	err = m.C.FindOne(context.TODO(), bson.M{"_id": p}).Decode(&user)
+func (m *CollectionModel) FindByID(id primitive.ObjectID) (*models.Collection, error) {
+	var collection = models.Collection{}
+	err := m.C.FindOne(context.TODO(), bson.M{"_id": id}).Decode(&collection)
 	if err != nil {
 		// Checks if the user was not found
 		if err == mongo.ErrNoDocuments {
@@ -52,7 +46,7 @@ func (m *CollectionModel) FindByID(id string) (*models.Collection, error) {
 		return nil, err
 	}
 
-	return &user, nil
+	return &collection, nil
 }
 
 // Insert will be used to insert a new user
@@ -67,4 +61,8 @@ func (m *CollectionModel) Delete(id string) (*mongo.DeleteResult, error) {
 		return nil, err
 	}
 	return m.C.DeleteOne(context.TODO(), bson.M{"_id": p})
+}
+func (m *CollectionModel) Update(collection models.Collection) (*mongo.UpdateResult, error) {
+	return m.C.UpdateOne(context.TODO(),bson.M{"_id":collection.Id},bson.D{{"$set",bson.M{"name":collection.Name,"user":collection.User,
+		"posts":collection.Posts}}})
 }

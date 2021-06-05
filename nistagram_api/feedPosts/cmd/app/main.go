@@ -24,6 +24,7 @@ type application struct {
 	albumFeeds   *mongodb.AlbumFeedModel
 	collections   *mongodb.CollectionModel
 	images   *mongodb.ImageModel
+	savedPosts *mongodb.SavedPostsModel
 }
 
 func main() {
@@ -33,7 +34,7 @@ func main() {
 	// Define command-line flags
 	serverAddr := flag.String("serverAddr", "", "HTTP server network address")
 	serverPort := flag.Int("serverPort", 4001, "HTTP server network port")
-	mongoURI := flag.String("mongoURI", "mongodb://localhost:27017", "Database hostname url")
+	mongoURI := flag.String("mongoURI", "mongodb://db_users:27017", "Database hostname url")
 	mongoDatabse := flag.String("mongoDatabse", "feedPosts", "Database name")
 	enableCredentials := flag.Bool("enableCredentials", false, "Enable the use of credentials for mongo connection")
 	flag.Parse()
@@ -97,6 +98,9 @@ func main() {
 		},
 		images: &mongodb.ImageModel{
 			C: client.Database(*mongoDatabse).Collection("images"),
+		},
+		savedPosts: &mongodb.SavedPostsModel{
+			C: client.Database(*mongoDatabse).Collection("savedPosts"),
 		},
 	}
 

@@ -8,16 +8,21 @@ import (
 func (app *application) routes() *mux.Router {
 	// Register handler functions.
 	r := mux.NewRouter()
-	r.HandleFunc("/api/story/{userId}", app.insertStoryPost).Methods("POST")
-	r.HandleFunc("/api/storyAlbum/{userId}", app.insertAlbumStory).Methods("POST")
-	r.HandleFunc("/api/image/{userId}/{storyId}", app.saveImage).Methods("POST")
+	r.HandleFunc("/story/{userId}", app.insertStoryPost).Methods("POST")
+	r.HandleFunc("/story/user/{userId}", app.getUsersStories).Methods("GET")
+
+	r.HandleFunc("/storyAlbum/{userId}", app.insertAlbumStory).Methods("POST")
+
+	r.HandleFunc("/image/{userId}/{storyId}", app.saveImage).Methods("POST")
+
 	r.HandleFunc("/highlight/", app.getAllHighlights).Methods("GET")
-	r.HandleFunc("/highlight/{id}", app.findHighlightByID).Methods("GET")
-	r.HandleFunc("/highlight/", app.insertHighlight).Methods("POST")
+	r.HandleFunc("/highlight/{userId}", app.insertHighlight).Methods("POST")
 	r.HandleFunc("/highlight/{id}", app.deleteHighlight).Methods("DELETE")
+	r.HandleFunc("/highlight/user/{userId}", app.getUsersHiglights).Methods("GET")
+	r.HandleFunc("/highlight/addStory/", app.insetStoryInHighlight).Methods("POST")
+
 
 	r.HandleFunc("/", app.getAllStoryPosts).Methods("GET")
-	r.HandleFunc("/{id}", app.findStoryPostByID).Methods("GET")
 	r.HandleFunc("/", app.insertStoryPost).Methods("POST")
 	r.HandleFunc("/{id}", app.deletePost).Methods("DELETE")
 

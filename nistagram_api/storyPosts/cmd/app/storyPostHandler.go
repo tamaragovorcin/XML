@@ -1,10 +1,15 @@
 package main
 
 import (
+	"bytes"
 	"encoding/json"
 	"github.com/gorilla/mux"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	"image"
+	"image/jpeg"
+	"log"
 	"net/http"
+	"os"
 	"storyPosts/pkg/dtos"
 	"storyPosts/pkg/models"
 	"strings"
@@ -32,35 +37,7 @@ func (app *application) getAllStoryPosts(w http.ResponseWriter, r *http.Request)
 	w.Write(b)
 }
 
-func (app *application) findStoryPostByID(w http.ResponseWriter, r *http.Request) {
-	// Get id from incoming url
-	vars := mux.Vars(r)
-	id := vars["id"]
 
-	// Find booking by id
-	m, err := app.storyPosts.FindByID(id)
-	if err != nil {
-		if err.Error() == "ErrNoDocuments" {
-			app.infoLog.Println("Story not found")
-			return
-		}
-		// Any other error will send an internal server error
-		app.serverError(w, err)
-	}
-
-	// Convert booking to json encoding
-	b, err := json.Marshal(m)
-	if err != nil {
-		app.serverError(w, err)
-	}
-
-	app.infoLog.Println("Have been found a storyPost")
-
-	// Send response back
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	w.Write(b)
-}
 
 func (app *application) insertStoryPost(w http.ResponseWriter, req *http.Request) {
 
@@ -118,4 +95,98 @@ func (app *application) deleteStoryPost(w http.ResponseWriter, r *http.Request) 
 	}
 
 	app.infoLog.Printf("Have been eliminated %d content(s)", deleteResult.DeletedCount)
+}
+
+
+func (app *application) getUsersStories(w http.ResponseWriter, r *http.Request)  {
+	vars := mux.Vars(r)
+	userId := vars["userId"]
+	userIdPrimitive, _ := primitive.ObjectIDFromHex(userId)
+	allImages,_ := app.images.All()
+	allStories, _ :=app.storyPosts.All()
+	usersStoryPosts,err :=findStoriesByUserId(allStories,userIdPrimitive)
+	if err != nil {
+		app.serverError(w, err)
+	}
+	storyPostResponse := []dtos.StoryPostInfoDTO{}
+	for _, storyPost := range usersStoryPosts {
+
+		images, err := findImageByPostId(allImages,storyPost.Id)
+		if err != nil {
+			app.serverError(w, err)
+		}
+
+		storyPostResponse = append(storyPostResponse, toResponseStoryPost(storyPost, images.Media))
+
+	}
+
+	imagesMarshaled, err := json.Marshal(storyPostResponse)
+	if err != nil {
+		app.serverError(w, err)
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	w.Write(imagesMarshaled)
+}
+
+func findImageByPostId(images []models.Image, id primitive.ObjectID) (models.Image, error) {
+	imageStoryPost := models.Image{}
+
+	for _, image := range images {
+		if	image.PostId==id {
+			imageStoryPost = image
+		}
+	}
+	return imageStoryPost, nil
+}
+
+func findStoriesByUserId(stories []models.StoryPost, idPrimitive primitive.ObjectID) ([]models.StoryPost,error) {
+	storyPostsUser := []models.StoryPost{}
+
+	for _, storyPost := range stories {
+		if	storyPost.Post.User.String()==idPrimitive.String() {
+			storyPostsUser = append(storyPostsUser, storyPost)
+		}
+	}
+	return storyPostsUser, nil
+}
+func toResponseStoryPost(storyPost models.StoryPost, image2 string) dtos.StoryPostInfoDTO {
+	f, _ := os.Open(image2)
+	defer f.Close()
+	image, _, _ := image.Decode(f)
+	buffer := new(bytes.Buffer)
+	if err := jpeg.Encode(buffer, image, nil); err != nil {
+		log.Println("unable to encode image.")
+	}
+
+	return dtos.StoryPostInfoDTO{
+		Id: storyPost.Id,
+		DateTime : strings.Split(storyPost.Post.DateTime.String(), " ")[0],
+		Tagged :  storyPost.Post.Tagged,
+		Location : locationToString(storyPost.Post.Location),
+		Description : storyPost.Post.Description,
+		Hashtags : hashTagsToString(storyPost.Post.Hashtags),
+		Media : buffer.Bytes(),
+
+	}
+}
+
+func locationToString(location models.Location) string {
+	if location.Country=="" {
+		return ""
+	}else if location.Country!="" && location.Town=="" {
+		return "Location: " +location.Country
+	} else if location.Country!="" && location.Town!="" && location.Street==""{
+		return "Location: " + location.Country + ", " + location.Town
+	}
+	return "Location: " + location.Country + ", " + location.Town + ", " + location.Street
+
+}
+
+func hashTagsToString(hashtags []string) string {
+	hashTagString :=""
+	for _, hash := range hashtags {
+		hashTagString+="#"+hash
+	}
+	return hashTagString
 }

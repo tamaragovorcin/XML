@@ -177,6 +177,29 @@ func (app *application) findUserByID(w http.ResponseWriter, r *http.Request) {
 	w.Write(b)
 }
 
+func (app *application) findUserUsername(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	vars := mux.Vars(r)
+	userId := vars["userId"]
+	intVar, err := primitive.ObjectIDFromHex(userId)
+	m, err := app.users.FindByID(intVar)
+	if err != nil {
+		if err.Error() == "ErrNoDocuments" {
+			app.infoLog.Println("User not found")
+			return
+		}
+		app.serverError(w, err)
+	}
+
+	b, err := json.Marshal(m.ProfileInformation.Username)
+	if err != nil {
+		app.serverError(w, err)
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	w.Write(b)
+}
 func (app *application) findUserPrivacy(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Access-Control-Allow-Origin", "*")
@@ -323,19 +346,14 @@ func (app *application) deleteUser(w http.ResponseWriter, r *http.Request) {
 	app.infoLog.Printf("Have been eliminated %d users(s)", deleteResult.DeletedCount)
 }
 func (app *application) updateUser(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Access-Control-Allow-Origin", "*")
-	app.infoLog.Printf("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
-
 
 		var m dtos.UserUpdateRequest
 		err := json.NewDecoder(r.Body).Decode(&m)
 		if err != nil {
 			app.serverError(w, err)
 		}
-		//intId, err := strconv.Atoi(m.Id)
 	intId, err := primitive.ObjectIDFromHex(m.Id)
 		if err != nil {
-			// handle error
 			fmt.Println(err)
 			os.Exit(2)
 		}
@@ -348,7 +366,6 @@ func (app *application) updateUser(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			app.infoLog.Println("Invalid email")
 		}
-		app.infoLog.Printf("USERNAMEEE, %s",uss.ProfileInformation.Username)
 		var profileInformation = models.ProfileInformation{
 			Id: uss.Id,
 			Name: m.Name,
@@ -369,12 +386,10 @@ func (app *application) updateUser(w http.ResponseWriter, r *http.Request) {
 			Verified: false,
 		}
 
-
 		insertResult, err := app.users.Update(user)
 		if err != nil {
 			app.serverError(w, err)
 		}
 
 	app.infoLog.Printf("New user have been created, id=%s", insertResult.UpsertedID)
-
 }
