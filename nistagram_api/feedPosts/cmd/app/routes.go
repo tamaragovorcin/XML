@@ -35,6 +35,7 @@ func (app *application) routes() *mux.Router {
 	r.HandleFunc("/albumFeed/", app.insertAlbumFeed).Methods("POST")
 	r.HandleFunc("/albumFeed/{id}", app.deleteAlbumFeed).Methods("DELETE")
 	r.HandleFunc("/api/feedAlbum/usersAlbums/{userIdd}", app.getUsersFeedAlbums).Methods("GET")
+	r.HandleFunc("/api/albumFeed/homePage/{userId}", app.getAlbumsForHomePage).Methods("GET")
 
 
 
@@ -42,6 +43,7 @@ func (app *application) routes() *mux.Router {
 	r.HandleFunc("/api/feed/usersImages/{userIdd}", app.getUsersFeedPosts).Methods("GET")
 	r.HandleFunc("/api/feed/searchByLocation/{country}/{city}/{street}", app.getFeedPostsByLocation).Methods("GET")
 	r.HandleFunc("/api/feed/searchByHashTags/", app.getFeedPostsByHashTags).Methods("POST")
+	r.HandleFunc("/api/feed/homePage/{userId}", app.getPhototsForHomePage).Methods("GET")
 
 	r.HandleFunc("/api/collection/allData/{userId}", app.insertAllDataCollection).Methods("POST")
 	r.HandleFunc("/collection/", app.getAllCollections).Methods("GET")

@@ -142,7 +142,6 @@ class ProfilePage extends React.Component {
 
 	}
 	handleAddProfileImage(picture) {
-		alert(picture)
 		let userid = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length-1)
 		this.setState({
 			profilePicture: this.state.profilePicture.concat(picture),
@@ -154,7 +153,6 @@ class ProfilePage extends React.Component {
 	
 
 	test(pic,userId, feedId) {
-		alert(pic)
 		this.setState({
 			fileUploadOngoing: true
 		});
@@ -173,8 +171,7 @@ class ProfilePage extends React.Component {
 		fetch(BASE_URL_FEED + "/api/image/"+userId+"/"+feedId , options);
 	}
 	testProfileImage(pic,userId) {
-		alert("USAOAOOO")
-		alert(pic)
+		
 		this.setState({
 			fileUploadOngoing: true
 		});
@@ -741,11 +738,10 @@ class ProfilePage extends React.Component {
 					this.test(pic, userid, feedId);
 				});
 
-				this.setState({ pictures: [] });
 				this.setState({ showImageModal: false, });
 				this.setState({ openModal: true });
 				this.setState({ textSuccessfulModal: "You have successfully added feed post." });
-				this.handleGetPhotos()
+				this.handleGetPhotos(id)
 
 			})
 			.catch((err) => {
@@ -769,8 +765,7 @@ class ProfilePage extends React.Component {
 					this.setState({ redirect: true });
 				}
 				let feedId = res.data;
-				console.log(res.data);
-				console.log(res.status);
+				
 				let userid = localStorage.getItem("userId");
 				
 				this.state.pictures.forEach((pic) => {
@@ -781,7 +776,7 @@ class ProfilePage extends React.Component {
 				this.setState({ showImageModal: false, });
 				this.setState({ openModal: true });
 				this.setState({ textSuccessfulModal: "You have successfully added album feed post." });
-				this.handleGetAlbums()
+				this.handleGetAlbums(id)
 
 			})
 			.catch((err) => {
@@ -821,7 +816,7 @@ class ProfilePage extends React.Component {
 				this.setState({ showImageModal: false, });
 				this.setState({ openModal: true });
 				this.setState({ textSuccessfulModal: "You have successfully added story post." });
-				this.handleGetStories()
+				this.handleGetStories(id)
 			})
 			.catch((err) => {
 				console.log(err);
@@ -859,7 +854,7 @@ class ProfilePage extends React.Component {
 				this.setState({ showImageModal: false, });
 				this.setState({ openModal: true });
 				this.setState({ textSuccessfulModal: "You have successfully added album story post." });
-				this.handleGetStories()
+				this.handleGetStories(id)
 			})
 			.catch((err) => {
 				console.log(err);

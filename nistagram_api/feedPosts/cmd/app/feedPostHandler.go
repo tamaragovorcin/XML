@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"feedPosts/pkg/dtos"
 	"feedPosts/pkg/models"
-	"fmt"
 	"github.com/gorilla/mux"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"image"
@@ -181,7 +180,7 @@ func toResponse(feedPost models.FeedPost, image2 string) dtos.FeedPostInfoDTO {
 		Description : feedPost.Post.Description,
 		Hashtags : hashTagsToString(feedPost.Post.Hashtags),
 		Media : buffer.Bytes(),
-
+		Username : "",
 	}
 }
 
@@ -273,7 +272,6 @@ func findFeedPostsByLocation(posts []models.FeedPost, country string, city strin
 func userIsPublic(user primitive.ObjectID) bool {
 
 	stringObjectID := user.Hex()
-	fmt.Println(stringObjectID)
 	resp, err := http.Get("http://localhost:4006/api/user/privacy/"+stringObjectID)
 	if err != nil {
 		log.Fatalln(err)
@@ -357,4 +355,89 @@ func postContainsAllHashTags(list []string, hashtags []string) bool {
 		}
 	}
 	return true
+}
+
+func (app *application) getPhototsForHomePage(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	userId := vars["userId"]
+	userIdPrimitive, _ := primitive.ObjectIDFromHex(userId)
+
+	allImages,_ := app.images.All()
+	allPosts, _ :=app.feedPosts.All()
+	postsForHomePage,err :=findFeedPostsForHomePage(allPosts,userIdPrimitive)
+	if err != nil {
+		app.serverError(w, err)
+	}
+	feedPostResponse := []dtos.FeedPostInfoDTO{}
+	for _, feedPost := range postsForHomePage {
+
+		images, err := findImageByPostId(allImages,feedPost.Id)
+		if err != nil {
+			app.serverError(w, err)
+		}
+		userUsername :=getUserUsername(feedPost.Post.User)
+		feedPostResponse = append(feedPostResponse, toResponseHomePage(feedPost, images.Media,userUsername))
+
+	}
+
+	imagesMarshaled, err := json.Marshal(feedPostResponse)
+	if err != nil {
+		app.serverError(w, err)
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	w.Write(imagesMarshaled)
+}
+
+func getUserUsername(user primitive.ObjectID) string {
+
+	stringObjectID := user.Hex()
+	resp, err := http.Get("http://localhost:4006/api/user/username/"+stringObjectID)
+	if err != nil {
+		log.Fatalln(err)
+	}
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		log.Fatalln(err)
+	}
+	sb := string(body)
+	sb = sb[1:]
+	sb = sb[:len(sb)-1]
+	return sb
+}
+
+func findFeedPostsForHomePage(posts []models.FeedPost, idPrimitive primitive.ObjectID) ([]models.FeedPost, error) {
+	feedPostUser := []models.FeedPost{}
+
+	for _, feedPost := range posts {
+
+		if	feedPost.Post.User.String()!=idPrimitive.String() {
+			feedPostUser = append(feedPostUser, feedPost)
+		}
+	}
+	//dodati uslov za pracenje!!!!!!!!!!!
+	return feedPostUser, nil
+}
+func toResponseHomePage(feedPost models.FeedPost, image2 string, username string) dtos.FeedPostInfoDTO {
+	f, _ := os.Open(image2)
+	defer f.Close()
+	image, _, _ := image.Decode(f)
+	buffer := new(bytes.Buffer)
+	if err := jpeg.Encode(buffer, image, nil); err != nil {
+		log.Println("unable to encode image.")
+	}
+
+	return dtos.FeedPostInfoDTO{
+		Id: feedPost.Id,
+		Comments: feedPost.Comments,
+		Likes: feedPost.Likes,
+		Dislikes: feedPost.Dislikes,
+		DateTime : strings.Split(feedPost.Post.DateTime.String(), " ")[0],
+		Tagged :feedPost.Post.Tagged,
+		Location : locationToString(feedPost.Post.Location),
+		Description : feedPost.Post.Description,
+		Hashtags : hashTagsToString(feedPost.Post.Hashtags),
+		Media : buffer.Bytes(),
+		Username : username,
+	}
 }

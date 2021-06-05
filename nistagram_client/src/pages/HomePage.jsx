@@ -13,20 +13,17 @@ import { FiHeart } from "react-icons/fi";
 import {FaHeartBroken,FaRegCommentDots} from "react-icons/fa"
 import {BsBookmark} from "react-icons/bs"
 import Axios from "axios";
-
+import IconTabsHomePage from "../components/Posts/IconTabsHomePage"
 
 class HomePage extends React.Component {
 	
 	state = {
 		stories: [],
 		photos: [],
-		pictures: [],
-		picture: "",
-		hiddenOne: true,
-		hiddenMultiple: true,
 		peopleLikes : [],
 		peopleDislikes : [],
 		comments : [],
+		albums : [],
 		showLikesModal : false,
 		showDislikesModal : false,
 		showCommentsModal : false,
@@ -68,33 +65,15 @@ class HomePage extends React.Component {
 	}
 	componentDidMount() {
 		let id = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length-1)
-		Axios.post(BASE_URL_FEED + "/api/collection/allData/"+id)
-								.then((res) => {
-									if (res.status === 409) {
-										this.setState({
-											errorHeader: "Resource conflict!",
-											errorMessage: "Email already exist.",
-											hiddenErrorAlert: false,
-										});
-									} else if (res.status === 500) {
-										this.setState({ errorHeader: "Internal server error!", errorMessage: "Server error.", hiddenErrorAlert: false });
-									} 
-									
-
-								})
-								.catch((err) => {
-									console.log(err);
-								});
-		this.handleGetBasicInfo()
-		this.handleGetStories()
-		this.handleGetPhotos()
+		
+		this.handleGetStories(id)
+		this.handleGetPhotos(id)
+		this.handleGetAlbums(id)
 
 	}
-	handleGetBasicInfo = () => {
-		this.setState({ username: "USERNAME" });
-	}
+	
 
-	handleGetStories= () => {
+	handleGetStories= (id) => {
 		let highliht1 = { id: 1, username: "mladenkak" };
 		let highliht2 = { id: 2, username: "tamarag" };
 		let highliht3 = { id: 3, username: "lunaz" };
@@ -152,34 +131,25 @@ class HomePage extends React.Component {
 		this.setState({ stories: list });
 	}
 
-	handleGetPhotos = () => {
-		let list = []
-		let comments1 = []
-		let comments2 = []
-		let comment1 = { id: 1, user: "USER 1 ", text: "very nice" }
-		let comment11 = { id: 2, user: "USER 2 ", text: "cool" }
-		let comment111 = { id: 3, user: "USER 3 ", text: "vau" }
-		comments1.push(comment1)
-		comments1.push(comment11)
-		comments1.push(comment111)
-
-		let comment2 = { id: 4, user: "USER 55443 ", text: "i like it" }
-		let comment22 = { id: 5, user: "USER 11111 ", text: "ugly" }
-		let comment222 = { id: 6, user: "USER 33333 ", text: "awesome" }
-		comments2.push(comment2)
-		comments2.push(comment22)
-		comments2.push(comment222)
-
-		let photo1 = { id: 1, username:"mladenkak", photo: playerLogo, numLikes: 52, numDislikes: 2, comments: comments1, profilePhoto: profileImage }
-		let photo2 = { id: 2, username:"mladenkak", photo: playerLogo, numLikes: 45, numDislikes: 0, comments: comments2 ,  profilePhoto: profileImage}
-		let photo3 = { id: 3, username:"mladenkak", photo: playerLogo, numLikes: 52, numDislikes: 2, comments: comments1,  profilePhoto: profileImage }
-		let photo4 = { id: 4, username:"mladenkak", photo: playerLogo, numLikes: 45, numDislikes: 0, comments: comments2,  profilePhoto: profileImage }
-		list.push(photo1)
-		list.push(photo2)
-		list.push(photo3)
-		list.push(photo4)
-
-		this.setState({ photos: list });
+	handleGetPhotos = (id) => {
+		
+		Axios.get(BASE_URL_FEED + "/api/feed/homePage/"+id)
+			.then((res) => {
+				this.setState({ photos: res.data });
+			})
+			.catch((err) => {
+				console.log(err);
+			});
+	}
+	handleGetAlbums = (id) => {
+		
+		Axios.get(BASE_URL_FEED + "/api/albumFeed/homePage/"+id)
+			.then((res) => {
+				this.setState({ albums: res.data });
+			})
+			.catch((err) => {
+				console.log(err);
+			});
 
 	}
 	render() {
@@ -219,73 +189,22 @@ class HomePage extends React.Component {
 									</tbody>
 								</table>
 							</div>
-				</div>
-				
-
-
-				<div className="d-flex align-items-top">
-					<div className="container-fluid">
-						
-						<table className="table">
-							<tbody>
-								{this.state.photos.map((photo) => (
-									
-									<tr id={photo.id} key={photo.id}>
-										<img
-												className="img-fluid"
-												src={photo.profilePhoto}
-												style={{margin:"2%",borderRadius: "50%"}}
-												alt="profile"
-												width ="60em"
-											/>
-										<label style={{fontSize:"20px",fontWeight:"bold"}}>{photo.username}</label>
-										<tr  style={{ width: "100%"}}>
-											<td colSpan="3">
-											<img
-												className="img-fluid"
-												src={photo.photo}
-												width="100%"
-												alt="description"
-											/>
-											</td>
-										</tr>
-										<tr  style={{ width: "100%" }}>
-												<td>
-												<button onClick={this.handleLike}  className="btn btn-outline-secondary btn-sm" style={{ marginBottom: "1rem", height:"40px",marginLeft:"6rem" }}><FiHeart/></button>
-												</td>
-												<td>
-												<button onClick={this.handleDislike}  className="btn btn-outline-secondary btn-sm" style={{ marginBottom: "1rem", height:"40px",marginLeft:"6rem" }}><FaHeartBroken/></button>
-
-												</td>
-												<td>
-												<button onClick={this.handleWriteCommentModal}  className="btn btn-outline-secondary btn-sm" style={{ marginBottom: "1rem", height:"40px",marginLeft:"6rem" }}><FaRegCommentDots/></button>
-												</td>
-												<td>
-												<button onClick={this.handleSave}  className="btn btn-outline-secondary btn-sm" style={{ marginBottom: "1rem", height:"40px" }}><BsBookmark/></button>
-												</td>
-										</tr>
-										<tr  style={{ width: "100%" }}>
-												<td>
-												<button onClick={this.handleLikesModalOpen} className="btn btn-outline-secondary btn-sm" style={{ marginBottom: "1rem" , marginLeft:"4rem"}}><label><b>{photo.numLikes}</b>likes</label></button>
-												</td>
-												<td>
-												<button onClick={this.handleDislikesModalOpen} className="btn btn-outline-secondary btn-sm" style={{ marginBottom: "1rem",marginLeft:"4rem" }}><label ><b>{photo.numDislikes}</b> dislikes</label></button>
-												</td>
-												<td>
-												<button onClick={this.handleCommentsModalOpen} className="btn btn-outline-secondary btn-sm" style={{ marginBottom: "1rem",marginLeft:"4rem" }}><label >Comments</label></button>
-												</td>
-										</tr>
-										<br/>
-										<br/>
-										<br/>
-									</tr>
-									
-								))}
-
-							</tbody>
-						</table>
 					</div>
-				</div>
+				
+					<div className="d-flex align-items-top">
+						<IconTabsHomePage
+							photos = {this.state.photos}
+							handleLike = {this.handleLike}
+							handleDislike = {this.handleDislike}
+							handleWriteCommentModal = {this.handleWriteCommentModal}						
+							handleSave = {this.handleSave}
+							handleLikesModalOpen = {this.handleLikesModalOpen}
+							handleDislikesModalOpen = {this.handleDislikesModalOpen}
+							handleCommentsModalOpen = {this.handleCommentsModalOpen}
+
+							albums ={this.state.albums}
+						/>
+					</div>
 
 				</div>
 					

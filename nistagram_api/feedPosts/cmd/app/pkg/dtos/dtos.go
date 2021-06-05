@@ -41,6 +41,7 @@ type FeedPostInfoDTO struct {
 	Description string
 	Hashtags    string
 	Media       []byte
+	Username    string
 }
 
 type CollectionInfoDTO struct {
@@ -68,6 +69,7 @@ type FeedAlbumInfoDTO struct {
 	Description string
 	Hashtags    string
 	Media       [][]byte
+	Username    string
 }
 type CollectionDTO struct {
 	Name string
