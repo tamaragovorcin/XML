@@ -5,7 +5,7 @@ import { Link } from "react-router-dom";
 import playerLogo from "../static/coach.png";
 
 import { BASE_URL_FEED } from "../constants.js";
-
+import { BASE_URL_USER_INTERACTION } from "../constants.js";
 import LikesModal from "../components/Posts/LikesModal"
 import DislikesModal from "../components/Posts/DislikesModal"
 import CommentsModal from "../components/Posts/CommentsModal"
@@ -335,8 +335,32 @@ class FollowerProfilePage extends React.Component {
 	}
 	handleFollow = () => {
 		let id = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length-1);
-		const followReguestDTO = { followerId: id, followingId: id};
-		Axios.post(BASE_URL_USER + "/api/followRequest", followReguestDTO)
+		const user1Id = {id: id}
+		const user2Id = {id : this.state.userId}
+		alert(this.state.userId);
+		
+		Axios.post(BASE_URL_USER_INTERACTION + "/api/createUser", user1Id)
+		.then((res) => {
+			
+				console.log(res.data)
+				
+			
+		})
+		.catch ((err) => {
+	console.log(err);
+});
+	Axios.post(BASE_URL_USER_INTERACTION + "/api/createUser", user2Id)
+				.then((res) => {
+					
+						console.log(res.data)
+						
+					
+				})
+				.catch ((err) => {
+			console.log(err);
+		});
+		const followReguestDTO = { follower: id, following : this.state.userId};
+		Axios.post(BASE_URL_USER_INTERACTION + "/api/followRequest", followReguestDTO)
 				.then((res) => {
 					
 						console.log(res.data)

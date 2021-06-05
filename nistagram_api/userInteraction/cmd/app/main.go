@@ -30,6 +30,7 @@ func routes() *mux.Router {
 	r.HandleFunc("/api/followRequest", CreateFollowRequest(driver, configuration.Database)).Methods("POST")
 	r.HandleFunc("/api/followApproved", AcceptFollowRequest(driver, configuration.Database)).Methods("POST")
 	r.HandleFunc("/api/createUser", CreateUser(driver, configuration.Database)).Methods("POST")
+	r.HandleFunc("/api/allFollowRequest", ReturnFollowRequests(driver, configuration.Database)).Methods("POST")
 	r.HandleFunc("/movie/vote/{id}", voteInMovieHandlerFunc(driver, configuration.Database)).Methods("GET")
 
 
@@ -62,7 +63,7 @@ func main(){
 	}
 
 	serverAddr := flag.String("serverAddr", "", "HTTP server network address")
-	serverPort := flag.Int("serverPort", 4006, "HTTP server network port")
+	serverPort := flag.Int("serverPort", 4005, "HTTP server network port")
 
 	serverURI := fmt.Sprintf("%s:%d", *serverAddr, *serverPort)
 	router := routes()
@@ -110,8 +111,8 @@ type FollowRequest struct {
 	Following string `json:"following"`
 }
 type FollowRequestDTO struct {
-	FollowerId string `json:"follower"`
-	FollowingId string `json:"following"`
+	Follower string `json:"follower"`
+	Following string `json:"following"`
 }
 type FollowDTO struct {
 	FollowerId string `json:"FollowerId"`
@@ -154,6 +155,11 @@ func CreateFollowRequest(driver neo4j.Driver, database string) func(w http.Respo
 		fmt.Println("POGODIIOOOO JE")
 		w.Header().Set("Access-Control-Allow-Origin", "*")
 		var m FollowRequestDTO
+
+		fmt.Println(m.Follower)
+		fmt.Println(m.Follower)
+
+
 		err := json.NewDecoder(req.Body).Decode(&m)
 		if err != nil {
 			fmt.Println("Error")
@@ -168,8 +174,8 @@ func CreateFollowRequest(driver neo4j.Driver, database string) func(w http.Respo
 			result, err := tx.Run(
 				"MATCH (follower:User), (following:User) WHERE follower.id = $followerId AND following.id = $followingId CREATE (follower)-[:FOLLOWREQUEST]->(following)",
 
-				map[string]interface{}{"followerId": m.FollowerId,
-					"followingId": m.FollowingId,
+				map[string]interface{}{"followerId": m.Follower,
+					"followingId": m.Following,
 				})
 			if err != nil {
 				return nil, err
@@ -209,8 +215,8 @@ func AcceptFollowRequest(driver neo4j.Driver, database string) func(w http.Respo
 			result, err := tx.Run(
 				"MATCH (following:User)<-[f:FOLLOWREQUEST]-(follower:User) WHERE following.id = followingId AND follower.id = followerId DELETE f",
 
-				map[string]interface{}{"followerId": m.FollowerId,
-					"followingId": m.FollowingId,
+				map[string]interface{}{"followerId": m.Follower,
+					"followingId": m.Following,
 				})
 			if err != nil {
 				return nil, err
@@ -270,6 +276,47 @@ func CreateFollow(driver neo4j.Driver, database string) func(w http.ResponseWrit
 		if err != nil {
 			log.Println("error writing volte result response:", err)
 		}
+	}
+}
+func ReturnFollowRequests(driver neo4j.Driver, database string) func(w http.ResponseWriter,r *http.Request) {
+	return func(w http.ResponseWriter, req *http.Request) {
+		fmt.Println("POGODIIOOOO JE")
+		//w.Header().Set("Access-Control-Allow-Origin", "*")
+		var m User
+		err := json.NewDecoder(req.Body).Decode(&m)
+		if err != nil {
+			fmt.Println("Error")
+		}
+		session := driver.NewSession(neo4j.SessionConfig{
+			AccessMode:   neo4j.AccessModeWrite,
+			DatabaseName: database,
+		})
+
+
+		defer unsafeClose(session)
+		result, err := session.ReadTransaction(func(tx neo4j.Transaction) (interface{}, error) {
+			query := "MATCH (following:User)<-[f:FOLLOWREQUEST]-(follower:User) WHERE following.id = $followingId return follower.id as id"
+			parameters := map[string]interface{}{
+				"followingId": m.Id,
+			}
+			records, err := tx.Run(query, parameters)
+			if err != nil {
+				return nil, err
+			}
+			users := Users{}
+			for records.Next() {
+				record := records.Record()
+				id, _ := record.Get("id")
+				users.Users = append(users.Users, id.(string))
+			}
+			return users, nil
+		})
+		if err != nil {
+			log.Println("error querying graph:", err)
+			return
+		}
+		log.Println(result)
+
 	}
 }
 

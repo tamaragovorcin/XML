@@ -11,6 +11,7 @@ import PasswordChange from './pages/PasswordChange'
 import Favorites from './pages/Favorites';
 import PharmacyProfilePage from './pages/FollowerProfilePage';
 import Search from './pages/Search';
+import FollowRequest from './pages/FollowRequest';
 
 function App() {
   return (
@@ -28,6 +29,7 @@ function App() {
 				<Link exact to="/settings" path="/settings" component={EditProfile} />
 				<Route path="/followerProfilePage/:id" children={<PharmacyProfilePage />} />
 				<Link exact to="/seacrh" path="/seacrh" component={Search} />
+				<Link exact to="/follows" path="/follows" component={FollowRequest} />
 
 			</Switch>
 	</Router>
