@@ -18,6 +18,7 @@ import IconTabsProfile from "../components/Posts/IconTabsProfile"
 import AddCollectionModal  from "../components/Posts/AddCollectionModal";
 import AddPostToCollection from "../components/Posts/AddPostToCollection";
 
+import WriteCommentAlbumModal from "../components/Posts/WriteCommentAlbumModal"
 
 class ProfilePage extends React.Component {
 	constructor(props) {
@@ -53,7 +54,7 @@ class ProfilePage extends React.Component {
 		noPicture : true,
 		peopleLikes : [],
 		peopleDislikes : [],
-		comments : [],
+		peopleComments : [],
 		coords: [],
 		addressNotFoundError: "none",
 		textSuccessfulModal : "",
@@ -82,7 +83,9 @@ class ProfilePage extends React.Component {
 		collections  :[],
 		postsForCollection : [],
 		hiddenStoriesForCollection : true,
-		showAddCollectionModal : false
+		showAddCollectionModal : false,
+		showWriteCommentModalAlbum : false
+
 	}
 	
 	handleAddCollectionClick = () => {
@@ -142,7 +145,6 @@ class ProfilePage extends React.Component {
 
 	}
 	handleAddProfileImage(picture) {
-		alert(picture)
 		let userid = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length-1)
 		this.setState({
 			profilePicture: this.state.profilePicture.concat(picture),
@@ -154,7 +156,6 @@ class ProfilePage extends React.Component {
 	
 
 	test(pic,userId, feedId) {
-		alert(pic)
 		this.setState({
 			fileUploadOngoing: true
 		});
@@ -173,8 +174,7 @@ class ProfilePage extends React.Component {
 		fetch(BASE_URL_FEED + "/api/image/"+userId+"/"+feedId , options);
 	}
 	testProfileImage(pic,userId) {
-		alert("USAOAOOO")
-		alert(pic)
+		
 		this.setState({
 			fileUploadOngoing: true
 		});
@@ -312,24 +312,9 @@ class ProfilePage extends React.Component {
 	handlePostModalOpen = () => {
 		this.setState({ showImageModal: true });
 	};
-	handleLikesModalOpen = ()=> {
-		this.setState({ showLikesModal: true });    
-	}
-	handleDislikesModalOpen = ()=> {
-		this.setState({ showDislikesModal: true });    
-	}
-	handleCommentsModalOpen = ()=> {
-		this.setState({ showCommentsModal: true });    
-	}
-	handleLikesModalClose = ()=> {
-		this.setState({ showLikesModal: false });    
-	}
-	handleDislikesModalClose = ()=> {
-		this.setState({ showDislikesModal: false });    
-	}
-	handleCommentsModalClose = ()=> {
-		this.setState({ showCommentsModal: false });    
-	}
+	
+	
+	
 	handleAddStoryPostCloseFriends =()=>{
 		if (this.state.addressInput === "") {
 			const storyPostDTO = {
@@ -391,21 +376,7 @@ class ProfilePage extends React.Component {
 		}
 
 	};
-	handleWriteCommentModalClose = ()=>{
-		this.setState({showWriteCommentModal : false});
-	}
-	handleWriteCommentModal = ()=>{
-		this.setState({showWriteCommentModal : true});
-	}
-	handleLike = ()=>{
-		
-	}
-	handleDislike = ()=>{
-		
-	}
-	handleSave = ()=>{
-
-	}
+	
 	handleAddFeedPost = ()=> {
 		
 		if (this.state.addressInput === "") {
@@ -741,11 +712,10 @@ class ProfilePage extends React.Component {
 					this.test(pic, userid, feedId);
 				});
 
-				this.setState({ pictures: [] });
 				this.setState({ showImageModal: false, });
 				this.setState({ openModal: true });
 				this.setState({ textSuccessfulModal: "You have successfully added feed post." });
-				this.handleGetPhotos()
+				this.handleGetPhotos(id)
 
 			})
 			.catch((err) => {
@@ -769,8 +739,7 @@ class ProfilePage extends React.Component {
 					this.setState({ redirect: true });
 				}
 				let feedId = res.data;
-				console.log(res.data);
-				console.log(res.status);
+				
 				let userid = localStorage.getItem("userId");
 				
 				this.state.pictures.forEach((pic) => {
@@ -781,7 +750,7 @@ class ProfilePage extends React.Component {
 				this.setState({ showImageModal: false, });
 				this.setState({ openModal: true });
 				this.setState({ textSuccessfulModal: "You have successfully added album feed post." });
-				this.handleGetAlbums()
+				this.handleGetAlbums(id)
 
 			})
 			.catch((err) => {
@@ -821,7 +790,7 @@ class ProfilePage extends React.Component {
 				this.setState({ showImageModal: false, });
 				this.setState({ openModal: true });
 				this.setState({ textSuccessfulModal: "You have successfully added story post." });
-				this.handleGetStories()
+				this.handleGetStories(id)
 			})
 			.catch((err) => {
 				console.log(err);
@@ -859,7 +828,7 @@ class ProfilePage extends React.Component {
 				this.setState({ showImageModal: false, });
 				this.setState({ openModal: true });
 				this.setState({ textSuccessfulModal: "You have successfully added album story post." });
-				this.handleGetStories()
+				this.handleGetStories(id)
 			})
 			.catch((err) => {
 				console.log(err);
@@ -967,7 +936,7 @@ class ProfilePage extends React.Component {
 			this.setState({ showAddCollectionModal: false });
 			let id = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length-1)
 			this.handleGetCollections(id);
-			this.setState({ textSuccessfulModal: "You have successfully added post to highlight." });
+			this.setState({ textSuccessfulModal: "You have successfully added post to collection." });
 			this.setState({ openModal: true });
 			this.setState({ showAddPostToCollection: false });
 
@@ -984,7 +953,207 @@ class ProfilePage extends React.Component {
 		this.setState({ hiddenStoriesForCollection: false });
 		this.setState({postsForCollection : posts})
 	}
+	handleLikesModalOpen = (postId)=> {
+		Axios.get(BASE_URL_FEED + "/api/feed/likes/"+postId)
+			.then((res) => {
+				this.setState({ peopleLikes: res.data });
+			})
+			.catch((err) => {
+				console.log(err);
+			});
+		this.setState({ showLikesModal: true });    
+	}
+	handleDislikesModalOpen = (postId)=> {
+		Axios.get(BASE_URL_FEED + "/api/feed/dislikes/"+postId)
+			.then((res) => {
+				this.setState({ peopleDislikes: res.data });
+			})
+			.catch((err) => {
+				console.log(err);
+			});
+		this.setState({ showDislikesModal: true });    
+	}
+	handleCommentsModalOpen = (postId)=> {
+		Axios.get(BASE_URL_FEED + "/api/feed/comments/"+postId)
+			.then((res) => {
+				this.setState({ peopleComments: res.data });
+			})
+			.catch((err) => {
+				console.log(err);
+			});
+		this.setState({ showCommentsModal: true });    
+	}
+	handleWriteCommentModal = (postId)=>{
+		this.setState({ selectedPostId: postId });
+		this.setState({showWriteCommentModal : true});
+	}
+	handleLikesModalClose = ()=> {
+		this.setState({ showLikesModal: false });    
+	}
+	handleDislikesModalClose = ()=> {
+		this.setState({ showDislikesModal: false });    
+	}
+	handleCommentsModalClose = ()=> {
+		this.setState({ showCommentsModal: false });    
+	}
+	handleWriteCommentModalClose = ()=>{
+		this.setState({showWriteCommentModal : false});
+	}
 	
+	handleLike = (postId)=>{
+		let id = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length-1)
+
+		let postReactionDTO = {
+			PostId : postId,
+			UserId : id
+		}
+		Axios.post(BASE_URL_FEED + "/api/feed/like/", postReactionDTO, {
+		}).then((res) => {
+
+			this.setState({ textSuccessfulModal: "You have successfully liked the photo." });
+			this.setState({ openModal: true });
+
+		})
+		.catch((err) => {
+			console.log(err);
+		});
+	}
+	handleDislike = (postId)=>{
+		let id = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length-1)
+
+		let postReactionDTO = {
+			PostId : postId,
+			UserId : id
+		}
+		Axios.post(BASE_URL_FEED + "/api/feed/dislike/", postReactionDTO, {
+		}).then((res) => {
+
+			this.setState({ textSuccessfulModal: "You have successfully disliked the photo." });
+			this.setState({ openModal: true });
+
+		})
+		.catch((err) => {
+			console.log(err);
+		});
+	}
+	
+	handleAddComment =(comment) => {
+		let id = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length-1)
+
+		let commentDTO = {
+			PostId : this.state.selectedPostId,
+			UserId : id,
+			Content : comment
+
+		}
+		Axios.post(BASE_URL_FEED + "/api/feed/comment/", commentDTO, {
+		}).then((res) => {
+			
+			this.setState({ textSuccessfulModal: "You have successfully commented the photo." });
+			this.setState({ openModal: true });
+			this.setState({ showWriteCommentModal: false });
+
+
+		})
+		.catch((err) => {
+			console.log(err);
+		});
+	}
+	handleLikesModalOpenAlbum = (postId)=> {
+		Axios.get(BASE_URL_FEED + "/api/albumFeed/likes/"+postId)
+			.then((res) => {
+				this.setState({ peopleLikes: res.data });
+			})
+			.catch((err) => {
+				console.log(err);
+			});
+		this.setState({ showLikesModal: true });    
+	}
+	handleDislikesModalOpenAlbum = (postId)=> {
+		Axios.get(BASE_URL_FEED + "/api/albumFeed/dislikes/"+postId)
+			.then((res) => {
+				this.setState({ peopleDislikes: res.data });
+			})
+			.catch((err) => {
+				console.log(err);
+			});
+		this.setState({ showDislikesModal: true });    
+	}
+	handleCommentsModalOpenAlbum = (postId)=> {
+		Axios.get(BASE_URL_FEED + "/api/albumFeed/comments/"+postId)
+			.then((res) => {
+				this.setState({ peopleComments: res.data });
+			})
+			.catch((err) => {
+				console.log(err);
+			});
+		this.setState({ showCommentsModal: true });    
+	}
+	handleAddCommentAlbum =(comment) => {
+		let id = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length-1)
+
+		let commentDTO = {
+			PostId : this.state.selectedPostId,
+			UserId : id,
+			Content : comment
+
+		}
+		Axios.post(BASE_URL_FEED + "/api/albumFeed/comment/", commentDTO, {
+		}).then((res) => {
+			
+			this.setState({ textSuccessfulModal: "You have successfully commented the album." });
+			this.setState({ openModal: true });
+			this.setState({ showWriteCommentModal: false });
+
+
+		})
+		.catch((err) => {
+			console.log(err);
+		});
+	}
+	handleLikeAlbum = (postId)=>{
+		let id = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length-1)
+
+		let postReactionDTO = {
+			PostId : postId,
+			UserId : id
+		}
+		Axios.post(BASE_URL_FEED + "/api/albumFeed/like/", postReactionDTO, {
+		}).then((res) => {
+
+			this.setState({ textSuccessfulModal: "You have successfully liked the album." });
+			this.setState({ openModal: true });
+
+		})
+		.catch((err) => {
+			console.log(err);
+		});
+	}
+	handleDislikeAlbum= (postId)=>{
+		let id = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length-1)
+
+		let postReactionDTO = {
+			PostId : postId,
+			UserId : id
+		}
+		Axios.post(BASE_URL_FEED + "/api/albumFeed/dislike/", postReactionDTO, {
+		}).then((res) => {
+
+			this.setState({ textSuccessfulModal: "You have successfully disliked the album." });
+			this.setState({ openModal: true });
+
+		})
+		.catch((err) => {
+			console.log(err);
+		});
+	}
+	handleWriteCommentModalAlbum = (postId)=>{
+		this.setState({ selectedPostId: postId });
+		this.setState({showWriteCommentModalAlbum : true});
+	}
+	handleWriteCommentAlbumModalClose = ()=>{
+		this.setState({showWriteCommentModalAlbum : false});
+	}
 	render() {
 		return (
 			<React.Fragment>
@@ -1058,6 +1227,12 @@ class ProfilePage extends React.Component {
 						handleCommentsModalOpen = {this.handleCommentsModalOpen}
 
 						albums ={this.state.albums}
+						handleLikeAlbum = {this.handleLikeAlbum}
+						handleDislikeAlbum  = {this.handleDislikeAlbum }
+						handleWriteCommentModalAlbum  = {this.handleWriteCommentModalAlbum }						
+						handleLikesModalOpenAlbum  = {this.handleLikesModalOpenAlbum }
+						handleDislikesModalOpenAlbum  = {this.handleDislikesModalOpenAlbum}
+						handleCommentsModalOpenAlbum  = {this.handleCommentsModalOpenAlbum }
 
 						stories = {this.state.stories}
 						handleOpenAddStoryToHighlightModal = {this.handleOpenAddStoryToHighlightModal}
@@ -1084,7 +1259,7 @@ class ProfilePage extends React.Component {
 				</section>
 				<div>
                         
-                    <LikesModal
+				<LikesModal
 					        show={this.state.showLikesModal}
 					        onCloseModal={this.handleLikesModalClose}
 					        header="People who liked the photo"
@@ -1100,7 +1275,19 @@ class ProfilePage extends React.Component {
                         show={this.state.showCommentsModal}
 						onCloseModal={this.handleCommentsModalClose}
 						header="Comments on the photo"
-						comments = {this.state.comments}
+						peopleComments = {this.state.peopleComments}
+                    />
+					<WriteCommentModal
+                        show={this.state.showWriteCommentModal}
+						onCloseModal={this.handleWriteCommentModalClose}
+						header="Leave your comment"
+						handleAddComment = {this.handleAddComment}
+                    />
+					<WriteCommentAlbumModal
+                        show={this.state.showWriteCommentModalAlbum}
+						onCloseModal={this.handleWriteCommentAlbumModalClose}
+						header="Leave your comment"
+						handleAddCommentAlbum = {this.handleAddCommentAlbum}
                     />
                     <ModalDialog
 						show={this.state.openModal}
@@ -1108,11 +1295,7 @@ class ProfilePage extends React.Component {
 						header="Successful"
 						text={this.state.textSuccessfulModal}
 					/>
-					<WriteCommentModal
-                        show={this.state.showWriteCommentModal}
-						onCloseModal={this.handleWriteCommentModalClose}
-						header="Leave your comment"
-                    />
+				
 					<AddPostModal
 						show={this.state.showImageModal}
 						onCloseModal={this.handlePostModalClose}

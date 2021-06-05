@@ -32,15 +32,13 @@ type PostInfoDTO struct {
 
 type FeedPostInfoDTO struct {
 	Id          primitive.ObjectID
-	Likes       []primitive.ObjectID
-	Dislikes    []primitive.ObjectID
-	Comments    []primitive.ObjectID
 	DateTime    string
 	Tagged      []primitive.ObjectID
 	Location    string
 	Description string
 	Hashtags    string
 	Media       []byte
+	Username    string
 }
 
 type CollectionInfoDTO struct {
@@ -59,15 +57,13 @@ type UserCollectionsDTO struct {
 }
 type FeedAlbumInfoDTO struct {
 	Id          primitive.ObjectID
-	Likes       []primitive.ObjectID
-	Dislikes    []primitive.ObjectID
-	Comments    []primitive.ObjectID
 	DateTime    string
 	Tagged      []primitive.ObjectID
 	Location    string
 	Description string
 	Hashtags    string
 	Media       [][]byte
+	Username    string
 }
 type CollectionDTO struct {
 	Name string
@@ -75,4 +71,23 @@ type CollectionDTO struct {
 type CollectionPostDTO struct {
 	PostId primitive.ObjectID
 	CollectionId primitive.ObjectID
+}
+
+type PostReactionDTO struct {
+	PostId primitive.ObjectID
+	UserId primitive.ObjectID
+}
+type CommentReactionDTO struct {
+	PostId primitive.ObjectID
+	UserId primitive.ObjectID
+	Content string
+}
+
+type CommentDTO struct {
+	Content string
+	Writer string
+	DateTime string
+}
+type LikeDTO struct {
+	Username string
 }

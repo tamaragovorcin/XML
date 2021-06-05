@@ -20,24 +20,13 @@ class LikesModal extends Component {
 				<Modal.Body>
 				
 					 <table className="table" style={{ width: "100%", marginTop: "3rem" }}>
-                            <tbody>
+                     <tbody>
                                 {this.props.peopleLikes.map((person) => (
-                                    <tr id={person.id} key={person.id}>
-                                        <td width="130em">
-                                            <img
-                                                className="img-fluid"
-                                                src={person.photo}
-                                                width="70em"
-                                                alt="description"
-                                            />
-                                        </td>
-
+                                    <tr id={person.Username} key={person.Username}>
+                                       
                                         <td>
                                             <div>
-                                                <b>Name: </b> {person.name}
-                                            </div>
-                                            <div>
-                                                <b>Surname: </b> {person.surname}
+                                                <b>Username: </b> {person.Username}
                                             </div>
                                         </td>
                                     </tr>
