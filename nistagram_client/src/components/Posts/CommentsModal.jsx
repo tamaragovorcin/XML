@@ -21,13 +21,13 @@ class DislikesModal extends Component {
 				
 					 <table className="table" style={{ width: "100%", marginTop: "3rem" }}>
                             <tbody>
-                                {this.props.comments.map((comment) => (
-                                    <tr id={comment.id} key={comment.id}>
+                                {this.props.peopleComments.map((comment) => (
+                                    <tr id={comment.Id} key={comment.Id}>
                                         <tr>
-                                            <label><b>{comment.user}</b></label>
+                                            <label><b>{comment.Writer}</b></label>
                                         </tr>
                                         <td>
-                                           <label>{comment.text}</label>
+                                           <label>{comment.Content}</label>
                                         </td>
                                     </tr>
 

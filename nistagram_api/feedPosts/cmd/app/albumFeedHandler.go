@@ -189,10 +189,6 @@ func toResponseAlbum(feedAlbum models.AlbumFeed, imageList []string) dtos.FeedAl
 
 	return dtos.FeedAlbumInfoDTO{
 		Id: feedAlbum.Id,
-		Comments: feedAlbum.Comments,
-		Likes: feedAlbum.Likes,
-		Dislikes: feedAlbum.Dislikes,
-
 		DateTime : strings.Split(feedAlbum.Post.DateTime.String(), " ")[0],
 		Tagged :feedAlbum.Post.Tagged,
 		Location : locationToString(feedAlbum.Post.Location),
@@ -252,10 +248,6 @@ func toResponseAlbumHomePage(feedAlbum models.AlbumFeed, imageList []string, use
 
 	return dtos.FeedAlbumInfoDTO{
 		Id: feedAlbum.Id,
-		Comments: feedAlbum.Comments,
-		Likes: feedAlbum.Likes,
-		Dislikes: feedAlbum.Dislikes,
-
 		DateTime : strings.Split(feedAlbum.Post.DateTime.String(), " ")[0],
 		Tagged :feedAlbum.Post.Tagged,
 		Location : locationToString(feedAlbum.Post.Location),

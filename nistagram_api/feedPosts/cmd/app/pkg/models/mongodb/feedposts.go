@@ -62,3 +62,9 @@ func (m *FeedPostModel) Delete(id string) (*mongo.DeleteResult, error) {
 	}
 	return m.C.DeleteOne(context.TODO(), bson.M{"_id": p})
 }
+
+func (m *FeedPostModel) Update(feed models.FeedPost)  (*mongo.UpdateResult, error) {
+	return m.C.UpdateOne(context.TODO(),bson.M{"_id":feed.Id},bson.D{{"$set",bson.M{"likes":feed.Likes,"dislikes":feed.Dislikes,"comments":feed.Comments,"post.user":feed.Post.User,
+		"post.dateTime":feed.Post.DateTime,"post.tagged":feed.Post.Tagged,"post.location":feed.Post.Location,
+		"post.description":feed.Post.Description,"post.blocked":feed.Post.Blocked,"post.hashtags":feed.Post.Hashtags}}})
+}

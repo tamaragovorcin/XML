@@ -90,7 +90,7 @@ func (app *application) insertFeedPost(w http.ResponseWriter, req *http.Request)
 		Post : post,
 		Likes : []primitive.ObjectID{},
 		Dislikes: []primitive.ObjectID{},
-		Comments: []primitive.ObjectID{},
+		Comments: []models.Comment{},
 	}
 
 
@@ -171,9 +171,6 @@ func toResponse(feedPost models.FeedPost, image2 string) dtos.FeedPostInfoDTO {
 
 	return dtos.FeedPostInfoDTO{
 		Id: feedPost.Id,
-		Comments: feedPost.Comments,
-		Likes: feedPost.Likes,
-		Dislikes: feedPost.Dislikes,
 		DateTime : strings.Split(feedPost.Post.DateTime.String(), " ")[0],
 		Tagged :feedPost.Post.Tagged,
 		Location : locationToString(feedPost.Post.Location),
@@ -182,6 +179,21 @@ func toResponse(feedPost models.FeedPost, image2 string) dtos.FeedPostInfoDTO {
 		Media : buffer.Bytes(),
 		Username : "",
 	}
+}
+
+func getCommentDtos(comments []models.Comment) []dtos.CommentDTO {
+	commentDtos :=[]dtos.CommentDTO{}
+	for _, comment := range comments {
+		writerUsername :=getUserUsername(comment.Writer)
+		var commentDto = dtos.CommentDTO{
+			Content :comment.Content,
+			Writer : writerUsername,
+			DateTime: strings.Split(comment.DateTime.String(), " ")[0],
+
+		}
+		commentDtos = append(commentDtos, commentDto)
+	}
+	return commentDtos
 }
 
 func locationToString(location models.Location) string {
@@ -429,9 +441,6 @@ func toResponseHomePage(feedPost models.FeedPost, image2 string, username string
 
 	return dtos.FeedPostInfoDTO{
 		Id: feedPost.Id,
-		Comments: feedPost.Comments,
-		Likes: feedPost.Likes,
-		Dislikes: feedPost.Dislikes,
 		DateTime : strings.Split(feedPost.Post.DateTime.String(), " ")[0],
 		Tagged :feedPost.Post.Tagged,
 		Location : locationToString(feedPost.Post.Location),
@@ -440,4 +449,205 @@ func toResponseHomePage(feedPost models.FeedPost, image2 string, username string
 		Media : buffer.Bytes(),
 		Username : username,
 	}
+}
+
+func (app *application) likeTheFeedPost(w http.ResponseWriter, r *http.Request) {
+
+	var m dtos.PostReactionDTO
+	err := json.NewDecoder(r.Body).Decode(&m)
+	if err != nil {
+		app.serverError(w, err)
+	}
+
+	feedPost, err := app.feedPosts.FindByID(m.PostId)
+	if feedPost == nil {
+		app.infoLog.Println("Feed Post not found")
+	}
+	var post = models.Post{
+		User : feedPost.Post.User,
+		DateTime : feedPost.Post.DateTime,
+		Tagged : feedPost.Post.Tagged,
+		Description: feedPost.Post.Description,
+		Hashtags: feedPost.Post.Hashtags,
+		Location : feedPost.Post.Location,
+		Blocked : feedPost.Post.Blocked,
+	}
+	var feedPostUpdate = models.FeedPost{
+		Id: feedPost.Id,
+		Dislikes:feedPost.Dislikes,
+		Comments : feedPost.Comments,
+		Post : post,
+		Likes: append(feedPost.Likes, m.UserId),
+	}
+
+	insertResult, err := app.feedPosts.Update(feedPostUpdate)
+	if err != nil {
+		app.serverError(w, err)
+	}
+	app.infoLog.Printf("New user have been created, id=%s", insertResult.UpsertedID)
+}
+func (app *application) dislikeTheFeedPost(w http.ResponseWriter, r *http.Request) {
+
+	var m dtos.PostReactionDTO
+	err := json.NewDecoder(r.Body).Decode(&m)
+	if err != nil {
+		app.serverError(w, err)
+	}
+
+	feedPost, err := app.feedPosts.FindByID(m.PostId)
+	if feedPost == nil {
+		app.infoLog.Println("Feed Post not found")
+	}
+	var post = models.Post{
+		User : feedPost.Post.User,
+		DateTime : feedPost.Post.DateTime,
+		Tagged : feedPost.Post.Tagged,
+		Description: feedPost.Post.Description,
+		Hashtags: feedPost.Post.Hashtags,
+		Location : feedPost.Post.Location,
+		Blocked : feedPost.Post.Blocked,
+	}
+	var feedPostUpdate = models.FeedPost{
+		Id: feedPost.Id,
+		Dislikes:append(feedPost.Dislikes, m.UserId),
+		Comments : feedPost.Comments,
+		Post : post,
+		Likes: feedPost.Likes,
+	}
+
+	insertResult, err := app.feedPosts.Update(feedPostUpdate)
+	if err != nil {
+		app.serverError(w, err)
+	}
+	app.infoLog.Printf("New user have been created, id=%s", insertResult.UpsertedID)
+}
+func (app *application) commentTheFeedPost(w http.ResponseWriter, r *http.Request) {
+
+	var m dtos.CommentReactionDTO
+	err := json.NewDecoder(r.Body).Decode(&m)
+	if err != nil {
+		app.serverError(w, err)
+	}
+
+	feedPost, err := app.feedPosts.FindByID(m.PostId)
+	if feedPost == nil {
+		app.infoLog.Println("Feed Post not found")
+	}
+	var post = models.Post{
+		User : feedPost.Post.User,
+		DateTime : feedPost.Post.DateTime,
+		Tagged : feedPost.Post.Tagged,
+		Description: feedPost.Post.Description,
+		Hashtags: feedPost.Post.Hashtags,
+		Location : feedPost.Post.Location,
+		Blocked : feedPost.Post.Blocked,
+	}
+	var comment = models.Comment{
+		DateTime : time.Now(),
+		Content : m.Content,
+		Writer: m.UserId,
+	}
+	var feedPostUpdate = models.FeedPost{
+		Id: feedPost.Id,
+		Dislikes:feedPost.Dislikes,
+		Comments : append(feedPost.Comments, comment),
+		Post : post,
+		Likes: feedPost.Likes,
+	}
+
+	insertResult, err := app.feedPosts.Update(feedPostUpdate)
+	if err != nil {
+		app.serverError(w, err)
+	}
+	app.infoLog.Printf("New user have been created, id=%s", insertResult.UpsertedID)
+}
+
+func (app *application) getlikesFeedPost(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	postId := vars["postId"]
+	postIdPrimitive, _ := primitive.ObjectIDFromHex(postId)
+
+
+	likesForPost,err :=app.feedPosts.FindByID(postIdPrimitive)
+
+	if err != nil {
+		app.serverError(w, err)
+	}
+
+	likesDtos := []dtos.LikeDTO{}
+	for _, user := range likesForPost.Likes {
+
+		userUsername :=getUserUsername(user)
+		var like = dtos.LikeDTO{
+			Username: userUsername,
+		}
+
+		likesDtos = append(likesDtos, like)
+
+	}
+
+	usernamesMarshaled, err := json.Marshal(likesDtos)
+	if err != nil {
+		app.serverError(w, err)
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	w.Write(usernamesMarshaled)
+}
+
+func (app *application) getdislikesFeedPost(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	postId := vars["postId"]
+	postIdPrimitive, _ := primitive.ObjectIDFromHex(postId)
+
+
+	likesForPost,err :=app.feedPosts.FindByID(postIdPrimitive)
+
+	if err != nil {
+		app.serverError(w, err)
+	}
+
+	likesDtos := []dtos.LikeDTO{}
+	for _, user := range likesForPost.Dislikes {
+
+		userUsername :=getUserUsername(user)
+		var like = dtos.LikeDTO{
+			Username: userUsername,
+		}
+
+		likesDtos = append(likesDtos, like)
+
+	}
+
+	usernamesMarshaled, err := json.Marshal(likesDtos)
+	if err != nil {
+		app.serverError(w, err)
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	w.Write(usernamesMarshaled)
+}
+
+func (app *application) getcommentsFeedPost(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	postId := vars["postId"]
+	postIdPrimitive, _ := primitive.ObjectIDFromHex(postId)
+
+
+	likesForPost,err :=app.feedPosts.FindByID(postIdPrimitive)
+
+	if err != nil {
+		app.serverError(w, err)
+	}
+
+	commentsDtos :=getCommentDtos(likesForPost.Comments)
+
+
+	usernamesMarshaled, err := json.Marshal(commentsDtos)
+	if err != nil {
+		app.serverError(w, err)
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	w.Write(usernamesMarshaled)
 }

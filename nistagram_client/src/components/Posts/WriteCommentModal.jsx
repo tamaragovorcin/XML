@@ -5,12 +5,9 @@ class WriteCommentModal extends Component {
     state = {
 		comment: ""
 	};
-    handleCommentChange =()=>{
-
-    }
-    handleComment =()=>{
-
-    }
+    handleCommentChange = (event) => {
+		this.setState({ comment: event.target.value });
+	};
 
 	render() {
 		return (
@@ -43,7 +40,7 @@ class WriteCommentModal extends Component {
 								</div>
                                 <Button
 									style={{ background: "#1977cc", marginTop: "15px", marginLeft: "40%", width: "20%" }}
-									onClick={this.handleComment}
+									onClick={() => this.props.handleAddComment(this.state.comment)}
 									className="btn btn-primary btn-md"
 									id="sendMessageButton"
 									type="button"
