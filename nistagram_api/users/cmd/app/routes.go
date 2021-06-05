@@ -8,15 +8,15 @@ func (app *application) routes() *mux.Router {
 	// Register handler functions.
 	r := mux.NewRouter()
 
-	r.HandleFunc("/api/", app.getAllUsers).Methods("GET")
-	r.HandleFunc("/api/{id}", app.findUserByID).Methods("GET")
-	r.HandleFunc("/api/user/update/", app.updateUser).Methods("POST")
-	r.HandleFunc("/api/", app.insertUser).Methods("POST")
-	r.HandleFunc("/api/{id}", app.deleteUser).Methods("DELETE")
+	r.HandleFunc("/", app.getAllUsers).Methods("GET")
+	r.HandleFunc("/{id}", app.findUserByID).Methods("GET")
+	r.HandleFunc("/user/update/", app.updateUser).Methods("POST")
+	r.HandleFunc("/", app.insertUser).Methods("POST")
+	r.HandleFunc("/{id}", app.deleteUser).Methods("DELETE")
 
-	r.HandleFunc("/api/search/{name}", app.search).Methods("GET")
-	r.HandleFunc("/api/login", app.loginUser).Methods("POST")
-	r.HandleFunc("/api/user/privacy/{userId}", app.findUserPrivacy).Methods("GET")
+	r.HandleFunc("/search/{name}", app.search).Methods("GET")
+	r.HandleFunc("/login", app.loginUser).Methods("POST")
+	r.HandleFunc("/user/privacy/{userId}", app.findUserPrivacy).Methods("GET")
 
 	//r.HandleFunc("/api/getLoggedIn", app.getLoggedIn).Methods("GET")
 
@@ -30,18 +30,18 @@ func (app *application) routes() *mux.Router {
 	r.HandleFunc("/verification/", app.insertVerification).Methods("POST")
 	r.HandleFunc("/verification/{id}", app.deleteVerification).Methods("DELETE")
 
-	r.HandleFunc("/api/role/", app.getAllRoles).Methods("GET")
-	r.HandleFunc("/api/role/{id}", app.findRoleByID).Methods("GET")
-	r.HandleFunc("/api/role/", app.insertRole).Methods("POST")
-	r.HandleFunc("/api/role/{id}", app.deleteRole).Methods("DELETE")
+	r.HandleFunc("/role/", app.getAllRoles).Methods("GET")
+	r.HandleFunc("/role/{id}", app.findRoleByID).Methods("GET")
+	r.HandleFunc("/role/", app.insertRole).Methods("POST")
+	r.HandleFunc("/role/{id}", app.deleteRole).Methods("DELETE")
 
 	r.HandleFunc("/agent/", app.getAllAgents).Methods("GET")
 	r.HandleFunc("/agent/{id}", app.findAgentByID).Methods("GET")
 	r.HandleFunc("/agent/", app.insertAgent).Methods("POST")
 	r.HandleFunc("/agent/{id}", app.deleteAgent).Methods("DELETE")
 
-	r.HandleFunc("/api/user/profileImage/{userId}", app.saveImage).Methods("POST")
-	r.HandleFunc("/api/user/profileImage/{userId}", app.getUsersProfileImage).Methods("GET")
+	r.HandleFunc("/user/profileImage/{userId}", app.saveImage).Methods("POST")
+	r.HandleFunc("/user/profileImage/{userId}", app.getUsersProfileImage).Methods("GET")
 
 	return r
 }
