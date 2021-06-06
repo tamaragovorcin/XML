@@ -5,8 +5,7 @@ import { FiHeart } from "react-icons/fi";
 import {FaHeartBroken,FaRegCommentDots} from "react-icons/fa"
 import {BsBookmark} from "react-icons/bs"
 import "react-responsive-carousel/lib/styles/carousel.min.css"; // requires a loader
-import { Carousel } from "bootstrap";
-
+import { Carousel } from 'react-responsive-carousel';
 
 class IconTabsHomePage extends React.Component {
   constructor(props){
@@ -110,7 +109,7 @@ render(){
               <tbody>
                 {this.props.albums.map((post) => (
                   
-                  <tr id={post.id} key={post.id}>
+                  <tr id={post.Id} key={post.Id}>
                      <tr>
                         <label style={{fontSize:"20px",fontWeight:"bold"}}>{post.Username}</label>
                     </tr>

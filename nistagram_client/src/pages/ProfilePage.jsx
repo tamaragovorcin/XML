@@ -1238,7 +1238,7 @@ class ProfilePage extends React.Component {
 											onChange={this.handleAddProfileImage}
 											imgExtension={['.jpg', '.gif', '.png', '.gif']}
 											withPreview={true}
-						/>
+										/>
 									</td>
 
 									<td>

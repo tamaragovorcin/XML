@@ -38,6 +38,9 @@ func routes() *mux.Router {
 	r.HandleFunc("/api/user/followRequestsByMe", ReturnUsersFollowRequestsByMe(driver, configuration.Database)).Methods("POST")
 	r.HandleFunc("/api/user/following", ReturnUsersFollowings(driver, configuration.Database)).Methods("POST")
 	r.HandleFunc("/api/user/followers", ReturnUsersFollowers(driver, configuration.Database)).Methods("POST")
+	r.HandleFunc("/api/checkInteraction", ReturnUsersInteraction(driver, configuration.Database)).Methods("POST")
+	r.HandleFunc("/api/checkIfSentRequest", ReturnIfRequestSent(driver, configuration.Database)).Methods("POST")
+
 
 	r.HandleFunc("/api/createUser", CreateUser(driver, configuration.Database)).Methods("POST")
 
@@ -170,7 +173,6 @@ func (nc *Neo4jConfiguration) newDriver() (neo4j.Driver, error) {
 
 func CreateFollowRequest(driver neo4j.Driver, database string) func(w http.ResponseWriter,r *http.Request) {
 	return func(w http.ResponseWriter, req *http.Request) {
-		fmt.Println("POGODIIOOOO JE")
 		w.Header().Set("Access-Control-Allow-Origin", "*")
 		var m FollowRequestDTO
 
@@ -216,7 +218,6 @@ func CreateFollowRequest(driver neo4j.Driver, database string) func(w http.Respo
 }
 func AcceptFollowRequest(driver neo4j.Driver, database string) func(w http.ResponseWriter,r *http.Request) {
 	return func(w http.ResponseWriter, req *http.Request) {
-		fmt.Println("POGODIIOOOO JE")
 		w.Header().Set("Access-Control-Allow-Origin", "*")
 		var m FollowRequestDTO
 		err := json.NewDecoder(req.Body).Decode(&m)
@@ -532,6 +533,89 @@ func ReturnUsersFollowers(driver neo4j.Driver, database string) func(http.Respon
 				return []followUserStructDTO{},nil
 			}
 			return users,nil
+		})
+		if err != nil {
+			log.Println("error querying search:", err)
+			return
+		}
+		err = json.NewEncoder(w).Encode(movieResults)
+		if err != nil {
+			log.Println("error writing search response:", err)
+		}
+	}
+}
+
+func ReturnUsersInteraction(driver neo4j.Driver, database string) func(http.ResponseWriter, *http.Request) {
+	return func(w http.ResponseWriter, req *http.Request) {
+		var m FollowRequestDTO
+		err := json.NewDecoder(req.Body).Decode(&m)
+		if err != nil {
+			fmt.Println("Error")
+		}
+		session := driver.NewSession(neo4j.SessionConfig{
+			AccessMode:   neo4j.AccessModeRead,
+			DatabaseName: database,
+		})
+		defer unsafeClose(session)
+
+		movieResults, err := session.ReadTransaction(func(tx neo4j.Transaction) (interface{}, error) {
+			records, err := tx.Run(
+				`MATCH (following:User)<-[f:FOLLOW]-(follower:User) WHERE follower.id = $followerId return following.id as id`,
+				map[string]interface{}{ "followerId": m.Follower})
+			if err != nil {
+				return nil, err
+			}
+			for records.Next() {
+				record := records.Record()
+				id, _ := record.Get("id")
+
+				if id.(string)==m.Following {
+					return true,nil
+				}
+			}
+			return false,nil
+		})
+		if err != nil {
+			log.Println("error querying search:", err)
+			return
+		}
+		err = json.NewEncoder(w).Encode(movieResults)
+		if err != nil {
+			log.Println("error writing search response:", err)
+		}
+	}
+}
+
+func ReturnIfRequestSent(driver neo4j.Driver, database string) func(http.ResponseWriter, *http.Request) {
+	return func(w http.ResponseWriter, req *http.Request) {
+		var m FollowRequestDTO
+		err := json.NewDecoder(req.Body).Decode(&m)
+		if err != nil {
+			fmt.Println("Error")
+		}
+		session := driver.NewSession(neo4j.SessionConfig{
+			AccessMode:   neo4j.AccessModeRead,
+			DatabaseName: database,
+		})
+		defer unsafeClose(session)
+
+		movieResults, err := session.ReadTransaction(func(tx neo4j.Transaction) (interface{}, error) {
+			records, err := tx.Run(
+				`MATCH (following:User)<-[f:FOLLOWREQUEST]-(follower:User) WHERE follower.id = $followerId return following.id as id`,
+				map[string]interface{}{ "followerId": m.Follower})
+			if err != nil {
+				return nil, err
+			}
+			for records.Next() {
+				record := records.Record()
+				id, _ := record.Get("id")
+
+				if id.(string)==m.Following {
+					return true,nil
+				}
+			}
+
+			return false,nil
 		})
 		if err != nil {
 			log.Println("error querying search:", err)
