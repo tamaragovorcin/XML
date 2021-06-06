@@ -353,8 +353,9 @@ class HomePage extends React.Component {
 		}).then((res) => {
 			
 			this.setState({ textSuccessfulModal: "You have successfully commented the album." });
+			this.setState({ showWriteCommentModalAlbum: false });
+
 			this.setState({ openModal: true });
-			this.setState({ showWriteCommentModal: false });
 
 
 		})
@@ -432,19 +433,19 @@ class HomePage extends React.Component {
                     <LikesModal
 					        show={this.state.showLikesModal}
 					        onCloseModal={this.handleLikesModalClose}
-					        header="People who liked the photo"
+					        header="People who liked"
 							peopleLikes = {this.state.peopleLikes}
 				    />
                     <DislikesModal
                          show={this.state.showDislikesModal}
 						 onCloseModal={this.handleDislikesModalClose}
-						 header="People who disliked the photo"
+						 header="People who disliked"
 						 peopleDislikes = {this.state.peopleDislikes}
 				    />
                     <CommentsModal
                         show={this.state.showCommentsModal}
 						onCloseModal={this.handleCommentsModalClose}
-						header="Comments on the photo"
+						header="Comments"
 						peopleComments = {this.state.peopleComments}
                     />
 					<WriteCommentModal

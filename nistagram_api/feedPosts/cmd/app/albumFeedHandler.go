@@ -250,7 +250,7 @@ func (app *application) likeTheFeedAlbum(w http.ResponseWriter, r *http.Request)
 
 	feedAlbum, err := app.albumFeeds.FindByID(m.PostId)
 	if feedAlbum == nil {
-		app.infoLog.Println("Feed Post not found")
+		app.infoLog.Println("Feed Album not found")
 	}
 	var post = models.Post{
 		User : feedAlbum.Post.User,
@@ -262,6 +262,7 @@ func (app *application) likeTheFeedAlbum(w http.ResponseWriter, r *http.Request)
 		Blocked : feedAlbum.Post.Blocked,
 	}
 	var feedAlbumUpdate = models.AlbumFeed{
+		Id: feedAlbum.Id,
 		Post : post,
 		Likes : append(feedAlbum.Likes, m.UserId),
 		Dislikes: feedAlbum.Dislikes,
@@ -282,28 +283,28 @@ func (app *application) dislikeTheFeedAlbum(w http.ResponseWriter, r *http.Reque
 		app.serverError(w, err)
 	}
 
-	feedPost, err := app.feedPosts.FindByID(m.PostId)
-	if feedPost == nil {
+	feedAlbum, err := app.albumFeeds.FindByID(m.PostId)
+	if feedAlbum == nil {
 		app.infoLog.Println("Feed Post not found")
 	}
 	var post = models.Post{
-		User : feedPost.Post.User,
-		DateTime : feedPost.Post.DateTime,
-		Tagged : feedPost.Post.Tagged,
-		Description: feedPost.Post.Description,
-		Hashtags: feedPost.Post.Hashtags,
-		Location : feedPost.Post.Location,
-		Blocked : feedPost.Post.Blocked,
+		User : feedAlbum.Post.User,
+		DateTime : feedAlbum.Post.DateTime,
+		Tagged : feedAlbum.Post.Tagged,
+		Description: feedAlbum.Post.Description,
+		Hashtags: feedAlbum.Post.Hashtags,
+		Location : feedAlbum.Post.Location,
+		Blocked : feedAlbum.Post.Blocked,
 	}
-	var feedPostUpdate = models.FeedPost{
-		Id: feedPost.Id,
-		Dislikes:append(feedPost.Dislikes, m.UserId),
-		Comments : feedPost.Comments,
+	var feedAlbumUpdate = models.AlbumFeed{
+		Id: feedAlbum.Id,
+		Dislikes:append(feedAlbum.Dislikes, m.UserId),
+		Comments : feedAlbum.Comments,
 		Post : post,
-		Likes: feedPost.Likes,
+		Likes: feedAlbum.Likes,
 	}
 
-	insertResult, err := app.feedPosts.Update(feedPostUpdate)
+	insertResult, err := app.albumFeeds.Update(feedAlbumUpdate)
 	if err != nil {
 		app.serverError(w, err)
 	}
@@ -317,33 +318,33 @@ func (app *application) commentTheFeedAlbum(w http.ResponseWriter, r *http.Reque
 		app.serverError(w, err)
 	}
 
-	feedPost, err := app.feedPosts.FindByID(m.PostId)
-	if feedPost == nil {
+	feedAlbum, err := app.albumFeeds.FindByID(m.PostId)
+	if feedAlbum == nil {
 		app.infoLog.Println("Feed Post not found")
 	}
 	var post = models.Post{
-		User : feedPost.Post.User,
-		DateTime : feedPost.Post.DateTime,
-		Tagged : feedPost.Post.Tagged,
-		Description: feedPost.Post.Description,
-		Hashtags: feedPost.Post.Hashtags,
-		Location : feedPost.Post.Location,
-		Blocked : feedPost.Post.Blocked,
+		User : feedAlbum.Post.User,
+		DateTime : feedAlbum.Post.DateTime,
+		Tagged : feedAlbum.Post.Tagged,
+		Description: feedAlbum.Post.Description,
+		Hashtags: feedAlbum.Post.Hashtags,
+		Location : feedAlbum.Post.Location,
+		Blocked : feedAlbum.Post.Blocked,
 	}
 	var comment = models.Comment{
 		DateTime : time.Now(),
 		Content : m.Content,
 		Writer: m.UserId,
 	}
-	var feedPostUpdate = models.FeedPost{
-		Id: feedPost.Id,
-		Dislikes:feedPost.Dislikes,
-		Comments : append(feedPost.Comments, comment),
+	var feedAlbumUpdate = models.AlbumFeed{
+		Id: feedAlbum.Id,
+		Dislikes:feedAlbum.Dislikes,
+		Comments : append(feedAlbum.Comments, comment),
 		Post : post,
-		Likes: feedPost.Likes,
+		Likes: feedAlbum.Likes,
 	}
 
-	insertResult, err := app.feedPosts.Update(feedPostUpdate)
+	insertResult, err := app.albumFeeds.Update(feedAlbumUpdate)
 	if err != nil {
 		app.serverError(w, err)
 	}
@@ -356,14 +357,14 @@ func (app *application) getlikesFeedAlbum(w http.ResponseWriter, r *http.Request
 	postIdPrimitive, _ := primitive.ObjectIDFromHex(postId)
 
 
-	likesForPost,err :=app.feedPosts.FindByID(postIdPrimitive)
+	likesForAlbum,err :=app.albumFeeds.FindByID(postIdPrimitive)
 
 	if err != nil {
 		app.serverError(w, err)
 	}
 
 	likesDtos := []dtos.LikeDTO{}
-	for _, user := range likesForPost.Likes {
+	for _, user := range likesForAlbum.Likes {
 
 		userUsername :=getUserUsername(user)
 		var like = dtos.LikeDTO{
@@ -389,25 +390,25 @@ func (app *application) getdislikesFeedAlbum(w http.ResponseWriter, r *http.Requ
 	postIdPrimitive, _ := primitive.ObjectIDFromHex(postId)
 
 
-	likesForPost,err :=app.feedPosts.FindByID(postIdPrimitive)
+	dislikesForAlbum,err :=app.albumFeeds.FindByID(postIdPrimitive)
 
 	if err != nil {
 		app.serverError(w, err)
 	}
 
-	likesDtos := []dtos.LikeDTO{}
-	for _, user := range likesForPost.Dislikes {
+	dislikesDtos := []dtos.LikeDTO{}
+	for _, user := range dislikesForAlbum.Dislikes {
 
 		userUsername :=getUserUsername(user)
 		var like = dtos.LikeDTO{
 			Username: userUsername,
 		}
 
-		likesDtos = append(likesDtos, like)
+		dislikesDtos = append(dislikesDtos, like)
 
 	}
 
-	usernamesMarshaled, err := json.Marshal(likesDtos)
+	usernamesMarshaled, err := json.Marshal(dislikesDtos)
 	if err != nil {
 		app.serverError(w, err)
 	}
@@ -422,13 +423,13 @@ func (app *application) getcommentsFeedAlbum(w http.ResponseWriter, r *http.Requ
 	postIdPrimitive, _ := primitive.ObjectIDFromHex(postId)
 
 
-	likesForPost,err :=app.feedPosts.FindByID(postIdPrimitive)
+	albumPostComments,err :=app.albumFeeds.FindByID(postIdPrimitive)
 
 	if err != nil {
 		app.serverError(w, err)
 	}
 
-	commentsDtos :=getCommentDtos(likesForPost.Comments)
+	commentsDtos :=getCommentDtos(albumPostComments.Comments)
 
 
 	usernamesMarshaled, err := json.Marshal(commentsDtos)
