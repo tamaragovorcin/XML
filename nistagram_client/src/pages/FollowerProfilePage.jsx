@@ -70,7 +70,8 @@ class FollowerProfilePage extends React.Component {
 		followingThisUser : false,
 		allowPagePreview : false,
 		ableToFollowThisUser : false,
-		sentFollowRequest : false
+		sentFollowRequest : false,
+		privateUser : false
 	}
 
 	fetchData = (id) => {
@@ -125,7 +126,7 @@ class FollowerProfilePage extends React.Component {
 				this.setState({ followingThisUser: res.data });
 				Axios.get(BASE_URL_USER + "/api/user/privacy/"+id)
 					.then((res2) => {
-						this.setState({ private: res2.data });
+						this.setState({ privateUser: res2.data });
 						if(!res.data && res2.data==="private") {
 							this.setState({ allowPagePreview: false });
 						}
@@ -488,18 +489,35 @@ class FollowerProfilePage extends React.Component {
 		let id = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length-1);
 	
 		const followReguestDTO = { follower: id, following : this.state.userId};
-		Axios.post(BASE_URL_USER_INTERACTION + "/api/followRequest", followReguestDTO)
-				.then((res) => {
-					
-					this.handleSetAllowPagePreview(this.state.userId)
-					
-					this.setState({ textSuccessfulModal: "You have successfully sent follow request." });
-					this.setState({ openModal: true });
+		if(this.state.privateUser==="private") {
 
-				})
-				.catch ((err) => {
-			console.log(err);
-		});
+			Axios.post(BASE_URL_USER_INTERACTION + "/api/followRequest", followReguestDTO)
+			.then((res) => {
+				
+				this.handleSetAllowPagePreview(this.state.userId)
+				
+				this.setState({ textSuccessfulModal: "You have successfully sent follow request." });
+				this.setState({ openModal: true });
+
+			})
+			.catch ((err) => {
+				console.log(err);
+			});
+		}else {
+			Axios.post(BASE_URL_USER_INTERACTION + "/api/followPublic", followReguestDTO)
+			.then((res) => {
+				
+				this.handleSetAllowPagePreview(this.state.userId)
+				
+				this.setState({ textSuccessfulModal: "You are now following this user." });
+				this.setState({ openModal: true });
+
+			})
+			.catch ((err) => {
+				console.log(err);
+			});
+		}
+		
 
 	}
 

@@ -306,7 +306,8 @@ func DeleteFollowRequest(driver neo4j.Driver, database string) func(w http.Respo
 func CreateFollowPublicProfile(driver neo4j.Driver, database string) func(w http.ResponseWriter,r *http.Request) {
 	return func(w http.ResponseWriter, req *http.Request) {
 		w.Header().Set("Access-Control-Allow-Origin", "*")
-		var m FollowDTO
+		var m FollowRequestDTO
+
 		err := json.NewDecoder(req.Body).Decode(&m)
 		if err != nil {
 			fmt.Println("Error")
@@ -318,20 +319,14 @@ func CreateFollowPublicProfile(driver neo4j.Driver, database string) func(w http
 		defer unsafeClose(session)
 
 		voteResult, err := session.WriteTransaction(func(tx neo4j.Transaction) (interface{}, error) {
-			result, err := tx.Run(
-				"MATCH (follower:User), (following:User) WHERE follower.id = $followerId AND following.id = $followingId CREATE (follower)-[:FOLLOW]->(following)",
+			result1, _ := tx.Run(
+				"MATCH (following:User), (follower:User) WHERE following.id = $followingId AND follower.id = $followerId CREATE (follower)-[:FOLLOW]->(following)",
 
-				map[string]interface{}{"followerId": m.FollowerId,
-					"followingId": m.FollowingId,
+				map[string]interface{}{"followerId": m.Follower,
+					"followingId": m.Following,
 				})
-			if err != nil {
-				return nil, err
-			}
-			var summary, _ = result.Consume()
-			var voteResult VoteResult
-			voteResult.Updates = summary.Counters().PropertiesSet()
 
-			return voteResult, nil
+			return result1, nil
 		})
 		if err != nil {
 			log.Println("error voting for movie:", err)
