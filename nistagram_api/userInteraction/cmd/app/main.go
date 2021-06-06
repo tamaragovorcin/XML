@@ -7,6 +7,7 @@ import (
 	"github.com/gorilla/mux"
 	"go.mongodb.org/mongo-driver/x/mongo/driver/uuid"
 	"io"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
@@ -28,10 +29,15 @@ func routes() *mux.Router {
 	r := mux.NewRouter()
 
 	r.HandleFunc("/api/followRequest", CreateFollowRequest(driver, configuration.Database)).Methods("POST")
+	r.HandleFunc("/api/followPublic", CreateFollowPublicProfile(driver, configuration.Database)).Methods("POST")
+
 	r.HandleFunc("/api/acceptFollowRequest", AcceptFollowRequest(driver, configuration.Database)).Methods("POST")
 	r.HandleFunc("/api/deleteFollowRequest", DeleteFollowRequest(driver, configuration.Database)).Methods("POST")
 	r.HandleFunc("/api/createUser", CreateUser(driver, configuration.Database)).Methods("POST")
 	r.HandleFunc("/api/user/followRequests", ReturnUsersFollowRequests(driver, configuration.Database)).Methods("POST")
+	r.HandleFunc("/api/user/followRequestsByMe", ReturnUsersFollowRequestsByMe(driver, configuration.Database)).Methods("POST")
+	r.HandleFunc("/api/user/following", ReturnUsersFollowings(driver, configuration.Database)).Methods("POST")
+	r.HandleFunc("/api/user/followers", ReturnUsersFollowers(driver, configuration.Database)).Methods("POST")
 
 	r.HandleFunc("/api/createUser", CreateUser(driver, configuration.Database)).Methods("POST")
 
@@ -150,6 +156,10 @@ type Neo4jConfiguration struct {
 	Username string
 	Password string
 	Database string
+}
+type followUserStructDTO struct {
+	Id string
+	Username string
 }
 
 func (nc *Neo4jConfiguration) newDriver() (neo4j.Driver, error) {
@@ -292,9 +302,8 @@ func DeleteFollowRequest(driver neo4j.Driver, database string) func(w http.Respo
 	}
 }
 
-func CreateFollow(driver neo4j.Driver, database string) func(w http.ResponseWriter,r *http.Request) {
+func CreateFollowPublicProfile(driver neo4j.Driver, database string) func(w http.ResponseWriter,r *http.Request) {
 	return func(w http.ResponseWriter, req *http.Request) {
-		fmt.Println("POGODIIOOOO JE")
 		w.Header().Set("Access-Control-Allow-Origin", "*")
 		var m FollowDTO
 		err := json.NewDecoder(req.Body).Decode(&m)
@@ -337,7 +346,6 @@ func CreateFollow(driver neo4j.Driver, database string) func(w http.ResponseWrit
 
 func ReturnUsersFollowRequests(driver neo4j.Driver, database string) func(http.ResponseWriter, *http.Request) {
 	return func(w http.ResponseWriter, req *http.Request) {
-		fmt.Println("RETURN FOLLOW REQUESTS")
 		var m User
 		err := json.NewDecoder(req.Body).Decode(&m)
 		fmt.Println(m.Id)
@@ -357,15 +365,171 @@ func ReturnUsersFollowRequests(driver neo4j.Driver, database string) func(http.R
 			if err != nil {
 				return nil, err
 			}
-			var users  []User
+			var users  []followUserStructDTO
 			for records.Next() {
 				record := records.Record()
 				id, _ := record.Get("id")
 				fmt.Println(record.Get("id"))
-				users = append(users,  User{Id: id.(string)})
+				username:=getUserUsername(id.(string))
+				var dto = followUserStructDTO{
+					Id : id.(string),
+					Username: username,
+				}
+				users = append(users,  dto)
 			}
-			for _, user := range users {
-				fmt.Println(user)
+
+			if users==nil {
+				return []followUserStructDTO{},nil
+			}
+			return users,nil
+		})
+		if err != nil {
+			log.Println("error querying search:", err)
+			return
+		}
+		err = json.NewEncoder(w).Encode(movieResults)
+		if err != nil {
+			log.Println("error writing search response:", err)
+		}
+	}
+}
+
+func ReturnUsersFollowRequestsByMe(driver neo4j.Driver, database string) func(http.ResponseWriter, *http.Request) {
+	return func(w http.ResponseWriter, req *http.Request) {
+		var m User
+		err := json.NewDecoder(req.Body).Decode(&m)
+		fmt.Println(m.Id)
+		if err != nil {
+			fmt.Println("Error")
+		}
+		session := driver.NewSession(neo4j.SessionConfig{
+			AccessMode:   neo4j.AccessModeRead,
+			DatabaseName: database,
+		})
+		defer unsafeClose(session)
+
+		movieResults, err := session.ReadTransaction(func(tx neo4j.Transaction) (interface{}, error) {
+			records, err := tx.Run(
+				`MATCH (following:User)<-[f:FOLLOWREQUEST]-(follower:User) WHERE follower.id = $followerId return following.id as id`,
+				map[string]interface{}{ "followerId": m.Id})
+			if err != nil {
+				return nil, err
+			}
+			var users  []followUserStructDTO
+			for records.Next() {
+				record := records.Record()
+				id, _ := record.Get("id")
+				fmt.Println(record.Get("id"))
+				username:=getUserUsername(id.(string))
+				var dto = followUserStructDTO{
+					Id : id.(string),
+					Username: username,
+				}
+				users = append(users,  dto)
+			}
+
+			if users==nil {
+				return []followUserStructDTO{},nil
+			}
+			return users,nil
+		})
+		if err != nil {
+			log.Println("error querying search:", err)
+			return
+		}
+		err = json.NewEncoder(w).Encode(movieResults)
+		if err != nil {
+			log.Println("error writing search response:", err)
+		}
+	}
+}
+
+func ReturnUsersFollowings(driver neo4j.Driver, database string) func(http.ResponseWriter, *http.Request) {
+	return func(w http.ResponseWriter, req *http.Request) {
+		var m User
+		err := json.NewDecoder(req.Body).Decode(&m)
+		fmt.Println(m.Id)
+		if err != nil {
+			fmt.Println("Error")
+		}
+		session := driver.NewSession(neo4j.SessionConfig{
+			AccessMode:   neo4j.AccessModeRead,
+			DatabaseName: database,
+		})
+		defer unsafeClose(session)
+
+		movieResults, err := session.ReadTransaction(func(tx neo4j.Transaction) (interface{}, error) {
+			records, err := tx.Run(
+				`MATCH (following:User)<-[f:FOLLOW]-(follower:User) WHERE follower.id = $followerId return following.id as id`,
+				map[string]interface{}{ "followerId": m.Id})
+			if err != nil {
+				return nil, err
+			}
+			var users  []followUserStructDTO
+			for records.Next() {
+				record := records.Record()
+				id, _ := record.Get("id")
+				fmt.Println(record.Get("id"))
+				username:=getUserUsername(id.(string))
+				var dto = followUserStructDTO{
+					Id : id.(string),
+					Username: username,
+				}
+				users = append(users,  dto)
+			}
+
+			if users==nil {
+				return []followUserStructDTO{},nil
+			}
+			return users,nil
+		})
+		if err != nil {
+			log.Println("error querying search:", err)
+			return
+		}
+		err = json.NewEncoder(w).Encode(movieResults)
+		if err != nil {
+			log.Println("error writing search response:", err)
+		}
+	}
+}
+
+func ReturnUsersFollowers(driver neo4j.Driver, database string) func(http.ResponseWriter, *http.Request) {
+	return func(w http.ResponseWriter, req *http.Request) {
+		var m User
+		err := json.NewDecoder(req.Body).Decode(&m)
+		fmt.Println(m.Id)
+		if err != nil {
+			fmt.Println("Error")
+		}
+		session := driver.NewSession(neo4j.SessionConfig{
+			AccessMode:   neo4j.AccessModeRead,
+			DatabaseName: database,
+		})
+		defer unsafeClose(session)
+
+		movieResults, err := session.ReadTransaction(func(tx neo4j.Transaction) (interface{}, error) {
+			records, err := tx.Run(
+				`MATCH (following:User)<-[f:FOLLOW]-(follower:User) WHERE following.id = $followingId return follower.id as id`,
+				map[string]interface{}{ "followingId": m.Id})
+			if err != nil {
+				return nil, err
+			}
+			var users  []followUserStructDTO
+			for records.Next() {
+				record := records.Record()
+				id, _ := record.Get("id")
+				fmt.Println(record.Get("id"))
+				username:=getUserUsername(id.(string))
+				var dto = followUserStructDTO{
+					Id : id.(string),
+					Username: username,
+				}
+				users = append(users,  dto)
+			}
+
+			if users==nil {
+				return []followUserStructDTO{},nil
 			}
 			return users,nil
 		})
@@ -383,7 +547,6 @@ func ReturnUsersFollowRequests(driver neo4j.Driver, database string) func(http.R
 
 func CreateUser(driver neo4j.Driver, database string) func(w http.ResponseWriter,r *http.Request) {
 	return func(w http.ResponseWriter, req *http.Request) {
-		fmt.Println("POGODIIOOOO")
 		var m User
 		err := json.NewDecoder(req.Body).Decode(&m)
 		if err != nil {
@@ -419,4 +582,20 @@ func CreateUser(driver neo4j.Driver, database string) func(w http.ResponseWriter
 			log.Println("error writing volte result response:", err)
 		}
 	}
+}
+
+func getUserUsername(user string) string {
+
+	resp, err := http.Get("http://localhost:4006/api/user/username/"+user)
+	if err != nil {
+		log.Fatalln(err)
+	}
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		log.Fatalln(err)
+	}
+	sb := string(body)
+	sb = sb[1:]
+	sb = sb[:len(sb)-1]
+	return sb
 }

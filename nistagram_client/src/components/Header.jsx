@@ -65,8 +65,6 @@ class Header extends React.Component {
 				console.log(err)
 			});
 
-
-
 	};
 
 	render() {
@@ -94,12 +92,7 @@ class Header extends React.Component {
 
 					</div>
 
-						
 					
-
-
-
-
 					<nav className="nav-menu d-none d-lg-block">
 						<ul>
 							<li>
@@ -112,7 +105,7 @@ class Header extends React.Component {
 								<Link to="/messages"><FiSend /></Link>
 							</li>
 							<li  >
-								<Link to="/follows"><AiOutlineHeart /></Link>
+								<Link to="/followRequest"><AiOutlineHeart /></Link>
 							</li>
 
 							<li className="drop-down">

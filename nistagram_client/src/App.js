@@ -29,7 +29,7 @@ function App() {
 				<Link exact to="/settings" path="/settings" component={EditProfile} />
 				<Route path="/followerProfilePage/:id" children={<PharmacyProfilePage />} />
 				<Link exact to="/seacrh" path="/seacrh" component={Search} />
-				<Link exact to="/followRequests" path="/followRequests" component={FollowRequest} />
+				<Link exact to="/followRequest" path="/followRequest" component={FollowRequest} />
 
 			</Switch>
 	</Router>

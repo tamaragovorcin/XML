@@ -1,107 +1,239 @@
 import React, { Component } from "react";
 import Axios from "axios";
-
+import Header from "../components/Header";
+import TopBar from "../components/TopBar";
 import { BASE_URL_USER_INTERACTION } from "../constants.js";
+import ModalDialog from "../components/ModalDialog";
+
 class FollowRequest extends Component {
 	state = {
-	followers: []	
+        followerRequests: [],
+        following : [],
+        followers : [],
+        followerRequestsByMe : [],
+        textSuccessfulModal : "",
+        openModal : false,
 
     };
 
-
-  handleAccept  = (followerId) => {
-    let id = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length-1);
-		const acceptedDTO = { following: id, follower: followerId};
-		Axios.post(BASE_URL_USER_INTERACTION  + "/api/acceptFollowRequest", acceptedDTO)
-				.then((res) => {
-					
-						console.log(res.data)
-					
-				})
-				.catch ((err) => {
-			console.log(err);
-		});
-  
-    
-}
-handleDelete  = (followerId) => {
-    let id = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length-1);
-    const dto = { following: id, follower: followerId};
-    Axios.post(BASE_URL_USER_INTERACTION  + "/api/deleteFollowRequest", dto)
-            .then((res) => {
-                
-                    console.log(res.data)
-                
-            })
-            .catch ((err) => {
-        console.log(err);
-    });
-}
     componentDidMount() {
+        this.getFollowRequests()
+        this.getFollowers()
+        this.getFollowing()
+        this.getFollowRequestsByMe()
+	}
+    handleAccept  = (followerId) => {
+        let id = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length-1);
+            const acceptedDTO = { following: id, follower: followerId};
+            Axios.post(BASE_URL_USER_INTERACTION  + "/api/acceptFollowRequest", acceptedDTO)
+                    .then((res) => {
+                        this.setState({ openModal: true });
+                        this.setState({ textSuccessfulModal: "You have successfully accepted follow request." });			
+                        this.getFollowRequests()
+                        this.getFollowers()
+                    })
+                    .catch ((err) => {
+                console.log(err);
+            });
+    }
+
+    handleDelete  = (followerId) => {
+        let id = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length-1);
+        const dto = { following: id, follower: followerId};
+        Axios.post(BASE_URL_USER_INTERACTION  + "/api/deleteFollowRequest", dto)
+                .then((res) => {
+                    this.setState({ openModal: true });
+                    this.setState({ textSuccessfulModal: "You have successfully deleted follow request." });			
+                    this.getFollowRequests()
+                })
+                .catch ((err) => {
+            console.log(err);
+        });
+    }
+
+	getFollowRequests = ()=> {
         let id = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length-1);
         const dto = {id: id}
         Axios.post(BASE_URL_USER_INTERACTION + "/api/user/followRequests", dto)
 			.then((res) => {
-				this.setState({ followers: res.data });
-               
-				
+				this.setState({ followerRequests: res.data });
 			})
 			.catch((err) => {
-
 				console.log(err)
 			});
+    }
+    getFollowRequestsByMe = ()=> {
+        let id = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length-1);
+        const dto = {id: id}
+        Axios.post(BASE_URL_USER_INTERACTION + "/api/user/followRequestsByMe", dto)
+			.then((res) => {
+				this.setState({ followerRequestsByMe: res.data });
+			})
+			.catch((err) => {
+				console.log(err)
+			});
+    }
+    getFollowers = ()=> {
+        let id = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length-1);
+        const dto = {id: id}
+        Axios.post(BASE_URL_USER_INTERACTION + "/api/user/followers", dto)
+			.then((res) => {
+				this.setState({ followers: res.data });
+			})
+			.catch((err) => {
+				console.log(err)
+			});
+    }
 
-	}
-	
+    getFollowing = ()=> {
+        let id = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length-1);
+        const dto = {id: id}
+        Axios.post(BASE_URL_USER_INTERACTION + "/api/user/following", dto)
+			.then((res) => {
+				this.setState({ following: res.data });
+			})
+			.catch((err) => {
+				console.log(err)
+			});
+    }
 
+    handleModalClose = () => {
+		this.setState({ openModal: false });
+	};
 	render() {
 		return (
-            <div class="container-fluid">
-            <b class="tab"></b>     
-            <b class="tab"></b>  
-                 <h3>Your follow requests</h3>
-                 <table className="table" style={{ width: "100%", marginTop: "3rem" }}>
-                            <tbody>
-                            {this.state.followers.map((follower) => (
-                                    <tr id={follower.id} key={follower.id}>
-                                        
+            <React.Fragment>
+				<TopBar />
+				<Header />
 
-                                        <td>
-                                            
-                                                <b>Username: </b> {follower.id}
-                                            
-                                
-                                        </td>
-                                        <td >
-                                            <div style={{marginLeft:'55%'}}>
-                                                <td>
-                                                    <br></br>
-                                                    <button  className="btn btn-outline-succes mt-1" onClick={() => this.handleAccept(follower.id)} type="button"><i className="icofont-subscribe mr-1"></i>Accept</button>
-                                                </td>
-                                                <td>
-                                                    <br></br>
-                                                    <button className="btn btn-outline-danger mt-1" onClick={() => this.handleDelete(follower.id)} type="button"><i className="icofont-subscribe mr-1"></i>Delete</button>
-                                                </td>
-                                                
-                                            </div>
-                                        </td>
-                                    </tr>
+                    <div className="container">
+                        <div className="container" style={{ marginTop: "10rem", marginRight: "10rem" }}>
+                            <h3>
+                                Follow requests
+                            </h3>
+                            <table className="table" style={{ width: "100%" }}>
+                                        <tbody>
+                                        {this.state.followerRequests.map((follower) => (
+                                                <tr id={follower.Id} key={follower.Id}>
+                                                    
+                                                    <td >
+                                                        <div style={{ marginTop: "1rem"}}>
+                                                            <b>Username: </b> {follower.Username}
+                                                        </div>
+                                                    </td>
+                                                    <td >
+                                                        <div style={{marginLeft:'55%'}}>
+                                                            <td>
+                                                                <button  className="btn btn-success mt-1" onClick={() => this.handleAccept(follower.Id)} type="button"><i className="icofont-subscribe mr-1"></i>Accept</button>
+                                                            </td>
+                                                            <td>
+                                                                <button className="btn btn-danger mt-1" onClick={() => this.handleDelete(follower.Id)} type="button"><i className="icofont-subscribe mr-1"></i>Delete</button>
+                                                            </td>
+                                                            
+                                                        </div>
+                                                    </td>
+                                                </tr>
 
-                                ))}
-                                <tr>
-                                    <td></td>
-                                    <td></td>
-                                    <td></td>
-                                </tr>
-                            </tbody>
-                        </table>
+                                            ))}
+                                            <tr>
+                                                <td></td>
+                                                <td></td>
+                                                <td></td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                            </div>
+                        </div>
+                        <div className="container">
+                        <div className="container" style={{ marginTop: "10rem", marginRight: "10rem" }}>
+                            <h3>
+                                Follow requests that I have sent
+                            </h3>
+                            <table className="table" style={{ width: "100%" }}>
+                                        <tbody>
+                                        {this.state.followerRequestsByMe.map((follower) => (
+                                                <tr id={follower.Id} key={follower.Id}>
+                                                    
+                                                    <td >
+                                                        <div style={{ marginTop: "1rem"}}>
+                                                            <b>Username: </b> {follower.Username}
+                                                        </div>
+                                                    </td>
+                                                </tr>
 
-                       
+                                            ))}
+                                            <tr>
+                                                <td></td>
+                                                <td></td>
+                                                <td></td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                            </div>
+                        </div>
+                        <div className="container">
+                        <div className="container" style={{ marginTop: "10rem", marginRight: "10rem" }}>
+                            <h3>
+                                People i am following
+                            </h3>
+                            <table className="table" style={{ width: "100%" }}>
+                                        <tbody>
+                                        {this.state.following.map((follower) => (
+                                                <tr id={follower.Id} key={follower.Id}>
+                                                    
+                                                    <td >
+                                                        <div style={{ marginTop: "1rem"}}>
+                                                            <b>Username: </b> {follower.Username}
+                                                        </div>
+                                                    </td>
+                                                </tr>
 
+                                            ))}
+                                            <tr>
+                                                <td></td>
+                                                <td></td>
+                                                <td></td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                            </div>
+                        </div>
+                        <div className="container">
+                        <div className="container" style={{ marginTop: "10rem", marginRight: "10rem" }}>
+                            <h3>
+                                People who follow me
+                            </h3>
+                            <table className="table" style={{ width: "100%" }}>
+                                        <tbody>
+                                        {this.state.followers.map((follower) => (
+                                                <tr id={follower.Id} key={follower.Id}>
+                                                    
+                                                    <td >
+                                                        <div style={{ marginTop: "1rem"}}>
+                                                            <b>Username: </b> {follower.Username}
+                                                        </div>
+                                                    </td>
+                                                </tr>
 
-
-    </div>
-
+                                            ))}
+                                            <tr>
+                                                <td></td>
+                                                <td></td>
+                                                <td></td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                            </div>
+                        </div>
+                        <div>
+                            <ModalDialog
+                            show={this.state.openModal}
+                            onCloseModal={this.handleModalClose}
+                            header="Successful"
+                            text={this.state.textSuccessfulModal}
+                            />
+                        </div>
+    </React.Fragment>
 );
 }
 }
