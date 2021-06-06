@@ -78,22 +78,23 @@ func (app *application) insertFeedPost(w http.ResponseWriter, req *http.Request)
 		app.serverError(w, err)
 	}
 	userIdPrimitive, _ := primitive.ObjectIDFromHex(userId)
+
+	listTagged := taggedUsersToPrimitiveObject(m)
 	var post = models.Post{
-		User : userIdPrimitive,
-		DateTime : time.Now(),
-		Tagged : m.Tagged,
+		User:        userIdPrimitive,
+		DateTime:    time.Now(),
+		Tagged:      listTagged,
 		Description: m.Description,
-		Hashtags: parseHashTags(m.Hashtags),
-		Location : m.Location,
-		Blocked : false,
+		Hashtags:    parseHashTags(m.Hashtags),
+		Location:    m.Location,
+		Blocked:     false,
 	}
 	var feedPost = models.FeedPost{
-		Post : post,
-		Likes : []primitive.ObjectID{},
+		Post:     post,
+		Likes:    []primitive.ObjectID{},
 		Dislikes: []primitive.ObjectID{},
 		Comments: []models.Comment{},
 	}
-
 
 	insertResult, err := app.feedPosts.Insert(feedPost)
 	if err != nil {
@@ -106,6 +107,16 @@ func (app *application) insertFeedPost(w http.ResponseWriter, req *http.Request)
 
 	idMarshaled, err := json.Marshal(insertResult.InsertedID)
 	w.Write(idMarshaled)
+}
+
+func taggedUsersToPrimitiveObject(m dtos.FeedPostDTO) []primitive.ObjectID {
+	listTagged := []primitive.ObjectID{}
+	for _, tag := range m.Tagged {
+		primitiveTag, _ := primitive.ObjectIDFromHex(tag)
+
+		listTagged = append(listTagged, primitiveTag)
+	}
+	return listTagged
 }
 
 func parseHashTags(hashtags string) []string {
@@ -171,16 +182,27 @@ func toResponse(feedPost models.FeedPost, image2 string) dtos.FeedPostInfoDTO {
 	if err := jpeg.Encode(buffer, image, nil); err != nil {
 		log.Println("unable to encode image.")
 	}
+	taggedPeople :=getTaggedPeople(feedPost.Post.Tagged)
 	return dtos.FeedPostInfoDTO{
 		Id: feedPost.Id,
 		DateTime : strings.Split(feedPost.Post.DateTime.String(), " ")[0],
-		Tagged :feedPost.Post.Tagged,
+		Tagged :taggedPeople,
 		Location : locationToString(feedPost.Post.Location),
 		Description : feedPost.Post.Description,
 		Hashtags : hashTagsToString(feedPost.Post.Hashtags),
 		Media : buffer.Bytes(),
 		Username : "",
 	}
+}
+
+func getTaggedPeople(tagged []primitive.ObjectID) string {
+	tagsString  := "Tagged: "
+	for _, tag := range tagged {
+		username :=getUserUsername(tag)
+		tagsString+=username
+		tagsString+=", "
+	}
+	return tagsString
 }
 
 func getCommentDtos(comments []models.Comment) []dtos.CommentDTO {
@@ -261,6 +283,47 @@ func (app *application) getFeedPostsByLocation(w http.ResponseWriter, r *http.Re
 	w.Write(imagesMarshaled)
 }
 
+func (app *application) getFeedPostByTags(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	user := vars["userId"]
+	userIdPrimitive, _ := primitive.ObjectIDFromHex(user)
+	tagsFeedAlbums, _ :=app.feedPosts.All()
+
+	allImages,_ := app.images.All()
+	tagsFeedAlbums =findFeedPostsByTags(tagsFeedAlbums,userIdPrimitive)
+
+	feedPostResponse := []dtos.FeedPostInfoDTO{}
+	for _, feedPost := range tagsFeedAlbums {
+
+		images, err := findImageByPostId(allImages,feedPost.Id)
+		if err != nil {
+			app.serverError(w, err)
+		}
+		userUsername :=getUserUsername(feedPost.Post.User)
+
+		feedPostResponse = append(feedPostResponse, toResponseHomePage(feedPost, images.Media, userUsername))
+
+	}
+
+	imagesMarshaled, err := json.Marshal(feedPostResponse)
+	if err != nil {
+		app.serverError(w, err)
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	w.Write(imagesMarshaled)
+}
+func findFeedPostsByTags(albums []models.FeedPost, idPrimitive primitive.ObjectID) []models.FeedPost {
+	listAlbums:=[]models.FeedPost{}
+	for _, album := range albums {
+		for _, tag := range album.Post.Tagged {
+			if tag.String()==idPrimitive.String() {
+				listAlbums = append(listAlbums, album)
+			}
+		}
+	}
+	return listAlbums
+}
 func findFeedPostsByLocation(posts []models.FeedPost, country string, city string, street string)([]models.FeedPost, error) {
 	feedPostsLocation := []models.FeedPost{}
 
@@ -440,11 +503,12 @@ func toResponseHomePage(feedPost models.FeedPost, image2 string, username string
 	if err := jpeg.Encode(buffer, image, nil); err != nil {
 		log.Println("unable to encode image.")
 	}
+	taggedPeople :=getTaggedPeople(feedPost.Post.Tagged)
 
 	return dtos.FeedPostInfoDTO{
 		Id: feedPost.Id,
 		DateTime : strings.Split(feedPost.Post.DateTime.String(), " ")[0],
-		Tagged :feedPost.Post.Tagged,
+		Tagged :taggedPeople,
 		Location : locationToString(feedPost.Post.Location),
 		Description : feedPost.Post.Description,
 		Hashtags : hashTagsToString(feedPost.Post.Hashtags),

@@ -72,25 +72,25 @@ type Verification struct {
 }
 type ProfileImage struct {
 	Id  primitive.ObjectID `bson:"_id,omitempty"`
-	Media string `bson:"media,omitempty"`
+	Media string `bson:"media"`
 	UserId primitive.ObjectID `bson:"userId"`
 }
 type Notifications struct {
-	Id       uuid.UUID `bson:"_id,omitempty"`
-	User     uuid.UUID `bson:"user,omitempty"`
-	NotificationsProfiles []uuid.UUID `bson:"notificationsProfiles,omitempty"`
-	NotificationsMessages []uuid.UUID `bson:"notificationsMessages,omitempty"`
-	NotificationsPosts []uuid.UUID `bson:"notificationsPosts [,omitempty"`
-	NotificationsStories []uuid.UUID `bson:"notificationsStories,omitempty"`
-	NotificationsComments []uuid.UUID `bson:"notificationsComments,omitempty"`
+	Id       primitive.ObjectID `bson:"_id,omitempty"`
+	User     primitive.ObjectID `bson:"user"`
+	NotificationsProfiles []primitive.ObjectID `bson:"notificationsProfiles"`
+	NotificationsMessages []primitive.ObjectID `bson:"notificationsMessages"`
+	NotificationsPosts []primitive.ObjectID `bson:"notificationsPosts"`
+	NotificationsStories []primitive.ObjectID `bson:"notificationsStories"`
+	NotificationsComments []primitive.ObjectID `bson:"notificationsComments"`
 }
 
 type Settings struct {
-	Id       uuid.UUID `bson:"_id,omitempty"`
-	User     uuid.UUID `bson:"user,omitempty"`
-	AllowTags bool `bson:"allowTags,omitempty"`
-	AcceptMessages bool `bson:"acceptMessages,omitempty"`
-	Muted []uuid.UUID `bson:"muted,omitempty"`
-	Blocked []uuid.UUID `bson:"blocked,omitempty"`
-	CloseFriends []primitive.ObjectID  `bson:"closeFriends,omitempty"`
+	Id       primitive.ObjectID `bson:"_id,omitempty"`
+	User     primitive.ObjectID `bson:"user"`
+	AllowTags bool `bson:"allowTags"`
+	AcceptMessages bool `bson:"acceptMessages"`
+	Muted []primitive.ObjectID `bson:"muted"`
+	Blocked []primitive.ObjectID `bson:"blocked"`
+	CloseFriends []primitive.ObjectID  `bson:"closeFriends"`
 }

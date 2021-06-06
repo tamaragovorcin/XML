@@ -17,8 +17,9 @@ import AddStoryToHighlightModal from "../components/Posts/AddStoryToHighlightMod
 import IconTabsProfile from "../components/Posts/IconTabsProfile"
 import AddCollectionModal  from "../components/Posts/AddCollectionModal";
 import AddPostToCollection from "../components/Posts/AddPostToCollection";
-
+import { BASE_URL_USER_INTERACTION } from "../constants.js";
 import WriteCommentAlbumModal from "../components/Posts/WriteCommentAlbumModal"
+import AddTagsModal from "../components/Posts/AddTagsModal";
 
 class ProfilePage extends React.Component {
 	constructor(props) {
@@ -89,9 +90,10 @@ class ProfilePage extends React.Component {
 		showWriteCommentModalAlbum : false,
 		selectedFile : "",
 		loaded : "",
-
-
-		storyAlbums : [] 
+		followingUsers : [],
+		storyAlbums : [],
+		showTagsModal : false,
+		taggedOnPost : []
 	}
 	
 	handleAddCollectionClick = () => {
@@ -326,8 +328,30 @@ class ProfilePage extends React.Component {
 	handlePostModalOpen = () => {
 		this.setState({ showImageModal: true });
 	};
-	
-	
+	getFollowing = ()=> {
+		let help = []
+
+        let id = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length-1);
+        const dto = {id: id}
+        Axios.post(BASE_URL_USER_INTERACTION + "/api/user/following", dto)
+			.then((res) => {
+
+				res.data.forEach((user) => {
+					let optionDTO = { id: user.Id, label: user.Username, value: user.Id }
+					help.push(optionDTO)
+				});
+				
+
+				this.setState({ followingUsers: help });
+			})
+			.catch((err) => {
+				console.log(err)
+			});
+    }
+	handleAddTagsModal = ()=> {
+		this.getFollowing()
+		this.setState({ showTagsModal: true });
+	}
 	
 	handleAddStoryPostCloseFriends =()=>{
 		if (this.state.addressInput === "") {
@@ -392,10 +416,13 @@ class ProfilePage extends React.Component {
 	};
 	
 	handleAddFeedPost = ()=> {
-		
+		var taggedHelp = []
+		this.state.taggedOnPost.forEach((user) => {
+			taggedHelp.push(user.id)
+		});
 		if (this.state.addressInput === "") {
 			const feedPostDTO = {
-				tagged: [],
+				tagged: taggedHelp,
 				description: this.state.description,
 				hashtags: this.state.hashtags,
 				location : this.state.addressLocation
@@ -434,7 +461,7 @@ class ProfilePage extends React.Component {
 						longitude : longitude
 					}
 					let feedPostDTO = {
-						tagged: [],
+						tagged: taggedHelp,
 						description: this.state.description,
 						hashtags: this.state.hashtags,
 						location : locationDTO
@@ -454,10 +481,13 @@ class ProfilePage extends React.Component {
 		
 	}
 	handleAddStoryPost = ()=> {
-
+		var taggedHelp = []
+		this.state.taggedOnPost.forEach((user) => {
+			taggedHelp.push(user.id)
+		});
 		if (this.state.addressInput === "") {
 			const storyPostDTO = {
-				tagged: [],
+				tagged: taggedHelp,
 				description: this.state.description,
 				hashtags: this.state.hashtags,
 				location : this.state.addressLocation,
@@ -497,7 +527,7 @@ class ProfilePage extends React.Component {
 						longitude : longitude
 					}
 					let storyPostDTO = {
-						tagged: [],
+						tagged: taggedHelp,
 						description: this.state.description,
 						hashtags: this.state.hashtags,
 						location : locationDTO,
@@ -517,9 +547,13 @@ class ProfilePage extends React.Component {
 
 	}
 	handleAddFeedPostAlbum = ()=> {
+		var taggedHelp = []
+		this.state.taggedOnPost.forEach((user) => {
+			taggedHelp.push(user.id)
+		});
 		if (this.state.addressInput === "") {
 			const feedPostDTO = {
-				tagged: [],
+				tagged: taggedHelp,
 				description: this.state.description,
 				hashtags: this.state.hashtags,
 				location : this.state.addressLocation
@@ -558,7 +592,7 @@ class ProfilePage extends React.Component {
 						longitude : longitude
 					}
 					let feedPostDTO = {
-						tagged: [],
+						tagged: taggedHelp,
 						description: this.state.description,
 						hashtags: this.state.hashtags,
 						location : locationDTO
@@ -577,9 +611,13 @@ class ProfilePage extends React.Component {
 
 	}
 	handleAddStoryPostAlbum = ()=> {
+		var taggedHelp = []
+		this.state.taggedOnPost.forEach((user) => {
+			taggedHelp.push(user.id)
+		});
 		if (this.state.addressInput === "") {
 			const storyPostDTO = {
-				tagged: [],
+				tagged: taggedHelp,
 				description: this.state.description,
 				hashtags: this.state.hashtags,
 				location : this.state.addressLocation,
@@ -619,7 +657,7 @@ class ProfilePage extends React.Component {
 						longitude : longitude
 					}
 					let storyPostDTO = {
-						tagged: [],
+						tagged: taggedHelp,
 						description: this.state.description,
 						hashtags: this.state.hashtags,
 						location : locationDTO,
@@ -638,9 +676,13 @@ class ProfilePage extends React.Component {
 		}
 	}
 	handleAddStoryPostAlbumCloseFriends = ()=> {
+		var taggedHelp = []
+		this.state.taggedOnPost.forEach((user) => {
+			taggedHelp.push(user.id)
+		});
 		if (this.state.addressInput === "") {
 			const storyPostDTO = {
-				tagged: [],
+				tagged: taggedHelp,
 				description: this.state.description,
 				hashtags: this.state.hashtags,
 				location : this.state.addressLocation,
@@ -680,7 +722,7 @@ class ProfilePage extends React.Component {
 						longitude : longitude
 					}
 					let storyPostDTO = {
-						tagged: [],
+						tagged: taggedHelp,
 						description: this.state.description,
 						hashtags: this.state.hashtags,
 						location : locationDTO,
@@ -1199,6 +1241,20 @@ class ProfilePage extends React.Component {
         event.preventDefault();
         
     };
+	handleTagsModalClose = () =>{
+		this.setState({ showTagsModal: false });
+
+	}
+	handleChangeTags = (event) => {
+	
+		let optionDTO = { id: event.value, label: event.label, value: event.value }
+		let helpDto = this.state.taggedOnPost.concat(optionDTO)
+		
+		this.setState({ taggedOnPost: helpDto });
+
+		const newList2 = this.state.followingUsers.filter((item) => item.Id !== event.value);
+		this.setState({ followingUsers: newList2 });		
+	};
 	render() {
 		return (
 			<React.Fragment>
@@ -1376,6 +1432,7 @@ class ProfilePage extends React.Component {
 						addressNotFoundError = {this.state.addressNotFoundError}
 						handleDescriptionChange = {this.handleDescriptionChange}
 						handleHashtagsChange = {this.handleHashtagsChange}
+						handleAddTagsModal = {this.handleAddTagsModal}
 					/>
 					 <AddHighlightModal
                           
@@ -1411,6 +1468,17 @@ class ProfilePage extends React.Component {
 						  header="Add post to collection"
 						  addPostToCollection={this.addPostToCollection}
 						  collections = {this.state.collections}
+					  />
+					   <AddTagsModal
+                          
+					  
+						  show={this.state.showTagsModal}
+						  onCloseModal={this.handleTagsModalClose}
+						  header="Add tags"
+						  followingUsers = {this.state.followingUsers}
+						  taggedOnPost = {this.state.taggedOnPost}
+						  tagUserOnPost={this.tagUserOnPost}
+						  handleChangeTags = {this.handleChangeTags}
 					  />
                     </div>
 

@@ -18,6 +18,8 @@ func (app *application) routes() *mux.Router {
 	r.HandleFunc("/api/login", app.loginUser).Methods("POST")
 	r.HandleFunc("/api/user/privacy/{userId}", app.findUserPrivacy).Methods("GET")
 	r.HandleFunc("/api/user/username/{userId}", app.findUserUsername).Methods("GET")
+	r.HandleFunc("//api/user/closeFriends/{userId}", app.findUserCloseFriends).Methods("GET")
+
 
 	//r.HandleFunc("/api/getLoggedIn", app.getLoggedIn).Methods("GET")
 
