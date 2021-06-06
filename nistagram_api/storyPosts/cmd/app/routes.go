@@ -10,6 +10,7 @@ func (app *application) routes() *mux.Router {
 	r := mux.NewRouter()
 	r.HandleFunc("/story/{userId}", app.insertStoryPost).Methods("POST")
 	r.HandleFunc("/story/user/{userId}", app.getUsersStories).Methods("GET")
+	r.HandleFunc("/api/story/homePage/{userId}", app.getStoriesForHomePage).Methods("GET")
 
 	r.HandleFunc("/storyAlbum/{userId}", app.insertAlbumStory).Methods("POST")
 
