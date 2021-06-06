@@ -5,7 +5,8 @@ import { FiHeart } from "react-icons/fi";
 import {FaHeartBroken,FaRegCommentDots} from "react-icons/fa"
 import {BsBookmark} from "react-icons/bs"
 import "react-responsive-carousel/lib/styles/carousel.min.css"; // requires a loader
-import { Carousel } from 'react-responsive-carousel';
+import { Carousel } from "bootstrap";
+
 
 class IconTabsHomePage extends React.Component {
   constructor(props){
