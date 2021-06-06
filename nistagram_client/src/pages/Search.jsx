@@ -1,26 +1,25 @@
 import React from "react";
 import Header from "../components/Header";
 import TopBar from "../components/TopBar";
-import { Link } from "react-router-dom";
-import playerLogo from "../static/me.jpg";
-import profileImage from "../static/profileImage.jpg"
+
 import LikesModal from "../components/Posts/LikesModal"
 import DislikesModal from "../components/Posts/DislikesModal"
 import CommentsModal from "../components/Posts/CommentsModal"
 import WriteCommentModal from "../components/Posts/WriteCommentModal"
-import { FiHeart } from "react-icons/fi";
-import {FaHeartBroken,FaRegCommentDots} from "react-icons/fa"
-import {BsBookmark} from "react-icons/bs"
+import WriteCommentAlbumModal from "../components/Posts/WriteCommentAlbumModal"
 import { YMaps, Map } from "react-yandex-maps";
 import Axios from "axios";
 import { BASE_URL_FEED } from "../constants.js";
+import IconTabsHomePage from "../components/Posts/IconTabsHomePage"
+import ModalDialog from "../components/ModalDialog";
+import AddPostToCollection from "../components/Posts/AddPostToCollection";
 
 const mapState = {
 	center: [44, 21],
 	zoom: 8,
 	controls: [],
 };
-class HomePage extends React.Component {
+class Search extends React.Component {
 	constructor(props) {
 		super(props);
 		this.addressInput = React.createRef();
@@ -28,17 +27,18 @@ class HomePage extends React.Component {
 	state = {
 		stories: [],
 		photos: [],
-		pictures: [],
-		picture: "",
-		hiddenOne: true,
-		hiddenMultiple: true,
 		peopleLikes : [],
 		peopleDislikes : [],
-		comments : [],
+		peopleComments : [],
+		albums : [],
 		showLikesModal : false,
 		showDislikesModal : false,
 		showCommentsModal : false,
 		showWriteCommentModal : false,
+		showAddPostToCollection : false,
+		selectedPostId : -1,
+		collections : [],
+		showWriteCommentModalAlbum : false,
         coords: [],
 		addressNotFoundError: "none",
         addressError: "none",
@@ -55,44 +55,9 @@ class HomePage extends React.Component {
 			},
 		});
 	};
-	handleLikesModalOpen = ()=> {
-		this.setState({ showLikesModal: true });    
-	}
-	handleDislikesModalOpen = ()=> {
-		this.setState({ showDislikesModal: true });    
-	}
-	handleCommentsModalOpen = ()=> {
-		this.setState({ showCommentsModal: true });    
-	}
-	handleWriteCommentModal = ()=>{
-		this.setState({showWriteCommentModal : true});
-	}
-	handleLikesModalClose = ()=> {
-		this.setState({ showLikesModal: false });    
-	}
-	handleDislikesModalClose = ()=> {
-		this.setState({ showDislikesModal: false });    
-	}
-	handleCommentsModalClose = ()=> {
-		this.setState({ showCommentsModal: false });    
-	}
-	handleWriteCommentModalClose = ()=>{
-		this.setState({showWriteCommentModal : false});
-	}
 
-	
-	handleLike = ()=>{
-		
-	}
-	handleDislike = ()=>{
-		
-	}
-	handleSave = ()=>{
 
-	}
-	componentDidMount() {
-       
-	}
+	componentDidMount() {}
 	
 	handleHashTagsChange = (event) => {
 		this.setState({ hashtags:  event.target.value });
@@ -140,10 +105,19 @@ class HomePage extends React.Component {
                     this.setState({ addressNotFoundError: "initial" });
                 } else {
                     this.setState({ photos: [] });
+                    this.setState({ albums: [] });
 
                     Axios.get(BASE_URL_FEED + "/api/feed/searchByLocation/"+country + "/"+city+"/"+street)
                     .then((res) => {
                         this.setState({ photos: res.data });
+                        this.setState({ hashtags: "" });
+                    })
+                    .catch((err) => {
+                        console.log(err);
+                    });
+					Axios.get(BASE_URL_FEED + "/api/albumFeed/searchByLocation/"+country + "/"+city+"/"+street)
+                    .then((res) => {
+                        this.setState({ albums: res.data });
                         this.setState({ hashtags: "" });
                     })
                     .catch((err) => {
@@ -162,6 +136,7 @@ class HomePage extends React.Component {
             HashTags : help
         }
 		this.setState({ photos: [] });
+		this.setState({ albums: [] });
 
        Axios.post(BASE_URL_FEED + "/api/feed/searchByHashTags/",helpDTO)
         .then((res) => {
@@ -171,7 +146,256 @@ class HomePage extends React.Component {
         .catch((err) => {
             console.log(err);
         });
+		Axios.post(BASE_URL_FEED + "/api/albumFeed/searchByHashTags/",helpDTO)
+        .then((res) => {
+            this.setState({ albums: res.data });
+            this.setState({ hashtags: "" });
+        })
+        .catch((err) => {
+            console.log(err);
+        });
     }
+	handleLikesModalOpen = (postId)=> {
+		Axios.get(BASE_URL_FEED + "/api/feed/likes/"+postId)
+			.then((res) => {
+				this.setState({ peopleLikes: res.data });
+			})
+			.catch((err) => {
+				console.log(err);
+			});
+		this.setState({ showLikesModal: true });    
+	}
+	handleDislikesModalOpen = (postId)=> {
+		Axios.get(BASE_URL_FEED + "/api/feed/dislikes/"+postId)
+			.then((res) => {
+				this.setState({ peopleDislikes: res.data });
+			})
+			.catch((err) => {
+				console.log(err);
+			});
+		this.setState({ showDislikesModal: true });    
+	}
+	handleCommentsModalOpen = (postId)=> {
+		Axios.get(BASE_URL_FEED + "/api/feed/comments/"+postId)
+			.then((res) => {
+				this.setState({ peopleComments: res.data });
+			})
+			.catch((err) => {
+				console.log(err);
+			});
+		this.setState({ showCommentsModal: true });    
+	}
+	handleLikesModalOpenAlbum = (postId)=> {
+		Axios.get(BASE_URL_FEED + "/api/albumFeed/likes/"+postId)
+			.then((res) => {
+				this.setState({ peopleLikes: res.data });
+			})
+			.catch((err) => {
+				console.log(err);
+			});
+		this.setState({ showLikesModal: true });    
+	}
+	handleDislikesModalOpenAlbum = (postId)=> {
+		Axios.get(BASE_URL_FEED + "/api/albumFeed/dislikes/"+postId)
+			.then((res) => {
+				this.setState({ peopleDislikes: res.data });
+			})
+			.catch((err) => {
+				console.log(err);
+			});
+		this.setState({ showDislikesModal: true });    
+	}
+	handleCommentsModalOpenAlbum = (postId)=> {
+		Axios.get(BASE_URL_FEED + "/api/albumFeed/comments/"+postId)
+			.then((res) => {
+				this.setState({ peopleComments: res.data });
+			})
+			.catch((err) => {
+				console.log(err);
+			});
+		this.setState({ showCommentsModal: true });    
+	}
+	handleWriteCommentModal = (postId)=>{
+		this.setState({ selectedPostId: postId });
+		this.setState({showWriteCommentModal : true});
+	}
+	handleWriteCommentModalAlbum = (postId)=>{
+		this.setState({ selectedPostId: postId });
+		this.setState({showWriteCommentModalAlbum : true});
+	}
+	handleWriteCommentAlbumModalClose = ()=>{
+		this.setState({showWriteCommentModalAlbum : false});
+	}
+	handleLikesModalClose = ()=> {
+		this.setState({ showLikesModal: false });    
+	}
+	handleDislikesModalClose = ()=> {
+		this.setState({ showDislikesModal: false });    
+	}
+	handleCommentsModalClose = ()=> {
+		this.setState({ showCommentsModal: false });    
+	}
+	handleWriteCommentModalClose = ()=>{
+		this.setState({showWriteCommentModal : false});
+	}
+	
+	handleLike = (postId)=>{
+		let id = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length-1)
+
+		let postReactionDTO = {
+			PostId : postId,
+			UserId : id
+		}
+		Axios.post(BASE_URL_FEED + "/api/feed/like/", postReactionDTO, {
+		}).then((res) => {
+
+			this.setState({ textSuccessfulModal: "You have successfully liked the photo." });
+			this.setState({ openModal: true });
+
+		})
+		.catch((err) => {
+			console.log(err);
+		});
+	}
+	handleLikeAlbum = (postId)=>{
+		let id = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length-1)
+
+		let postReactionDTO = {
+			PostId : postId,
+			UserId : id
+		}
+		Axios.post(BASE_URL_FEED + "/api/albumFeed/like/", postReactionDTO, {
+		}).then((res) => {
+
+			this.setState({ textSuccessfulModal: "You have successfully liked the album." });
+			this.setState({ openModal: true });
+
+		})
+		.catch((err) => {
+			console.log(err);
+		});
+	}
+	handleDislike = (postId)=>{
+		let id = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length-1)
+
+		let postReactionDTO = {
+			PostId : postId,
+			UserId : id
+		}
+		Axios.post(BASE_URL_FEED + "/api/feed/dislike/", postReactionDTO, {
+		}).then((res) => {
+
+			this.setState({ textSuccessfulModal: "You have successfully disliked the photo." });
+			this.setState({ openModal: true });
+
+		})
+		.catch((err) => {
+			console.log(err);
+		});
+	}
+	handleDislikeAlbum= (postId)=>{
+		let id = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length-1)
+
+		let postReactionDTO = {
+			PostId : postId,
+			UserId : id
+		}
+		Axios.post(BASE_URL_FEED + "/api/albumFeed/dislike/", postReactionDTO, {
+		}).then((res) => {
+
+			this.setState({ textSuccessfulModal: "You have successfully disliked the album." });
+			this.setState({ openModal: true });
+
+		})
+		.catch((err) => {
+			console.log(err);
+		});
+	}
+	handleOpenAddPostToCollectionModal = (postId)=> {
+		let id = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length-1)
+
+		this.handleGetCollections(id)
+		this.setState({ showAddPostToCollection: true });
+		this.setState({ selectedPostId: postId });
+	}
+	handleGetCollections = (id) => {
+		Axios.get(BASE_URL_FEED + "/api/collection/user/"+id)
+			.then((res) => {
+				this.setState({ collections: res.data });
+			})
+			.catch((err) => {
+				console.log(err);
+			});
+	}
+	handleAddPostToCollectionModalClose = ()=> {
+		this.setState({ showAddPostToCollection: false });
+	}
+	addPostToCollection = (collectionId) => {
+		let postCollectionDTO = {
+			PostId : this.state.selectedPostId,
+			CollectionId : collectionId
+		}
+		Axios.post(BASE_URL_FEED + "/api/collection/addPost/", postCollectionDTO, {
+		}).then((res) => {
+			
+			this.setState({ showAddCollectionModal: false });
+			this.setState({ textSuccessfulModal: "You have successfully added post to highlight." });
+			this.setState({ openModal: true });
+			this.setState({ showAddPostToCollection: false });
+
+		})
+		.catch((err) => {
+			console.log(err);
+		});
+	}
+	handleModalClose = () => {
+		this.setState({ openModal: false });
+	};
+	handleAddComment =(comment) => {
+		let id = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length-1)
+
+		let commentDTO = {
+			PostId : this.state.selectedPostId,
+			UserId : id,
+			Content : comment
+
+		}
+		Axios.post(BASE_URL_FEED + "/api/feed/comment/", commentDTO, {
+		}).then((res) => {
+			
+			this.setState({ textSuccessfulModal: "You have successfully commented the photo." });
+			this.setState({ openModal: true });
+			this.setState({ showWriteCommentModal: false });
+
+
+		})
+		.catch((err) => {
+			console.log(err);
+		});
+	}
+	handleAddCommentAlbum =(comment) => {
+		let id = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length-1)
+
+		let commentDTO = {
+			PostId : this.state.selectedPostId,
+			UserId : id,
+			Content : comment
+
+		}
+		Axios.post(BASE_URL_FEED + "/api/albumFeed/comment/", commentDTO, {
+		}).then((res) => {
+			
+			this.setState({ textSuccessfulModal: "You have successfully commented the album." });
+			this.setState({ showWriteCommentModalAlbum: false });
+
+			this.setState({ openModal: true });
+
+
+		})
+		.catch((err) => {
+			console.log(err);
+		});
+	}
 	render() {
 		return (
 			<React.Fragment>
@@ -252,91 +476,78 @@ class HomePage extends React.Component {
 					</div>
 					
 
-				<div className="d-flex align-items-top">
-					<div className="container-fluid">
-						
-                    <table className="table">
-							<tbody>
-								{this.state.photos.map((post) => (
-									
-									<tr id={post.id} key={post.id}>
-										
-										<tr  style={{ width: "100%"}}>
-											<td colSpan="3">
-											<img
-												className="img-fluid"
-												src={`data:image/jpg;base64,${post.Media}`}
-												width="100%"
-												alt="description"
-											/>
-											</td>
-										</tr>
-										<tr  style={{ width: "100%" }}>
-												<td>
-												<button onClick={this.handleLike}  className="btn btn-outline-secondary btn-sm" style={{ marginBottom: "1rem", height:"40px",marginLeft:"6rem" }}><FiHeart/></button>
-												</td>
-												<td>
-												<button onClick={this.handleDislike}  className="btn btn-outline-secondary btn-sm" style={{ marginBottom: "1rem", height:"40px",marginLeft:"6rem" }}><FaHeartBroken/></button>
+					<div className="d-flex align-items-top">
+						<IconTabsHomePage
+							photos = {this.state.photos}
+							handleLike = {this.handleLike}
+							handleDislike = {this.handleDislike}
+							handleWriteCommentModal = {this.handleWriteCommentModal}						
+							handleLikesModalOpen = {this.handleLikesModalOpen}
+							handleDislikesModalOpen = {this.handleDislikesModalOpen}
+							handleCommentsModalOpen = {this.handleCommentsModalOpen}
 
-												</td>
-												<td>
-												<button onClick={this.handleWriteCommentModal}  className="btn btn-outline-secondary btn-sm" style={{ marginBottom: "1rem", height:"40px",marginLeft:"6rem" }}><FaRegCommentDots/></button>
-												</td>
-												<td>
-												<button onClick={this.handleSave}  className="btn btn-outline-secondary btn-sm" style={{ marginBottom: "1rem", height:"40px" }}><BsBookmark/></button>
-												</td>
-										</tr>
-										<tr  style={{ width: "100%" }}>
-												<td>
-												<button onClick={this.handleLikesModalOpen} className="btn btn-outline-secondary btn-sm" style={{ marginBottom: "1rem" , marginLeft:"4rem"}}><label>likes</label></button>
-												</td>
-												<td>
-												<button onClick={this.handleDislikesModalOpen} className="btn btn-outline-secondary btn-sm" style={{ marginBottom: "1rem",marginLeft:"4rem" }}><label > dislikes</label></button>
-												</td>
-												<td>
-												<button onClick={this.handleCommentsModalOpen} className="btn btn-outline-secondary btn-sm" style={{ marginBottom: "1rem",marginLeft:"4rem" }}><label >Comments</label></button>
-												</td>
-										</tr>
-										<br/>
-										<br/>
-										<br/>
-									</tr>
-									
-								))}
+							albums ={this.state.albums}
+							handleLikeAlbum = {this.handleLikeAlbum}
+							handleDislikeAlbum  = {this.handleDislikeAlbum }
+							handleWriteCommentModalAlbum  = {this.handleWriteCommentModalAlbum }						
+							handleLikesModalOpenAlbum  = {this.handleLikesModalOpenAlbum }
+							handleDislikesModalOpenAlbum  = {this.handleDislikesModalOpenAlbum}
+							handleCommentsModalOpenAlbum  = {this.handleCommentsModalOpenAlbum }
 
-							</tbody>
-						</table>
+							handleOpenAddPostToCollectionModal = {this.handleOpenAddPostToCollectionModal}
+
+						/>
 					</div>
-				</div>
+
 
 				</div>
 					
 				</section>
 				<div>
-                        
-                    <LikesModal
+				<LikesModal
 					        show={this.state.showLikesModal}
 					        onCloseModal={this.handleLikesModalClose}
-					        header="People who liked the photo"
+					        header="People who liked"
 							peopleLikes = {this.state.peopleLikes}
 				    />
                     <DislikesModal
                          show={this.state.showDislikesModal}
 						 onCloseModal={this.handleDislikesModalClose}
-						 header="People who disliked the photo"
+						 header="People who disliked"
 						 peopleDislikes = {this.state.peopleDislikes}
 				    />
                     <CommentsModal
                         show={this.state.showCommentsModal}
 						onCloseModal={this.handleCommentsModalClose}
-						header="Comments on the photo"
-						comments = {this.state.comments}
+						header="Comments"
+						peopleComments = {this.state.peopleComments}
                     />
 					<WriteCommentModal
                         show={this.state.showWriteCommentModal}
 						onCloseModal={this.handleWriteCommentModalClose}
 						header="Leave your comment"
+						handleAddComment = {this.handleAddComment}
                     />
+					<WriteCommentAlbumModal
+                        show={this.state.showWriteCommentModalAlbum}
+						onCloseModal={this.handleWriteCommentAlbumModalClose}
+						header="Leave your comment"
+						handleAddCommentAlbum = {this.handleAddCommentAlbum}
+                    />
+					 <AddPostToCollection
+						  show={this.state.showAddPostToCollection}
+						  onCloseModal={this.handleAddPostToCollectionModalClose}
+						  header="Add post to collection"
+						  addPostToCollection={this.addPostToCollection}
+						  collections = {this.state.collections}
+
+					  />
+					  <ModalDialog
+						show={this.state.openModal}
+						onCloseModal={this.handleModalClose}
+						header="Successful"
+						text={this.state.textSuccessfulModal}
+					/>
                         
                     </div>
 			</React.Fragment>
@@ -344,4 +555,4 @@ class HomePage extends React.Component {
 	}
 }
 
-export default HomePage;
+export default Search;
