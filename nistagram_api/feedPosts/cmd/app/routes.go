@@ -63,5 +63,7 @@ func (app *application) routes() *mux.Router {
 	r.HandleFunc("/api/collection/user/{userId}", app.getUsersCollections).Methods("GET")
 	r.HandleFunc("/api/collection/addPost/", app.insetPostInCollection).Methods("POST")
 
+
+	r.HandleFunc("/api/video/{userIdd}", app.uploadFile).Methods("POST")
 	return r
 }

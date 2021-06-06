@@ -65,3 +65,9 @@ type Image struct {
 	UserId primitive.ObjectID `bson:"userId"`
 	PostId primitive.ObjectID `bson:"postId"`
 }
+type Video struct {
+	Id  primitive.ObjectID `bson:"_id,omitempty"`
+	Media string `bson:"media"`
+	UserId primitive.ObjectID `bson:"userId"`
+	PostId primitive.ObjectID `bson:"postId"`
+}

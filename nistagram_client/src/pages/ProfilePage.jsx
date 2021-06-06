@@ -48,6 +48,8 @@ class ProfilePage extends React.Component {
 		highlihts: [],
 		photos: [],
 		pictures: [],
+		videos : [],
+		video : "",
 		picture: "",
 		hiddenOne: true,
 		hiddenMultiple: true,
@@ -84,7 +86,9 @@ class ProfilePage extends React.Component {
 		postsForCollection : [],
 		hiddenStoriesForCollection : true,
 		showAddCollectionModal : false,
-		showWriteCommentModalAlbum : false
+		showWriteCommentModalAlbum : false,
+		selectedFile : "",
+		loaded : ""
 
 	}
 	
@@ -685,6 +689,7 @@ class ProfilePage extends React.Component {
 		}
 	}
 
+
 	
 
 	sendRequestForFeed(feedPostDTO) {
@@ -1154,6 +1159,36 @@ class ProfilePage extends React.Component {
 	handleWriteCommentAlbumModalClose = ()=>{
 		this.setState({showWriteCommentModalAlbum : false});
 	}
+	onChangeHandler = (event) => {
+        this.setState({
+            selectedFile: event.target.files[0],
+            loaded: 0,
+        });
+        console.log(event.target.files[0]);
+    };
+
+    handleSubmit = (event) => {
+		
+		let id = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length-1)
+		event.preventDefault();
+        const formData = new FormData();
+        const { selectedFile } = this.state;	
+		formData.append('inputFile', selectedFile);
+		Axios.post(BASE_URL_FEED + "/api/video/" + id, formData)
+			.then((res) => {
+
+				this.setState({ showImageModal: false, });
+				this.setState({ openModal: true });
+				this.setState({ textSuccessfulModal: "You have successfully added feed post." });
+				this.handleGetPhotos(id)
+
+			})
+			.catch((err) => {
+				console.log(err);
+			});
+        event.preventDefault();
+        
+    };
 	render() {
 		return (
 			<React.Fragment>
@@ -1161,6 +1196,18 @@ class ProfilePage extends React.Component {
 				<Header />
 
 				<section id="hero" className="d-flex align-items-top">
+				< div >
+                <form onSubmit={this.handleSubmit}>
+                    <label>
+                        Upload a file: <br /><br />
+                        <input type="file" name="file" onChange={this.onChangeHandler} />
+                    </label>
+                    <br /><br />
+                    <button type="submit">
+                        Upload
+                    </button>
+                </form >
+            </div >
 				<div className="container">
 				<div className="d-flex align-items-top">
 					<div className="container" style={{ marginTop: "10rem", marginRight: "10rem" }}>
@@ -1193,6 +1240,7 @@ class ProfilePage extends React.Component {
 												<Link to="/settings" className="btn btn-outline-secondary btn-sm">Edit profile</Link>
 
 											</td>
+											
 											<td>
 												<button onClick={this.handlePostModalOpen} className="btn btn-outline-secondary btn-sm" style={{ marginBottom: "1rem" }}>Add new post/video</button>
 
