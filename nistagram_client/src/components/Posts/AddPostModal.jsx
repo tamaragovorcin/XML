@@ -74,6 +74,7 @@ class AddPostModal extends Component {
 											placeholder="Description"
 											className="form-control"
 											id="email"
+											
 											type="text"
 											onChange={this.props.handleDescriptionChange}
 											value={this.props.description}

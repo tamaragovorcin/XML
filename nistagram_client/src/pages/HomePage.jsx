@@ -1,14 +1,14 @@
 import React from "react";
 import Header from "../components/Header";
 import TopBar from "../components/TopBar";
-import { BASE_URL_FEED} from "../constants.js";
+import { BASE_URL_FEED , BASE_URL_STORY} from "../constants.js";
 import playerLogo from "../static/me.jpg";
 import LikesModal from "../components/Posts/LikesModal"
 import DislikesModal from "../components/Posts/DislikesModal"
 import CommentsModal from "../components/Posts/CommentsModal"
 import WriteCommentModal from "../components/Posts/WriteCommentModal"
 import WriteCommentAlbumModal from "../components/Posts/WriteCommentAlbumModal"
-
+import Stories from 'react-insta-stories';
 import Axios from "axios";
 import IconTabsHomePage from "../components/Posts/IconTabsHomePage"
 import AddPostToCollection from "../components/Posts/AddPostToCollection";
@@ -30,7 +30,10 @@ class HomePage extends React.Component {
 		showAddPostToCollection : false,
 		selectedPostId : -1,
 		collections : [],
-		showWriteCommentModalAlbum : false
+		showWriteCommentModalAlbum : false,
+		users: [],
+		pics: [],
+
 
 	}
 	handleLikesModalOpen = (postId)=> {
@@ -190,9 +193,42 @@ class HomePage extends React.Component {
 		});
 	}
 	componentDidMount() {
+		let help = []
 		let id = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length-1)
-		
-		this.handleGetStories(id)
+		Axios.get(BASE_URL_STORY + "/api/")
+			.then((res) => {
+				//this.setState({ stories: res.data });
+				console.log("sffffffffffffffffffffffffff" + res.data);
+				let list = [];
+				res.data.forEach(story => {
+					let highliht1 = { id: res.data.id, username: "mladenkak" };
+					
+					list.push(highliht1)
+				});
+
+				this.setState({ stories: list });
+
+
+				res.data.forEach((story) => {
+					let optionDTO = { id: story.Id, label: story.media, value: story.Id }
+					help.push(optionDTO)
+				});
+
+				this.setState({ pics: help });
+				console.log(help)
+
+
+
+
+
+
+
+			})
+			.catch((err) => {
+				console.log(err);
+			});
+		this.setState({ showCommentsModal: true });   
+		//this.handleGetStories(id)
 		this.handleGetPhotos(id)
 		this.handleGetAlbums(id)
 

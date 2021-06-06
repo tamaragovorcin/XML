@@ -21,6 +21,11 @@ type UserRequest struct {
 	Biography string
 }
 
+type CloseFriendsDTO struct {
+	IdLogged string
+	IdClose string
+}
+
 type UserUpdateRequest struct {
 	Id string `bson:"_id,omitempty"`
 	Name  string `bson:"name,omitempty"`

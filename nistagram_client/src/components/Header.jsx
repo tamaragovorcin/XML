@@ -5,8 +5,9 @@ import { BiBookmark } from 'react-icons/bi';
 import Axios from "axios";
 import { FiSettings, FiSend } from 'react-icons/fi';
 import { VscHome } from 'react-icons/vsc';
-import {FaSearch } from 'react-icons/fa';
+import { FaSearch } from 'react-icons/fa';
 
+import { GiThreeFriends } from 'react-icons/gi';
 import { AiOutlineHeart } from 'react-icons/ai';
 import { BASE_URL_USER } from "../constants.js";
 import Select from 'react-select';
@@ -40,7 +41,7 @@ class Header extends React.Component {
 	handleChange = (event) => {
 		this.setState({ userId: event.value });
 		window.location = "#/followerProfilePage/" + event.value;
-		
+
 	};
 
 
@@ -70,8 +71,8 @@ class Header extends React.Component {
 	};
 
 	render() {
-		
-		
+
+
 		return (
 			<header id="header" className="fixed-top">
 				<div className="container d-flex align-items-center">
@@ -86,7 +87,7 @@ class Header extends React.Component {
 								className="select-custom-class"
 								label="Single select"
 								options={this.state.options}
-								onChange ={e => this.handleChange(e)}
+								onChange={e => this.handleChange(e)}
 							/>
 
 
@@ -94,8 +95,8 @@ class Header extends React.Component {
 
 					</div>
 
-						
-					
+
+
 
 
 
@@ -135,6 +136,14 @@ class Header extends React.Component {
 
 
 										<Link to="/settings"><FiSettings /> Settings </Link>
+
+
+									</li>
+
+									<li>
+
+
+										<Link to="/closeFriends"><GiThreeFriends /> Close friends </Link>
 
 
 									</li>
