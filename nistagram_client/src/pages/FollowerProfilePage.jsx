@@ -67,6 +67,7 @@ class FollowerProfilePage extends React.Component {
 		showWriteCommentModal : false,
 		albums : [],
 		stories : [],
+		storyAlbums : [],
 		highlights : [],
 		showAddHighLightModal : false,
 		highlightNameError : "none",
@@ -125,6 +126,7 @@ class FollowerProfilePage extends React.Component {
 		this.handleGetFeedPosts(s[5])
 		this.handleGetStories(s[5])
 		this.handleGetAlbums(s[5])
+		this.handleGetStoryAlbums(s[5])
 
 	}
 	handleAddCollectionClick = () => {
@@ -401,6 +403,15 @@ class FollowerProfilePage extends React.Component {
 			});
 	}
 
+	handleGetStoryAlbums = (id) => {
+		Axios.get(BASE_URL_STORY + "/api/storyAlbum/usersAlbums/"+id)
+			.then((res) => {
+				this.setState({ storyAlbums: res.data });
+			})
+			.catch((err) => {
+				console.log(err);
+			});
+	}
 
 	
 	handleWriteCommentModal = (postId)=>{
@@ -563,6 +574,8 @@ class FollowerProfilePage extends React.Component {
 						handleCommentsModalOpenAlbum  = {this.handleCommentsModalOpenAlbum }
 
 						stories = {this.state.stories}
+						storyAlbums = {this.state.storyAlbums}
+
 
 						highlights = {this.state.highlights}
 						seeStoriesInHighlight = {this.seeStoriesInHighlight}

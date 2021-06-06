@@ -440,3 +440,114 @@ func (app *application) getcommentsFeedAlbum(w http.ResponseWriter, r *http.Requ
 	w.WriteHeader(http.StatusOK)
 	w.Write(usernamesMarshaled)
 }
+
+func (app *application) getFeedAlbumsByLocation(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	country := vars["country"]
+	city :=vars["city"]
+	street :=vars["street"]
+	allImages,_ := app.images.All()
+	locationFeedAlbums, _ :=app.albumFeeds.All()
+
+	if country!="n" || city!="n" || street!="n" {
+		locationFeedAlbums,_ =findFeedAlbumsByLocation(locationFeedAlbums,country,city,street)
+	}
+	feedAlbumsResponse := []dtos.FeedAlbumInfoDTO{}
+	for _, album := range locationFeedAlbums {
+
+		images, err := findAlbumByPostId(allImages,album.Id)
+		if err != nil {
+			app.serverError(w, err)
+		}
+		userUsername :=getUserUsername(album.Post.User)
+
+		feedAlbumsResponse = append(feedAlbumsResponse, toResponseAlbumHomePage(album, images,userUsername))
+
+	}
+
+	imagesMarshaled, err := json.Marshal(feedAlbumsResponse)
+	if err != nil {
+		app.serverError(w, err)
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	w.Write(imagesMarshaled)
+}
+
+func findFeedAlbumsByLocation(posts []models.AlbumFeed, country string, city string, street string)([]models.AlbumFeed, error) {
+	feedPostsLocation := []models.AlbumFeed{}
+
+	for _, feedPost := range posts {
+		if userIsPublic(feedPost.Post.User)==true {
+			if	feedPost.Post.Location.Country==country {
+				if city=="n" {
+					feedPostsLocation = append(feedPostsLocation, feedPost)
+				} else if feedPost.Post.Location.Town==city {
+					if street== "n" {
+						feedPostsLocation = append(feedPostsLocation, feedPost)
+					} else if feedPost.Post.Location.Street==street {
+						feedPostsLocation = append(feedPostsLocation, feedPost)
+					}
+				}
+			}
+		}
+
+	}
+	return feedPostsLocation, nil
+}
+
+
+func (app *application) getFeedAlbumsByHashTags(w http.ResponseWriter, r *http.Request) {
+	var hashtags dtos.HashTagDTO
+	err := json.NewDecoder(r.Body).Decode(&hashtags)
+	if err != nil {
+		app.serverError(w, err)
+	}
+	allImages,_ := app.images.All()
+	hashTagsFeedAlbums, _ :=app.albumFeeds.All()
+
+	if hashtags.HashTags!="n" {
+		hashTagsFeedAlbums,_ =findFeedAlbumsByHashTags(hashTagsFeedAlbums,parseHashTags(hashtags.HashTags))
+	}
+
+	feedAlbumsResponse := []dtos.FeedAlbumInfoDTO{}
+	for _, album := range hashTagsFeedAlbums {
+
+		images, err := findAlbumByPostId(allImages,album.Id)
+		if err != nil {
+			app.serverError(w, err)
+		}
+
+		userUsername :=getUserUsername(album.Post.User)
+
+		feedAlbumsResponse = append(feedAlbumsResponse, toResponseAlbumHomePage(album, images,userUsername))
+
+	}
+
+	imagesMarshaled, err := json.Marshal(feedAlbumsResponse)
+	if err != nil {
+		app.serverError(w, err)
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	w.Write(imagesMarshaled)
+}
+
+func findFeedAlbumsByHashTags(posts []models.AlbumFeed, hashtags []string) ([]models.AlbumFeed, error) {
+	feedPostsHashTags := []models.AlbumFeed{}
+
+	for _, feedPost := range posts {
+		if userIsPublic(feedPost.Post.User)==true {
+			feedPostsHashTagsList := feedPost.Post.Hashtags
+			if feedPostsHashTagsList != nil {
+				if postContainsAllHashTags(feedPostsHashTagsList, hashtags) {
+					feedPostsHashTags = append(feedPostsHashTags, feedPost)
+				}
+			}
+		}
+
+	}
+	return feedPostsHashTags, nil
+}
+
+

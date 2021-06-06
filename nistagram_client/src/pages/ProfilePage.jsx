@@ -84,8 +84,8 @@ class ProfilePage extends React.Component {
 		postsForCollection : [],
 		hiddenStoriesForCollection : true,
 		showAddCollectionModal : false,
-		showWriteCommentModalAlbum : false
-
+		showWriteCommentModalAlbum : false,
+		storyAlbums : []
 	}
 	
 	handleAddCollectionClick = () => {
@@ -104,8 +104,6 @@ class ProfilePage extends React.Component {
 			pictures: this.state.pictures.concat(picture),
 		});
 
-		//let pomoc = this.state.pictures.length;
-		
 		let pomoc = picture.length
 		if(pomoc===0) {
 			this.setState({
@@ -245,6 +243,7 @@ class ProfilePage extends React.Component {
 		this.handleGetHighlights(id)
 		this.handleGetPhotos(id)
 		this.handleGetAlbums(id)
+		this.handleGetStoryAlbums(id)
 		this.handleGetStories(id)
 		this.handleGetCollections(id)
 
@@ -291,6 +290,15 @@ class ProfilePage extends React.Component {
 		Axios.get(BASE_URL_FEED + "/api/feedAlbum/usersAlbums/"+id)
 			.then((res) => {
 				this.setState({ albums: res.data });
+			})
+			.catch((err) => {
+				console.log(err);
+			});
+	}
+	handleGetStoryAlbums = (id) => {
+		Axios.get(BASE_URL_STORY + "/api/storyAlbum/usersAlbums/"+id)
+			.then((res) => {
+				this.setState({ storyAlbums: res.data });
 			})
 			.catch((err) => {
 				console.log(err);
@@ -828,7 +836,7 @@ class ProfilePage extends React.Component {
 				this.setState({ showImageModal: false, });
 				this.setState({ openModal: true });
 				this.setState({ textSuccessfulModal: "You have successfully added album story post." });
-				this.handleGetStories(id)
+				this.handleGetStoryAlbums(id)
 			})
 			.catch((err) => {
 				console.log(err);
@@ -1236,6 +1244,9 @@ class ProfilePage extends React.Component {
 
 						stories = {this.state.stories}
 						handleOpenAddStoryToHighlightModal = {this.handleOpenAddStoryToHighlightModal}
+
+
+						storyAlbums = {this.state.storyAlbums}
 
 						handleAddHighLightClick = {this.handleAddHighLightClick}
 						highlights = {this.state.highlights}

@@ -191,14 +191,32 @@ class HomePage extends React.Component {
 	}
 	componentDidMount() {
 		let id = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length-1)
-		
+		this.handleAddAllDataCollection(id)
 		this.handleGetStories(id)
 		this.handleGetPhotos(id)
 		this.handleGetAlbums(id)
 
 	}
 	
+	handleAddAllDataCollection = (id) =>{
+		Axios.post(BASE_URL_FEED + "/api/collection/allData/"+id)
+								.then((res) => {
+									if (res.status === 409) {
+										this.setState({
+											errorHeader: "Resource conflict!",
+											errorMessage: "Email already exist.",
+											hiddenErrorAlert: false,
+										});
+									} else if (res.status === 500) {
+										this.setState({ errorHeader: "Internal server error!", errorMessage: "Server error.", hiddenErrorAlert: false });
+									} 
+									
 
+								})
+								.catch((err) => {
+									console.log(err);
+								});
+	}
 	handleGetStories= (id) => {
 		let highliht1 = { id: 1, username: "mladenkak" };
 		let highliht2 = { id: 2, username: "tamarag" };

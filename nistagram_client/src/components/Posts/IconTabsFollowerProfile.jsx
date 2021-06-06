@@ -227,7 +227,59 @@ render(){
                     </div>
                 </div>
             </Tab>
-            <Tab eventKey={4} title="Highlights">
+            <Tab eventKey={4} title="Story Albums">
+            <div className="d-flex align-items-top">
+                <div className="container-fluid">
+                  
+                  <table className="table">
+                    <tbody>
+                      {this.props.storyAlbums.map((post) => (
+                        
+                        <tr id={post.id} key={post.id}>
+                          
+                          <tr  style={{ width: "100%"}}>
+                            <td colSpan="3">
+                             <Carousel dynamicHeight={true}>
+							                	{post.Media.map(img => (<div>
+                                    <img
+                                    className="img-fluid"
+                                    src={`data:image/jpg;base64,${img}`}
+                                    width="100%"
+                                    alt="description"
+                                    />		
+                                </div>))}
+							                </Carousel>
+                            </td>
+                          </tr>
+                          <tr>
+                            <td colSpan="3">
+                                {post.Location}
+                            </td>
+                          </tr>
+                          <tr>
+                            <td colSpan="3">
+                                {post.Description}
+                            </td>
+                          </tr>
+                          <tr>
+                            <td colSpan="3">
+                                {post.Hashtags}
+                            </td>
+                          </tr>
+                         
+                          <br/>
+                          <br/>
+                          <br/>
+                        </tr>
+                        
+                      ))}
+
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </Tab>
+            <Tab eventKey={5} title="Highlights">
                  <div className="container">
                     <div className="container-fluid testimonial-group d-flex align-items-top">
                         <div className="container-fluid scrollable" style={{ marginRight: "10rem" , marginBottom:"5rem",marginTop:"5rem"}}>
