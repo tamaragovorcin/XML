@@ -19,7 +19,7 @@ func (app *application) routes() *mux.Router {
 	r.HandleFunc("/api/image/{userId}/{storyId}", app.saveImage).Methods("POST")
 
 	r.HandleFunc("/highlight/", app.getAllHighlights).Methods("GET")
-	r.HandleFunc("/highlight/{userId}", app.insertHighlight).Methods("POST")
+	r.HandleFunc("/api/highlight/{userId}", app.insertHighlight).Methods("POST")
 	r.HandleFunc("/highlight/{id}", app.deleteHighlight).Methods("DELETE")
 	r.HandleFunc("/api/highlight/user/{userId}", app.getUsersHiglights).Methods("GET")
 	r.HandleFunc("/api/highlight/addStory/", app.insetStoryInHighlight).Methods("POST")

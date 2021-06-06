@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"feedPosts/pkg/dtos"
 	"feedPosts/pkg/models"
+	"fmt"
 	"github.com/gorilla/mux"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"image"
@@ -146,12 +147,12 @@ func (app *application) getUsersFeedPosts(w http.ResponseWriter, r *http.Request
 		if err != nil {
 			app.serverError(w, err)
 		}
-
 		feedPostResponse = append(feedPostResponse, toResponse(feedPost, images.Media))
 
 	}
 
 	imagesMarshaled, err := json.Marshal(feedPostResponse)
+
 	if err != nil {
 		app.serverError(w, err)
 	}
@@ -161,14 +162,15 @@ func (app *application) getUsersFeedPosts(w http.ResponseWriter, r *http.Request
 }
 
 func toResponse(feedPost models.FeedPost, image2 string) dtos.FeedPostInfoDTO {
+	fmt.Println(image2)
 	f, _ := os.Open(image2)
 	defer f.Close()
 	image, _, _ := image.Decode(f)
+
 	buffer := new(bytes.Buffer)
 	if err := jpeg.Encode(buffer, image, nil); err != nil {
 		log.Println("unable to encode image.")
 	}
-
 	return dtos.FeedPostInfoDTO{
 		Id: feedPost.Id,
 		DateTime : strings.Split(feedPost.Post.DateTime.String(), " ")[0],

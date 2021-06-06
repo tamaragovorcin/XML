@@ -78,7 +78,7 @@ func (app *application) saveImage(w http.ResponseWriter, r *http.Request)  {
 		userId = userId[:len(userId)-1]
 	}
 		defer file.Close()
-		var path = "images/story/"+hander.Filename
+		var path = "images/"+hander.Filename
 		f, err := os.OpenFile(path, os.O_WRONLY|os.O_CREATE, 777)
 		if err != nil {
 			fmt.Println(err.Error())
