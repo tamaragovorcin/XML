@@ -35,24 +35,18 @@ func (m *AlbumFeedModel) All() ([]models.AlbumFeed, error) {
 }
 
 // FindByID will be used to find a new movie registry by id
-func (m *AlbumFeedModel) FindByID(id string) (*models.AlbumFeed, error) {
-	p, err := primitive.ObjectIDFromHex(id)
+func (m *AlbumFeedModel) FindByID(id primitive.ObjectID) (*models.AlbumFeed, error) {
+	var feedAlbum = models.AlbumFeed{}
+	err := m.C.FindOne(context.TODO(), bson.M{"_id": id}).Decode(&feedAlbum)
 	if err != nil {
-		return nil, err
-	}
-
-	// Find movie by id
-	var movie = models.AlbumFeed{}
-	err = m.C.FindOne(context.TODO(), bson.M{"_id": p}).Decode(&movie)
-	if err != nil {
-		// Checks if the movie was not found
+		// Checks if the user was not found
 		if err == mongo.ErrNoDocuments {
 			return nil, errors.New("ErrNoDocuments")
 		}
 		return nil, err
 	}
 
-	return &movie, nil
+	return &feedAlbum, nil
 }
 
 // Insert will be used to insert a new movie registry
@@ -67,4 +61,10 @@ func (m *AlbumFeedModel) Delete(id string) (*mongo.DeleteResult, error) {
 		return nil, err
 	}
 	return m.C.DeleteOne(context.TODO(), bson.M{"_id": p})
+}
+
+func (m *AlbumFeedModel) Update(album models.AlbumFeed) (*mongo.UpdateResult, error) {
+	return m.C.UpdateOne(context.TODO(),bson.M{"_id":album.Id},bson.D{{"$set",bson.M{"likes":album.Likes,"dislikes":album.Dislikes,"comments":album.Comments,"post.user":album.Post.User,
+		"post.dateTime":album.Post.DateTime,"post.tagged":album.Post.Tagged,"post.location":album.Post.Location,
+		"post.description":album.Post.Description,"post.blocked":album.Post.Blocked,"post.hashtags":album.Post.Hashtags}}})
 }

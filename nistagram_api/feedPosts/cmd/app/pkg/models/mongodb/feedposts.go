@@ -34,7 +34,6 @@ func (m *FeedPostModel) All() ([]models.FeedPost, error) {
 	return uu, err
 }
 
-// FindByID will be used to find a new user registry by id
 func (m *FeedPostModel) FindByID(id primitive.ObjectID) (*models.FeedPost, error) {
 	var feedPosts = models.FeedPost{}
 	err := m.C.FindOne(context.TODO(), bson.M{"_id": id}).Decode(&feedPosts)

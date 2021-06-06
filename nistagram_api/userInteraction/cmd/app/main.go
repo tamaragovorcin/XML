@@ -9,8 +9,8 @@ import (
 	"io"
 	"log"
 	"net/http"
-	"net/url"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/neo4j/neo4j-go-driver/v4/neo4j"
@@ -26,9 +26,14 @@ func routes() *mux.Router {
 		log.Fatal(err)
 	}
 	r := mux.NewRouter()
-	r.HandleFunc("/api/followRequest", CreateFollow(driver, configuration.Database)).Methods("POST")
+
+	r.HandleFunc("/api/followRequest", CreateFollowRequest(driver, configuration.Database)).Methods("POST")
+	r.HandleFunc("/api/acceptFollowRequest", AcceptFollowRequest(driver, configuration.Database)).Methods("POST")
+	r.HandleFunc("/api/deleteFollowRequest", DeleteFollowRequest(driver, configuration.Database)).Methods("POST")
 	r.HandleFunc("/api/createUser", CreateUser(driver, configuration.Database)).Methods("POST")
-	r.HandleFunc("/movie/vote/{id}", voteInMovieHandlerFunc(driver, configuration.Database)).Methods("GET")
+	r.HandleFunc("/api/user/followRequests", ReturnUsersFollowRequests(driver, configuration.Database)).Methods("POST")
+
+	r.HandleFunc("/api/createUser", CreateUser(driver, configuration.Database)).Methods("POST")
 
 
 	return r
@@ -60,7 +65,7 @@ func main(){
 	}
 
 	serverAddr := flag.String("serverAddr", "", "HTTP server network address")
-	serverPort := flag.Int("serverPort", 4006, "HTTP server network port")
+	serverPort := flag.Int("serverPort", 4005, "HTTP server network port")
 
 	serverURI := fmt.Sprintf("%s:%d", *serverAddr, *serverPort)
 	router := routes()
@@ -72,10 +77,18 @@ func main(){
 
 func parseConfiguration() *Neo4jConfiguration {
 
+
+	if !strings.HasPrefix(lookupEnvOrGetDefault("NEO4J_VERSION", "4"), "4") {
+		//database = ""
+	}
+
 	return &Neo4jConfiguration{
 		Url:      lookupEnvOrGetDefault("NEO4J_URI", "bolt://localhost:7687"),
 		Username: lookupEnvOrGetDefault("NEO4J_USER", "neo4j"),
 		Password: lookupEnvOrGetDefault("NEO4J_PASSWORD", "root"),
+
+		//Database: database,
+
 	}
 }
 
@@ -103,6 +116,16 @@ type FollowRequest struct {
 	Follower string `json:"follower"`
 	Following string `json:"following"`
 }
+
+type FollowRequestDTO struct {
+	Follower string `json:"follower"`
+	Following string `json:"following"`
+}
+type FollowDTO struct {
+	FollowerId string `json:"FollowerId"`
+	FollowingId string `json:"FollowingId"`
+}
+
 type User struct {
 	Id string `json:"id"`
 }
@@ -135,11 +158,16 @@ func (nc *Neo4jConfiguration) newDriver() (neo4j.Driver, error) {
 
 
 
-func CreateFollow(driver neo4j.Driver, database string) func(w http.ResponseWriter,r *http.Request) {
+func CreateFollowRequest(driver neo4j.Driver, database string) func(w http.ResponseWriter,r *http.Request) {
 	return func(w http.ResponseWriter, req *http.Request) {
 		fmt.Println("POGODIIOOOO JE")
 		w.Header().Set("Access-Control-Allow-Origin", "*")
-		var m FollowRequest
+		var m FollowRequestDTO
+
+		fmt.Println(m.Follower)
+		fmt.Println(m.Follower)
+
+
 		err := json.NewDecoder(req.Body).Decode(&m)
 		if err != nil {
 			fmt.Println("Error")
@@ -152,10 +180,11 @@ func CreateFollow(driver neo4j.Driver, database string) func(w http.ResponseWrit
 
 		voteResult, err := session.WriteTransaction(func(tx neo4j.Transaction) (interface{}, error) {
 			result, err := tx.Run(
-				"MATCH (follower:User), (following:User) WHERE follower.id = $followerId AND following.id = $followingId CREATE (follower)-[:FOLLOW]->(following)",
+				"MATCH (follower:User), (following:User) WHERE follower.id = $followerId AND following.id = $followingId CREATE (follower)-[:FOLLOWREQUEST]->(following)",
+
 				map[string]interface{}{"followerId": m.Follower,
 					"followingId": m.Following,
-					})
+				})
 			if err != nil {
 				return nil, err
 			}
@@ -175,10 +204,11 @@ func CreateFollow(driver neo4j.Driver, database string) func(w http.ResponseWrit
 		}
 	}
 }
-func CreateUser(driver neo4j.Driver, database string) func(w http.ResponseWriter,r *http.Request) {
+func AcceptFollowRequest(driver neo4j.Driver, database string) func(w http.ResponseWriter,r *http.Request) {
 	return func(w http.ResponseWriter, req *http.Request) {
-		fmt.Println("POGODIIOOOO")
-		var m User
+		fmt.Println("POGODIIOOOO JE")
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+		var m FollowRequestDTO
 		err := json.NewDecoder(req.Body).Decode(&m)
 		if err != nil {
 			fmt.Println("Error")
@@ -191,9 +221,98 @@ func CreateUser(driver neo4j.Driver, database string) func(w http.ResponseWriter
 
 		voteResult, err := session.WriteTransaction(func(tx neo4j.Transaction) (interface{}, error) {
 			result, err := tx.Run(
-				"CREATE (:User{id:$uId})",
-				map[string]interface{}{
-					"uId": m.Id,
+				"MATCH (following:User)<-[f:FOLLOWREQUEST]-(follower:User) WHERE following.id = $followingId AND follower.id = $followerId DELETE f",
+				map[string]interface{}{"followerId": m.Follower,
+					"followingId": m.Following,
+				})
+
+			if err != nil {
+				return nil, err
+			}
+			var summary, _ = result.Consume()
+			var voteResult VoteResult
+			voteResult.Updates = summary.Counters().PropertiesSet()
+			result1, _ := tx.Run(
+				"MATCH (following:User), (follower:User) WHERE following.id = $followingId AND follower.id = $followerId CREATE (follower)-[:FOLLOW]->(following)",
+
+				map[string]interface{}{"followerId": m.Follower,
+					"followingId": m.Following,
+				})
+
+			return result1, nil
+		})
+		if err != nil {
+			log.Println("error voting for movie:", err)
+			return
+		}
+		err = json.NewEncoder(w).Encode(voteResult)
+		if err != nil {
+			log.Println("error writing volte result response:", err)
+		}
+	}
+}
+func DeleteFollowRequest(driver neo4j.Driver, database string) func(w http.ResponseWriter,r *http.Request) {
+	return func(w http.ResponseWriter, req *http.Request) {
+		fmt.Println("DELETE FOLLOW REQUEST")
+		var m FollowRequestDTO
+		err := json.NewDecoder(req.Body).Decode(&m)
+		if err != nil {
+			fmt.Println("Error")
+		}
+		session := driver.NewSession(neo4j.SessionConfig{
+			AccessMode:   neo4j.AccessModeWrite,
+			DatabaseName: database,
+		})
+		defer unsafeClose(session)
+
+		voteResult, err := session.WriteTransaction(func(tx neo4j.Transaction) (interface{}, error) {
+			result, err := tx.Run(
+				"MATCH (following:User)<-[f:FOLLOWREQUEST]-(follower:User) WHERE following.id = $followingId AND follower.id = $followerId DELETE f",
+				map[string]interface{}{"followerId": m.Follower,
+					"followingId": m.Following,
+				})
+
+			if err != nil {
+				return nil, err
+			}
+			var summary, _ = result.Consume()
+			var voteResult VoteResult
+			voteResult.Updates = summary.Counters().PropertiesSet()
+
+			return voteResult, nil
+		})
+		if err != nil {
+			log.Println("error voting for movie:", err)
+			return
+		}
+		err = json.NewEncoder(w).Encode(voteResult)
+		if err != nil {
+			log.Println("error writing volte result response:", err)
+		}
+	}
+}
+
+func CreateFollow(driver neo4j.Driver, database string) func(w http.ResponseWriter,r *http.Request) {
+	return func(w http.ResponseWriter, req *http.Request) {
+		fmt.Println("POGODIIOOOO JE")
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+		var m FollowDTO
+		err := json.NewDecoder(req.Body).Decode(&m)
+		if err != nil {
+			fmt.Println("Error")
+		}
+		session := driver.NewSession(neo4j.SessionConfig{
+			AccessMode:   neo4j.AccessModeWrite,
+			DatabaseName: database,
+		})
+		defer unsafeClose(session)
+
+		voteResult, err := session.WriteTransaction(func(tx neo4j.Transaction) (interface{}, error) {
+			result, err := tx.Run(
+				"MATCH (follower:User), (following:User) WHERE follower.id = $followerId AND following.id = $followingId CREATE (follower)-[:FOLLOW]->(following)",
+
+				map[string]interface{}{"followerId": m.FollowerId,
+					"followingId": m.FollowingId,
 				})
 			if err != nil {
 				return nil, err
@@ -215,12 +334,61 @@ func CreateUser(driver neo4j.Driver, database string) func(w http.ResponseWriter
 	}
 }
 
-func voteInMovieHandlerFunc(driver neo4j.Driver, database string) func(http.ResponseWriter, *http.Request) {
-	return func(w http.ResponseWriter, req *http.Request) {
-		fmt.Println("POGOOOODI")
-		w.Header().Set("Content-Type", "application/json")
-		title, _ := url.QueryUnescape(req.URL.Path[len("/movie/vote/"):])
 
+func ReturnUsersFollowRequests(driver neo4j.Driver, database string) func(http.ResponseWriter, *http.Request) {
+	return func(w http.ResponseWriter, req *http.Request) {
+		fmt.Println("RETURN FOLLOW REQUESTS")
+		var m User
+		err := json.NewDecoder(req.Body).Decode(&m)
+		fmt.Println(m.Id)
+		if err != nil {
+			fmt.Println("Error")
+		}
+		session := driver.NewSession(neo4j.SessionConfig{
+			AccessMode:   neo4j.AccessModeRead,
+			DatabaseName: database,
+		})
+		defer unsafeClose(session)
+
+		movieResults, err := session.ReadTransaction(func(tx neo4j.Transaction) (interface{}, error) {
+			records, err := tx.Run(
+				`MATCH (following:User)<-[f:FOLLOWREQUEST]-(follower:User) WHERE following.id = $followingId return follower.id as id`,
+				map[string]interface{}{ "followingId": m.Id})
+			if err != nil {
+				return nil, err
+			}
+			var users  []User
+			for records.Next() {
+				record := records.Record()
+				id, _ := record.Get("id")
+				fmt.Println(record.Get("id"))
+				users = append(users,  User{Id: id.(string)})
+			}
+			for _, user := range users {
+				fmt.Println(user)
+			}
+			return users,nil
+		})
+		if err != nil {
+			log.Println("error querying search:", err)
+			return
+		}
+		err = json.NewEncoder(w).Encode(movieResults)
+		if err != nil {
+			log.Println("error writing search response:", err)
+		}
+	}
+}
+
+
+func CreateUser(driver neo4j.Driver, database string) func(w http.ResponseWriter,r *http.Request) {
+	return func(w http.ResponseWriter, req *http.Request) {
+		fmt.Println("POGODIIOOOO")
+		var m User
+		err := json.NewDecoder(req.Body).Decode(&m)
+		if err != nil {
+			fmt.Println("Error")
+		}
 		session := driver.NewSession(neo4j.SessionConfig{
 			AccessMode:   neo4j.AccessModeWrite,
 			DatabaseName: database,
@@ -229,10 +397,10 @@ func voteInMovieHandlerFunc(driver neo4j.Driver, database string) func(http.Resp
 
 		voteResult, err := session.WriteTransaction(func(tx neo4j.Transaction) (interface{}, error) {
 			result, err := tx.Run(
-				`MATCH (m:Movie {title: $title}) 
-				WITH m, (CASE WHEN exists(m.votes) THEN m.votes ELSE 0 END) AS currentVotes
-				SET m.votes = currentVotes + 1;`,
-				map[string]interface{}{"title": title})
+				"CREATE (:User{id:$uId})",
+				map[string]interface{}{
+					"uId": m.Id,
+				})
 			if err != nil {
 				return nil, err
 			}

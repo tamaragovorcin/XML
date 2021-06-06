@@ -107,10 +107,7 @@ class ProfilePage extends React.Component {
 		this.setState({
 			pictures: this.state.pictures.concat(picture),
 		});
-
 		let pomoc = picture.length;
-	
-		
 		if(pomoc===0) {
 			this.setState({
 				noPicture: true,

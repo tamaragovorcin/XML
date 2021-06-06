@@ -45,7 +45,7 @@ type AlbumFeed struct {
 	Post Post `bson:"post"`
 	Likes []primitive.ObjectID `bson:"likes"`
 	Dislikes []primitive.ObjectID `bson:"dislikes"`
-	Comments []primitive.ObjectID `bson:"comments"`
+	Comments []Comment `bson:"comments"`
 }
 type Collection struct {
 	Id primitive.ObjectID `bson:"_id,omitempty"`

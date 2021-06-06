@@ -12,7 +12,7 @@ import Favorites from './pages/Favorites';
 import PharmacyProfilePage from './pages/FollowerProfilePage';
 import Search from './pages/Search';
 import CloseFriends from './pages/CloseFriends';
-
+import FollowRequest from './pages/FollowRequest';
 
 function App() {
   return (
@@ -31,6 +31,7 @@ function App() {
 				<Route path="/followerProfilePage/:id" children={<PharmacyProfilePage />} />
 				<Link exact to="/seacrh" path="/seacrh" component={Search} />
 				<Link exact to="/closeFriends" path="/closeFriends" component={CloseFriends} />
+				<Link exact to="/followRequests" path="/followRequests" component={FollowRequest} />
 
 			</Switch>
 	</Router>

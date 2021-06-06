@@ -5,7 +5,7 @@ import { Link } from "react-router-dom";
 import playerLogo from "../static/coach.png";
 
 import { BASE_URL_FEED } from "../constants.js";
-
+import { BASE_URL_USER_INTERACTION } from "../constants.js";
 import LikesModal from "../components/Posts/LikesModal"
 import DislikesModal from "../components/Posts/DislikesModal"
 import CommentsModal from "../components/Posts/CommentsModal"
@@ -16,8 +16,11 @@ import WriteCommentModal from "../components/Posts/WriteCommentModal"
 
 import { BASE_URL_USER } from "../constants.js";
 import { FiHeart } from "react-icons/fi";
+
 import { FaHeartBroken, FaRegCommentDots } from "react-icons/fa"
 import { BsBookmark } from "react-icons/bs"
+import { Lock } from "@material-ui/icons";
+import { Icon } from "@material-ui/core";
 class FollowerProfilePage extends React.Component {
 	constructor(props) {
 		super(props);
@@ -330,7 +333,45 @@ class FollowerProfilePage extends React.Component {
 	handleAddStoryPostAlbum = () => {
 
 	}
+	handleFollow = () => {
+		let id = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length-1);
+		const user1Id = {id: id}
+		const user2Id = {id : this.state.userId}
+		alert(this.state.userId);
+		
+		Axios.post(BASE_URL_USER_INTERACTION + "/api/createUser", user1Id)
+		.then((res) => {
+			
+				console.log(res.data)
+				
+			
+		})
+		.catch ((err) => {
+	console.log(err);
+});
+	Axios.post(BASE_URL_USER_INTERACTION + "/api/createUser", user2Id)
+				.then((res) => {
+					
+						console.log(res.data)
+						
+					
+				})
+				.catch ((err) => {
+			console.log(err);
+		});
+		const followReguestDTO = { follower: id, following : this.state.userId};
+		Axios.post(BASE_URL_USER_INTERACTION + "/api/followRequest", followReguestDTO)
+				.then((res) => {
+					
+						console.log(res.data)
+						this.setState({ redirect: true });
+					
+				})
+				.catch ((err) => {
+			console.log(err);
+		});
 
+	}
 
 
 
@@ -405,7 +446,8 @@ class FollowerProfilePage extends React.Component {
 														<label >{this.state.username}</label>
 													</td>
 													<td>
-														<Link to="/userChangeProfile" className="btn btn-outline-secondary btn-sm">Follow</Link>
+														<Link to="/userChangeProfile" className="btn btn-outline-secondary btn-sm">Edit profile</Link>
+													<Link onClick={this.handleFollow} className="btn btn-outline-success btn-sm">Follow</Link>
 
 													</td>
 
@@ -563,41 +605,22 @@ class FollowerProfilePage extends React.Component {
 					<div hidden={!this.state.following}>
 
 													NE PRATITE SE
+						<div className="d-flex align-items-top p-3 mb-2 d-flex justify-content-center">
+							
+							<label><b>This Account is Private</b></label>
+							
+						</div>
+
+						<div className="d-flex justify-content-center h-100">
+							<Icon className="d-flex justify-content-center h-100 w-100"><Lock /></Icon>
+						</div>
 
 					</div>
 
 				</section>
 				<div>
 
-					<LikesModal
-						show={this.state.showLikesModal}
-						onCloseModal={this.handleLikesModalClose}
-						header="People who liked the photo"
-						peopleLikes={this.state.peopleLikes}
-					/>
-					<DislikesModal
-						show={this.state.showDislikesModal}
-						onCloseModal={this.handleDislikesModalClose}
-						header="People who disliked the photo"
-						peopleDislikes={this.state.peopleDislikes}
-					/>
-					<CommentsModal
-						show={this.state.showCommentsModal}
-						onCloseModal={this.handleCommentsModalClose}
-						header="Comments on the photo"
-						comments={this.state.comments}
-					/>
-					<ModalDialog
-						show={this.state.openModal}
-						onCloseModal={this.handleModalClose}
-						header="Successful publishing"
-						text={this.state.textSuccessfulModal}
-					/>
-					<WriteCommentModal
-						show={this.state.showWriteCommentModal}
-						onCloseModal={this.handleWriteCommentModalClose}
-						header="Leave your comment"
-					/>
+				
 
 				</div>
 
