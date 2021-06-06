@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"github.com/gorilla/mux"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"image"
@@ -100,6 +101,7 @@ func (app *application) deleteStoryPost(w http.ResponseWriter, r *http.Request) 
 
 
 func (app *application) getUsersStories(w http.ResponseWriter, r *http.Request)  {
+	fmt.Println("*********************")
 	vars := mux.Vars(r)
 	userId := vars["userId"]
 	userIdPrimitive, _ := primitive.ObjectIDFromHex(userId)
