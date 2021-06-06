@@ -9,7 +9,6 @@ import (
 	"io"
 	"log"
 	"net/http"
-	"net/url"
 	"os"
 	"strings"
 	"time"
@@ -35,8 +34,6 @@ func routes() *mux.Router {
 	r.HandleFunc("/api/user/followRequests", ReturnUsersFollowRequests(driver, configuration.Database)).Methods("POST")
 
 	r.HandleFunc("/api/createUser", CreateUser(driver, configuration.Database)).Methods("POST")
-
-	r.HandleFunc("/movie/vote/{id}", voteInMovieHandlerFunc(driver, configuration.Database)).Methods("GET")
 
 
 	return r
@@ -404,44 +401,6 @@ func CreateUser(driver neo4j.Driver, database string) func(w http.ResponseWriter
 				map[string]interface{}{
 					"uId": m.Id,
 				})
-			if err != nil {
-				return nil, err
-			}
-			var summary, _ = result.Consume()
-			var voteResult VoteResult
-			voteResult.Updates = summary.Counters().PropertiesSet()
-
-			return voteResult, nil
-		})
-		if err != nil {
-			log.Println("error voting for movie:", err)
-			return
-		}
-		err = json.NewEncoder(w).Encode(voteResult)
-		if err != nil {
-			log.Println("error writing volte result response:", err)
-		}
-	}
-}
-
-func voteInMovieHandlerFunc(driver neo4j.Driver, database string) func(http.ResponseWriter, *http.Request) {
-	return func(w http.ResponseWriter, req *http.Request) {
-		fmt.Println("POGOOOODI")
-		w.Header().Set("Content-Type", "application/json")
-		title, _ := url.QueryUnescape(req.URL.Path[len("/movie/vote/"):])
-
-		session := driver.NewSession(neo4j.SessionConfig{
-			AccessMode:   neo4j.AccessModeWrite,
-			DatabaseName: database,
-		})
-		defer unsafeClose(session)
-
-		voteResult, err := session.WriteTransaction(func(tx neo4j.Transaction) (interface{}, error) {
-			result, err := tx.Run(
-				`MATCH (m:Movie {title: $title}) 
-				WITH m, (CASE WHEN exists(m.votes) THEN m.votes ELSE 0 END) AS currentVotes
-				SET m.votes = currentVotes + 1;`,
-				map[string]interface{}{"title": title})
 			if err != nil {
 				return nil, err
 			}
