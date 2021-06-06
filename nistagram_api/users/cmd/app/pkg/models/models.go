@@ -92,5 +92,5 @@ type Settings struct {
 	AcceptMessages bool `bson:"acceptMessages,omitempty"`
 	Muted []uuid.UUID `bson:"muted,omitempty"`
 	Blocked []uuid.UUID `bson:"blocked,omitempty"`
-	CloseFriends []uuid.UUID `bson:"closeFriends,omitempty"`
+	CloseFriends []primitive.ObjectID  `bson:"closeFriends,omitempty"`
 }
