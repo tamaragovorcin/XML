@@ -40,4 +40,24 @@ type HighlightsInfoDTO struct {
 	Name string
 }
 
+type StoryPostInfoHomePageDTO struct {
+	UserId          primitive.ObjectID
+	UserUsername    string
+	Stories    []StoryPostInfoDTO
+}
 
+type StoryAlbumInfoDTO struct {
+	Id          primitive.ObjectID
+	DateTime    string
+	Tagged      []primitive.ObjectID
+	Location    string
+	Description string
+	Hashtags    string
+	Media       [][]byte
+	Username    string
+}
+type StoryAlbumInfoHomePageDTO struct {
+	UserId          primitive.ObjectID
+	UserUsername    string
+	Albums    []StoryAlbumInfoDTO
+}

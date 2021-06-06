@@ -3,10 +3,12 @@ package main
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"github.com/gorilla/mux"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"image"
 	"image/jpeg"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
@@ -99,6 +101,7 @@ func (app *application) deleteStoryPost(w http.ResponseWriter, r *http.Request) 
 
 
 func (app *application) getUsersStories(w http.ResponseWriter, r *http.Request)  {
+	fmt.Println("*********************")
 	vars := mux.Vars(r)
 	userId := vars["userId"]
 	userIdPrimitive, _ := primitive.ObjectIDFromHex(userId)
@@ -128,6 +131,7 @@ func (app *application) getUsersStories(w http.ResponseWriter, r *http.Request) 
 	w.WriteHeader(http.StatusOK)
 	w.Write(imagesMarshaled)
 }
+
 
 func findImageByPostId(images []models.Image, id primitive.ObjectID) (models.Image, error) {
 	imageStoryPost := models.Image{}
@@ -189,4 +193,174 @@ func hashTagsToString(hashtags []string) string {
 		hashTagString+="#"+hash
 	}
 	return hashTagString
+}
+
+func (app *application) getStoriesForHomePage(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	userId := vars["userId"]
+	userIdPrimitive, _ := primitive.ObjectIDFromHex(userId)
+
+	allImages,_ := app.images.All()
+	allPosts, _ :=app.storyPosts.All()
+	storiesForHomePage,err :=findStoryPostsForHomePage(allPosts,userIdPrimitive)
+	if err != nil {
+		app.serverError(w, err)
+	}
+	storyPostsResponse := []dtos.StoryPostInfoHomePageDTO{}
+	for _, storyPost := range storiesForHomePage {
+
+		images, err := findImageByPostId(allImages,storyPost.Id)
+		if err != nil {
+			app.serverError(w, err)
+		}
+		userInList :=getIndexInListOfUsersStories(userIdPrimitive,storyPostsResponse)
+		if userInList==-1 {
+			userUsername := getUserUsername(storyPost.Post.User)
+			userId := storyPost.Post.User
+			stories := []dtos.StoryPostInfoDTO{}
+			var dto = dtos.StoryPostInfoHomePageDTO{
+				UserId:       userId,
+				UserUsername: userUsername,
+				Stories:      append(stories, toResponseStoryPost(storyPost, images.Media)),
+			}
+			storyPostsResponse = append(storyPostsResponse, dto)
+		}else if userInList!=-1 {
+			existingDto :=storyPostsResponse[userInList]
+			existingDto.Stories = append(existingDto.Stories, toResponseStoryPost(storyPost, images.Media))
+		}
+	}
+
+	imagesMarshaled, err := json.Marshal(storyPostsResponse)
+	if err != nil {
+		app.serverError(w, err)
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	w.Write(imagesMarshaled)
+}
+func getIndexInListOfUsersStories(idPrimitive primitive.ObjectID, listStories []dtos.StoryPostInfoHomePageDTO) int {
+	for num, story := range listStories {
+		if story.UserId.String()==idPrimitive.String() {
+			return num
+		}
+	}
+	return -1
+}
+func findStoryPostsForHomePage(posts []models.StoryPost, idPrimitive primitive.ObjectID) ([]models.StoryPost, error) {
+	storyPostsUser := []models.StoryPost{}
+
+	for _, storyPost := range posts {
+
+		if	storyPost.Post.User.String()!=idPrimitive.String() && checkIfStoryIsInLast24h(storyPost.Post.DateTime){
+			storyPostsUser = append(storyPostsUser, storyPost)
+		}
+	}
+	//dodati uslov za pracenje!!!!!!!!!!!
+	return storyPostsUser, nil
+}
+
+func checkIfStoryIsInLast24h(dateTime time.Time) bool {
+	yesterday := time.Now().Add(-24*time.Hour)
+	check := dateTime.After(yesterday)
+	return check
+}
+
+
+func getUserUsername(user primitive.ObjectID) string {
+
+	stringObjectID := user.Hex()
+	resp, err := http.Get("http://localhost:4006/api/user/username/"+stringObjectID)
+	if err != nil {
+		log.Fatalln(err)
+	}
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		log.Fatalln(err)
+	}
+	sb := string(body)
+	sb = sb[1:]
+	sb = sb[:len(sb)-1]
+	return sb
+}
+
+func (app *application) getUsersStoryAlbums(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	userId := vars["userIdd"]
+	userIdPrimitive, _ := primitive.ObjectIDFromHex(userId)
+	allImages, _ := app.images.All()
+	allAlbums, _ := app.albumStories.All()
+	usersStoryAlbums, err := findStoryAlbumsByUserId(allAlbums, userIdPrimitive)
+	if err != nil {
+		app.serverError(w, err)
+	}
+
+	storyAlbumResponse := []dtos.StoryAlbumInfoDTO{}
+	for _, album := range usersStoryAlbums {
+
+		images, err := findAlbumByPostId(allImages,album.Id)
+		if err != nil {
+			app.serverError(w, err)
+		}
+
+		storyAlbumResponse = append(storyAlbumResponse, toResponseAlbum(album, images))
+
+	}
+
+	imagesMarshaled, err := json.Marshal(storyAlbumResponse)
+	if err != nil {
+		app.serverError(w, err)
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	w.Write(imagesMarshaled)
+}
+
+func findStoryAlbumsByUserId(albums []models.AlbumStory, idPrimitive primitive.ObjectID) ([]models.AlbumStory, error){
+	feedAlbumsUser := []models.AlbumStory{}
+
+	for _, album := range albums {
+		if	album.Post.User.String()==idPrimitive.String() {
+			feedAlbumsUser = append(feedAlbumsUser, album)
+		}
+	}
+	return feedAlbumsUser, nil
+}
+func findAlbumByPostId(images []models.Image, idFeedAlbum primitive.ObjectID) ([]string, error) {
+	imageAlbumPost := []string{}
+
+	for _, image := range images {
+
+		if	image.PostId==idFeedAlbum {
+			imageAlbumPost= append(imageAlbumPost, image.Media)
+		}
+	}
+	return imageAlbumPost, nil
+}
+
+func toResponseAlbum(feedAlbum models.AlbumStory, imageList []string) dtos.StoryAlbumInfoDTO {
+	imagesBuffered := [][]byte{}
+	for _, image2 := range imageList {
+		f, _ := os.Open(image2)
+		defer f.Close()
+		image, _, _ := image.Decode(f)
+		buffer := new(bytes.Buffer)
+		if err := jpeg.Encode(buffer, image, nil); err != nil {
+			log.Println("unable to encode image.")
+		}
+		imageBuffered :=buffer.Bytes()
+		imagesBuffered= append(imagesBuffered, imageBuffered)
+	}
+
+
+	return dtos.StoryAlbumInfoDTO{
+		Id: feedAlbum.Id,
+		DateTime : strings.Split(feedAlbum.Post.DateTime.String(), " ")[0],
+		Tagged :feedAlbum.Post.Tagged,
+		Location : locationToString(feedAlbum.Post.Location),
+		Description : feedAlbum.Post.Description,
+		Hashtags : hashTagsToString(feedAlbum.Post.Hashtags),
+		Media : imagesBuffered,
+		Username : "",
+
+	}
 }

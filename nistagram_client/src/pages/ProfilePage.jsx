@@ -88,8 +88,10 @@ class ProfilePage extends React.Component {
 		showAddCollectionModal : false,
 		showWriteCommentModalAlbum : false,
 		selectedFile : "",
-		loaded : ""
+		loaded : "",
 
+
+		storyAlbums : [] 
 	}
 	
 	handleAddCollectionClick = () => {
@@ -108,8 +110,6 @@ class ProfilePage extends React.Component {
 			pictures: this.state.pictures.concat(picture),
 		});
 
-		//let pomoc = this.state.pictures.length;
-		
 		let pomoc = picture.length
 		if(pomoc===0) {
 			this.setState({
@@ -249,6 +249,7 @@ class ProfilePage extends React.Component {
 		this.handleGetHighlights(id)
 		this.handleGetPhotos(id)
 		this.handleGetAlbums(id)
+		this.handleGetStoryAlbums(id)
 		this.handleGetStories(id)
 		this.handleGetCollections(id)
 
@@ -295,6 +296,15 @@ class ProfilePage extends React.Component {
 		Axios.get(BASE_URL_FEED + "/api/feedAlbum/usersAlbums/"+id)
 			.then((res) => {
 				this.setState({ albums: res.data });
+			})
+			.catch((err) => {
+				console.log(err);
+			});
+	}
+	handleGetStoryAlbums = (id) => {
+		Axios.get(BASE_URL_STORY + "/api/storyAlbum/usersAlbums/"+id)
+			.then((res) => {
+				this.setState({ storyAlbums: res.data });
 			})
 			.catch((err) => {
 				console.log(err);
@@ -833,7 +843,7 @@ class ProfilePage extends React.Component {
 				this.setState({ showImageModal: false, });
 				this.setState({ openModal: true });
 				this.setState({ textSuccessfulModal: "You have successfully added album story post." });
-				this.handleGetStories(id)
+				this.handleGetStoryAlbums(id)
 			})
 			.catch((err) => {
 				console.log(err);
@@ -1108,7 +1118,7 @@ class ProfilePage extends React.Component {
 			
 			this.setState({ textSuccessfulModal: "You have successfully commented the album." });
 			this.setState({ openModal: true });
-			this.setState({ showWriteCommentModal: false });
+			this.setState({ showWriteCommentModalAlbum: false });
 
 
 		})
@@ -1285,6 +1295,9 @@ class ProfilePage extends React.Component {
 						stories = {this.state.stories}
 						handleOpenAddStoryToHighlightModal = {this.handleOpenAddStoryToHighlightModal}
 
+
+						storyAlbums = {this.state.storyAlbums}
+
 						handleAddHighLightClick = {this.handleAddHighLightClick}
 						highlights = {this.state.highlights}
 						seeStoriesInHighlight = {this.seeStoriesInHighlight}
@@ -1310,19 +1323,19 @@ class ProfilePage extends React.Component {
 				<LikesModal
 					        show={this.state.showLikesModal}
 					        onCloseModal={this.handleLikesModalClose}
-					        header="People who liked the photo"
+					        header="People who liked"
 							peopleLikes = {this.state.peopleLikes}
 				    />
                     <DislikesModal
                          show={this.state.showDislikesModal}
 						 onCloseModal={this.handleDislikesModalClose}
-						 header="People who disliked the photo"
+						 header="People who disliked"
 						 peopleDislikes = {this.state.peopleDislikes}
 				    />
                     <CommentsModal
                         show={this.state.showCommentsModal}
 						onCloseModal={this.handleCommentsModalClose}
-						header="Comments on the photo"
+						header="Comments"
 						peopleComments = {this.state.peopleComments}
                     />
 					<WriteCommentModal
