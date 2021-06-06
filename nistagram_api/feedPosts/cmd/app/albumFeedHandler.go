@@ -37,35 +37,6 @@ func (app *application) getAllAlbumFeeds(w http.ResponseWriter, r *http.Request)
 	w.Write(b)
 }
 
-func (app *application) findAlbumFeedByID(w http.ResponseWriter, r *http.Request) {
-	// Get id from incoming url
-	vars := mux.Vars(r)
-	id := vars["id"]
-
-	// Find booking by id
-	m, err := app.albumFeeds.FindByID(id)
-	if err != nil {
-		if err.Error() == "ErrNoDocuments" {
-			app.infoLog.Println("albumFeeds not found")
-			return
-		}
-		// Any other error will send an internal server error
-		app.serverError(w, err)
-	}
-
-	// Convert booking to json encoding
-	b, err := json.Marshal(m)
-	if err != nil {
-		app.serverError(w, err)
-	}
-
-	app.infoLog.Println("Have been found a albumFeeds")
-
-	// Send response back
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	w.Write(b)
-}
 
 func (app *application) insertAlbumFeed(w http.ResponseWriter, req *http.Request) {
 	vars := mux.Vars(req)
@@ -87,9 +58,9 @@ func (app *application) insertAlbumFeed(w http.ResponseWriter, req *http.Request
 	}
 	var feedPost = models.AlbumFeed{
 		Post : post,
-		Likes : nil,
-		Dislikes: nil,
-		Comments: nil,
+		Likes : []primitive.ObjectID{},
+		Dislikes: []primitive.ObjectID{},
+		Comments: []models.Comment{},
 	}
 
 
@@ -268,4 +239,203 @@ func findFeedAlbumsForHomePage(albums []models.AlbumFeed, idPrimitive primitive.
 	}
 	//usloc za pracenje!!!!!!!!!!!!!!!
 	return feedAlbumsUser, nil
+}
+func (app *application) likeTheFeedAlbum(w http.ResponseWriter, r *http.Request) {
+
+	var m dtos.PostReactionDTO
+	err := json.NewDecoder(r.Body).Decode(&m)
+	if err != nil {
+		app.serverError(w, err)
+	}
+
+	feedAlbum, err := app.albumFeeds.FindByID(m.PostId)
+	if feedAlbum == nil {
+		app.infoLog.Println("Feed Post not found")
+	}
+	var post = models.Post{
+		User : feedAlbum.Post.User,
+		DateTime : feedAlbum.Post.DateTime,
+		Tagged : feedAlbum.Post.Tagged,
+		Description: feedAlbum.Post.Description,
+		Hashtags: feedAlbum.Post.Hashtags,
+		Location : feedAlbum.Post.Location,
+		Blocked : feedAlbum.Post.Blocked,
+	}
+	var feedAlbumUpdate = models.AlbumFeed{
+		Post : post,
+		Likes : append(feedAlbum.Likes, m.UserId),
+		Dislikes: feedAlbum.Dislikes,
+		Comments: feedAlbum.Comments,
+	}
+
+	insertResult, err := app.albumFeeds.Update(feedAlbumUpdate)
+	if err != nil {
+		app.serverError(w, err)
+	}
+	app.infoLog.Printf("New user have been created, id=%s", insertResult.UpsertedID)
+}
+func (app *application) dislikeTheFeedAlbum(w http.ResponseWriter, r *http.Request) {
+
+	var m dtos.PostReactionDTO
+	err := json.NewDecoder(r.Body).Decode(&m)
+	if err != nil {
+		app.serverError(w, err)
+	}
+
+	feedPost, err := app.feedPosts.FindByID(m.PostId)
+	if feedPost == nil {
+		app.infoLog.Println("Feed Post not found")
+	}
+	var post = models.Post{
+		User : feedPost.Post.User,
+		DateTime : feedPost.Post.DateTime,
+		Tagged : feedPost.Post.Tagged,
+		Description: feedPost.Post.Description,
+		Hashtags: feedPost.Post.Hashtags,
+		Location : feedPost.Post.Location,
+		Blocked : feedPost.Post.Blocked,
+	}
+	var feedPostUpdate = models.FeedPost{
+		Id: feedPost.Id,
+		Dislikes:append(feedPost.Dislikes, m.UserId),
+		Comments : feedPost.Comments,
+		Post : post,
+		Likes: feedPost.Likes,
+	}
+
+	insertResult, err := app.feedPosts.Update(feedPostUpdate)
+	if err != nil {
+		app.serverError(w, err)
+	}
+	app.infoLog.Printf("New user have been created, id=%s", insertResult.UpsertedID)
+}
+func (app *application) commentTheFeedAlbum(w http.ResponseWriter, r *http.Request) {
+
+	var m dtos.CommentReactionDTO
+	err := json.NewDecoder(r.Body).Decode(&m)
+	if err != nil {
+		app.serverError(w, err)
+	}
+
+	feedPost, err := app.feedPosts.FindByID(m.PostId)
+	if feedPost == nil {
+		app.infoLog.Println("Feed Post not found")
+	}
+	var post = models.Post{
+		User : feedPost.Post.User,
+		DateTime : feedPost.Post.DateTime,
+		Tagged : feedPost.Post.Tagged,
+		Description: feedPost.Post.Description,
+		Hashtags: feedPost.Post.Hashtags,
+		Location : feedPost.Post.Location,
+		Blocked : feedPost.Post.Blocked,
+	}
+	var comment = models.Comment{
+		DateTime : time.Now(),
+		Content : m.Content,
+		Writer: m.UserId,
+	}
+	var feedPostUpdate = models.FeedPost{
+		Id: feedPost.Id,
+		Dislikes:feedPost.Dislikes,
+		Comments : append(feedPost.Comments, comment),
+		Post : post,
+		Likes: feedPost.Likes,
+	}
+
+	insertResult, err := app.feedPosts.Update(feedPostUpdate)
+	if err != nil {
+		app.serverError(w, err)
+	}
+	app.infoLog.Printf("New user have been created, id=%s", insertResult.UpsertedID)
+}
+
+func (app *application) getlikesFeedAlbum(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	postId := vars["postId"]
+	postIdPrimitive, _ := primitive.ObjectIDFromHex(postId)
+
+
+	likesForPost,err :=app.feedPosts.FindByID(postIdPrimitive)
+
+	if err != nil {
+		app.serverError(w, err)
+	}
+
+	likesDtos := []dtos.LikeDTO{}
+	for _, user := range likesForPost.Likes {
+
+		userUsername :=getUserUsername(user)
+		var like = dtos.LikeDTO{
+			Username: userUsername,
+		}
+
+		likesDtos = append(likesDtos, like)
+
+	}
+
+	usernamesMarshaled, err := json.Marshal(likesDtos)
+	if err != nil {
+		app.serverError(w, err)
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	w.Write(usernamesMarshaled)
+}
+
+func (app *application) getdislikesFeedAlbum(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	postId := vars["postId"]
+	postIdPrimitive, _ := primitive.ObjectIDFromHex(postId)
+
+
+	likesForPost,err :=app.feedPosts.FindByID(postIdPrimitive)
+
+	if err != nil {
+		app.serverError(w, err)
+	}
+
+	likesDtos := []dtos.LikeDTO{}
+	for _, user := range likesForPost.Dislikes {
+
+		userUsername :=getUserUsername(user)
+		var like = dtos.LikeDTO{
+			Username: userUsername,
+		}
+
+		likesDtos = append(likesDtos, like)
+
+	}
+
+	usernamesMarshaled, err := json.Marshal(likesDtos)
+	if err != nil {
+		app.serverError(w, err)
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	w.Write(usernamesMarshaled)
+}
+
+func (app *application) getcommentsFeedAlbum(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	postId := vars["postId"]
+	postIdPrimitive, _ := primitive.ObjectIDFromHex(postId)
+
+
+	likesForPost,err :=app.feedPosts.FindByID(postIdPrimitive)
+
+	if err != nil {
+		app.serverError(w, err)
+	}
+
+	commentsDtos :=getCommentDtos(likesForPost.Comments)
+
+
+	usernamesMarshaled, err := json.Marshal(commentsDtos)
+	if err != nil {
+		app.serverError(w, err)
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	w.Write(usernamesMarshaled)
 }

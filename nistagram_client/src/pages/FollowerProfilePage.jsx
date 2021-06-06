@@ -620,35 +620,7 @@ class FollowerProfilePage extends React.Component {
 				</section>
 				<div>
 
-					<LikesModal
-						show={this.state.showLikesModal}
-						onCloseModal={this.handleLikesModalClose}
-						header="People who liked the photo"
-						peopleLikes={this.state.peopleLikes}
-					/>
-					<DislikesModal
-						show={this.state.showDislikesModal}
-						onCloseModal={this.handleDislikesModalClose}
-						header="People who disliked the photo"
-						peopleDislikes={this.state.peopleDislikes}
-					/>
-					<CommentsModal
-						show={this.state.showCommentsModal}
-						onCloseModal={this.handleCommentsModalClose}
-						header="Comments on the photo"
-						comments={this.state.comments}
-					/>
-					<ModalDialog
-						show={this.state.openModal}
-						onCloseModal={this.handleModalClose}
-						header="Successful publishing"
-						text={this.state.textSuccessfulModal}
-					/>
-					<WriteCommentModal
-						show={this.state.showWriteCommentModal}
-						onCloseModal={this.handleWriteCommentModalClose}
-						header="Leave your comment"
-					/>
+				
 
 				</div>
 
