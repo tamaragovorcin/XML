@@ -7,19 +7,19 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
-	"notifications/pkg/models"
+	"users/pkg/models"
 )
 
 // MovieModel represent a mgo database session with a movie data model.
-type SettingsModel struct {
+type NotificationModel struct {
 	C *mongo.Collection
 }
 
 // All method will be used to get all records from the movies table.
-func (m *SettingsModel) GetAll() ([]models.Settings, error) {
+func (m *NotificationModel) GetAll() ([]models.Notifications, error) {
 	// Define variables
 	ctx := context.TODO()
-	mm := []models.Settings{}
+	mm := []models.Notifications{}
 
 	// Find all movies
 	movieCursor, err := m.C.Find(ctx, bson.M{})
@@ -35,14 +35,14 @@ func (m *SettingsModel) GetAll() ([]models.Settings, error) {
 }
 
 // FindByID will be used to find a new movie registry by id
-func (m *SettingsModel) FindByID(id string) (*models.Settings, error) {
+func (m *NotificationModel) FindByID(id string) (*models.Notifications, error) {
 	p, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
 		return nil, err
 	}
 
 	// Find movie by id
-	var notification = models.Settings{}
+	var notification = models.Notifications{}
 	err = m.C.FindOne(context.TODO(), bson.M{"_id": p}).Decode(&notification)
 	if err != nil {
 		// Checks if the movie was not found
@@ -56,12 +56,12 @@ func (m *SettingsModel) FindByID(id string) (*models.Settings, error) {
 }
 
 // Insert will be used to insert a new movie registry
-func (m *SettingsModel) Insert( notification models.Settings) (*mongo.InsertOneResult, error) {
+func (m *NotificationModel) Insert( notification models.Notifications) (*mongo.InsertOneResult, error) {
 	return m.C.InsertOne(context.TODO(), notification)
 }
 
 // Delete will be used to delete a movie registry
-func (m *SettingsModel) Delete(id string) (*mongo.DeleteResult, error) {
+func (m *NotificationModel) Delete(id string) (*mongo.DeleteResult, error) {
 	p, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
 		return nil, err

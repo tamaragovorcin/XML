@@ -4,12 +4,12 @@ import (
 	"net/http"
 
 	"github.com/gorilla/mux"
-	"notifications/pkg/models"
+	"users/pkg/models"
 )
 
-func (app *application) getAllSettings(w http.ResponseWriter, r *http.Request) {
+func (app *application) getAllNotification(w http.ResponseWriter, r *http.Request) {
 	// Get all movie stored
-	ad, err := app.settings.GetAll()
+	ad, err := app.notification.GetAll()
 	if err != nil {
 		app.serverError(w, err)
 	}
@@ -20,7 +20,7 @@ func (app *application) getAllSettings(w http.ResponseWriter, r *http.Request) {
 		app.serverError(w, err)
 	}
 
-	app.infoLog.Println("settings have been listed")
+	app.infoLog.Println("Movies have been listed")
 
 	// Send response back
 	w.Header().Set("Content-Type", "application/json")
@@ -28,16 +28,16 @@ func (app *application) getAllSettings(w http.ResponseWriter, r *http.Request) {
 	w.Write(b)
 }
 
-func (app *application) findSettingsByID(w http.ResponseWriter, r *http.Request) {
+func (app *application) findByIDNotification(w http.ResponseWriter, r *http.Request) {
 	// Get id from incoming url
 	vars := mux.Vars(r)
 	id := vars["id"]
 
 	// Find movie by id
-	m, err := app.settings.FindByID(id)
+	m, err := app.notification.FindByID(id)
 	if err != nil {
 		if err.Error() == "ErrNoDocuments" {
-			app.infoLog.Println("Settings not found")
+			app.infoLog.Println("Movie not found")
 			return
 		}
 		// Any other error will send an internal server error
@@ -50,7 +50,7 @@ func (app *application) findSettingsByID(w http.ResponseWriter, r *http.Request)
 		app.serverError(w, err)
 	}
 
-	app.infoLog.Println("Have been found a Settings")
+	app.infoLog.Println("Have been found a movie")
 
 	// Send response back
 	w.Header().Set("Content-Type", "application/json")
@@ -58,9 +58,9 @@ func (app *application) findSettingsByID(w http.ResponseWriter, r *http.Request)
 	w.Write(b)
 }
 
-func (app *application) insertSettings(w http.ResponseWriter, r *http.Request) {
+func (app *application) insertNotification(w http.ResponseWriter, r *http.Request) {
 	// Define movie model
-	var m models.Settings
+	var m models.Notifications
 	// Get request information
 	err := json.NewDecoder(r.Body).Decode(&m)
 	if err != nil {
@@ -68,24 +68,24 @@ func (app *application) insertSettings(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Insert new movie
-	insertResult, err := app.settings.Insert(m)
+	insertResult, err := app.notification.Insert(m)
 	if err != nil {
 		app.serverError(w, err)
 	}
 
-	app.infoLog.Printf("New Settings have been created, id=%s", insertResult.InsertedID)
+	app.infoLog.Printf("New movie have been created, id=%s", insertResult.InsertedID)
 }
 
-func (app *application) deleteSettings(w http.ResponseWriter, r *http.Request) {
+func (app *application) deleteNotification(w http.ResponseWriter, r *http.Request) {
 	// Get id from incoming url
 	vars := mux.Vars(r)
 	id := vars["id"]
 
 	// Delete movie by id
-	deleteResult, err := app.settings.Delete(id)
+	deleteResult, err := app.notification.Delete(id)
 	if err != nil {
 		app.serverError(w, err)
 	}
 
-	app.infoLog.Printf("Have been eliminated %d Settings(s)", deleteResult.DeletedCount)
+	app.infoLog.Printf("Have been eliminated %d movie(s)", deleteResult.DeletedCount)
 }
