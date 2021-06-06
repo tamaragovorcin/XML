@@ -42,6 +42,8 @@ func (app *application) routes() *mux.Router {
 	r.HandleFunc("/api/albumFeed/likes/{postId}", app.getlikesFeedAlbum).Methods("GET")
 	r.HandleFunc("/api/albumFeed/dislikes/{postId}", app.getdislikesFeedAlbum).Methods("GET")
 	r.HandleFunc("/api/albumFeed/comments/{postId}", app.getcommentsFeedAlbum).Methods("GET")
+	r.HandleFunc("/api/albumFeed/searchByLocation/{country}/{city}/{street}", app.getFeedAlbumsByLocation).Methods("GET")
+	r.HandleFunc("/api/albumFeed/searchByHashTags/", app.getFeedAlbumsByHashTags).Methods("POST")
 
 	r.HandleFunc("/api/image/{userIdd}/{feedId}", app.saveImage).Methods("POST")
 	r.HandleFunc("/api/feed/usersImages/{userIdd}", app.getUsersFeedPosts).Methods("GET")
