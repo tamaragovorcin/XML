@@ -8,8 +8,11 @@ import (
 func (app *application) routes() *mux.Router {
 	// Register handler functions.
 	r := mux.NewRouter()
-	r.HandleFunc("/api/story/{userId}", app.insertStoryPost).Methods("POST")
-	r.HandleFunc("/api/story/user/{userId}", app.getUsersStories).Methods("GET")
+
+	r.HandleFunc("/story/{userId}", app.insertStoryPost).Methods("POST")
+	r.HandleFunc("/story/user/{userId}", app.getUsersStories).Methods("GET")
+	r.HandleFunc("/api/story/homePage/{userId}", app.getStoriesForHomePage).Methods("GET")
+
 
 	r.HandleFunc("/api/storyAlbum/{userId}", app.insertAlbumStory).Methods("POST")
 
