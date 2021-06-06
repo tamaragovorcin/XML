@@ -35,24 +35,19 @@ func (m *SettingsModel) GetAll() ([]models.Settings, error) {
 }
 
 // FindByID will be used to find a new movie registry by id
-func (m *SettingsModel) FindByID(id string) (*models.Settings, error) {
-	p, err := primitive.ObjectIDFromHex(id)
-	if err != nil {
-		return nil, err
-	}
+func (m *SettingsModel) FindByID(id primitive.ObjectID) (*models.Settings, error) {
 
-	// Find movie by id
-	var notification = models.Settings{}
-	err = m.C.FindOne(context.TODO(), bson.M{"_id": p}).Decode(&notification)
+	var user = models.Settings{}
+	err := m.C.FindOne(context.TODO(), bson.M{"_id": id}).Decode(&user)
 	if err != nil {
-		// Checks if the movie was not found
+		// Checks if the user was not found
 		if err == mongo.ErrNoDocuments {
 			return nil, errors.New("ErrNoDocuments")
 		}
 		return nil, err
 	}
 
-	return &notification, nil
+	return &user, nil
 }
 
 // Insert will be used to insert a new movie registry

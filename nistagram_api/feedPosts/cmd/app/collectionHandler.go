@@ -251,11 +251,12 @@ func toResponseFeedPost(storyPost models.FeedPost, image2 string) dtos.FeedPostI
 	if err := jpeg.Encode(buffer, image, nil); err != nil {
 		log.Println("unable to encode image.")
 	}
+	taggedPeople :=getTaggedPeople(storyPost.Post.Tagged)
 
 	return dtos.FeedPostInfoDTO{
 		Id: storyPost.Id,
 		DateTime : strings.Split(storyPost.Post.DateTime.String(), " ")[0],
-		Tagged :  storyPost.Post.Tagged,
+		Tagged :  taggedPeople,
 		Location : locationToString(storyPost.Post.Location),
 		Description : storyPost.Post.Description,
 		Hashtags : hashTagsToString(storyPost.Post.Hashtags),

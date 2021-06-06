@@ -64,6 +64,12 @@ render(){
                           {post.Hashtags}
                       </td>
                     </tr>
+                    <tr>
+                            <td colSpan="3">
+                                {post.Tagged}
+                            </td>
+                            
+                          </tr>
                     <tr  style={{ width: "100%" }}>
                         <td>
                            <button onClick={() =>  this.props.handleLike(post.Id)}  className="btn btn-outline-secondary btn-sm" style={{ marginBottom: "1rem", height:"40px",marginLeft:"6rem" }}><FiHeart/></button>
@@ -142,6 +148,12 @@ render(){
                           {post.Hashtags}
                       </td>
                     </tr>
+                    <tr>
+                            <td colSpan="3">
+                                {post.Tagged}
+                            </td>
+                            
+                          </tr>
                     <tr  style={{ width: "100%" }}>
                         <td>
                            <button onClick={() =>  this.props.handleLikeAlbum(post.Id)}  className="btn btn-outline-secondary btn-sm" style={{ marginBottom: "1rem", height:"40px",marginLeft:"6rem" }}><FiHeart/></button>

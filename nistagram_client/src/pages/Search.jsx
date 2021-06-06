@@ -13,6 +13,8 @@ import { BASE_URL_FEED } from "../constants.js";
 import IconTabsHomePage from "../components/Posts/IconTabsHomePage"
 import ModalDialog from "../components/ModalDialog";
 import AddPostToCollection from "../components/Posts/AddPostToCollection";
+import Select from 'react-select';
+import { BASE_URL_USER } from "../constants.js";
 
 const mapState = {
 	center: [44, 21],
@@ -43,7 +45,11 @@ class Search extends React.Component {
 		addressNotFoundError: "none",
         addressError: "none",
         hashtags :"",
-        hashtagsError : "none"
+        hashtagsError : "none",
+		tags : "",
+		tagsError :"none",
+		options: [],
+
 
 	}
 
@@ -57,12 +63,32 @@ class Search extends React.Component {
 	};
 
 
-	componentDidMount() {}
+	componentDidMount() {
+		let help = []
+		Axios.get(BASE_URL_USER + "/api/")
+			.then((res) => {
+
+				console.log(res.data)
+				this.setState({ users: res.data });
+
+				res.data.forEach((user) => {
+					let optionDTO = { id: user.ID, label: user.ProfileInformation.Username, value: user.Id }
+					help.push(optionDTO)
+				});
+
+				this.setState({ options: help });
+				console.log(help)
+			})
+			.catch((err) => {
+
+				console.log(err)
+			});
+	}
 	
 	handleHashTagsChange = (event) => {
 		this.setState({ hashtags:  event.target.value });
 	}
-
+	
 	handleSearchByLocation = ()=> {
 
 
@@ -396,6 +422,28 @@ class Search extends React.Component {
 			console.log(err);
 		});
 	}
+	handleChangeTags = (event) => {
+		
+		 this.setState({ photos: [] });
+		 this.setState({ albums: [] });
+ 
+		Axios.get(BASE_URL_FEED + "/api/feed/searchByTags/"+event.value)
+		 .then((res) => {
+			 this.setState({ photos: res.data });
+			 this.setState({ hashtags: "" });
+		 })
+		 .catch((err) => {
+			 console.log(err);
+		 });
+		 Axios.get(BASE_URL_FEED + "/api/albumFeed/searchByTags/"+event.value)
+		 .then((res) => {
+			 this.setState({ albums: res.data });
+			 this.setState({ hashtags: "" });
+		 })
+		 .catch((err) => {
+			 console.log(err);
+		 });
+	};
 	render() {
 		return (
 			<React.Fragment>
@@ -414,7 +462,7 @@ class Search extends React.Component {
                                         <td>
                                             <div className="control-group">
                                                 <div className="form-group controls mb-0 pb-2" style={{ color: "#6c757d", opacity: 1 }}>
-                                                    <input className="form-control" id="suggest" ref={this.addressInput} placeholder="Address" style={{ width: '400px' }}/>
+                                                    <input className="form-control" id="suggest" ref={this.addressInput} placeholder="Address" style={{ width: '200px' }}/>
                                                 </div>
                                                 <YMaps
                                                     query={{
@@ -453,7 +501,7 @@ class Search extends React.Component {
                                                         className="form-control" 
                                                         id="suggest" 
                                                         placeholder="HashTags" 
-                                                        style={{ width: '400px' }}
+                                                        style={{ width: '200px' }}
                                                         onChange={this.handleHashTagsChange}/>
                                                 </div>
                                             
@@ -468,6 +516,23 @@ class Search extends React.Component {
                                                 <button onClick={this.handleSearchByHashTags} className="btn btn-outline-secondary btn-sm" >Search</button>
                                             </td>
                                         </td>
+									</td>
+									<td>
+										<div class="input-group rounded" >
+
+											<div style={{ width: '300px' }}>
+												<Select
+													style={{ width: `$200px` }}
+													className="select-custom-class"
+													label="Single select"
+													options={this.state.options}
+													onChange ={e => this.handleChangeTags(e)}
+												/>
+
+
+											</div>
+
+										</div>
 									</td>
 										
 								</tr>

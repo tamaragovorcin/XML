@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/json"
-	"fmt"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"storyPosts/pkg/dtos"
 	"time"
@@ -65,8 +64,6 @@ func (app *application) findAlbumStoryByID(w http.ResponseWriter, r *http.Reques
 }
 
 func (app *application) insertAlbumStory(w http.ResponseWriter, req *http.Request) {
-	fmt.Println("****************************************************")
-	fmt.Println("AAAAAAAAAAAAAALLLLLLLLLLLLLLLLBBBBBBBBBBBBBBUUUUUUUUUUUUUUUMMMMMMMMMMMMMM")
 
 	vars := mux.Vars(req)
 	userId := vars["userId"]
@@ -76,10 +73,12 @@ func (app *application) insertAlbumStory(w http.ResponseWriter, req *http.Reques
 		app.serverError(w, err)
 	}
 	userIdPrimitive, _ := primitive.ObjectIDFromHex(userId)
+	listTagged := taggedUsersToPrimitiveObject(m)
+
 	var post = models.Post{
 		User : userIdPrimitive,
 		DateTime : time.Now(),
-		Tagged : m.Tagged,
+		Tagged : listTagged,
 		Description: m.Description,
 		Hashtags: parseHashTags(m.Hashtags),
 		Location : m.Location,

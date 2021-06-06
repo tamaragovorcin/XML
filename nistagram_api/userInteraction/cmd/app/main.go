@@ -40,6 +40,7 @@ func routes() *mux.Router {
 	r.HandleFunc("/api/user/followers", ReturnUsersFollowers(driver, configuration.Database)).Methods("POST")
 	r.HandleFunc("/api/checkInteraction", ReturnUsersInteraction(driver, configuration.Database)).Methods("POST")
 	r.HandleFunc("/api/checkIfSentRequest", ReturnIfRequestSent(driver, configuration.Database)).Methods("POST")
+	r.HandleFunc("/api/user/followingCloseFriends", ReturnUsersCloseFriends(driver, configuration.Database)).Methods("POST")
 
 
 	r.HandleFunc("/api/createUser", CreateUser(driver, configuration.Database)).Methods("POST")
@@ -163,6 +164,10 @@ type Neo4jConfiguration struct {
 type followUserStructDTO struct {
 	Id string
 	Username string
+}
+type followUserCloseFriendsDTO struct {
+	CloseFriends []followUserStructDTO
+	NotCloseFriends []followUserStructDTO
 }
 
 func (nc *Neo4jConfiguration) newDriver() (neo4j.Driver, error) {
@@ -662,6 +667,103 @@ func CreateUser(driver neo4j.Driver, database string) func(w http.ResponseWriter
 		}
 	}
 }
+
+func ReturnUsersCloseFriends(driver neo4j.Driver, database string) func(http.ResponseWriter, *http.Request) {
+	return func(w http.ResponseWriter, req *http.Request) {
+		var m User
+		err := json.NewDecoder(req.Body).Decode(&m)
+		if err != nil {
+			fmt.Println("Error")
+		}
+		session := driver.NewSession(neo4j.SessionConfig{
+			AccessMode:   neo4j.AccessModeRead,
+			DatabaseName: database,
+		})
+		defer unsafeClose(session)
+
+		movieResults, err := session.ReadTransaction(func(tx neo4j.Transaction) (interface{}, error) {
+			records, err := tx.Run(
+				`MATCH (following:User)<-[f:FOLLOW]-(follower:User) WHERE follower.id = $followerId return following.id as id`,
+				map[string]interface{}{ "followerId": m.Id})
+			if err != nil {
+				return nil, err
+			}
+			var closeFriends followUserCloseFriendsDTO
+			var users  []followUserStructDTO
+			for records.Next() {
+				record := records.Record()
+				id, _ := record.Get("id")
+				fmt.Println(record.Get("id"))
+				username:=getUserUsername(id.(string))
+				var dto = followUserStructDTO{
+					Id : id.(string),
+					Username: username,
+				}
+				users = append(users,  dto)
+			}
+
+			if users==nil {
+				return followUserCloseFriendsDTO{},nil
+			}
+			listCloseFriendsIds := getListCloseFriends(m.Id)
+			closeFriends = organizeFollowersAccordingToCloseFriends(listCloseFriendsIds,users)
+			return closeFriends,nil
+		})
+		if err != nil {
+			log.Println("error querying search:", err)
+			return
+		}
+		err = json.NewEncoder(w).Encode(movieResults)
+		if err != nil {
+			log.Println("error writing search response:", err)
+		}
+	}
+}
+
+func organizeFollowersAccordingToCloseFriends(ids []string, users []followUserStructDTO) followUserCloseFriendsDTO {
+	closeFriends := []followUserStructDTO{}
+	notCloseFriends := []followUserStructDTO{}
+
+	for _, user := range users {
+		if userIsCloseFriends(user,ids) {
+			closeFriends = append(closeFriends,user)
+		} else {
+			notCloseFriends = append(notCloseFriends,user)
+		}
+	}
+	var completeDTO = followUserCloseFriendsDTO{
+		CloseFriends :closeFriends,
+		NotCloseFriends : notCloseFriends,
+	}
+	return completeDTO
+}
+
+func userIsCloseFriends(user2 followUserStructDTO, ids []string) bool {
+	for _, id := range ids {
+		if id==user2.Id {
+			return true
+		}
+	}
+	return false
+}
+
+func getListCloseFriends(id string) []string {
+	resp, err := http.Get("http://localhost:4006/api/user/closeFriends/"+id)
+	if err != nil {
+		log.Fatalln(err)
+	}
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		log.Fatalln(err)
+	}
+	listStrings := []string{}
+	for _, str := range body {
+		listStrings = append(listStrings,string(str))
+	}
+	return listStrings
+}
+
+
 
 func getUserUsername(user string) string {
 

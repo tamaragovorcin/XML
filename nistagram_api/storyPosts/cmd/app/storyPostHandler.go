@@ -3,7 +3,6 @@ package main
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
 	"github.com/gorilla/mux"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"image"
@@ -52,10 +51,12 @@ func (app *application) insertStoryPost(w http.ResponseWriter, req *http.Request
 		app.serverError(w, err)
 	}
 	userIdPrimitive, _ := primitive.ObjectIDFromHex(userId)
+	listTagged := taggedUsersToPrimitiveObject(m)
+
 	var post = models.Post{
 		User : userIdPrimitive,
 		DateTime : time.Now(),
-		Tagged : m.Tagged,
+		Tagged : listTagged,
 		Description: m.Description,
 		Hashtags: parseHashTags(m.Hashtags),
 		Location : m.Location,
@@ -80,6 +81,15 @@ func (app *application) insertStoryPost(w http.ResponseWriter, req *http.Request
 	w.Write(idMarshaled)
 
 }
+func taggedUsersToPrimitiveObject(m dtos.StoryPostDTO) []primitive.ObjectID {
+	listTagged := []primitive.ObjectID{}
+	for _, tag := range m.Tagged {
+		primitiveTag, _ := primitive.ObjectIDFromHex(tag)
+
+		listTagged = append(listTagged, primitiveTag)
+	}
+	return listTagged
+}
 func parseHashTags(hashtags string) []string {
 	a := strings.Split(hashtags, "#")
 	a = a[1:]
@@ -101,7 +111,6 @@ func (app *application) deleteStoryPost(w http.ResponseWriter, r *http.Request) 
 
 
 func (app *application) getUsersStories(w http.ResponseWriter, r *http.Request)  {
-	fmt.Println("*********************")
 	vars := mux.Vars(r)
 	userId := vars["userId"]
 	userIdPrimitive, _ := primitive.ObjectIDFromHex(userId)
@@ -162,11 +171,12 @@ func toResponseStoryPost(storyPost models.StoryPost, image2 string) dtos.StoryPo
 	if err := jpeg.Encode(buffer, image, nil); err != nil {
 		log.Println("unable to encode image.")
 	}
+	taggedPeople :=getTaggedPeople(storyPost.Post.Tagged)
 
 	return dtos.StoryPostInfoDTO{
 		Id: storyPost.Id,
 		DateTime : strings.Split(storyPost.Post.DateTime.String(), " ")[0],
-		Tagged :  storyPost.Post.Tagged,
+		Tagged : taggedPeople,
 		Location : locationToString(storyPost.Post.Location),
 		Description : storyPost.Post.Description,
 		Hashtags : hashTagsToString(storyPost.Post.Hashtags),
@@ -174,7 +184,15 @@ func toResponseStoryPost(storyPost models.StoryPost, image2 string) dtos.StoryPo
 
 	}
 }
-
+func getTaggedPeople(tagged []primitive.ObjectID) string {
+	tagsString  := "Tagged: "
+	for _, tag := range tagged {
+		username :=getUserUsername(tag)
+		tagsString+=username
+		tagsString+=", "
+	}
+	return tagsString
+}
 func locationToString(location models.Location) string {
 	if location.Country=="" {
 		return ""
@@ -351,11 +369,12 @@ func toResponseAlbum(feedAlbum models.AlbumStory, imageList []string) dtos.Story
 		imagesBuffered= append(imagesBuffered, imageBuffered)
 	}
 
+	taggedPeople :=getTaggedPeople(feedAlbum.Post.Tagged)
 
 	return dtos.StoryAlbumInfoDTO{
 		Id: feedAlbum.Id,
 		DateTime : strings.Split(feedAlbum.Post.DateTime.String(), " ")[0],
-		Tagged :feedAlbum.Post.Tagged,
+		Tagged :taggedPeople,
 		Location : locationToString(feedAlbum.Post.Location),
 		Description : feedAlbum.Post.Description,
 		Hashtags : hashTagsToString(feedAlbum.Post.Hashtags),
