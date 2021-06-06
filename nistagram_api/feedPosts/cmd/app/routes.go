@@ -31,13 +31,17 @@ func (app *application) routes() *mux.Router {
 
 
 	r.HandleFunc("/albumFeed/", app.getAllAlbumFeeds).Methods("GET")
-	r.HandleFunc("/albumFeed/{id}", app.findAlbumFeedByID).Methods("GET")
 	r.HandleFunc("/albumFeed/", app.insertAlbumFeed).Methods("POST")
 	r.HandleFunc("/albumFeed/{id}", app.deleteAlbumFeed).Methods("DELETE")
 	r.HandleFunc("/api/feedAlbum/usersAlbums/{userIdd}", app.getUsersFeedAlbums).Methods("GET")
 	r.HandleFunc("/api/albumFeed/homePage/{userId}", app.getAlbumsForHomePage).Methods("GET")
 
-
+	r.HandleFunc("/api/albumFeed/like/", app.likeTheFeedAlbum).Methods("POST")
+	r.HandleFunc("/api/albumFeed/dislike/", app.dislikeTheFeedAlbum).Methods("POST")
+	r.HandleFunc("/api/albumFeed/comment/", app.commentTheFeedAlbum).Methods("POST")
+	r.HandleFunc("/api/albumFeed/likes/{postId}", app.getlikesFeedAlbum).Methods("GET")
+	r.HandleFunc("/api/albumFeed/dislikes/{postId}", app.getdislikesFeedAlbum).Methods("GET")
+	r.HandleFunc("/api/albumFeed/comments/{postId}", app.getcommentsFeedAlbum).Methods("GET")
 
 	r.HandleFunc("/api/image/{userIdd}/{feedId}", app.saveImage).Methods("POST")
 	r.HandleFunc("/api/feed/usersImages/{userIdd}", app.getUsersFeedPosts).Methods("GET")
