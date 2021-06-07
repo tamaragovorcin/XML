@@ -53,6 +53,12 @@ type Collection struct {
 	Posts []FeedPost `bson:"posts"`
 	Name string `bson:"name"`
 }
+type CollectionAlbum struct {
+	Id primitive.ObjectID `bson:"_id,omitempty"`
+	User primitive.ObjectID `bson:"user"`
+	Albums []AlbumFeed `bson:"albums"`
+	Name string `bson:"name"`
+}
 type SavedPost struct {
 	Id  primitive.ObjectID   `bson:"_id,omitempty"`
 	User primitive.ObjectID  `bson:"user"`

@@ -184,6 +184,35 @@ func (app *application) insertCollection(w http.ResponseWriter, req *http.Reques
 
 }
 
+
+func (app *application) insertCollectionAlbum(w http.ResponseWriter, req *http.Request) {
+	vars := mux.Vars(req)
+	userId := vars["userId"]
+	var m dtos.CollectionDTO
+	res1 := strings.HasPrefix(userId, "\"")
+	if res1 == true {
+		userId = userId[1:]
+		userId = userId[:len(userId)-1]
+	}
+
+	userIdPrimitive, _ := primitive.ObjectIDFromHex(userId)
+	err := json.NewDecoder(req.Body).Decode(&m)
+	if err != nil {
+		app.serverError(w, err)
+	}
+	var collection = models.CollectionAlbum{
+		User : userIdPrimitive,
+		Name : m.Name,
+		Albums : []models.AlbumFeed{},
+	}
+
+	insertResult, err := app.collectionAlbums.Insert(collection)
+	if err != nil {
+		app.serverError(w, err)
+	}
+	app.infoLog.Printf("New highlight have been created, id=%s", insertResult.InsertedID)
+
+}
 func (app *application) deleteCollection(w http.ResponseWriter, r *http.Request) {
 	// Get id from incoming url
 	vars := mux.Vars(r)
@@ -230,6 +259,60 @@ func (app *application) getUsersCollections(w http.ResponseWriter, r *http.Reque
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	w.Write(imagesMarshaled)
+}
+
+func (app *application) getUsersCollectionAlbums(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	userId := vars["userId"]
+	userIdPrimitive, _ := primitive.ObjectIDFromHex(userId)
+	allCollections, _ :=app.collectionAlbums.All()
+	allImages,_ := app.images.All()
+	usersHighlights,err :=findCollectionAlbumsByUserId(allCollections,userIdPrimitive)
+	if err != nil {
+		app.serverError(w, err)
+	}
+	highlightsResponse := []dtos.CollectionAlbumInfoDTO{}
+	for _, feed := range usersHighlights {
+
+		albums := feed.Albums
+		highlightsResponse = append(highlightsResponse, toResponseCollectionsAlbum(feed, albums,allImages))
+
+	}
+	imagesMarshaled, err := json.Marshal(highlightsResponse)
+	if err != nil {
+		app.serverError(w, err)
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	w.Write(imagesMarshaled)
+}
+
+func toResponseCollectionsAlbum(feed models.CollectionAlbum, albums []models.AlbumFeed, images []models.Image) dtos.CollectionAlbumInfoDTO {
+	storiesInfoDtos := []dtos.FeedAlbumInfoDTO{}
+	for _, album := range albums {
+		images2, _ := findAlbumByPostId(images,album.Id)
+		storyPostInfoDTO :=toResponseAlbum(album,images2)
+		storiesInfoDtos = append(storiesInfoDtos,storyPostInfoDTO)
+	}
+
+	return dtos.CollectionAlbumInfoDTO{
+		Id: feed.Id,
+		Albums: storiesInfoDtos,
+		Name : feed.Name,
+	}
+}
+
+
+
+func findCollectionAlbumsByUserId(collections []models.CollectionAlbum, idPrimitive primitive.ObjectID) ([]models.CollectionAlbum,error) {
+	collectionUser := []models.CollectionAlbum{}
+
+	for _, collection := range collections {
+		if	collection.User.String()==idPrimitive.String() {
+			collectionUser = append(collectionUser, collection)
+		}
+	}
+	return collectionUser, nil
 }
 func getImageByFeedPost(images []models.Image,highlightsId primitive.ObjectID) string {
 	storyImage := models.Image{}
@@ -303,6 +386,38 @@ func (app *application) insetPostInCollection(w http.ResponseWriter, r *http.Req
 	}
 
 	insertResult, err := app.collections.Update(collectionUpdate)
+	if err != nil {
+		app.serverError(w, err)
+	}
+	app.infoLog.Printf("New user have been created, id=%s", insertResult.UpsertedID)
+}
+
+func (app *application) insetAlbumInCollectionAlbum(w http.ResponseWriter, r *http.Request) {
+
+	var m dtos.CollectionPostDTO
+	err := json.NewDecoder(r.Body).Decode(&m)
+	if err != nil {
+		app.serverError(w, err)
+	}
+
+	collection, err := app.collectionAlbums.FindByID(m.CollectionId)
+	if collection == nil {
+		app.infoLog.Println("Collection not found")
+	}
+	album, err := app.albumFeeds.FindByID(m.PostId)
+	if album == nil {
+		app.infoLog.Println("Posts not found")
+	}
+
+
+	var collectionUpdate = models.CollectionAlbum{
+		Id: m.CollectionId,
+		User:collection.User,
+		Name : collection.Name,
+		Albums: append(collection.Albums, *album),
+	}
+
+	insertResult, err := app.collectionAlbums.Update(collectionUpdate)
 	if err != nil {
 		app.serverError(w, err)
 	}

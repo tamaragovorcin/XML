@@ -545,35 +545,80 @@ class HomePage extends React.Component {
 							ready={this.state.ready}
 							count = {this.state.count}
 						/>
+<div className="d-flex align-items-top">
+						<IconTabsHomePage
+							photos={this.state.photos}
+							handleLike={this.handleLike}
+							handleDislike={this.handleDislike}
+							handleWriteCommentModal={this.handleWriteCommentModal}
+							handleLikesModalOpen={this.handleLikesModalOpen}
+							handleDislikesModalOpen={this.handleDislikesModalOpen}
+							handleCommentsModalOpen={this.handleCommentsModalOpen}
+							albums={this.state.albums}
+							handleLikeAlbum={this.handleLikeAlbum}
+							handleDislikeAlbum={this.handleDislikeAlbum}
+							handleWriteCommentModalAlbum={this.handleWriteCommentModalAlbum}
+							handleLikesModalOpenAlbum={this.handleLikesModalOpenAlbum}
+							handleDislikesModalOpenAlbum={this.handleDislikesModalOpenAlbum}
+							handleCommentsModalOpenAlbum={this.handleCommentsModalOpenAlbum}
 
-						<WriteCommentModal
-							show={this.state.showWriteCommentModal}
-							onCloseModal={this.handleWriteCommentModalClose}
-							header="Leave your comment"
-							handleAddComment={this.handleAddComment}
-						/>
-						<WriteCommentAlbumModal
-							show={this.state.showWriteCommentModalAlbum}
-							onCloseModal={this.handleWriteCommentAlbumModalClose}
-							header="Leave your comment"
-							handleAddCommentAlbum={this.handleAddCommentAlbum}
-						/>
-						<AddPostToCollection
-							show={this.state.showAddPostToCollection}
-							onCloseModal={this.handleAddPostToCollectionModalClose}
-							header="Add post to collection"
-							addPostToCollection={this.addPostToCollection}
-							collections={this.state.collections}
+							handleOpenAddPostToCollectionModal={this.handleOpenAddPostToCollectionModal}
+							handleOpenAddAlbumToCollectionAlbumModal = {this.handleOpenAddAlbumToCollectionAlbumModal}
 
 						/>
-						<ModalDialog
-							show={this.state.openModal}
-							onCloseModal={this.handleModalClose}
-							header="Successful"
-							text={this.state.textSuccessfulModal}
-						/>
-
 					</div>
+
+				</div>
+
+				<div>
+                        
+                    <LikesModal
+					        show={this.state.showLikesModal}
+					        onCloseModal={this.handleLikesModalClose}
+					        header="People who liked"
+							peopleLikes = {this.state.peopleLikes}
+				    />
+                    <DislikesModal
+                         show={this.state.showDislikesModal}
+						 onCloseModal={this.handleDislikesModalClose}
+						 header="People who disliked"
+						 peopleDislikes = {this.state.peopleDislikes}
+				    />
+                    <CommentsModal
+                        show={this.state.showCommentsModal}
+						onCloseModal={this.handleCommentsModalClose}
+						header="Comments"
+						peopleComments = {this.state.peopleComments}
+                    />
+
+					<WriteCommentModal
+						show={this.state.showWriteCommentModal}
+						onCloseModal={this.handleWriteCommentModalClose}
+						header="Leave your comment"
+						handleAddComment={this.handleAddComment}
+					/>
+					<WriteCommentAlbumModal
+						show={this.state.showWriteCommentModalAlbum}
+						onCloseModal={this.handleWriteCommentAlbumModalClose}
+						header="Leave your comment"
+						handleAddCommentAlbum={this.handleAddCommentAlbum}
+					/>
+					<AddPostToCollection
+						show={this.state.showAddPostToCollection}
+						onCloseModal={this.handleAddPostToCollectionModalClose}
+						header="Add post to collection"
+						addPostToCollection={this.addPostToCollection}
+						collections={this.state.collections}
+
+					/>
+					<ModalDialog
+						show={this.state.openModal}
+						onCloseModal={this.handleModalClose}
+						header="Successful"
+						text={this.state.textSuccessfulModal}
+					/>
+
+				</div>
 			</React.Fragment>
 		);
 	}
