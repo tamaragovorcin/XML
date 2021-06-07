@@ -207,6 +207,7 @@ render(){
                                 <img
                                 className="img-fluid"
                                 src={`data:image/jpg;base64,${post.Media}`}
+                             
                                 width="100%"
                                 alt="description"
                                 />

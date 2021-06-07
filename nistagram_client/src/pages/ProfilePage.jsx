@@ -108,11 +108,15 @@ class ProfilePage extends React.Component {
 		});
 	};
 	onDrop(picture) {
+
+		this.setState({
+			pictures: [],
+		});
 		this.setState({
 			pictures: this.state.pictures.concat(picture),
 		});
 
-		let pomoc = picture.length
+		let pomoc = picture.length;
 		if(pomoc===0) {
 			this.setState({
 				noPicture: true,
@@ -298,6 +302,7 @@ class ProfilePage extends React.Component {
 		Axios.get(BASE_URL_FEED + "/api/feedAlbum/usersAlbums/"+id)
 			.then((res) => {
 				this.setState({ albums: res.data });
+				console.log("sfsfsf" + res.data)
 			})
 			.catch((err) => {
 				console.log(err);
@@ -327,6 +332,7 @@ class ProfilePage extends React.Component {
 	};
 	handlePostModalOpen = () => {
 		this.setState({ showImageModal: true });
+		this.setState({pictures: []})
 	};
 	getFollowing = ()=> {
 		let help = []
@@ -1421,6 +1427,7 @@ class ProfilePage extends React.Component {
 						hiddenOne = {this.state.hiddenOne}
 						noPicture = {this.state.noPicture}
 						onDrop = {this.onDrop}
+
 						addressInput = {this.addressInput}
 						onYmapsLoad = {this.onYmapsLoad}
 						handleAddFeedPost = {this.handleAddFeedPost}
