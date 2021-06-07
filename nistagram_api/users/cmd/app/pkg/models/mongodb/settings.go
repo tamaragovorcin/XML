@@ -63,3 +63,10 @@ func (m *SettingsModel) Delete(id string) (*mongo.DeleteResult, error) {
 	}
 	return m.C.DeleteOne(context.TODO(), bson.M{"_id": p})
 }
+
+func (m *SettingsModel) Update(settings models.Settings)  (*mongo.UpdateResult, error) {
+	return m.C.UpdateOne(context.TODO(),bson.M{"_id":settings.Id},bson.D{{"$set",bson.M{"user":settings.User,
+		"allowTags":settings.AllowTags,
+		"acceptMessages":settings.AcceptMessages,"muted":settings.Muted,
+		"blocked":settings.Blocked,"closeFriends":settings.CloseFriends}}})
+}

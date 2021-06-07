@@ -92,7 +92,6 @@ class Header extends React.Component {
 						</div>
 
 					</div>
-
 					<nav className="nav-menu d-none d-lg-block">
 						<ul>
 							<li>

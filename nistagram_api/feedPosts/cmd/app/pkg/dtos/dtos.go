@@ -40,6 +40,19 @@ type FeedPostInfoDTO struct {
 	Media       []byte
 	Username    string
 }
+type FeedPostInfoDTO1 struct {
+	Id          primitive.ObjectID
+	DateTime    string
+	Tagged      string
+	Location    string
+	Description string
+	Hashtags    string
+	Media       string
+	Username    string
+}
+type VideoDTO struct {
+	 Media string
+}
 
 type CollectionInfoDTO struct {
 	Id  primitive.ObjectID

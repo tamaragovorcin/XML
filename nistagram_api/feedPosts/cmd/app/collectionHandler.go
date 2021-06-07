@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"feedPosts/pkg/dtos"
 	"feedPosts/pkg/models"
-	"fmt"
 	"github.com/gorilla/mux"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"image"
@@ -98,8 +97,7 @@ func (app *application) addToFavourites(w http.ResponseWriter, req *http.Request
 		userId = userId[1:]
 		userId = userId[:len(userId)-1]
 	}
-	fmt.Println(res1)
-	fmt.Println(userId)
+
 	userIdPrimitive, _ := primitive.ObjectIDFromHex(userId)
 	feedIdPrimitive, _ := primitive.ObjectIDFromHex(feedId)
 	allCollections, _ :=app.collections.All()

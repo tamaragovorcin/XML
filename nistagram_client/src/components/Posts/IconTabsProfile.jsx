@@ -9,6 +9,7 @@ import "react-responsive-carousel/lib/styles/carousel.min.css"; // requires a lo
 import { Carousel } from 'react-responsive-carousel';
 import playerLogo from "../../static/coach.png";
 import logo from "../../static/collection.png";
+import ReactPlayer from 'react-player'
 
 class IconTabsProfile extends React.Component {
   constructor(props){
@@ -294,7 +295,9 @@ render(){
                             </td>
                             
                           </tr>
-                         
+                          <tr>
+                                    <button onClick={() =>  this.props.handleOpenAddStoryAlbumToHighlightModal(post.Id)} className="btn btn-outline-secondary btn-sm"><label >Add story album to highlight album</label></button>
+                            </tr>
                           <br/>
                           <br/>
                           <br/>
@@ -397,7 +400,101 @@ render(){
                     </div>
                 </div>
             </Tab>
-            <Tab eventKey={6} title="Saved posts">
+            <Tab eventKey={6} title="HighlightsAlbums">
+            <button onClick={() =>  this.props.handleAddHighLightAlbumClick()} className="btn btn-outline-secondary btn-sm" style={{ marginTop: "3rem",marginLeft:"2rem",marginBottom: "2rem" }}><label >Add new highlight album</label></button>
+                 <div className="container">
+                    <div className="container-fluid testimonial-group d-flex align-items-top">
+                        <div className="container-fluid scrollable" style={{ marginRight: "10rem" , marginBottom:"5rem",marginTop:"5rem"}}>
+                          <table className="table-responsive" style={{ width: "100%" }}>
+                            <tbody>
+
+                              <tr >
+                                {this.props.highlightsAlbums.map((high) => (
+                                  <td id={high.Id} key={high.Id} style={{width:"60em", marginLeft:"10em"}}>
+                                    <tr width="100em">
+                                      <button onClick={() =>  this.props.seeStoriesInHighlightAlbum(high.Albums)} className="btn btn-outline-secondary btn-sm" style={{ marginTop: "3rem",marginLeft:"2rem",marginBottom: "3rem" }}>
+
+                                        <img
+                                          className="img-fluid"
+                                          src={playerLogo}
+                                          style ={{borderRadius:"50%",margin:"2%"}}
+                                          width="60em"
+                                          alt="description"
+                                        />
+                                        </button>
+                                    </tr>
+                                    <tr>
+                                      <label style={{marginRight:"15px"}}>{high.Name}</label>
+                                    </tr>
+                                  </td>
+                                  
+                                ))}
+                              </tr>
+
+
+                            </tbody>
+                          </table>
+                        </div>
+                  </div>
+                </div>
+                <div className="d-flex align-items-top" hidden={this.props.hiddenStoriesForHighlightalbum}>
+                    <div className="container-fluid">
+                    
+                    <table className="table">
+                        <tbody>
+                        {this.props.storiesForHightlihtAlbum.map((post) => (
+                            
+                            <tr id={post.id} key={post.id}>
+                          
+                            <tr  style={{ width: "100%"}}>
+                              <td colSpan="3">
+                               <Carousel dynamicHeight={true}>
+                                  {post.Media.map(img => (<div>
+                                      <img
+                                      className="img-fluid"
+                                      src={`data:image/jpg;base64,${img}`}
+                                      width="100%"
+                                      alt="description"
+                                      />		
+                                  </div>))}
+                                </Carousel>
+                              </td>
+                            </tr>
+                            <tr>
+                              <td colSpan="3">
+                                  {post.Location}
+                              </td>
+                            </tr>
+                            <tr>
+                              <td colSpan="3">
+                                  {post.Description}
+                              </td>
+                            </tr>
+                            <tr>
+                              <td colSpan="3">
+                                  {post.Hashtags}
+                              </td>
+                            </tr>
+                            <tr>
+                              <td colSpan="3">
+                                  {post.Tagged}
+                              </td>
+                              
+                            </tr>
+                           
+                            <br/>
+                            <br/>
+                            <br/>
+                          </tr>
+                          
+                        ))}
+
+                        </tbody>
+                    </table>
+                    </div>
+                </div>
+            </Tab>
+            <Tab eventKey={7} title="Saved posts">
             <button onClick={() =>  this.props.handleAddCollectionClick()} className="btn btn-outline-secondary btn-sm" style={{ marginTop: "3rem",marginLeft:"2rem",marginBottom: "2rem" }}><label >Add new collection</label></button>
                  <div className="container">
                     <div className="container-fluid testimonial-group d-flex align-items-top">
@@ -487,6 +584,27 @@ render(){
                     </div>
                 </div>
 				
+            </Tab>
+            <Tab eventKey={7} title="Videos">
+                <div className="container-fluid">
+                  
+                                      
+                          
+                            VIDEOO
+
+{/* 
+                            <video width="320" height="240" controls autoPlay loop muted>
+              <source src="http://localhost:4001/api/feed/usersVideos/1" type ="video/mp4"></source>
+                          </video>
+                          */}
+                         
+                         
+                          <br/>
+                          <br/>
+                          <br/>
+                        
+                
+                </div>
             </Tab>
         </Tabs>
     );

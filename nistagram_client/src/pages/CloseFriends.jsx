@@ -6,15 +6,15 @@ import { BASE_URL_USER } from "../constants.js";
 import PharmacyLogo from "../static/coach.png";
 import "../App.js";
 import { Redirect } from "react-router-dom";
+import { BASE_URL_USER_INTERACTION } from "../constants.js";
 
 import ModalDialog from "../components/ModalDialog";
 class CloseFriends extends Component {
 	state = {
-        users: [],
-        options: [],
-        myCloseFriends: [],
-
-
+		closeFriends : [],
+		notCloseFriends : [],
+		openModal : false,
+		textSuccessfulModal : ""
 	};
 
 	hasRole = (reqRole) => {
@@ -29,41 +29,23 @@ class CloseFriends extends Component {
         }
         return false;
     };
-
-
-
 	componentDidMount() {
-		
-        let help = []
-		Axios.get(BASE_URL_USER + "/api/")
-			.then((res) => {
-
-				console.log(res.data)
-				this.setState({ users: res.data });
-
-				res.data.forEach((user) => {
-					let optionDTO = { id: user.Id, label: user.ProfileInformation.Username, value: user.Id }
-					help.push(optionDTO)
-				});
-
-				this.setState({ options: help });
-				console.log(help)
-			})
-			.catch((err) => {
-
-				console.log(err)
-			});
-
-
-
-
-
-
-
+		this.getCloseFriendsDTO()
 	};
 
+	getCloseFriendsDTO = ()=> {
+		let id = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length-1);
+		const dto = {id: id}
+		Axios.post(BASE_URL_USER_INTERACTION + "/api/user/followingCloseFriends", dto)
+			.then((res) => {
+				this.setState({ closeFriends: res.data.CloseFriends });
+				this.setState({ notCloseFriends: res.data.NotCloseFriends });
 
-	
+			})
+			.catch((err) => {
+				console.log(err)
+			});
+	}	
 
 	hangleFormToogle = () => {
 		this.setState({ formShowed: !this.state.formShowed });
@@ -76,11 +58,12 @@ class CloseFriends extends Component {
             IdLogged: userid,
             IdClose: id 
         }
-        Axios.get(BASE_URL_USER + "/api/addToCloseFriends/" + CloseFriendsDTO)
+        Axios.post(BASE_URL_USER + "/api/user/addToCloseFriends/", CloseFriendsDTO)
         .then((res) => {
+			this.setState({ openModal: true });
+			this.setState({ textSuccessfulModal: "You have successfully added user to close friends." });
 
-            console.log(res.data)
-			window.location.reload();
+			this.getCloseFriendsDTO()
         })
         .catch((err) => {
 
@@ -97,23 +80,22 @@ class CloseFriends extends Component {
             IdLogged: userid,
             IdClose: id 
         }
-        Axios.get(BASE_URL_USER + "/api/removeFromCloseFriends/" + CloseFriendsDTO)
+        Axios.post(BASE_URL_USER + "/api/user/removeFromCloseFriends/", CloseFriendsDTO)
         .then((res) => {
 
-            console.log(res.data)
-            window.location.reload();
-        })
+			this.setState({ openModal: true });
+			this.setState({ textSuccessfulModal: "You have successfully removed user from close friends." });
+
+			this.getCloseFriendsDTO()
+		})
         .catch((err) => {
 
             console.log(err)
         });
 
 	};
-
-
-
-	handleOrderModalClose = () => {
-		this.setState({ showOrderModal: false });
+	handleModalClose = () => {
+		this.setState({ openModal: false });
 	};
 
 
@@ -131,10 +113,10 @@ class CloseFriends extends Component {
 					
 					<table className="table table-hover" style={{ width: "100%", marginTop: "3rem" }}>
 						<tbody>
-							{this.state.users.map((user) => (
+							{this.state.notCloseFriends.map((user) => (
 								<tr
-									id={user.id}
-									key={user.id}
+									id={user.Id}
+									key={user.Id}
 									style={{ cursor: "pointer" }}
 							
 								>
@@ -143,7 +125,7 @@ class CloseFriends extends Component {
 									</td>
 									<td>
 										<div>
-											{user.ProfileInformation.Username}
+											{user.Username}
 										</div>
 										
 
@@ -176,10 +158,10 @@ class CloseFriends extends Component {
 					
 					<table className="table table-hover" style={{ width: "100%", marginTop: "3rem" }}>
 						<tbody>
-							{this.state.users.map((user) => (
+							{this.state.closeFriends.map((user) => (
 								<tr
-									id={user.id}
-									key={user.id}
+									id={user.Id}
+									key={user.Id}
 									style={{ cursor: "pointer" }}
 							
 								>
@@ -188,7 +170,7 @@ class CloseFriends extends Component {
 									</td>
 									<td>
 										<div>
-											{user.ProfileInformation.Username}
+											{user.Username}
 										</div>
 										
 
@@ -199,7 +181,7 @@ class CloseFriends extends Component {
 												marginLeft: "40%",
 												width: "20%",
 											}}
-											onClick={(e)=>this.handleRemoveFromCloseFriends(e,user.id)}
+											onClick={(e)=>this.handleRemoveFromCloseFriends(e,user.Id)}
 											className="btn btn-primary btn-xl"
 											id="sendMessageButton"
 											type="button"
@@ -215,9 +197,9 @@ class CloseFriends extends Component {
 				</div>
 				<ModalDialog
                     show={this.state.openModal}
-                    onCloseModal={this.handleModalClose}
-                    header="Success"
-                    text="You have successfully removed the item."
+					onCloseModal={this.handleModalClose}
+					header="Successful"
+					text={this.state.textSuccessfulModal}
                 />
 			
 			</React.Fragment>
