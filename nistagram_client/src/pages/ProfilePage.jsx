@@ -1064,7 +1064,7 @@ class ProfilePage extends React.Component {
 			this.setState({ showAddHighLightAlbumModal: false });
 
 			let id = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length-1)
-			this.handleGetHighlights(id);
+			this.handleGetHighlightAlbums(id);
 			this.setState({ textSuccessfulModal: "You have successfully added story album to highlight." });
 			this.setState({ openModal: true });
 			this.setState({ showAddStoryAlbumToHighLightModal: false });
@@ -1101,6 +1101,7 @@ class ProfilePage extends React.Component {
 	seeStoriesInHighlightAlbum = (stories)=> {
 		this.setState({ hiddenStoriesForHighlightAlbum: false });
 		this.setState({storiesForHightlihtAlbum : stories})
+		console.log(stories)
 	}
 	seePostsInCollection = (posts)=> {
 		this.setState({ hiddenStoriesForCollection: false });
@@ -1464,7 +1465,7 @@ class ProfilePage extends React.Component {
 						stories = {this.state.stories}
 						handleOpenAddStoryToHighlightModal = {this.handleOpenAddStoryToHighlightModal}
 						handleOpenAddStoryAlbumToHighlightModal = {this.handleOpenAddStoryAlbumToHighlightModal}
-
+						
 
 						storyAlbums = {this.state.storyAlbums}
 
@@ -1479,7 +1480,7 @@ class ProfilePage extends React.Component {
 						seeStoriesInHighlightAlbum = {this.seeStoriesInHighlightAlbum}
 						storiesForHightlihtAlbum= {this.state.storiesForHightlihtAlbum}
 						hiddenStoriesForHighlightalbum = {this.state.hiddenStoriesForHighlightAlbum}
-
+						
 						handleAddCollectionClick = {this.handleAddCollectionClick}
 						collections = {this.state.collections}
 						seePostsInCollection = {this.seePostsInCollection}
