@@ -286,7 +286,10 @@ class HomePage extends React.Component {
 					let list = [];
 					let st = [];
 					let luna = [];
+					
+					
 					res.data.forEach(story => {
+						alert(story.CloseFriends)
 						let luna = [];
 						story.Stories.forEach(s => {
 
@@ -471,7 +474,7 @@ class HomePage extends React.Component {
 									<thead></thead>
 									<tbody>
 
-
+									<td><p> STORIES </p>  </td>
 										{this.state.ss.map((post) => (
 											<td  id="td" style={{ width: "15em", height: "15em" ,marginLeft: "8em" }}>
 												<tr >
@@ -493,7 +496,7 @@ class HomePage extends React.Component {
 
 											</td>
 										))}
-
+<td><p> ALBUM STORIES </p> </td>
 
 
 									</tbody>
