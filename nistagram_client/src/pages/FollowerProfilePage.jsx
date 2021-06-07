@@ -16,6 +16,7 @@ import AddPostToCollection from "../components/Posts/AddPostToCollection";
 import WriteCommentAlbumModal from "../components/Posts/WriteCommentAlbumModal"
 import { Lock } from "@material-ui/icons";
 import { Icon } from "@material-ui/core";
+import { isCompositeComponentWithType } from "react-dom/test-utils";
 class FollowerProfilePage extends React.Component {
 	
 	state = {
@@ -73,7 +74,18 @@ class FollowerProfilePage extends React.Component {
 		sentFollowRequest : false,
 		privateUser : false
 	}
+	hasRole = (reqRole) => {
+		let roles = JSON.parse(localStorage.getItem("keyRole"));
 
+		if (roles === null) return false;
+
+		if (reqRole === "*") return true;
+
+		for (let role of roles) {
+			if (role === reqRole) return true;
+		}
+		return false;
+	};
 	fetchData = (id) => {
 		this.setState({
 			userId: id,
@@ -117,11 +129,36 @@ class FollowerProfilePage extends React.Component {
 
 	}
 	handleSetAllowPagePreview = (id)=> {
-		let loggedId = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length-1)
-		const followReguestDTO = { follower: loggedId, following : id};
+		console.log(this.hasRole("*"))
+		if(!this.hasRole("*")) {
+			console.log("fggggggggggggggggggggggggggg")
 
-		Axios.post(BASE_URL_USER_INTERACTION + "/api/checkInteraction",followReguestDTO)
-			.then((res) => {
+			this.setState({ followingThisUser: false});
+			this.setState({ sentFollowRequest: false});
+			this.setState({ ableToFollowThisUser: false});
+			Axios.get(BASE_URL_USER + "/api/user/privacy/"+id)
+			.then((res2) => {
+				this.setState({ privateUser: res2.data });
+				if( res2.data==="private") {
+					this.setState({ allowPagePreview: false });
+				}
+				else {
+					this.setState({ allowPagePreview: true });
+				}	
+			})
+			.catch((err) => {
+				console.log(err);
+			});
+		
+		}
+		else {
+			console.log("fggggggg11111111111111111111111111111111111111111111111111111111111gggggggggggggggggggg")
+
+			let loggedId = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length-1)
+			const followReguestDTO = { follower: loggedId, following : id};
+
+			Axios.post(BASE_URL_USER_INTERACTION + "/api/checkInteraction",followReguestDTO)
+				.then((res) => {
 				
 				this.setState({ followingThisUser: res.data });
 				Axios.get(BASE_URL_USER + "/api/user/privacy/"+id)
@@ -163,7 +200,7 @@ class FollowerProfilePage extends React.Component {
 			.catch((err) => {
 				console.log(err);
 			});
-		
+		}
 	}
 	handleAddCollectionClick = () => {
 		this.setState({ showAddCollectionModal: true });

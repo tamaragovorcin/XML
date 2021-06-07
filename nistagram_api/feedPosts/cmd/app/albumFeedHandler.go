@@ -463,6 +463,7 @@ func (app *application) getFeedAlbumsByLocation(w http.ResponseWriter, r *http.R
 		if err != nil {
 			app.serverError(w, err)
 		}
+
 		userUsername :=getUserUsername(album.Post.User)
 
 		feedAlbumsResponse = append(feedAlbumsResponse, toResponseAlbumHomePage(album, images,userUsername))
@@ -513,9 +514,12 @@ func (app *application) getFeedAlbumsByTags(w http.ResponseWriter, r *http.Reque
 func findFeedAlbumsByTags(albums []models.AlbumFeed, idPrimitive primitive.ObjectID) []models.AlbumFeed {
 	listAlbums:=[]models.AlbumFeed{}
 	for _, album := range albums {
-		for _, tag := range album.Post.Tagged {
-			if tag.String()==idPrimitive.String() {
-				listAlbums = append(listAlbums, album)
+		if userIsPublic(album.Post.User)==true {
+
+			for _, tag := range album.Post.Tagged {
+				if tag.String() == idPrimitive.String() {
+					listAlbums = append(listAlbums, album)
+				}
 			}
 		}
 	}
