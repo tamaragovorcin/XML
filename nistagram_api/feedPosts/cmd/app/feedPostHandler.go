@@ -316,9 +316,12 @@ func (app *application) getFeedPostByTags(w http.ResponseWriter, r *http.Request
 func findFeedPostsByTags(albums []models.FeedPost, idPrimitive primitive.ObjectID) []models.FeedPost {
 	listAlbums:=[]models.FeedPost{}
 	for _, album := range albums {
-		for _, tag := range album.Post.Tagged {
-			if tag.String()==idPrimitive.String() {
-				listAlbums = append(listAlbums, album)
+		if userIsPublic(album.Post.User)==true {
+
+			for _, tag := range album.Post.Tagged {
+				if tag.String() == idPrimitive.String() {
+					listAlbums = append(listAlbums, album)
+				}
 			}
 		}
 	}
