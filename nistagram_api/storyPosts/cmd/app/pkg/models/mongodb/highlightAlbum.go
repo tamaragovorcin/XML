@@ -64,5 +64,5 @@ func (m *HighlightAlbumModel) Delete(id string) (*mongo.DeleteResult, error) {
 
 func (m *HighlightAlbumModel) Update(highlight models.HighLightAlbum) (*mongo.UpdateResult, error) {
 	return m.C.UpdateOne(context.TODO(),bson.M{"_id":highlight.Id},bson.D{{"$set",bson.M{"name":highlight.Name,"user":highlight.User,
-		"stories":highlight.Stories}}})
+		"albums":highlight.Albums}}})
 }

@@ -29,13 +29,15 @@ func (app *application) routes() *mux.Router {
 	r.HandleFunc("/api/highlight/user/{userId}", app.getUsersHiglights).Methods("GET")
 	r.HandleFunc("/api/highlight/addStory/", app.insetStoryInHighlight).Methods("POST")
 
+	r.HandleFunc("/api/highlight/album/{userId}", app.insertHighlightAlbum).Methods("POST")
+	r.HandleFunc("/api/highlight/user/album/{userId}", app.getUsersHiglightAlbums).Methods("GET")
+
 
 	r.HandleFunc("/api/", app.getAllStoryPosts).Methods("GET")
 	r.HandleFunc("/api/", app.insertStoryPost).Methods("POST")
 	r.HandleFunc("/api/{id}", app.deletePost).Methods("DELETE")
 
 	r.HandleFunc("/api/albumStory/", app.getAllStory).Methods("GET")
-	r.HandleFunc("/api/albumStory/{id}", app.findAlbumStoryByID).Methods("GET")
 	r.HandleFunc("/api/albumStory/", app.insertAlbumStory).Methods("POST")
 	r.HandleFunc("/api/albumStory/{id}", app.deleteStory).Methods("DELETE")
 	r.HandleFunc("/api/highlight/addStoryAlbum/", app.insetStoryAlbumInHighlight).Methods("POST")

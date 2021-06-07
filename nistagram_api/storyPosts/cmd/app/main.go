@@ -96,6 +96,9 @@ func main() {
 		images: &mongodb.ImageModel{
 			C: client.Database(*mongoDatabse).Collection("images"),
 		},
+		highlightsAlbum: &mongodb.HighlightAlbumModel{
+			C: client.Database(*mongoDatabse).Collection("highlightsAlbum"),
+		},
 	}
 
 	serverURI := fmt.Sprintf("%s:%d", *serverAddr, *serverPort)
