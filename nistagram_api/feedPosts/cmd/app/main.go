@@ -26,6 +26,7 @@ type application struct {
 	images   *mongodb.ImageModel
 	savedPosts *mongodb.SavedPostsModel
 	videos   *mongodb.VideoModel
+	collectionAlbums *mongodb.CollectionAlbumModel
 }
 
 func main() {
@@ -105,6 +106,9 @@ func main() {
 		},
 		videos: &mongodb.VideoModel{
 			C: client.Database(*mongoDatabse).Collection("videos"),
+		},
+		collectionAlbums: &mongodb.CollectionAlbumModel{
+			C: client.Database(*mongoDatabse).Collection("collectionAlbums"),
 		},
 	}
 
