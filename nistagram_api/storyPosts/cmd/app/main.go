@@ -23,6 +23,8 @@ type application struct {
 	posts       *mongodb.PostsModel
 	locations   *mongodb.LocationModel
 	images   *mongodb.ImageModel
+	highlightsAlbum   *mongodb.HighlightAlbumModel
+
 
 }
 

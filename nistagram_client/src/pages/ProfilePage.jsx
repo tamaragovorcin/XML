@@ -93,7 +93,10 @@ class ProfilePage extends React.Component {
 		followingUsers : [],
 		storyAlbums : [],
 		showTagsModal : false,
-		taggedOnPost : []
+		taggedOnPost : [],
+		highlightsAlbum : [],
+		showAddStoryAlbumToHighLightModal : false,
+		storiesAlbumsForHightliht : [],
 	}
 	
 	handleAddCollectionClick = () => {
@@ -955,8 +958,12 @@ class ProfilePage extends React.Component {
 		}
 	}
 	handleOpenAddStoryToHighlightModal = (storyId)=> {
-		this.setState({ showAddStoryToHighLightModal: true });
+		this.setState({ showAddStoryAlbumToHighLightModal: true });
 		this.setState({ selectedStoryId: storyId });
+	}
+	handleOpenAddStoryAlbumToHighlightModal = (highlightId)=> {
+		this.setState({ showAddStoryAlbumToHighLightModal: true });
+		this.setState({ selectedStoryId: highlightId });
 	}
 	handleOpenAddPostToCollectionModal = (postId)=> {
 		this.setState({ showAddPostToCollection: true });
@@ -964,6 +971,9 @@ class ProfilePage extends React.Component {
 	}
 	handleAddStoryToHighlightModalClose = ()=> {
 		this.setState({ showAddStoryToHighLightModal: false });
+	}
+	handleAddStoryAlbumToHighlightModalClose = ()=> {
+		this.setState({ showAddStoryAlbumToHighLightModal: false });
 	}
 	handleAddPostToCollectionModalClose = ()=> {
 		this.setState({ showAddPostToCollection: false });
@@ -982,6 +992,26 @@ class ProfilePage extends React.Component {
 			this.setState({ textSuccessfulModal: "You have successfully added story to highlight." });
 			this.setState({ openModal: true });
 			this.setState({ showAddStoryToHighLightModal: false });
+
+		})
+		.catch((err) => {
+			console.log(err);
+		});
+	}
+	addStoryAlbumToHighlight = (highlightId) => {
+		let storyHighlightDTO = {
+			StoryId : this.state.selectedStoryId,
+			HighlightId : highlightId
+		}
+		Axios.post(BASE_URL_STORY + "/api/highlight/addStoryAlbum/", storyHighlightDTO, {
+		}).then((res) => {
+			
+			this.setState({ showAddHighLightModal: false });
+			let id = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length-1)
+			this.handleGetHighlights(id);
+			this.setState({ textSuccessfulModal: "You have successfully added story album to highlight." });
+			this.setState({ openModal: true });
+			this.setState({ showAddStoryAlbumToHighLightModal: false });
 
 		})
 		.catch((err) => {
@@ -1356,6 +1386,7 @@ class ProfilePage extends React.Component {
 
 						stories = {this.state.stories}
 						handleOpenAddStoryToHighlightModal = {this.handleOpenAddStoryToHighlightModal}
+						handleOpenAddStoryAlbumToHighlightModal = {this.handleOpenAddStoryAlbumHighlightModal}
 
 
 						storyAlbums = {this.state.storyAlbums}
@@ -1466,6 +1497,15 @@ class ProfilePage extends React.Component {
 						  header="Add story to highlight"
 						  addStoryToHighlight={this.addStoryToHighlight}
 						  highlights = {this.state.highlights}
+					  />
+					  <AddStoryAlbumToHighlightModal
+                          
+					  
+						  show={this.state.showAddStoryAlbumToHighLightModal}
+						  onCloseModal={this.handleAddStoryAlbumToHighlightModalClose}
+						  header="Add story album to highlight"
+						  addStoryAlbumToHighlight={this.addStoryAlbumToHighlight}
+						  highlightsAlbum = {this.state.highlightsAlbum}
 					  />
 					  <AddPostToCollection
                           
