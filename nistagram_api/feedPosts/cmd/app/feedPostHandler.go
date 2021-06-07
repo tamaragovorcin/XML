@@ -7,8 +7,6 @@ import (
 	"feedPosts/pkg/models"
 	"github.com/gorilla/mux"
 	"go.mongodb.org/mongo-driver/bson/primitive"
-	"image"
-	"image/jpeg"
 	"io"
 	"io/ioutil"
 	"log"
@@ -321,7 +319,7 @@ func (app *application) getFeedPostByTags(w http.ResponseWriter, r *http.Request
 	allImages,_ := app.images.All()
 	tagsFeedAlbums =findFeedPostsByTags(tagsFeedAlbums,userIdPrimitive)
 
-	feedPostResponse := []dtos.FeedPostInfoDTO{}
+	feedPostResponse := []dtos.FeedPostInfoDTO1{}
 	for _, feedPost := range tagsFeedAlbums {
 
 		images, err := findImageByPostId(allImages,feedPost.Id)
