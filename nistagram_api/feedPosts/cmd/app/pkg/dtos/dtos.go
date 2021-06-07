@@ -57,7 +57,7 @@ type MediaDTO struct {
 
 type CollectionInfoDTO struct {
 	Id  primitive.ObjectID
-	Posts []FeedPostInfoDTO
+	Posts []FeedPostInfoDTO1
 	Name string
 }
 type CollectionAlbumInfoDTO struct {

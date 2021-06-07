@@ -475,7 +475,7 @@ func (app *application) getPhototsForHomePage(w http.ResponseWriter, r *http.Req
 	if err != nil {
 		app.serverError(w, err)
 	}
-	feedPostResponse := []dtos.FeedPostInfoDTO{}
+	feedPostResponse := []dtos.FeedPostInfoDTO1{}
 	for _, feedPost := range postsForHomePage {
 		if iAmFollowingThisUser(userId,feedPost.Post.User.Hex()) {
 			images, err := findImageByPostId(allImages,feedPost.Id)
@@ -555,25 +555,21 @@ func findFeedPostsForHomePage(posts []models.FeedPost, idPrimitive primitive.Obj
 	//dodati uslov za pracenje!!!!!!!!!!!
 	return feedPostUser, nil
 }
-func toResponseHomePage(feedPost models.FeedPost, image2 string, username string) dtos.FeedPostInfoDTO {
-	f, _ := os.Open(image2)
-	defer f.Close()
-	image, _, _ := image.Decode(f)
-	buffer := new(bytes.Buffer)
-	if err := jpeg.Encode(buffer, image, nil); err != nil {
-		log.Println("unable to encode image.")
-	}
+func toResponseHomePage(feedPost models.FeedPost, image2 string, username string) dtos.FeedPostInfoDTO1 {
 	taggedPeople :=getTaggedPeople(feedPost.Post.Tagged)
-
-	return dtos.FeedPostInfoDTO{
+	file1, _:=os.Open(image2)
+	FileHeader:=make([]byte,512)
+	file1.Read(FileHeader)
+	ContentType:= http.DetectContentType(FileHeader)
+	return dtos.FeedPostInfoDTO1{
 		Id: feedPost.Id,
 		DateTime : strings.Split(feedPost.Post.DateTime.String(), " ")[0],
 		Tagged :taggedPeople,
 		Location : locationToString(feedPost.Post.Location),
 		Description : feedPost.Post.Description,
 		Hashtags : hashTagsToString(feedPost.Post.Hashtags),
-		Media : buffer.Bytes(),
 		Username : username,
+		ContentType: ContentType,
 	}
 }
 

@@ -35,12 +35,9 @@ class AddVideoPostModal extends Component {
                         <form onSubmit={this.props.handleSubmit}>
                             <label>
                                 Upload a file: <br /><br />
-                                <input type="file" name="file" onChange={this.props.onChangeHandler} />
+                                <input type="file" className="btn btn-outline-secondary btn-sm" name="file" onChange={this.props.onChangeHandler} />
                             </label>
                             <br /><br />
-                            <button type="submit">
-                                Upload
-                            </button>
                         </form >
 					<div className="row section-design"  style={{ border:"1 solid black", }}>
 						<div className="col-lg-8 mx-auto">

@@ -28,6 +28,16 @@ type StoryPostInfoDTO struct {
 	Type 		string
 	ContentType string
 }
+type StoryPostInfoDTO1 struct {
+	Id          primitive.ObjectID
+	DateTime    string
+	Tagged      string
+	Location    string
+	Description string
+	Hashtags    string
+	Type 		string
+	ContentType string
+}
 type HighlightDTO struct {
 	Name string
 }

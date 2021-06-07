@@ -3,7 +3,6 @@ package main
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
 	"github.com/gorilla/mux"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"image"
@@ -114,7 +113,6 @@ func (app *application) deleteStoryPost(w http.ResponseWriter, r *http.Request) 
 
 
 func (app *application) getUsersStories(w http.ResponseWriter, r *http.Request)  {
-	fmt.Println("POGODIO JE METODU")
 	vars := mux.Vars(r)
 	userId := vars["userId"]
 	userIdPrimitive, _ := primitive.ObjectIDFromHex(userId)
@@ -182,8 +180,7 @@ func(app *application) GetFileTypeByPostId(feedId primitive.ObjectID) string {
 	FileHeader:=make([]byte,512)
 	file.Read(FileHeader)
 	ContentType:= http.DetectContentType(FileHeader)
-	fmt.Println("CONTENT TYPE")
-	fmt.Println(ContentType)
+
 
 	return ContentType
 
@@ -211,14 +208,12 @@ func findStoriesByUserId(stories []models.StoryPost, idPrimitive primitive.Objec
 	return storyPostsUser, nil
 }
 func toResponseStoryPost(storyPost models.StoryPost, image2 string) dtos.StoryPostInfoDTO {
-	f, _ := os.Open(image2)
-	defer f.Close()
-	image, _, _ := image.Decode(f)
-	buffer := new(bytes.Buffer)
-	if err := jpeg.Encode(buffer, image, nil); err != nil {
-		log.Println("unable to encode image.")
-	}
 	taggedPeople :=getTaggedPeople(storyPost.Post.Tagged)
+
+	file1, _:=os.Open(image2)
+	FileHeader:=make([]byte,512)
+	file1.Read(FileHeader)
+	ContentType:= http.DetectContentType(FileHeader)
 
 	return dtos.StoryPostInfoDTO{
 		Id: storyPost.Id,
@@ -227,7 +222,7 @@ func toResponseStoryPost(storyPost models.StoryPost, image2 string) dtos.StoryPo
 		Location : locationToString(storyPost.Post.Location),
 		Description : storyPost.Post.Description,
 		Hashtags : hashTagsToString(storyPost.Post.Hashtags),
-		Media:  buffer.Bytes(),
+		ContentType: ContentType,
 	}
 }
 func toResponseStoryPost1(storyPost models.StoryPost, contentType string) dtos.StoryPostInfoDTO {

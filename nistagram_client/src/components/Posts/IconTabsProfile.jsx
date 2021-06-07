@@ -212,15 +212,17 @@ render(){
                             <tr  style={{ width: "100%"}}>
                                 <td colSpan="3">
                                 {post.ContentType === "image/jpeg" ? (
-         <img
-         className="img-fluid"
-         src={"http://localhost:4004/api/story/file/"+post.Id}
-         width="100%"
-         alt="description"
-       />
-      ) : (
+                                                  <img
+                                                        className="img-fluid"
+                                                        src={"http://localhost:4004/api/story/file/"+post.Id}
+                                                        width="100%"
+                                                        alt="description"
+                                                    />
+                                                 ) : (
         
-        <video width="100%"  controls autoPlay loop muted><source src={"http://localhost:4004/api/story/file/"+post.Id} type ="video/mp4"></source></video>
+                                          <video width="100%"  controls autoPlay loop muted>
+                                            <source src={"http://localhost:4004/api/story/file/"+post.Id} type ="video/mp4"></source>
+                                            </video>
         
       )}
                                 </td>
@@ -370,17 +372,15 @@ render(){
                             <tr  style={{ width: "100%"}}>
                                 <td colSpan="3">
                                 {post.ContentType === "image/jpeg" ? (
-         <img
-         className="img-fluid"
-         src={"http://localhost:4004/api/story/file/"+post.Id}
-         width="100%"
-         alt="description"
-       />
-      ) : (
-        
-        <video width="100%"  controls autoPlay loop muted><source src={"http://localhost:4004/api/story/file/"+post.Id} type ="video/mp4"></source></video>
-        
-      )}
+                                    <img
+                                    className="img-fluid"
+                                    src={"http://localhost:4004/api/story/file/"+post.Id}
+                                    width="100%"
+                                    alt="description"
+                                  /> ) : (
+                                <video width="100%"  controls autoPlay loop muted>
+                                  <source src={"http://localhost:4004/api/story/file/"+post.Id} type ="video/mp4"></source>
+                                </video>)}
                                 </td>
                             </tr>
                             <tr>
@@ -558,12 +558,16 @@ render(){
                             
                             <tr  style={{ width: "100%"}}>
                                 <td colSpan="3">
-                                <img
-                                className="img-fluid"
-                                src={`data:image/jpg;base64,${post.Media}`}
-                                width="100%"
-                                alt="description"
-                                />
+                                {post.ContentType === "image/jpeg" ? (
+                                    <img
+                                    className="img-fluid"
+                                    src={"http://localhost:4001/api/feed/file/"+post.Id}
+                                    width="100%"
+                                    alt="description"
+                                  /> ) : (
+                                <video width="100%"  controls autoPlay loop muted>
+                                  <source src={"http://localhost:4001/api/feed/file/"+post.Id} type ="video/mp4"></source>
+                                </video>)}
                                 </td>
                             </tr>
                             <tr>
@@ -717,27 +721,7 @@ render(){
                 </div>
 				
             </Tab>
-            <Tab eventKey={9} title="Videos">
-                <div className="container-fluid">
-                  
-                                      
-                          
-                            VIDEOO
-
-{/* 
-                            <video width="320" height="240" controls autoPlay loop muted>
-              <source src="http://localhost:4001/api/feed/usersVideos/1" type ="video/mp4"></source>
-                          </video>
-                          */}
-                         
-                         
-                          <br/>
-                          <br/>
-                          <br/>
-                        
-                
-                </div>
-            </Tab>
+           
         </Tabs>
     );
 
