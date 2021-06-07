@@ -289,7 +289,7 @@ class HomePage extends React.Component {
 					
 					
 					res.data.forEach(story => {
-						alert(story.CloseFriends)
+						//alert(story.CloseFriends)
 						let luna = [];
 						story.Stories.forEach(s => {
 
