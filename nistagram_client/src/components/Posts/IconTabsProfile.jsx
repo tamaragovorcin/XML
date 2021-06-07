@@ -65,6 +65,13 @@ render(){
                             <td colSpan="3">
                                 {post.Hashtags}
                             </td>
+                            
+                          </tr>
+                          <tr>
+                            <td colSpan="3">
+                                {post.Tagged}
+                            </td>
+                            
                           </tr>
                           <tr  style={{ width: "100%" }}>
                            <td>
@@ -142,6 +149,12 @@ render(){
                                 {post.Hashtags}
                             </td>
                           </tr>
+                          <tr>
+                            <td colSpan="3">
+                                {post.Tagged}
+                            </td>
+                            
+                          </tr>
                           <tr  style={{ width: "100%" }}>
                                 <td>
                                   <button onClick={() =>  this.props.handleLikeAlbum(post.Id)}  className="btn btn-outline-secondary btn-sm" style={{ marginBottom: "1rem", height:"40px",marginLeft:"6rem" }}><FiHeart/></button>
@@ -195,6 +208,7 @@ render(){
                                 <img
                                 className="img-fluid"
                                 src={`data:image/jpg;base64,${post.Media}`}
+                             
                                 width="100%"
                                 alt="description"
                                 />
@@ -215,6 +229,12 @@ render(){
                                     {post.Hashtags}
                                 </td>
                             </tr>
+                            <tr>
+                            <td colSpan="3">
+                                {post.Tagged}
+                            </td>
+                            
+                          </tr>
                             <tr>
                                     <button onClick={() =>  this.props.handleOpenAddStoryToHighlightModal(post.Id)} className="btn btn-outline-secondary btn-sm"><label >Add story to highlight</label></button>
                             </tr>
@@ -268,6 +288,12 @@ render(){
                             <td colSpan="3">
                                 {post.Hashtags}
                             </td>
+                          </tr>
+                          <tr>
+                            <td colSpan="3">
+                                {post.Tagged}
+                            </td>
+                            
                           </tr>
                          
                           <br/>
@@ -353,6 +379,12 @@ render(){
                                     {post.Hashtags}
                                 </td>
                             </tr>
+                            <tr>
+                            <td colSpan="3">
+                                {post.Tagged}
+                            </td>
+                            
+                          </tr>
                           
                             <br/>
                             <br/>
@@ -436,6 +468,12 @@ render(){
                                     {post.Hashtags}
                                 </td>
                             </tr>
+                            <tr>
+                            <td colSpan="3">
+                                {post.Tagged}
+                            </td>
+                            
+                          </tr>
                           
                             <br/>
                             <br/>
@@ -452,33 +490,25 @@ render(){
 				
             </Tab>
             <Tab eventKey={7} title="Videos">
-              <div className="d-flex align-items-top">
                 <div className="container-fluid">
                   
-                  <table className="table">
-                    <tbody>                      
+                                      
                           
-                          <tr  style={{ width: "100%"}}>
                             VIDEOO
-                            <img
-                              className="img-fluid"
-                              src={`data:image/jpg;base64,${this.props.videos}`}
-                              width="100%"
-                              alt="description"
-                            />
-                          </tr>
-                         
+
+{/* 
+                            <video width="320" height="240" controls autoPlay loop muted>
+              <source src="http://localhost:4001/api/feed/usersVideos/1" type ="video/mp4"></source>
+                          </video>
+                          */}
                          
                          
                           <br/>
                           <br/>
                           <br/>
                         
-                 
-                    </tbody>
-                  </table>
+                
                 </div>
-              </div>
             </Tab>
         </Tabs>
     );

@@ -16,11 +16,9 @@ import AddPostToCollection from "../components/Posts/AddPostToCollection";
 import WriteCommentAlbumModal from "../components/Posts/WriteCommentAlbumModal"
 import { Lock } from "@material-ui/icons";
 import { Icon } from "@material-ui/core";
+import { isCompositeComponentWithType } from "react-dom/test-utils";
 class FollowerProfilePage extends React.Component {
-	constructor(props) {
-		super(props);
-
-	}
+	
 	state = {
 		following: true,
 		userId: "",
@@ -30,7 +28,7 @@ class FollowerProfilePage extends React.Component {
 		lastName : "",
 		webSite : "",
 		biography : "",
-		private : "",
+		private : false,
 		numberOfPosts : "",
 		numberOfFollowers : "",
 		numberOfFollowings : "",
@@ -51,24 +49,11 @@ class FollowerProfilePage extends React.Component {
 		foundLocation: true,
 		description: "",
 		hashtags: "",
-		peopleLikes : [],
-		peopleDislikes : [],
 		peopleComments : [],
 		coords: [],
 		addressNotFoundError: "none",
-		textSuccessfulModal : "",
-		showLikesModal : false,
-		showDislikesModal : false,
-		showCommentsModal : false,
-		showImageModal : false,
-		openModal : false,
-		addressLocation :null,
-		foundLocation : true,
 		showWriteCommentModal : false,
-		albums : [],
-		stories : [],
 		storyAlbums : [],
-		highlights : [],
 		showAddHighLightModal : false,
 		highlightNameError : "none",
 		collectionNameError : "none",
@@ -82,16 +67,30 @@ class FollowerProfilePage extends React.Component {
 		postsForCollection : [],
 		hiddenStoriesForCollection : true,
 		showAddCollectionModal : false,
-		showWriteCommentModalAlbum : false
+		showWriteCommentModalAlbum : false,
+		followingThisUser : false,
+		allowPagePreview : false,
+		ableToFollowThisUser : false,
+		sentFollowRequest : false,
+		privateUser : false
 	}
+	hasRole = (reqRole) => {
+		let roles = JSON.parse(localStorage.getItem("keyRole"));
 
+		if (roles === null) return false;
+
+		if (reqRole === "*") return true;
+
+		for (let role of roles) {
+			if (role === reqRole) return true;
+		}
+		return false;
+	};
 	fetchData = (id) => {
 		this.setState({
 			userId: id,
 		});
 	};
-
-
 
 	componentDidMount() {
 		var sentence = window.location.toString()
@@ -102,7 +101,6 @@ class FollowerProfilePage extends React.Component {
 
 
 		this.fetchData(s[5]);
-		let id = localStorage.getItem("userId")
 		Axios.get(BASE_URL_USER + "/api/" + s[5])
 			.then((res) => {
 				this.setState({
@@ -127,7 +125,82 @@ class FollowerProfilePage extends React.Component {
 		this.handleGetStories(s[5])
 		this.handleGetAlbums(s[5])
 		this.handleGetStoryAlbums(s[5])
+		this.handleSetAllowPagePreview(s[5])
 
+	}
+	handleSetAllowPagePreview = (id)=> {
+		console.log(this.hasRole("*"))
+		if(!this.hasRole("*")) {
+			console.log("fggggggggggggggggggggggggggg")
+
+			this.setState({ followingThisUser: false});
+			this.setState({ sentFollowRequest: false});
+			this.setState({ ableToFollowThisUser: false});
+			Axios.get(BASE_URL_USER + "/api/user/privacy/"+id)
+			.then((res2) => {
+				this.setState({ privateUser: res2.data });
+				if( res2.data==="private") {
+					this.setState({ allowPagePreview: false });
+				}
+				else {
+					this.setState({ allowPagePreview: true });
+				}	
+			})
+			.catch((err) => {
+				console.log(err);
+			});
+		
+		}
+		else {
+			console.log("fggggggg11111111111111111111111111111111111111111111111111111111111gggggggggggggggggggg")
+
+			let loggedId = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length-1)
+			const followReguestDTO = { follower: loggedId, following : id};
+
+			Axios.post(BASE_URL_USER_INTERACTION + "/api/checkInteraction",followReguestDTO)
+				.then((res) => {
+				
+				this.setState({ followingThisUser: res.data });
+				Axios.get(BASE_URL_USER + "/api/user/privacy/"+id)
+					.then((res2) => {
+						this.setState({ privateUser: res2.data });
+						if(!res.data && res2.data==="private") {
+							this.setState({ allowPagePreview: false });
+						}
+						else {
+							this.setState({ allowPagePreview: true });
+						}
+						if(!res.data) {
+							Axios.post(BASE_URL_USER_INTERACTION + "/api/checkIfSentRequest",followReguestDTO)
+							.then((res3) => {
+								this.setState({ sentFollowRequest: res3.data });
+								if(res3.data) {
+									this.setState({ ableToFollowThisUser: false });
+								}
+								else {
+									this.setState({ ableToFollowThisUser: true });
+								}
+							}).catch((err) => {
+								console.log(err);
+							});
+						}
+						else {
+							this.setState({ sentFollowRequest: false });
+							this.setState({ ableToFollowThisUser: false });
+						}
+						
+			
+					})
+					.catch((err) => {
+						console.log(err);
+					});
+				
+				
+			})
+			.catch((err) => {
+				console.log(err);
+			});
+		}
 	}
 	handleAddCollectionClick = () => {
 		this.setState({ showAddCollectionModal: true });
@@ -245,7 +318,6 @@ class FollowerProfilePage extends React.Component {
 	}
 	
 	handleAddComment =(comment) => {
-		alert("POGODIO")
 		let id = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length-1)
 
 		let commentDTO = {
@@ -414,6 +486,7 @@ class FollowerProfilePage extends React.Component {
 	}
 
 	
+	
 	handleWriteCommentModal = (postId)=>{
 		this.setState({ selectedPostId: postId });
 		this.setState({showWriteCommentModal : true});
@@ -442,7 +515,9 @@ class FollowerProfilePage extends React.Component {
 	}
 
 
-
+	handleModalClose = () => {
+		this.setState({ openModal: false });
+	};
 
 	
 
@@ -451,16 +526,35 @@ class FollowerProfilePage extends React.Component {
 		let id = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length-1);
 	
 		const followReguestDTO = { follower: id, following : this.state.userId};
-		Axios.post(BASE_URL_USER_INTERACTION + "/api/followRequest", followReguestDTO)
-				.then((res) => {
-					
-						console.log(res.data)
-						this.setState({ redirect: true });
-					
-				})
-				.catch ((err) => {
-			console.log(err);
-		});
+		if(this.state.privateUser==="private") {
+
+			Axios.post(BASE_URL_USER_INTERACTION + "/api/followRequest", followReguestDTO)
+			.then((res) => {
+				
+				this.handleSetAllowPagePreview(this.state.userId)
+				
+				this.setState({ textSuccessfulModal: "You have successfully sent follow request." });
+				this.setState({ openModal: true });
+
+			})
+			.catch ((err) => {
+				console.log(err);
+			});
+		}else {
+			Axios.post(BASE_URL_USER_INTERACTION + "/api/followPublic", followReguestDTO)
+			.then((res) => {
+				
+				this.handleSetAllowPagePreview(this.state.userId)
+				
+				this.setState({ textSuccessfulModal: "You are now following this user." });
+				this.setState({ openModal: true });
+
+			})
+			.catch ((err) => {
+				console.log(err);
+			});
+		}
+		
 
 	}
 
@@ -496,23 +590,19 @@ class FollowerProfilePage extends React.Component {
 														<label >{this.state.username}</label>
 													</td>
 													<td>
-													<Link onClick={this.handleFollow} className="btn btn-outline-success btn-sm">Follow</Link>
-
+														<div hidden={!this.state.followingThisUser}>
+															<button  className="btn btn-outline-success mt-1"  type="button"><i className="icofont-subscribe mr-1"></i>Following</button>
+														</div>
+														<div hidden={!this.state.ableToFollowThisUser}>
+															<button  className="btn btn-outline-primary mt-1" onClick={() => this.handleFollow()} type="button"><i className="icofont-subscribe mr-1"></i>Follow</button>
+														</div>
+														<div hidden={!this.state.sentFollowRequest}>
+															<button  className="btn btn-outline-warning mt-1"  type="button"><i className="icofont-subscribe mr-1"></i>Sent request</button>
+														</div>
 													</td>
 
 												</div>
-												<div>
-													<td>
-														<label ><b>{this.state.numberOfPosts}</b> posts</label>
-													</td>
-													<td>
-														<label ><b>{this.state.numberOfFollowers}</b> followers</label>
-													</td>
-													<td>
-														<label ><b>{this.state.numberOfFollowings}</b> following</label>
-													</td>
-
-												</div>
+											
 												<div>
 													<td>
 														<label >{this.state.biography}</label>
@@ -531,62 +621,62 @@ class FollowerProfilePage extends React.Component {
 								</table>
 							</div>
 						</div>
+						<div hidden={!this.state.allowPagePreview}>
+							<IconTabsFollowerProfile
+								photos = {this.state.photos}
+								handleLike = {this.handleLike}
+								handleDislike = {this.handleDislike}
+								handleWriteCommentModal = {this.handleWriteCommentModal}						
+								handleSave = {this.handleSave}
+								handleLikesModalOpen = {this.handleLikesModalOpen}
+								handleDislikesModalOpen = {this.handleDislikesModalOpen}
+								handleCommentsModalOpen = {this.handleCommentsModalOpen}
 
-						<IconTabsFollowerProfile
-						photos = {this.state.photos}
-						handleLike = {this.handleLike}
-						handleDislike = {this.handleDislike}
-						handleWriteCommentModal = {this.handleWriteCommentModal}						
-						handleSave = {this.handleSave}
-						handleLikesModalOpen = {this.handleLikesModalOpen}
-						handleDislikesModalOpen = {this.handleDislikesModalOpen}
-						handleCommentsModalOpen = {this.handleCommentsModalOpen}
+								albums ={this.state.albums}
+								handleLikeAlbum = {this.handleLikeAlbum}
+								handleDislikeAlbum  = {this.handleDislikeAlbum }
+								handleWriteCommentModalAlbum  = {this.handleWriteCommentModalAlbum }						
+								handleLikesModalOpenAlbum  = {this.handleLikesModalOpenAlbum }
+								handleDislikesModalOpenAlbum  = {this.handleDislikesModalOpenAlbum}
+								handleCommentsModalOpenAlbum  = {this.handleCommentsModalOpenAlbum }
 
-						albums ={this.state.albums}
-						handleLikeAlbum = {this.handleLikeAlbum}
-						handleDislikeAlbum  = {this.handleDislikeAlbum }
-						handleWriteCommentModalAlbum  = {this.handleWriteCommentModalAlbum }						
-						handleLikesModalOpenAlbum  = {this.handleLikesModalOpenAlbum }
-						handleDislikesModalOpenAlbum  = {this.handleDislikesModalOpenAlbum}
-						handleCommentsModalOpenAlbum  = {this.handleCommentsModalOpenAlbum }
-
-						stories = {this.state.stories}
-						storyAlbums = {this.state.storyAlbums}
-
-
-						highlights = {this.state.highlights}
-						seeStoriesInHighlight = {this.seeStoriesInHighlight}
-						storiesForHightliht= {this.state.storiesForHightliht}
-						hiddenStoriesForHighlight = {this.state.hiddenStoriesForHighlight}
-
-						handleAddCollectionClick = {this.handleAddCollectionClick}
-						collections = {this.state.collections}
-						seePostsInCollection = {this.seePostsInCollection}
-						postsForCollection = {this.state.postsForCollection}
-						hiddenStoriesForCollection = {this.state.hiddenStoriesForCollection}
-						handleOpenAddPostToCollectionModal = {this.handleOpenAddPostToCollectionModal}
-
-						
-					/>
+								stories = {this.state.stories}
+								storyAlbums = {this.state.storyAlbums}
 
 
+								highlights = {this.state.highlights}
+								seeStoriesInHighlight = {this.seeStoriesInHighlight}
+								storiesForHightliht= {this.state.storiesForHightliht}
+								hiddenStoriesForHighlight = {this.state.hiddenStoriesForHighlight}
+
+								handleAddCollectionClick = {this.handleAddCollectionClick}
+								collections = {this.state.collections}
+								seePostsInCollection = {this.seePostsInCollection}
+								postsForCollection = {this.state.postsForCollection}
+								hiddenStoriesForCollection = {this.state.hiddenStoriesForCollection}
+								handleOpenAddPostToCollectionModal = {this.handleOpenAddPostToCollectionModal}
+
+							
+						/>
+						</div>
+
+						<div hidden={this.state.allowPagePreview}>
+
+							<div className="d-flex align-items-top p-3 mb-2 d-flex justify-content-center">
+
+								<label><b>This Account is Private</b></label>
+
+							</div>
+
+							<div className="d-flex justify-content-center h-100">
+								<Icon className="d-flex justify-content-center h-100 w-100"><Lock /></Icon>
+							</div>
+
+						</div>
 
 					</div>
 
-					<div hidden={!this.state.following}>
-
-													NE PRATITE SE
-						<div className="d-flex align-items-top p-3 mb-2 d-flex justify-content-center">
-							
-							<label><b>This Account is Private</b></label>
-							
-						</div>
-
-						<div className="d-flex justify-content-center h-100">
-							<Icon className="d-flex justify-content-center h-100 w-100"><Lock /></Icon>
-						</div>
-
-					</div>
+					
 
 				</section>
 				<div>

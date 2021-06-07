@@ -1,15 +1,15 @@
 package main
 
 import (
-	"bytes"
+	"bufio"
+	"encoding/base64"
+	"encoding/json"
 	"feedPosts/pkg/dtos"
 	"feedPosts/pkg/models"
 	"fmt"
 	"github.com/gorilla/mux"
 	"go.mongodb.org/mongo-driver/bson/primitive"
-	"image"
-	"image/jpeg"
-	"log"
+	"io/ioutil"
 	"strconv"
 	"strings"
 
@@ -66,7 +66,7 @@ func (app *application) uploadFile (w http.ResponseWriter, r *http.Request) {
 
 func(app *application) GetVideo(w http.ResponseWriter, r *http.Request){
 	fmt.Println("--------------------------------------")
-	file, err:=os.Open("images/IMG-0d12b381f8c253794f87cf8b907e3e21-V.jpg")
+	file, err:=os.Open("images/20190303_032235.mp4")
 	if err!=nil{
 		http.Error(w,"file not found",404)
 		return
@@ -78,15 +78,24 @@ func(app *application) GetVideo(w http.ResponseWriter, r *http.Request){
 	ContentType:= http.DetectContentType(FileHeader)
 	FileStat,_:= file.Stat()
 	FileSize:= strconv.FormatInt(FileStat.Size(),10)
-	w.Header().Set("Content-Disposition", "attachment; filename="+"images/IMG-0d12b381f8c253794f87cf8b907e3e21-V.jpg")
+	w.Header().Set("Content-Disposition", "attachment; filename="+"images/20190303_032235.mp4")
 	w.Header().Set("Content-Type", ContentType)
 	w.Header().Set("Content-Length", FileSize)
 
 	file.Seek(0,0)
 	io.Copy(w,file)
 	return
-	/*feedPostResponse := dtos.VideoDTO{}
-	feedPostResponse = videoToResponse("videos/20190303_032235.mp4")
+
+
+
+}
+func(app *application) GetVideo1(w http.ResponseWriter, r *http.Request){
+	feedPostResponse := dtos.VideoDTO{}
+
+	feedPostResponse =  videoToResponse("images/20190303_032235.mp4")
+
+
+
 	imagesMarshaled, err := json.Marshal(feedPostResponse)
 
 	if err != nil {
@@ -94,22 +103,22 @@ func(app *application) GetVideo(w http.ResponseWriter, r *http.Request){
 	}
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
-	w.Write(imagesMarshaled)*/
+	w.Write(imagesMarshaled)
+
 }
+func videoToResponse(image string) dtos.VideoDTO {
+	f, _ := os.Open(image)
 
-func videoToResponse(image2 string) dtos.VideoDTO {
-	f, _ := os.Open(image2)
+	reader := bufio.NewReader(f)
+	content, _ := ioutil.ReadAll(reader)
 
+	// Encode as base64.
+	encoded := base64.StdEncoding.EncodeToString(content)
 
-	defer f.Close()
-	image, _, _ := image.Decode(f)
-
-	buffer := new(bytes.Buffer)
-	if err := jpeg.Encode(buffer, image, nil); err != nil {
-		log.Println("unable to encode image.")
-	}
+	// Print encoded data to console.
+	// ... The base64 image can be used as a data URI in a browser.
+	fmt.Println("ENCODED: " + encoded)
 	return dtos.VideoDTO{
-		Media: buffer.Bytes(),
-
+		Media: encoded,
 	}
 }

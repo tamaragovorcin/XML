@@ -136,9 +136,6 @@ func (app *application) search(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-
-
-
 	b, err := json.Marshal(u)
 	if err != nil {
 		app.serverError(w, err)

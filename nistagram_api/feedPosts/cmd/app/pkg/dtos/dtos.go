@@ -8,7 +8,7 @@ import (
 type FeedPostDTO struct {
 	User        string
 	Media       string
-	Tagged      []primitive.ObjectID
+	Tagged      []string
 	Location    models2.Location
 	Description string
 	Hashtags    string
@@ -23,7 +23,7 @@ type HashTagDTO struct {
 
 type PostInfoDTO struct {
 	DateTime    string
-	Tagged      []primitive.ObjectID
+	Tagged      string
 	Location    models2.Location
 	Description string
 	Hashtags    []string
@@ -33,15 +33,25 @@ type PostInfoDTO struct {
 type FeedPostInfoDTO struct {
 	Id          primitive.ObjectID
 	DateTime    string
-	Tagged      []primitive.ObjectID
+	Tagged      string
 	Location    string
 	Description string
 	Hashtags    string
 	Media       []byte
 	Username    string
 }
+type FeedPostInfoDTO1 struct {
+	Id          primitive.ObjectID
+	DateTime    string
+	Tagged      string
+	Location    string
+	Description string
+	Hashtags    string
+	Media       string
+	Username    string
+}
 type VideoDTO struct {
-	 Media []byte
+	 Media string
 }
 
 type CollectionInfoDTO struct {
@@ -61,7 +71,7 @@ type UserCollectionsDTO struct {
 type FeedAlbumInfoDTO struct {
 	Id          primitive.ObjectID
 	DateTime    string
-	Tagged      []primitive.ObjectID
+	Tagged      string
 	Location    string
 	Description string
 	Hashtags    string

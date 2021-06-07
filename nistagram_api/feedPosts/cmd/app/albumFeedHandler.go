@@ -47,10 +47,12 @@ func (app *application) insertAlbumFeed(w http.ResponseWriter, req *http.Request
 		app.serverError(w, err)
 	}
 	userIdPrimitive, _ := primitive.ObjectIDFromHex(userId)
+	listTagged := taggedUsersToPrimitiveObject(m)
+
 	var post = models.Post{
 		User : userIdPrimitive,
 		DateTime : time.Now(),
-		Tagged : m.Tagged,
+		Tagged : listTagged,
 		Description: m.Description,
 		Hashtags: parseHashTags(m.Hashtags),
 		Location : m.Location,
@@ -157,11 +159,12 @@ func toResponseAlbum(feedAlbum models.AlbumFeed, imageList []string) dtos.FeedAl
 		imagesBuffered= append(imagesBuffered, imageBuffered)
 	}
 
+	taggedPeople :=getTaggedPeople(feedAlbum.Post.Tagged)
 
 	return dtos.FeedAlbumInfoDTO{
 		Id: feedAlbum.Id,
 		DateTime : strings.Split(feedAlbum.Post.DateTime.String(), " ")[0],
-		Tagged :feedAlbum.Post.Tagged,
+		Tagged :taggedPeople,
 		Location : locationToString(feedAlbum.Post.Location),
 		Description : feedAlbum.Post.Description,
 		Hashtags : hashTagsToString(feedAlbum.Post.Hashtags),
@@ -216,11 +219,12 @@ func toResponseAlbumHomePage(feedAlbum models.AlbumFeed, imageList []string, use
 		imagesBuffered= append(imagesBuffered, imageBuffered)
 	}
 
+	taggedPeople :=getTaggedPeople(feedAlbum.Post.Tagged)
 
 	return dtos.FeedAlbumInfoDTO{
 		Id: feedAlbum.Id,
 		DateTime : strings.Split(feedAlbum.Post.DateTime.String(), " ")[0],
-		Tagged :feedAlbum.Post.Tagged,
+		Tagged :taggedPeople,
 		Location : locationToString(feedAlbum.Post.Location),
 		Description : feedAlbum.Post.Description,
 		Hashtags : hashTagsToString(feedAlbum.Post.Hashtags),
@@ -459,6 +463,7 @@ func (app *application) getFeedAlbumsByLocation(w http.ResponseWriter, r *http.R
 		if err != nil {
 			app.serverError(w, err)
 		}
+
 		userUsername :=getUserUsername(album.Post.User)
 
 		feedAlbumsResponse = append(feedAlbumsResponse, toResponseAlbumHomePage(album, images,userUsername))
@@ -474,6 +479,52 @@ func (app *application) getFeedAlbumsByLocation(w http.ResponseWriter, r *http.R
 	w.Write(imagesMarshaled)
 }
 
+func (app *application) getFeedAlbumsByTags(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	user := vars["userId"]
+	userIdPrimitive, _ := primitive.ObjectIDFromHex(user)
+
+	allImages,_ := app.images.All()
+	tagsFeedAlbums, _ :=app.albumFeeds.All()
+
+	tagsFeedAlbums =findFeedAlbumsByTags(tagsFeedAlbums,userIdPrimitive)
+
+	feedAlbumsResponse := []dtos.FeedAlbumInfoDTO{}
+	for _, album := range tagsFeedAlbums {
+
+		images, err := findAlbumByPostId(allImages,album.Id)
+		if err != nil {
+			app.serverError(w, err)
+		}
+		userUsername :=getUserUsername(album.Post.User)
+
+		feedAlbumsResponse = append(feedAlbumsResponse, toResponseAlbumHomePage(album, images,userUsername))
+
+	}
+
+	imagesMarshaled, err := json.Marshal(feedAlbumsResponse)
+	if err != nil {
+		app.serverError(w, err)
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	w.Write(imagesMarshaled)
+}
+
+func findFeedAlbumsByTags(albums []models.AlbumFeed, idPrimitive primitive.ObjectID) []models.AlbumFeed {
+	listAlbums:=[]models.AlbumFeed{}
+	for _, album := range albums {
+		if userIsPublic(album.Post.User)==true {
+
+			for _, tag := range album.Post.Tagged {
+				if tag.String() == idPrimitive.String() {
+					listAlbums = append(listAlbums, album)
+				}
+			}
+		}
+	}
+	return listAlbums
+}
 func findFeedAlbumsByLocation(posts []models.AlbumFeed, country string, city string, street string)([]models.AlbumFeed, error) {
 	feedPostsLocation := []models.AlbumFeed{}
 

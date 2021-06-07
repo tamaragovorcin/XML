@@ -74,6 +74,7 @@ class AddPostModal extends Component {
 											placeholder="Description"
 											className="form-control"
 											id="email"
+											
 											type="text"
 											onChange={this.props.handleDescriptionChange}
 											value={this.props.description}
@@ -93,6 +94,9 @@ class AddPostModal extends Component {
 											value={this.props.hashtags}
 										/>
 									</div>
+								</div>
+								<div className="control-group">
+									<button style={{ width: "10rem", margin : "1rem" }}  onClick={this.props.handleAddTagsModal} className="btn btn-outline-secondary btn-sm">Add tags<br/> <CgFeed/> </button>
 								</div>
 								</div>
 

@@ -5,8 +5,7 @@ import { FiHeart } from "react-icons/fi";
 import {FaHeartBroken,FaRegCommentDots} from "react-icons/fa"
 import {BsBookmark} from "react-icons/bs"
 import "react-responsive-carousel/lib/styles/carousel.min.css"; // requires a loader
-import { Carousel } from "bootstrap";
-
+import { Carousel } from 'react-responsive-carousel';
 
 class IconTabsHomePage extends React.Component {
   constructor(props){
@@ -65,6 +64,12 @@ render(){
                           {post.Hashtags}
                       </td>
                     </tr>
+                    <tr>
+                            <td colSpan="3">
+                                {post.Tagged}
+                            </td>
+                            
+                          </tr>
                     <tr  style={{ width: "100%" }}>
                         <td>
                            <button onClick={() =>  this.props.handleLike(post.Id)}  className="btn btn-outline-secondary btn-sm" style={{ marginBottom: "1rem", height:"40px",marginLeft:"6rem" }}><FiHeart/></button>
@@ -81,13 +86,13 @@ render(){
                     </tr>
                     <tr  style={{ width: "100%" }}>
                         <td>
-                          <button onClick={() =>  this.props.handleLikesModalOpen(post.Id)} className="btn btn-outline-secondary btn-sm" style={{ marginBottom: "1rem" , marginLeft:"4rem"}}><label>likes</label></button>
+                          <button onClick={(e) =>  this.props.handleLikesModalOpen(e,post.Id)} className="btn btn-outline-secondary btn-sm" style={{ marginBottom: "1rem" , marginLeft:"4rem"}}><label>likes</label></button>
                         </td>
                         <td>
-                         <button onClick={() =>  this.props.handleDislikesModalOpen(post.Id)} className="btn btn-outline-secondary btn-sm" style={{ marginBottom: "1rem",marginLeft:"4rem" }}><label > dislikes</label></button>
+                         <button onClick={(e) =>  this.props.handleDislikesModalOpen(e,post.Id)} className="btn btn-outline-secondary btn-sm" style={{ marginBottom: "1rem",marginLeft:"4rem" }}><label > dislikes</label></button>
                         </td>
                         <td>
-                          <button onClick={() =>  this.props.handleCommentsModalOpen(post.Id)} className="btn btn-outline-secondary btn-sm" style={{ marginBottom: "1rem",marginLeft:"4rem" }}><label >Comments</label></button>
+                          <button onClick={(e) =>  this.props.handleCommentsModalOpen(e,post.Id)} className="btn btn-outline-secondary btn-sm" style={{ marginBottom: "1rem",marginLeft:"4rem" }}><label >Comments</label></button>
                         </td>
                     </tr>
                     <br/>
@@ -110,7 +115,7 @@ render(){
               <tbody>
                 {this.props.albums.map((post) => (
                   
-                  <tr id={post.id} key={post.id}>
+                  <tr id={post.Id} key={post.Id}>
                      <tr>
                         <label style={{fontSize:"20px",fontWeight:"bold"}}>{post.Username}</label>
                     </tr>
@@ -143,6 +148,12 @@ render(){
                           {post.Hashtags}
                       </td>
                     </tr>
+                    <tr>
+                            <td colSpan="3">
+                                {post.Tagged}
+                            </td>
+                            
+                          </tr>
                     <tr  style={{ width: "100%" }}>
                         <td>
                            <button onClick={() =>  this.props.handleLikeAlbum(post.Id)}  className="btn btn-outline-secondary btn-sm" style={{ marginBottom: "1rem", height:"40px",marginLeft:"6rem" }}><FiHeart/></button>

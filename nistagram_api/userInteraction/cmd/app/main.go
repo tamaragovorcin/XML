@@ -38,6 +38,10 @@ func routes() *mux.Router {
 	r.HandleFunc("/api/user/followRequestsByMe", ReturnUsersFollowRequestsByMe(driver, configuration.Database)).Methods("POST")
 	r.HandleFunc("/api/user/following", ReturnUsersFollowings(driver, configuration.Database)).Methods("POST")
 	r.HandleFunc("/api/user/followers", ReturnUsersFollowers(driver, configuration.Database)).Methods("POST")
+	r.HandleFunc("/api/checkInteraction", ReturnUsersInteraction(driver, configuration.Database)).Methods("POST")
+	r.HandleFunc("/api/checkIfSentRequest", ReturnIfRequestSent(driver, configuration.Database)).Methods("POST")
+	r.HandleFunc("/api/user/followingCloseFriends", ReturnUsersCloseFriends(driver, configuration.Database)).Methods("POST")
+
 
 	r.HandleFunc("/api/createUser", CreateUser(driver, configuration.Database)).Methods("POST")
 
@@ -161,6 +165,10 @@ type followUserStructDTO struct {
 	Id string
 	Username string
 }
+type followUserCloseFriendsDTO struct {
+	CloseFriends []followUserStructDTO
+	NotCloseFriends []followUserStructDTO
+}
 
 func (nc *Neo4jConfiguration) newDriver() (neo4j.Driver, error) {
 	return neo4j.NewDriver(nc.Url, neo4j.BasicAuth(nc.Username, nc.Password, ""))
@@ -170,7 +178,6 @@ func (nc *Neo4jConfiguration) newDriver() (neo4j.Driver, error) {
 
 func CreateFollowRequest(driver neo4j.Driver, database string) func(w http.ResponseWriter,r *http.Request) {
 	return func(w http.ResponseWriter, req *http.Request) {
-		fmt.Println("POGODIIOOOO JE")
 		w.Header().Set("Access-Control-Allow-Origin", "*")
 		var m FollowRequestDTO
 
@@ -216,7 +223,6 @@ func CreateFollowRequest(driver neo4j.Driver, database string) func(w http.Respo
 }
 func AcceptFollowRequest(driver neo4j.Driver, database string) func(w http.ResponseWriter,r *http.Request) {
 	return func(w http.ResponseWriter, req *http.Request) {
-		fmt.Println("POGODIIOOOO JE")
 		w.Header().Set("Access-Control-Allow-Origin", "*")
 		var m FollowRequestDTO
 		err := json.NewDecoder(req.Body).Decode(&m)
@@ -305,7 +311,8 @@ func DeleteFollowRequest(driver neo4j.Driver, database string) func(w http.Respo
 func CreateFollowPublicProfile(driver neo4j.Driver, database string) func(w http.ResponseWriter,r *http.Request) {
 	return func(w http.ResponseWriter, req *http.Request) {
 		w.Header().Set("Access-Control-Allow-Origin", "*")
-		var m FollowDTO
+		var m FollowRequestDTO
+
 		err := json.NewDecoder(req.Body).Decode(&m)
 		if err != nil {
 			fmt.Println("Error")
@@ -317,20 +324,14 @@ func CreateFollowPublicProfile(driver neo4j.Driver, database string) func(w http
 		defer unsafeClose(session)
 
 		voteResult, err := session.WriteTransaction(func(tx neo4j.Transaction) (interface{}, error) {
-			result, err := tx.Run(
-				"MATCH (follower:User), (following:User) WHERE follower.id = $followerId AND following.id = $followingId CREATE (follower)-[:FOLLOW]->(following)",
+			result1, _ := tx.Run(
+				"MATCH (following:User), (follower:User) WHERE following.id = $followingId AND follower.id = $followerId CREATE (follower)-[:FOLLOW]->(following)",
 
-				map[string]interface{}{"followerId": m.FollowerId,
-					"followingId": m.FollowingId,
+				map[string]interface{}{"followerId": m.Follower,
+					"followingId": m.Following,
 				})
-			if err != nil {
-				return nil, err
-			}
-			var summary, _ = result.Consume()
-			var voteResult VoteResult
-			voteResult.Updates = summary.Counters().PropertiesSet()
 
-			return voteResult, nil
+			return result1, nil
 		})
 		if err != nil {
 			log.Println("error voting for movie:", err)
@@ -544,6 +545,89 @@ func ReturnUsersFollowers(driver neo4j.Driver, database string) func(http.Respon
 	}
 }
 
+func ReturnUsersInteraction(driver neo4j.Driver, database string) func(http.ResponseWriter, *http.Request) {
+	return func(w http.ResponseWriter, req *http.Request) {
+		var m FollowRequestDTO
+		err := json.NewDecoder(req.Body).Decode(&m)
+		if err != nil {
+			fmt.Println("Error")
+		}
+		session := driver.NewSession(neo4j.SessionConfig{
+			AccessMode:   neo4j.AccessModeRead,
+			DatabaseName: database,
+		})
+		defer unsafeClose(session)
+
+		movieResults, err := session.ReadTransaction(func(tx neo4j.Transaction) (interface{}, error) {
+			records, err := tx.Run(
+				`MATCH (following:User)<-[f:FOLLOW]-(follower:User) WHERE follower.id = $followerId return following.id as id`,
+				map[string]interface{}{ "followerId": m.Follower})
+			if err != nil {
+				return nil, err
+			}
+			for records.Next() {
+				record := records.Record()
+				id, _ := record.Get("id")
+
+				if id.(string)==m.Following {
+					return true,nil
+				}
+			}
+			return false,nil
+		})
+		if err != nil {
+			log.Println("error querying search:", err)
+			return
+		}
+		err = json.NewEncoder(w).Encode(movieResults)
+		if err != nil {
+			log.Println("error writing search response:", err)
+		}
+	}
+}
+
+func ReturnIfRequestSent(driver neo4j.Driver, database string) func(http.ResponseWriter, *http.Request) {
+	return func(w http.ResponseWriter, req *http.Request) {
+		var m FollowRequestDTO
+		err := json.NewDecoder(req.Body).Decode(&m)
+		if err != nil {
+			fmt.Println("Error")
+		}
+		session := driver.NewSession(neo4j.SessionConfig{
+			AccessMode:   neo4j.AccessModeRead,
+			DatabaseName: database,
+		})
+		defer unsafeClose(session)
+
+		movieResults, err := session.ReadTransaction(func(tx neo4j.Transaction) (interface{}, error) {
+			records, err := tx.Run(
+				`MATCH (following:User)<-[f:FOLLOWREQUEST]-(follower:User) WHERE follower.id = $followerId return following.id as id`,
+				map[string]interface{}{ "followerId": m.Follower})
+			if err != nil {
+				return nil, err
+			}
+			for records.Next() {
+				record := records.Record()
+				id, _ := record.Get("id")
+
+				if id.(string)==m.Following {
+					return true,nil
+				}
+			}
+
+			return false,nil
+		})
+		if err != nil {
+			log.Println("error querying search:", err)
+			return
+		}
+		err = json.NewEncoder(w).Encode(movieResults)
+		if err != nil {
+			log.Println("error writing search response:", err)
+		}
+	}
+}
+
 
 func CreateUser(driver neo4j.Driver, database string) func(w http.ResponseWriter,r *http.Request) {
 	return func(w http.ResponseWriter, req *http.Request) {
@@ -583,6 +667,103 @@ func CreateUser(driver neo4j.Driver, database string) func(w http.ResponseWriter
 		}
 	}
 }
+
+func ReturnUsersCloseFriends(driver neo4j.Driver, database string) func(http.ResponseWriter, *http.Request) {
+	return func(w http.ResponseWriter, req *http.Request) {
+		var m User
+		err := json.NewDecoder(req.Body).Decode(&m)
+		if err != nil {
+			fmt.Println("Error")
+		}
+		session := driver.NewSession(neo4j.SessionConfig{
+			AccessMode:   neo4j.AccessModeRead,
+			DatabaseName: database,
+		})
+		defer unsafeClose(session)
+
+		movieResults, err := session.ReadTransaction(func(tx neo4j.Transaction) (interface{}, error) {
+			records, err := tx.Run(
+				`MATCH (following:User)<-[f:FOLLOW]-(follower:User) WHERE follower.id = $followerId return following.id as id`,
+				map[string]interface{}{ "followerId": m.Id})
+			if err != nil {
+				return nil, err
+			}
+			var closeFriends followUserCloseFriendsDTO
+			var users  []followUserStructDTO
+			for records.Next() {
+				record := records.Record()
+				id, _ := record.Get("id")
+				fmt.Println(record.Get("id"))
+				username:=getUserUsername(id.(string))
+				var dto = followUserStructDTO{
+					Id : id.(string),
+					Username: username,
+				}
+				users = append(users,  dto)
+			}
+
+			if users==nil {
+				return followUserCloseFriendsDTO{},nil
+			}
+			listCloseFriendsIds := getListCloseFriends(m.Id)
+			closeFriends = organizeFollowersAccordingToCloseFriends(listCloseFriendsIds,users)
+			return closeFriends,nil
+		})
+		if err != nil {
+			log.Println("error querying search:", err)
+			return
+		}
+		err = json.NewEncoder(w).Encode(movieResults)
+		if err != nil {
+			log.Println("error writing search response:", err)
+		}
+	}
+}
+
+func organizeFollowersAccordingToCloseFriends(ids []string, users []followUserStructDTO) followUserCloseFriendsDTO {
+	closeFriends := []followUserStructDTO{}
+	notCloseFriends := []followUserStructDTO{}
+
+	for _, user := range users {
+		if userIsCloseFriends(user,ids) {
+			closeFriends = append(closeFriends,user)
+		} else {
+			notCloseFriends = append(notCloseFriends,user)
+		}
+	}
+	var completeDTO = followUserCloseFriendsDTO{
+		CloseFriends :closeFriends,
+		NotCloseFriends : notCloseFriends,
+	}
+	return completeDTO
+}
+
+func userIsCloseFriends(user2 followUserStructDTO, ids []string) bool {
+	for _, id := range ids {
+		if id==user2.Id {
+			return true
+		}
+	}
+	return false
+}
+
+func getListCloseFriends(id string) []string {
+	resp, err := http.Get("http://localhost:4006/api/user/closeFriends/"+id)
+	if err != nil {
+		log.Fatalln(err)
+	}
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		log.Fatalln(err)
+	}
+	listStrings := []string{}
+	for _, str := range body {
+		listStrings = append(listStrings,string(str))
+	}
+	return listStrings
+}
+
+
 
 func getUserUsername(user string) string {
 

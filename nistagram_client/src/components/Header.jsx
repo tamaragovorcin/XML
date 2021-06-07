@@ -5,8 +5,9 @@ import { BiBookmark } from 'react-icons/bi';
 import Axios from "axios";
 import { FiSettings, FiSend } from 'react-icons/fi';
 import { VscHome } from 'react-icons/vsc';
-import {FaSearch } from 'react-icons/fa';
+import { FaSearch } from 'react-icons/fa';
 
+import { GiThreeFriends } from 'react-icons/gi';
 import { AiOutlineHeart } from 'react-icons/ai';
 import { BASE_URL_USER } from "../constants.js";
 import Select from 'react-select';
@@ -40,7 +41,7 @@ class Header extends React.Component {
 	handleChange = (event) => {
 		this.setState({ userId: event.value });
 		window.location = "#/followerProfilePage/" + event.value;
-		
+
 	};
 
 
@@ -68,8 +69,8 @@ class Header extends React.Component {
 	};
 
 	render() {
-		
-		
+
+
 		return (
 			<header id="header" className="fixed-top">
 				<div className="container d-flex align-items-center">
@@ -84,15 +85,13 @@ class Header extends React.Component {
 								className="select-custom-class"
 								label="Single select"
 								options={this.state.options}
-								onChange ={e => this.handleChange(e)}
+								onChange={e => this.handleChange(e)}
 							/>
 
 
 						</div>
 
 					</div>
-
-					
 					<nav className="nav-menu d-none d-lg-block">
 						<ul>
 							<li>
@@ -101,14 +100,14 @@ class Header extends React.Component {
 							<li  >
 								<Link to="/seacrh"><FaSearch /></Link>
 							</li>
-							<li  >
+							<li  hidden={!this.hasRole("*")}>
 								<Link to="/messages"><FiSend /></Link>
 							</li>
-							<li  >
+							<li  hidden={!this.hasRole("*")}>
 								<Link to="/followRequest"><AiOutlineHeart /></Link>
 							</li>
 
-							<li className="drop-down">
+							<li className="drop-down" hidden={!this.hasRole("*")}>
 								<a href="#"><CgProfile /></a>
 								<ul>
 
@@ -131,6 +130,14 @@ class Header extends React.Component {
 
 
 									</li>
+
+									<li>
+
+
+										<Link to="/closeFriends"><GiThreeFriends /> Close friends </Link>
+
+
+									</li>
 									<li>
 
 
@@ -145,7 +152,27 @@ class Header extends React.Component {
 					</nav>
 				</div>
 			</header>
-		);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+);
 
 	}
 }
