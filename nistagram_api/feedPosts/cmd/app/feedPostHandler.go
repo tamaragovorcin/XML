@@ -1,11 +1,12 @@
 package main
 
 import (
+	"bufio"
 	"bytes"
+	"encoding/base64"
 	"encoding/json"
 	"feedPosts/pkg/dtos"
 	"feedPosts/pkg/models"
-	"fmt"
 	"github.com/gorilla/mux"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"image"
@@ -151,7 +152,7 @@ func (app *application) getUsersFeedPosts(w http.ResponseWriter, r *http.Request
 	if err != nil {
 		app.serverError(w, err)
 	}
-	feedPostResponse := []dtos.FeedPostInfoDTO{}
+	feedPostResponse := []dtos.FeedPostInfoDTO1{}
 	for _, feedPost := range usersFeedPosts {
 
 		images, err := findImageByPostId(allImages,feedPost.Id)
@@ -172,25 +173,27 @@ func (app *application) getUsersFeedPosts(w http.ResponseWriter, r *http.Request
 	w.Write(imagesMarshaled)
 }
 
-func toResponse(feedPost models.FeedPost, image2 string) dtos.FeedPostInfoDTO {
-	fmt.Println(image2)
+func toResponse(feedPost models.FeedPost, image2 string) dtos.FeedPostInfoDTO1 {
 	f, _ := os.Open(image2)
-	defer f.Close()
-	image, _, _ := image.Decode(f)
 
-	buffer := new(bytes.Buffer)
-	if err := jpeg.Encode(buffer, image, nil); err != nil {
-		log.Println("unable to encode image.")
-	}
+	reader := bufio.NewReader(f)
+	content, _ := ioutil.ReadAll(reader)
+
+	// Encode as base64.
+	encoded := base64.StdEncoding.EncodeToString(content)
+
+	// Print encoded data to console.
+	// ... The base64 image can be used as a data URI in a browser.
+	//fmt.Println(buffer.Bytes())
 	taggedPeople :=getTaggedPeople(feedPost.Post.Tagged)
-	return dtos.FeedPostInfoDTO{
+	return dtos.FeedPostInfoDTO1{
 		Id: feedPost.Id,
 		DateTime : strings.Split(feedPost.Post.DateTime.String(), " ")[0],
 		Tagged :taggedPeople,
 		Location : locationToString(feedPost.Post.Location),
 		Description : feedPost.Post.Description,
 		Hashtags : hashTagsToString(feedPost.Post.Hashtags),
-		Media : buffer.Bytes(),
+		Media : encoded,
 		Username : "",
 	}
 }
@@ -262,7 +265,7 @@ func (app *application) getFeedPostsByLocation(w http.ResponseWriter, r *http.Re
 	if country!="n" || city!="n" || street!="n" {
 		locationFeedPosts,_ =findFeedPostsByLocation(locationFeedPosts,country,city,street)
 	}
-	feedPostResponse := []dtos.FeedPostInfoDTO{}
+	feedPostResponse := []dtos.FeedPostInfoDTO1{}
 	for _, feedPost := range locationFeedPosts {
 
 		images, err := findImageByPostId(allImages,feedPost.Id)
@@ -383,7 +386,7 @@ func (app *application) getFeedPostsByHashTags(w http.ResponseWriter, r *http.Re
 		hashTagsFeedPosts,_ =findFeedPostsByHashTags(hashTagsFeedPosts,parseHashTags(hashtags.HashTags))
 	}
 
-	feedPostResponse := []dtos.FeedPostInfoDTO{}
+	feedPostResponse := []dtos.FeedPostInfoDTO1{}
 	for _, feedPost := range hashTagsFeedPosts {
 
 		images, err := findImageByPostId(allImages,feedPost.Id)

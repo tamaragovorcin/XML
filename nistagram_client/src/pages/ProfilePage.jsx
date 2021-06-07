@@ -20,7 +20,9 @@ import AddPostToCollection from "../components/Posts/AddPostToCollection";
 import { BASE_URL_USER_INTERACTION } from "../constants.js";
 import WriteCommentAlbumModal from "../components/Posts/WriteCommentAlbumModal"
 import AddTagsModal from "../components/Posts/AddTagsModal";
+import ConvertVideo from "react-convert-image";
 import AddStoryAlbumToHighlightModal from "../components/Posts/AddStoryAlbumToHighlightModal";
+ 
 class ProfilePage extends React.Component {
 	constructor(props) {
 		super(props);
@@ -49,7 +51,7 @@ class ProfilePage extends React.Component {
 		highlihts: [],
 		photos: [],
 		pictures: [],
-		videos : [],
+		videos : "",
 		video : "",
 		picture: "",
 		hiddenOne: true,
@@ -94,6 +96,8 @@ class ProfilePage extends React.Component {
 		storyAlbums : [],
 		showTagsModal : false,
 		taggedOnPost : [],
+		stories: ["blob:http://localhost:3000/ac876899-5147-482c-9086-998ee05c765f"],
+		urlVideo : "",
 		highlightsAlbums : [],
 		showAddStoryAlbumToHighLightModal : false,
 		storiesForHightlihtAlbum : [],
@@ -101,9 +105,6 @@ class ProfilePage extends React.Component {
 		showAddHighLightAlbumModal : false
 	}
 	
-	handleAddCollectionClick = () => {
-		this.setState({ showAddCollectionModal: true });
-	};
 	onYmapsLoad = (ymaps) => {
 		this.ymaps = ymaps;
 		new this.ymaps.SuggestView(this.addressInput.current, {
@@ -263,6 +264,7 @@ class ProfilePage extends React.Component {
 		this.handleGetStoryAlbums(id)
 		this.handleGetStories(id)
 		this.handleGetCollections(id)
+		// this.handleGetVideos(id)
 		this.handleGetHighlightAlbums(id)
 
 	}
@@ -313,6 +315,19 @@ class ProfilePage extends React.Component {
 				console.log(err);
 			});
 	}
+
+	handleGetVideos = (id)=>{
+		alert("ubisu se")
+		Axios.get(BASE_URL_FEED + "/api/feed/usersVideos/" + id)
+			.then((res) => {
+				this.setState({ videos: res.data });
+
+			})
+			.catch((err) => {
+				console.log(err);
+			});
+	}
+	
 	handleGetAlbums = (id) => {
 		Axios.get(BASE_URL_FEED + "/api/feedAlbum/usersAlbums/"+id)
 			.then((res) => {
@@ -554,7 +569,6 @@ class ProfilePage extends React.Component {
 						location : locationDTO,
 						onlyCloseFriends : false
 					};
-					alert(storyPostDTO.onlyCloseFriends)
 					if (this.state.foundLocation === false) {
 							this.setState({ addressNotFoundError: "initial" });
 					} else {
@@ -1313,8 +1327,8 @@ class ProfilePage extends React.Component {
 
 				this.setState({ showImageModal: false, });
 				this.setState({ openModal: true });
-				this.setState({ textSuccessfulModal: "You have successfully added feed post." });
-				this.handleGetPhotos(id)
+				this.setState({ textSuccessfulModal: "You have successfully added video feed post." });
+				// this.handleGetVideos(id)
 
 			})
 			.catch((err) => {
@@ -1337,11 +1351,27 @@ class ProfilePage extends React.Component {
 		const newList2 = this.state.followingUsers.filter((item) => item.Id !== event.value);
 		this.setState({ followingUsers: newList2 });		
 	};
+	handleConvertedImage = (converted) => {
+		console.log(converted)
+		alert("helo")
+		alert(converted)
+
+		/*	converted = converted.replace("webp", "jpg");
+			console.log(converted)
+			let hh = this.state.pictures;
+			hh.push(converted)
+			console.log(hh)
+			this.setState({
+				pictures: hh,
+			});*/
+
+	}
 	render() {
 		return (
 			<React.Fragment>
 				<TopBar />
 				<Header />
+			
 
 				<section id="hero" className="d-flex align-items-top">
 				< div >
@@ -1404,7 +1434,6 @@ class ProfilePage extends React.Component {
 										
 									</td>
 									
-									
 								</tr>
 							</tbody>
 						</table>
@@ -1414,6 +1443,8 @@ class ProfilePage extends React.Component {
 				<div>
 					<IconTabsProfile
 						photos = {this.state.photos}
+						videos = {this.state.videos}
+						urlVideo = {this.state.urlVideo}
 						handleLike = {this.handleLike}
 						handleDislike = {this.handleDislike}
 						handleWriteCommentModal = {this.handleWriteCommentModal}						

@@ -9,6 +9,7 @@ import "react-responsive-carousel/lib/styles/carousel.min.css"; // requires a lo
 import { Carousel } from 'react-responsive-carousel';
 import playerLogo from "../../static/coach.png";
 import logo from "../../static/collection.png";
+import ReactPlayer from 'react-player'
 
 class IconTabsProfile extends React.Component {
   constructor(props){
@@ -583,6 +584,27 @@ render(){
                     </div>
                 </div>
 				
+            </Tab>
+            <Tab eventKey={7} title="Videos">
+                <div className="container-fluid">
+                  
+                                      
+                          
+                            VIDEOO
+
+{/* 
+                            <video width="320" height="240" controls autoPlay loop muted>
+              <source src="http://localhost:4001/api/feed/usersVideos/1" type ="video/mp4"></source>
+                          </video>
+                          */}
+                         
+                         
+                          <br/>
+                          <br/>
+                          <br/>
+                        
+                
+                </div>
             </Tab>
         </Tabs>
     );
