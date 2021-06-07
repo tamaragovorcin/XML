@@ -51,21 +51,16 @@ class HomePage extends React.Component {
 		stories: [],
 		convertedImage: "",
 		count: 0,
-		userIsLogged : false,
-
-
-
-	}
-
-
-	Change = () => {
-		this.state.pictures.forEach(pic => {
-			console.log(pic)
-		}
-
-		)
+		userIsLogged: false,
+		ssAlbums: [],
+		usern: "",
+		brojac : 0,
+		br: 0
 
 	}
+
+
+
 
 	hasRole = (reqRole) => {
 		let roles = JSON.parse(localStorage.getItem("keyRole"));
@@ -79,34 +74,110 @@ class HomePage extends React.Component {
 		}
 		return false;
 	};
-	handleConvertedImage = (converted) => {
-
-		var hh = this.state.stories;
-		var username = this.state.ss[hh.length].username
+	handleConvertedImage = (converted, username) => {
 		
-		let st = { id: 1, stories: [] }
-		let storiji = {url: converted, header: {
-			heading: username,
-			subheading: 'CLOSE FRIENDS',
-			
-		},}
-		st.stories.push(storiji)
-		hh.push(st)
-		this.setState({
-			stories: hh,
-		});
-		this.setState({
-			convertedImage: converted,
-		});
+		var hh = this.state.stories;
+		this.setState({ br: this.state.br +1 });
+		if (this.state.usern === "") {
 
-
-
-		if (this.state.ss.length === hh.length) {
 			this.setState({
-				ready: true,
+				usern: username.username,
 			});
+
+			let st = { id: this.state.br, stories: [] }
+			let storiji = {
+				url: converted, header: {
+					heading: username.username,
+					subheading: 'CLOSE FRIENDS',
+
+				},
+			}
+			st.stories.push(storiji)
+			hh.push(st)
+			this.setState({
+				stories: hh,
+			});
+
+
+
+
+			if (this.state.brojac === hh.length) {
+				this.setState({
+					ready: true,
+				});
+			}
 		}
-		console.log(hh)
+
+		else if (this.state.usern == username.username) {
+
+			this.state.stories.forEach(l => {
+				l.stories.forEach(ll => {
+					console.log(ll)
+					if (ll.header.heading === username.username) {
+						
+						console.log(ll)
+						let storiji = {
+							url: converted, header: {
+								heading: username.username,
+								subheading: 'CLOSE FRIENDS',
+
+							},
+						}
+						
+						l.stories.push(storiji)
+						var pom =l
+						hh.pop(l)
+						hh.push(pom)
+
+					}
+
+				
+					this.setState({
+						stories: hh,
+					});
+
+				})
+			})
+
+
+
+
+
+			if (this.state.brojac === hh.length) {
+				this.setState({
+					ready: true,
+				});
+			}
+		}
+		else{
+			this.setState({
+				usern: username.username,
+			});
+
+			let st = { id:  this.state.br, stories: [] }
+			let storiji = {
+				url: converted, header: {
+					heading: username.username,
+					subheading: 'CLOSE FRIENDS',
+
+				},
+			}
+			st.stories.push(storiji)
+			hh.push(st)
+			this.setState({
+				stories: hh,
+			});
+
+
+
+
+			if (this.state.brojac === hh.length) {
+				this.setState({
+					ready: true,
+				});
+			}
+			console.log(hh)
+		}
 	}
 
 	handleLikesModalOpen = (postId) => {
@@ -196,6 +267,7 @@ class HomePage extends React.Component {
 		this.setState({ showWriteCommentModal: false });
 	}
 	onClickImage = () => {
+		alert(this.state.brojac)
 		this.setState({ showStories: true });
 	}
 
@@ -274,48 +346,75 @@ class HomePage extends React.Component {
 
 
 	componentDidMount() {
-		if(this.hasRole("*")) {
-			
+		if (this.hasRole("*")) {
+
 			this.setState({ userIsLogged: true });
 
 			let id = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length - 1)
-
-			Axios.get(BASE_URL_STORY + "/api/story/homePage/" + id)
+			Axios.get(BASE_URL_STORY + "/api/storyAlbum/homePage/" + id)
 
 				.then((res) => {
 					let list = [];
-					let st = [];
-					let luna = [];
-					
-					
+					let br = this.state.brojac;
 					res.data.forEach(story => {
-						//alert(story.CloseFriends)
+						br = br+1
 						let luna = [];
-						story.Stories.forEach(s => {
 
-							let aa = `data:image/jpg;base64,${s.Media}`
-							luna.push(aa)
-							//st.push(luna)
+						story.Albums.forEach(s => {
+
+							s.Media.forEach(media => {
+								let aa = `data:image/jpg;base64,${media}`
+								luna.push(aa)
+							});
 
 						});
 
-						let highliht1 = { id: res.data.id, username: story.UserUsername, storiess: luna };
+						let highliht1 = { id: this.state.br, username: story.UserUsername+"Album", storiess: luna };
 						list.push(highliht1)
+						this.setState({ br: br +1 });
+
 					});
-					//this.setState({ image: st });
-					this.setState({ ss: list });
-					//this.setState({ bla: luna });
+					this.setState({ ss: this.state.ss.concat(list) });
+					this.setState({ brojac: br });
+					console.log(list)
 
 				})
 				.catch((err) => {
 					console.log(err);
 				});
 
-			//this.setState({ showCommentsModal: true });
+				Axios.get(BASE_URL_STORY + "/api/story/homePage/" + id)
+	
+					.then((res) => {
+						let br = this.state.brojac;
+						let list = [];
+						let st = [];
+						let luna = [];
+						
+						res.data.forEach(story => {
+							br = br + 1
+							//alert(story.CloseFriends)
+							let luna = [];
+							story.Stories.forEach(s => {
+								let aa = `data:image/jpg;base64,${s.Media}`
+								luna.push(aa)
+	
+							});
+	
+							let highliht1 = { id: res.data.id, username: story.UserUsername, storiess: luna };
+							list.push(highliht1)
+						});
+						this.setState({ ss: this.state.ss.concat(list) });
+						this.setState({ brojac: br });
+					})
+					.catch((err) => {
+						console.log(err);
+					});
+	
 
 			this.handleGetPhotos(id)
 			this.handleGetAlbums(id)
-		}else {
+		} else {
 			this.setState({ userIsLogged: false });
 		}
 
@@ -448,7 +547,7 @@ class HomePage extends React.Component {
 			});
 	}
 	render() {
-
+	
 		return (
 			<React.Fragment>
 				<TopBar />
@@ -459,7 +558,7 @@ class HomePage extends React.Component {
 							<div hidden={this.state.hid}>
 								<ConvertImage
 									image={post}
-									onConversion={this.handleConvertedImage}
+									onConversion={e => this.handleConvertedImage(e, user)}
 
 								/>
 							</div>))}</div>
@@ -474,9 +573,9 @@ class HomePage extends React.Component {
 									<thead></thead>
 									<tbody>
 
-									<td><p> STORIES </p>  </td>
+										<td><p> STORIES </p>  </td>
 										{this.state.ss.map((post) => (
-											<td  id="td" style={{ width: "15em", height: "15em" ,marginLeft: "8em" }}>
+											<td id="td" style={{ width: "15em", height: "15em", marginLeft: "8em" }}>
 												<tr >
 													<img
 														class="td"
@@ -484,8 +583,8 @@ class HomePage extends React.Component {
 														style={{ borderRadius: "50%", margin: "2%" }}
 														width="100em"
 														height="100em"
-														max-width= "100%"
-														max-height= "100%"
+														max-width="100%"
+														max-height="100%"
 														alt="description"
 														onClick={this.onClickImage}
 													/>
@@ -496,7 +595,7 @@ class HomePage extends React.Component {
 
 											</td>
 										))}
-<td><p> ALBUM STORIES </p> </td>
+										<td><p> ALBUM STORIES </p> </td>
 
 
 									</tbody>
@@ -527,40 +626,40 @@ class HomePage extends React.Component {
 							/>
 						</div>
 
-					
-						</div>
-					</section>
 
-<div>
-		
+					</div>
+				</section>
+
+				<div>
+
 				</div>
 
 				<div>
-				<StoriesModal
-							show={this.state.showStories}
-							onCloseModal={this.handleStoriesClose}
-							stories={this.state.stories}
-							ready={this.state.ready}
-							count = {this.state.count}
-						/>
-                    <LikesModal
-					        show={this.state.showLikesModal}
-					        onCloseModal={this.handleLikesModalClose}
-					        header="People who liked"
-							peopleLikes = {this.state.peopleLikes}
-				    />
-                    <DislikesModal
-                         show={this.state.showDislikesModal}
-						 onCloseModal={this.handleDislikesModalClose}
-						 header="People who disliked"
-						 peopleDislikes = {this.state.peopleDislikes}
-				    />
-                    <CommentsModal
-                        show={this.state.showCommentsModal}
+					<StoriesModal
+						show={this.state.showStories}
+						onCloseModal={this.handleStoriesClose}
+						stories={this.state.stories}
+						ready={this.state.ready}
+						brojac = {this.state.brojac}
+					/>
+					<LikesModal
+						show={this.state.showLikesModal}
+						onCloseModal={this.handleLikesModalClose}
+						header="People who liked"
+						peopleLikes={this.state.peopleLikes}
+					/>
+					<DislikesModal
+						show={this.state.showDislikesModal}
+						onCloseModal={this.handleDislikesModalClose}
+						header="People who disliked"
+						peopleDislikes={this.state.peopleDislikes}
+					/>
+					<CommentsModal
+						show={this.state.showCommentsModal}
 						onCloseModal={this.handleCommentsModalClose}
 						header="Comments"
-						peopleComments = {this.state.peopleComments}
-                    />
+						peopleComments={this.state.peopleComments}
+					/>
 
 					<WriteCommentModal
 						show={this.state.showWriteCommentModal}
