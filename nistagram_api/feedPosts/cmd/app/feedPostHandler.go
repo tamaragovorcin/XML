@@ -1,9 +1,7 @@
 package main
 
 import (
-	"bufio"
 	"bytes"
-	"encoding/base64"
 	"encoding/json"
 	"feedPosts/pkg/dtos"
 	"feedPosts/pkg/models"
@@ -11,10 +9,12 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"image"
 	"image/jpeg"
+	"io"
 	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -146,7 +146,6 @@ func (app *application) getUsersFeedPosts(w http.ResponseWriter, r *http.Request
 	vars := mux.Vars(r)
 	userId := vars["userIdd"]
 	userIdPrimitive, _ := primitive.ObjectIDFromHex(userId)
-	allImages,_ := app.images.All()
 	allPosts, _ :=app.feedPosts.All()
 	usersFeedPosts,err :=findFeedPostsByUserId(allPosts,userIdPrimitive)
 	if err != nil {
@@ -155,11 +154,11 @@ func (app *application) getUsersFeedPosts(w http.ResponseWriter, r *http.Request
 	feedPostResponse := []dtos.FeedPostInfoDTO1{}
 	for _, feedPost := range usersFeedPosts {
 
-		images, err := findImageByPostId(allImages,feedPost.Id)
 		if err != nil {
 			app.serverError(w, err)
 		}
-		feedPostResponse = append(feedPostResponse, toResponse(feedPost, images.Media))
+		contentType := app.GetFileTypeByPostId(feedPost.Id)
+		feedPostResponse = append(feedPostResponse, toResponse(feedPost,contentType))
 
 	}
 
@@ -172,19 +171,52 @@ func (app *application) getUsersFeedPosts(w http.ResponseWriter, r *http.Request
 	w.WriteHeader(http.StatusOK)
 	w.Write(imagesMarshaled)
 }
+func(app *application) GetFileTypeByPostId(feedId primitive.ObjectID) string {
+	allImages,_ := app.images.All()
+	images, _ := findImageByPostId(allImages,feedId)
 
-func toResponse(feedPost models.FeedPost, image2 string) dtos.FeedPostInfoDTO1 {
-	f, _ := os.Open(image2)
+	file, _:=os.Open(images.Media)
 
-	reader := bufio.NewReader(f)
-	content, _ := ioutil.ReadAll(reader)
+	FileHeader:=make([]byte,512)
+	file.Read(FileHeader)
+	ContentType:= http.DetectContentType(FileHeader)
 
-	// Encode as base64.
-	encoded := base64.StdEncoding.EncodeToString(content)
+	return ContentType
 
-	// Print encoded data to console.
-	// ... The base64 image can be used as a data URI in a browser.
-	//fmt.Println(buffer.Bytes())
+
+}
+func(app *application) GetFileByPostId(w http.ResponseWriter, r *http.Request){
+	vars := mux.Vars(r)
+	feedId := vars["feedId"]
+	feedIdPrim, _ := primitive.ObjectIDFromHex(feedId)
+
+	allImages,_ := app.images.All()
+	images, err := findImageByPostId(allImages,feedIdPrim)
+
+	file, err:=os.Open(images.Media)
+	if err!=nil{
+		http.Error(w,"file not found",404)
+		return
+	}
+
+
+	FileHeader:=make([]byte,512)
+	file.Read(FileHeader)
+	ContentType:= http.DetectContentType(FileHeader)
+	FileStat,_:= file.Stat()
+	FileSize:= strconv.FormatInt(FileStat.Size(),10)
+	w.Header().Set("Content-Disposition", "attachment; filename="+images.Media)
+	w.Header().Set("Content-Type", ContentType)
+	w.Header().Set("Content-Length", FileSize)
+
+	file.Seek(0,0)
+	io.Copy(w,file)
+	return
+
+
+
+}
+func toResponse(feedPost models.FeedPost, contentType string) dtos.FeedPostInfoDTO1 {
 	taggedPeople :=getTaggedPeople(feedPost.Post.Tagged)
 	return dtos.FeedPostInfoDTO1{
 		Id: feedPost.Id,
@@ -193,8 +225,8 @@ func toResponse(feedPost models.FeedPost, image2 string) dtos.FeedPostInfoDTO1 {
 		Location : locationToString(feedPost.Post.Location),
 		Description : feedPost.Post.Description,
 		Hashtags : hashTagsToString(feedPost.Post.Hashtags),
-		Media : encoded,
 		Username : "",
+		ContentType: contentType,
 	}
 }
 
@@ -259,7 +291,6 @@ func (app *application) getFeedPostsByLocation(w http.ResponseWriter, r *http.Re
 	country := vars["country"]
 	city :=vars["city"]
 	street :=vars["street"]
-	allImages,_ := app.images.All()
 	locationFeedPosts, _ :=app.feedPosts.All()
 
 	if country!="n" || city!="n" || street!="n" {
@@ -267,13 +298,8 @@ func (app *application) getFeedPostsByLocation(w http.ResponseWriter, r *http.Re
 	}
 	feedPostResponse := []dtos.FeedPostInfoDTO1{}
 	for _, feedPost := range locationFeedPosts {
-
-		images, err := findImageByPostId(allImages,feedPost.Id)
-		if err != nil {
-			app.serverError(w, err)
-		}
-
-		feedPostResponse = append(feedPostResponse, toResponse(feedPost, images.Media))
+		contentType := app.GetFileTypeByPostId(feedPost.Id)
+		feedPostResponse = append(feedPostResponse, toResponse(feedPost,contentType))
 
 	}
 
@@ -379,7 +405,6 @@ func (app *application) getFeedPostsByHashTags(w http.ResponseWriter, r *http.Re
 	if err != nil {
 		app.serverError(w, err)
 	}
-	allImages,_ := app.images.All()
 	hashTagsFeedPosts, _ :=app.feedPosts.All()
 
 	if hashtags.HashTags!="n" {
@@ -389,12 +414,11 @@ func (app *application) getFeedPostsByHashTags(w http.ResponseWriter, r *http.Re
 	feedPostResponse := []dtos.FeedPostInfoDTO1{}
 	for _, feedPost := range hashTagsFeedPosts {
 
-		images, err := findImageByPostId(allImages,feedPost.Id)
 		if err != nil {
 			app.serverError(w, err)
 		}
-
-		feedPostResponse = append(feedPostResponse, toResponse(feedPost, images.Media))
+		contentType := app.GetFileTypeByPostId(feedPost.Id)
+		feedPostResponse = append(feedPostResponse, toResponse(feedPost,contentType))
 
 	}
 

@@ -10,6 +10,7 @@ import ImageUploader from 'react-images-upload';
 import Axios from "axios";
 import ModalDialog from "../components/ModalDialog";
 import AddPostModal from "../components/Posts/AddPostModal";
+import AddVideoPostModal from "../components/Posts/AddVideoPostModal";
 import WriteCommentModal from "../components/Posts/WriteCommentModal"
 import { BASE_URL_USER } from "../constants.js";
 import AddHighlightModal from "../components/Posts/AddHighlightModal";
@@ -51,7 +52,7 @@ class ProfilePage extends React.Component {
 		highlihts: [],
 		photos: [],
 		pictures: [],
-		videos : "",
+		videos : [],
 		video : "",
 		picture: "",
 		hiddenOne: true,
@@ -177,6 +178,22 @@ class ProfilePage extends React.Component {
 
 	
 
+	testVideo(pic,userId, feedId) {
+		alert("pogodio")
+	
+
+		const formData = new FormData();
+
+		formData.append("file", pic);
+		formData.append("test", "StringValueTest");
+
+		const options = {
+			method: "POST",
+			body: formData
+
+		};
+		fetch(BASE_URL_FEED + "/api/image/"+userId+"/"+feedId , options);
+	}
 	test(pic,userId, feedId) {
 		this.setState({
 			fileUploadOngoing: true
@@ -215,7 +232,6 @@ class ProfilePage extends React.Component {
 		fetch(BASE_URL_USER + "/api/user/profileImage/"+userId , options);
 	}
 	testStory(pic,userId, storyId) {
-
 		this.setState({
 			fileUploadOngoing: true
 		});
@@ -270,7 +286,6 @@ class ProfilePage extends React.Component {
 		this.handleGetStoryAlbums(id)
 		this.handleGetStories(id)
 		this.handleGetCollections(id)
-		// this.handleGetVideos(id)
 		this.handleGetHighlightAlbums(id)
 		this.handleGetCollectionAlbums(id)
 
@@ -331,10 +346,11 @@ class ProfilePage extends React.Component {
 			.catch((err) => {
 				console.log(err);
 			});
+		
+			
 	}
 
 	handleGetVideos = (id)=>{
-		alert("ubisu se")
 		Axios.get(BASE_URL_FEED + "/api/feed/usersVideos/" + id)
 			.then((res) => {
 				this.setState({ videos: res.data });
@@ -380,6 +396,14 @@ class ProfilePage extends React.Component {
 	handlePostModalOpen = () => {
 		this.setState({ showImageModal: true });
 		this.setState({pictures: []})
+	};
+	handleVideoPostModalClose = () => {
+		this.setState({ showVideoModal: false });
+		this.setState({selectedFile: ""})
+	};
+	handleVideoPostModalOpen = () => {
+		this.setState({ showVideoModal: true });
+		this.setState({selectedFile: ""})
 	};
 	getFollowing = ()=> {
 		let help = []
@@ -815,12 +839,16 @@ class ProfilePage extends React.Component {
 				}
 				let feedId = res.data;
 				
-				let userid = localStorage.getItem("userId");
+				let userid = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length-1)
 			
 				this.state.pictures.forEach((pic) => {
 					this.test(pic, userid, feedId);
 				});
-
+				if(this.state.selectedFile != ""){
+				this.testVideo(this.state.selectedFile, userid, feedId)
+				}
+				this.setState({ selectedFile : ""});
+				this.setState({ pictures: [] });
 				this.setState({ showImageModal: false, });
 				this.setState({ openModal: true });
 				this.setState({ textSuccessfulModal: "You have successfully added feed post." });
@@ -885,16 +913,19 @@ class ProfilePage extends React.Component {
 				}
 				let storyId = res.data;
 			
-				let userid = localStorage.getItem("userId");
+				let userid = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length-1)
 				let pics = [];
 
 				this.state.pictures.forEach((p) => {
 					pics.push(p.name);
-				});
+				}); 
 				this.state.pictures.forEach((pic) => {
 					this.testStory(pic, userid, storyId);
 				});
-
+				if(this.state.selectedFile != ""){
+				this.testStory(this.state.selectedFile, userid, storyId)
+				}
+				this.setState({selectedFile : ""});
 				this.setState({ pictures: [] });
 				this.setState({ showImageModal: false, });
 				this.setState({ openModal: true });
@@ -932,7 +963,6 @@ class ProfilePage extends React.Component {
 				this.state.pictures.forEach((pic) => {
 					this.testStory(pic, userid, storyId);
 				});
-
 				this.setState({ pictures: [] });
 				this.setState({ showImageModal: false, });
 				this.setState({ openModal: true });
@@ -1391,7 +1421,7 @@ class ProfilePage extends React.Component {
 		this.setState({showWriteCommentModalAlbum : false});
 	}
 	onChangeHandler = (event) => {
-        this.setState({
+		this.setState({
             selectedFile: event.target.files[0],
             loaded: 0,
         });
@@ -1399,26 +1429,7 @@ class ProfilePage extends React.Component {
     };
 
     handleSubmit = (event) => {
-		
-		let id = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length-1)
-		event.preventDefault();
-        const formData = new FormData();
-        const { selectedFile } = this.state;	
-		formData.append('inputFile', selectedFile);
-		Axios.post(BASE_URL_FEED + "/api/video/" + id, formData)
-			.then((res) => {
-
-				this.setState({ showImageModal: false, });
-				this.setState({ openModal: true });
-				this.setState({ textSuccessfulModal: "You have successfully added video feed post." });
-				// this.handleGetVideos(id)
-
-			})
-			.catch((err) => {
-				console.log(err);
-			});
         event.preventDefault();
-        
     };
 	handleTagsModalClose = () =>{
 		this.setState({ showTagsModal: false });
@@ -1434,21 +1445,7 @@ class ProfilePage extends React.Component {
 		const newList2 = this.state.followingUsers.filter((item) => item.Id !== event.value);
 		this.setState({ followingUsers: newList2 });		
 	};
-	handleConvertedImage = (converted) => {
-		console.log(converted)
-		alert("helo")
-		alert(converted)
 
-		/*	converted = converted.replace("webp", "jpg");
-			console.log(converted)
-			let hh = this.state.pictures;
-			hh.push(converted)
-			console.log(hh)
-			this.setState({
-				pictures: hh,
-			});*/
-
-	}
 	render() {
 		return (
 			<React.Fragment>
@@ -1457,18 +1454,7 @@ class ProfilePage extends React.Component {
 			
 
 				<section id="hero" className="d-flex align-items-top">
-				< div >
-                <form onSubmit={this.handleSubmit}>
-                    <label>
-                        Upload a file: <br /><br />
-                        <input type="file" name="file" onChange={this.onChangeHandler} />
-                    </label>
-                    <br /><br />
-                    <button type="submit">
-                        Upload
-                    </button>
-                </form >
-            </div >
+				
 				<div className="container">
 				<div className="d-flex align-items-top">
 					<div className="container" style={{ marginTop: "10rem", marginRight: "10rem" }}>
@@ -1503,7 +1489,11 @@ class ProfilePage extends React.Component {
 											</td>
 											
 											<td>
-												<button onClick={this.handlePostModalOpen} className="btn btn-outline-secondary btn-sm" style={{ marginBottom: "1rem" }}>Add new post/video</button>
+												<button onClick={this.handlePostModalOpen} className="btn btn-outline-secondary btn-sm" style={{ marginBottom: "1rem" }}>Add image post</button>
+
+											</td>
+											<td>
+												<button onClick={this.handleVideoPostModalOpen} className="btn btn-outline-secondary btn-sm" style={{ marginBottom: "1rem" }}>Add video post</button>
 
 											</td>
 										</div>
@@ -1642,6 +1632,34 @@ class ProfilePage extends React.Component {
 						handleDescriptionChange = {this.handleDescriptionChange}
 						handleHashtagsChange = {this.handleHashtagsChange}
 						handleAddTagsModal = {this.handleAddTagsModal}
+
+
+					/>
+					<AddVideoPostModal
+						show={this.state.showVideoModal}
+						onCloseModal={this.handleVideoPostModalClose}
+						header="New video post/story"
+						hiddenMultiple = {this.state.hiddenMultiple}
+						hiddenOne = {this.state.hiddenOne}
+						noPicture = {this.state.noPicture}
+						onDrop = {this.onDrop}
+
+						addressInput = {this.addressInput}
+						onYmapsLoad = {this.onYmapsLoad}
+						handleAddFeedPost = {this.handleAddFeedPost}
+						handleAddStoryPost = {this.handleAddStoryPost}
+						handleAddStoryPostCloseFriends = {this.handleAddStoryPostCloseFriends}
+						handleAddFeedPostAlbum = {this.handleAddFeedPostAlbum}
+						handleAddStoryPostAlbum= {this.handleAddStoryPostAlbum}
+						handleAddStoryPostAlbumCloseFriends = {this.handleAddStoryPostAlbumCloseFriends}
+						addressNotFoundError = {this.state.addressNotFoundError}
+						handleDescriptionChange = {this.handleDescriptionChange}
+						handleHashtagsChange = {this.handleHashtagsChange}
+						handleAddTagsModal = {this.handleAddTagsModal}
+
+						handleSubmit = {this.handleSubmit}
+						onChangeHandler = {this.onChangeHandler}
+
 					/>
 					 <AddHighlightModal
                           

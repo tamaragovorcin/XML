@@ -25,6 +25,8 @@ type StoryPostInfoDTO struct {
 	Description string
 	Hashtags    string
 	Media       []byte
+	Type 		string
+	ContentType string
 }
 type HighlightDTO struct {
 	Name string

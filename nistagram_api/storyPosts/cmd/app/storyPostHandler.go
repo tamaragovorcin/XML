@@ -3,16 +3,19 @@ package main
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"github.com/gorilla/mux"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"image"
 	"image/jpeg"
+	"io"
 	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
 	"storyPosts/pkg/dtos"
 	"storyPosts/pkg/models"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -111,10 +114,10 @@ func (app *application) deleteStoryPost(w http.ResponseWriter, r *http.Request) 
 
 
 func (app *application) getUsersStories(w http.ResponseWriter, r *http.Request)  {
+	fmt.Println("POGODIO JE METODU")
 	vars := mux.Vars(r)
 	userId := vars["userId"]
 	userIdPrimitive, _ := primitive.ObjectIDFromHex(userId)
-	allImages,_ := app.images.All()
 	allStories, _ :=app.storyPosts.All()
 	usersStoryPosts,err :=findStoriesByUserId(allStories,userIdPrimitive)
 	if err != nil {
@@ -123,12 +126,11 @@ func (app *application) getUsersStories(w http.ResponseWriter, r *http.Request) 
 	storyPostResponse := []dtos.StoryPostInfoDTO{}
 	for _, storyPost := range usersStoryPosts {
 
-		images, err := findImageByPostId(allImages,storyPost.Id)
 		if err != nil {
 			app.serverError(w, err)
 		}
-
-		storyPostResponse = append(storyPostResponse, toResponseStoryPost(storyPost, images.Media))
+		contentType := app.GetFileTypeByPostId(storyPost.Id)
+		storyPostResponse = append(storyPostResponse, toResponseStoryPost1(storyPost,contentType))
 
 	}
 
@@ -140,8 +142,53 @@ func (app *application) getUsersStories(w http.ResponseWriter, r *http.Request) 
 	w.WriteHeader(http.StatusOK)
 	w.Write(imagesMarshaled)
 }
+func(app *application) GetFileByPostId(w http.ResponseWriter, r *http.Request){
+	vars := mux.Vars(r)
+	feedId := vars["storyId"]
+	feedIdPrim, _ := primitive.ObjectIDFromHex(feedId)
+
+	allImages,_ := app.images.All()
+	images, err := findImageByPostId(allImages,feedIdPrim)
+
+	file, err:=os.Open(images.Media)
+	if err!=nil{
+		http.Error(w,"file not found",404)
+		return
+	}
 
 
+	FileHeader:=make([]byte,512)
+	file.Read(FileHeader)
+	ContentType:= http.DetectContentType(FileHeader)
+	FileStat,_:= file.Stat()
+	FileSize:= strconv.FormatInt(FileStat.Size(),10)
+	w.Header().Set("Content-Disposition", "attachment; filename="+images.Media)
+	w.Header().Set("Content-Type", ContentType)
+	w.Header().Set("Content-Length", FileSize)
+
+	file.Seek(0,0)
+	io.Copy(w,file)
+	return
+
+
+
+}
+func(app *application) GetFileTypeByPostId(feedId primitive.ObjectID) string {
+	allImages,_ := app.images.All()
+	images, _ := findImageByPostId(allImages,feedId)
+
+	file, _:=os.Open(images.Media)
+
+	FileHeader:=make([]byte,512)
+	file.Read(FileHeader)
+	ContentType:= http.DetectContentType(FileHeader)
+	fmt.Println("CONTENT TYPE")
+	fmt.Println(ContentType)
+
+	return ContentType
+
+
+}
 func findImageByPostId(images []models.Image, id primitive.ObjectID) (models.Image, error) {
 	imageStoryPost := models.Image{}
 
@@ -180,10 +227,24 @@ func toResponseStoryPost(storyPost models.StoryPost, image2 string) dtos.StoryPo
 		Location : locationToString(storyPost.Post.Location),
 		Description : storyPost.Post.Description,
 		Hashtags : hashTagsToString(storyPost.Post.Hashtags),
-		Media : buffer.Bytes(),
+		Media:  buffer.Bytes(),
+	}
+}
+func toResponseStoryPost1(storyPost models.StoryPost, contentType string) dtos.StoryPostInfoDTO {
+	taggedPeople :=getTaggedPeople(storyPost.Post.Tagged)
+
+	return dtos.StoryPostInfoDTO{
+		Id: storyPost.Id,
+		DateTime : strings.Split(storyPost.Post.DateTime.String(), " ")[0],
+		Tagged : taggedPeople,
+		Location : locationToString(storyPost.Post.Location),
+		Description : storyPost.Post.Description,
+		Hashtags : hashTagsToString(storyPost.Post.Hashtags),
+		ContentType:  contentType,
 
 	}
 }
+
 func getTaggedPeople(tagged []primitive.ObjectID) string {
 	tagsString  := "Tagged: "
 	for _, tag := range tagged {
