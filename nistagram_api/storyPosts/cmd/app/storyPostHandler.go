@@ -213,49 +213,6 @@ func hashTagsToString(hashtags []string) string {
 	return hashTagString
 }
 
-func (app *application) getStoriesForHomePage(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-	userId := vars["userId"]
-	userIdPrimitive, _ := primitive.ObjectIDFromHex(userId)
-
-	allImages,_ := app.images.All()
-	allPosts, _ :=app.storyPosts.All()
-	storiesForHomePage,err :=findStoryPostsForHomePage(allPosts,userIdPrimitive)
-	if err != nil {
-		app.serverError(w, err)
-	}
-	storyPostsResponse := []dtos.StoryPostInfoHomePageDTO{}
-	for _, storyPost := range storiesForHomePage {
-
-		images, err := findImageByPostId(allImages,storyPost.Id)
-		if err != nil {
-			app.serverError(w, err)
-		}
-		userInList :=getIndexInListOfUsersStories(userIdPrimitive,storyPostsResponse)
-		if userInList==-1 {
-			userUsername := getUserUsername(storyPost.Post.User)
-			userId := storyPost.Post.User
-			stories := []dtos.StoryPostInfoDTO{}
-			var dto = dtos.StoryPostInfoHomePageDTO{
-				UserId:       userId,
-				UserUsername: userUsername,
-				Stories:      append(stories, toResponseStoryPost(storyPost, images.Media)),
-			}
-			storyPostsResponse = append(storyPostsResponse, dto)
-		}else if userInList!=-1 {
-			existingDto :=storyPostsResponse[userInList]
-			existingDto.Stories = append(existingDto.Stories, toResponseStoryPost(storyPost, images.Media))
-		}
-	}
-
-	imagesMarshaled, err := json.Marshal(storyPostsResponse)
-	if err != nil {
-		app.serverError(w, err)
-	}
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	w.Write(imagesMarshaled)
-}
 func getIndexInListOfUsersStories(idPrimitive primitive.ObjectID, listStories []dtos.StoryPostInfoHomePageDTO) int {
 	for num, story := range listStories {
 		if story.UserId.String()==idPrimitive.String() {
@@ -382,4 +339,109 @@ func toResponseAlbum(feedAlbum models.AlbumStory, imageList []string) dtos.Story
 		Username : "",
 
 	}
+}
+
+
+func (app *application) getStoriesForHomePage(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	userId := vars["userId"]
+	userIdPrimitive, _ := primitive.ObjectIDFromHex(userId)
+
+	allImages,_ := app.images.All()
+	allPosts, _ :=app.storyPosts.All()
+	storiesForHomePage,err :=findStoryPostsForHomePage(allPosts,userIdPrimitive)
+	if err != nil {
+		app.serverError(w, err)
+	}
+	storyPostsResponse := []dtos.StoryPostInfoHomePageDTO{}
+	for _, storyPost := range storiesForHomePage {
+
+		images, err := findImageByPostId(allImages,storyPost.Id)
+		if err != nil {
+			app.serverError(w, err)
+		}
+		userInList :=getIndexInListOfUsersStories(userIdPrimitive,storyPostsResponse)
+		if userInList==-1 {
+			userUsername := getUserUsername(storyPost.Post.User)
+			userId := storyPost.Post.User
+
+
+			inClose := false
+			closeFriends := getListCloseFriends(userId.String())
+			app.infoLog.Printf("idddddddddddDDDDDDDDDD." , userId.String())
+			app.infoLog.Printf("Evo",closeFriends )
+			for _, storyPost := range closeFriends {
+				app.infoLog.Printf("CLOSEEEEEEEE",storyPost )
+			}
+
+
+
+			if userIsCloseFriends(userIdPrimitive.String(), closeFriends){
+				inClose = true
+			}
+
+
+
+
+			stories := []dtos.StoryPostInfoDTO{}
+			//ako je slika close friends proveri da li sam u close friend
+			var dto = dtos.StoryPostInfoHomePageDTO{
+				UserId:       userId,
+				UserUsername: userUsername,
+				Stories:      append(stories, toResponseStoryPost(storyPost, images.Media)),
+				CloseFriends: inClose,
+
+			}
+			storyPostsResponse = append(storyPostsResponse, dto)
+		}else if userInList!=-1 {
+			existingDto :=storyPostsResponse[userInList]
+			existingDto.Stories = append(existingDto.Stories, toResponseStoryPost(storyPost, images.Media))
+		}
+	}
+
+	imagesMarshaled, err := json.Marshal(storyPostsResponse)
+	if err != nil {
+		app.serverError(w, err)
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	w.Write(imagesMarshaled)
+}
+func getListCloseFriends(id string) []string { //id usera ciji je stori
+
+	resp, err := http.Get("http://localhost:4006/api/user/closeFriends/"+id)
+	log.Println("unable to encode image.", resp)
+	if err != nil {
+		log.Fatalln(err)
+	}
+	body, err := ioutil.ReadAll(resp.Body)
+
+	if err != nil {
+		log.Fatalln(err)
+	}
+	var listStrings []string
+	sb := string(body)
+	if sb!="" {
+		listStrings =strings.Split(sb, ",")
+	}
+	return listStrings
+}
+
+
+
+func userIsCloseFriends(user2 string, ids []string) bool { // svoj id
+
+	for index, id := range ids {
+		if index==0 {
+			id = id[1:]
+		}
+		if index == len(ids)-1 {
+			id = id[:len(id)-1]
+		}
+
+		if id==user2 {
+			return true
+		}
+	}
+	return false
 }
