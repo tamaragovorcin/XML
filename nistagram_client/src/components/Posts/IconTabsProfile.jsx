@@ -569,7 +569,17 @@ render(){
                             </td>
                             
                           </tr>
-                          
+                          <tr  style={{ width: "100%" }}>
+                            <td>
+                              <button onClick={() =>  this.props.handleLikesModalOpen(post.Id)} className="btn btn-outline-secondary btn-sm" style={{ marginBottom: "1rem" , marginLeft:"4rem"}}><label>likes</label></button>
+                            </td>
+                            <td>
+                            <button onClick={() =>  this.props.handleDislikesModalOpen(post.Id)} className="btn btn-outline-secondary btn-sm" style={{ marginBottom: "1rem",marginLeft:"4rem" }}><label > dislikes</label></button>
+                            </td>
+                            <td>
+                              <button onClick={() =>  this.props.handleCommentsModalOpen(post.Id)} className="btn btn-outline-secondary btn-sm" style={{ marginBottom: "1rem",marginLeft:"4rem" }}><label >Comments</label></button>
+                            </td>
+                          </tr>
                             <br/>
                             <br/>
                             <br/>
@@ -664,7 +674,17 @@ render(){
                             </td>
                             
                           </tr>
-                          
+                          <tr  style={{ width: "100%" }}>
+                                <td>
+                                  <button onClick={() =>  this.props.handleLikesModalOpenAlbum(post.Id)} className="btn btn-outline-secondary btn-sm" style={{ marginBottom: "1rem" , marginLeft:"4rem"}}><label>likes</label></button>
+                                </td>
+                                <td>
+                                <button onClick={() =>  this.props.handleDislikesModalOpenAlbum(post.Id)} className="btn btn-outline-secondary btn-sm" style={{ marginBottom: "1rem",marginLeft:"4rem" }}><label > dislikes</label></button>
+                                </td>
+                                <td>
+                                  <button onClick={() =>  this.props.handleCommentsModalOpenAlbum(post.Id)} className="btn btn-outline-secondary btn-sm" style={{ marginBottom: "1rem",marginLeft:"4rem" }}><label >Comments</label></button>
+                                </td>
+                            </tr>
                             <br/>
                             <br/>
                             <br/>

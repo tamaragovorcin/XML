@@ -213,6 +213,54 @@ func hashTagsToString(hashtags []string) string {
 	return hashTagString
 }
 
+<<<<<<< HEAD
+=======
+func (app *application) getStoriesForHomePage(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	userId := vars["userId"]
+	userIdPrimitive, _ := primitive.ObjectIDFromHex(userId)
+
+	allImages,_ := app.images.All()
+	allPosts, _ :=app.storyPosts.All()
+	storiesForHomePage,err :=findStoryPostsForHomePage(allPosts,userIdPrimitive)
+	if err != nil {
+		app.serverError(w, err)
+	}
+	storyPostsResponse := []dtos.StoryPostInfoHomePageDTO{}
+	for _, storyPost := range storiesForHomePage {
+		if iAmFollowingThisUser(userId,storyPost.Post.User.Hex()) {
+
+			images, err := findImageByPostId(allImages, storyPost.Id)
+			if err != nil {
+				app.serverError(w, err)
+			}
+			userInList := getIndexInListOfUsersStories(userIdPrimitive, storyPostsResponse)
+			if userInList == -1 {
+				userUsername := getUserUsername(storyPost.Post.User)
+				userId := storyPost.Post.User
+				stories := []dtos.StoryPostInfoDTO{}
+				var dto = dtos.StoryPostInfoHomePageDTO{
+					UserId:       userId,
+					UserUsername: userUsername,
+					Stories:      append(stories, toResponseStoryPost(storyPost, images.Media)),
+				}
+				storyPostsResponse = append(storyPostsResponse, dto)
+			} else if userInList != -1 {
+				existingDto := storyPostsResponse[userInList]
+				existingDto.Stories = append(existingDto.Stories, toResponseStoryPost(storyPost, images.Media))
+			}
+		}
+	}
+
+	imagesMarshaled, err := json.Marshal(storyPostsResponse)
+	if err != nil {
+		app.serverError(w, err)
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	w.Write(imagesMarshaled)
+}
+>>>>>>> 3129f945b4460557068bfcc13d891fc94e83cb01
 func getIndexInListOfUsersStories(idPrimitive primitive.ObjectID, listStories []dtos.StoryPostInfoHomePageDTO) int {
 	for num, story := range listStories {
 		if story.UserId.String()==idPrimitive.String() {
@@ -341,6 +389,7 @@ func toResponseAlbum(feedAlbum models.AlbumStory, imageList []string) dtos.Story
 	}
 }
 
+<<<<<<< HEAD
 
 func (app *application) getStoriesForHomePage(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
@@ -444,4 +493,33 @@ func userIsCloseFriends(user2 string, ids []string) bool { // svoj id
 		}
 	}
 	return false
+=======
+func iAmFollowingThisUser(logged string, userWithPost string) bool {
+
+	postBody, _ := json.Marshal(map[string]string{
+		"follower":  logged,
+		"following": userWithPost,
+	})
+	responseBody := bytes.NewBuffer(postBody)
+	//Leverage Go's HTTP Post function to make request
+	resp, err := http.Post("http://localhost:4005/api/checkInteraction", "application/json", responseBody)
+	//Handle Error
+	if err != nil {
+		log.Fatalf("An Error Occured %v", err)
+	}
+	defer resp.Body.Close()
+	//Read the response body
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		log.Fatalln(err)
+	}
+	sb := string(body)
+	sbbtext := strings.ToLower(strings.Trim(sb," \r\n"))
+
+	if sbbtext=="true" {
+		return true
+	} else {
+		return false
+	}
+>>>>>>> 3129f945b4460557068bfcc13d891fc94e83cb01
 }

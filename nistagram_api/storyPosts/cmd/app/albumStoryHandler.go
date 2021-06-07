@@ -103,25 +103,27 @@ func (app *application) getStoryAlbumsForHomePage(w http.ResponseWriter, r *http
 	}
 	storyAlbumsResponse := []dtos.StoryAlbumInfoHomePageDTO{}
 	for _, albumPost := range storiesForHomePage {
+		if iAmFollowingThisUser(userId,albumPost.Post.User.Hex()) {
 
-		images, err := findAlbumByPostId(allImages,albumPost.Id)
-		if err != nil {
-			app.serverError(w, err)
-		}
-		userInList :=getIndexInListOfUsersStoryAlbums(userIdPrimitive,storyAlbumsResponse)
-		if userInList==-1 {
-			userUsername := getUserUsername(albumPost.Post.User)
-			userId := albumPost.Post.User
-			albums := []dtos.StoryAlbumInfoDTO{}
-			var dto = dtos.StoryAlbumInfoHomePageDTO{
-				UserId:       userId,
-				UserUsername: userUsername,
-				Albums:      append(albums, toResponseAlbum(albumPost, images)),
+			images, err := findAlbumByPostId(allImages, albumPost.Id)
+			if err != nil {
+				app.serverError(w, err)
 			}
-			storyAlbumsResponse = append(storyAlbumsResponse, dto)
-		}else if userInList!=-1 {
-			existingDto :=storyAlbumsResponse[userInList]
-			existingDto.Albums = append(existingDto.Albums, toResponseAlbum(albumPost, images))
+			userInList := getIndexInListOfUsersStoryAlbums(userIdPrimitive, storyAlbumsResponse)
+			if userInList == -1 {
+				userUsername := getUserUsername(albumPost.Post.User)
+				userId := albumPost.Post.User
+				albums := []dtos.StoryAlbumInfoDTO{}
+				var dto = dtos.StoryAlbumInfoHomePageDTO{
+					UserId:       userId,
+					UserUsername: userUsername,
+					Albums:       append(albums, toResponseAlbum(albumPost, images)),
+				}
+				storyAlbumsResponse = append(storyAlbumsResponse, dto)
+			} else if userInList != -1 {
+				existingDto := storyAlbumsResponse[userInList]
+				existingDto.Albums = append(existingDto.Albums, toResponseAlbum(albumPost, images))
+			}
 		}
 	}
 

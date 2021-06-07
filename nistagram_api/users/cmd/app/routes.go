@@ -9,6 +9,8 @@ func (app *application) routes() *mux.Router {
 	r := mux.NewRouter()
 
 	r.HandleFunc("/api/", app.getAllUsers).Methods("GET")
+	r.HandleFunc("/api/all/{userId}", app.getAllUsersWithoutLogged).Methods("GET")
+
 	r.HandleFunc("/api/{id}", app.findUserByID).Methods("GET")
 	r.HandleFunc("/api/user/update/", app.updateUser).Methods("POST")
 	r.HandleFunc("/api/", app.insertUser).Methods("POST")

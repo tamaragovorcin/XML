@@ -113,6 +113,34 @@ func (app *application) getAllUsers(w http.ResponseWriter, r *http.Request) {
 	w.Write(b)
 }
 
+func (app *application) getAllUsersWithoutLogged(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	vars := mux.Vars(r)
+
+	user := vars["userId"]
+	users, err := app.users.GetAll()
+	if err != nil {
+		app.serverError(w, err)
+	}
+	userWithoutLogged := []models.User{}
+	for _, oneUser := range users {
+
+		if oneUser.Id.Hex()!=user {
+			userWithoutLogged = append(userWithoutLogged,oneUser)
+		}
+	}
+
+	b, err := json.Marshal(userWithoutLogged)
+	if err != nil {
+		app.serverError(w, err)
+	}
+
+	app.infoLog.Println("Users have been listed")
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	w.Write(b)
+}
 func (app *application) search(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	vars := mux.Vars(r)
@@ -319,6 +347,7 @@ func (app *application) insertUser(w http.ResponseWriter, r *http.Request) {
 			Biography:          m.Biography,
 			Private:            m.Private,
 			Verified:           false,
+			Website: m.Website,
 		}
 
 		insertResult, err := app.users.Insert(user)
@@ -327,8 +356,6 @@ func (app *application) insertUser(w http.ResponseWriter, r *http.Request) {
 		}
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
-		fmt.Println("---------------------------------------------------------------------")
-		fmt.Println(insertResult)
 		idMarshaled, err := json.Marshal(insertResult.InsertedID)
 		fmt.Println(idMarshaled)
 
@@ -355,14 +382,18 @@ func (app *application) updateUser(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			app.serverError(w, err)
 		}
-	intId, err := primitive.ObjectIDFromHex(m.Id)
+		sb := m.Id
+		sb = sb[1:]
+		sb = sb[:len(sb)-1]
+	intId, err := primitive.ObjectIDFromHex(sb)
 		if err != nil {
 			fmt.Println(err)
 			os.Exit(2)
 		}
 
 		uss, err := app.users.FindByID(intId)
-		if uss == nil {
+
+	if uss == nil {
 			app.infoLog.Println("User not found")
 		}
 
@@ -370,7 +401,6 @@ func (app *application) updateUser(w http.ResponseWriter, r *http.Request) {
 			app.infoLog.Println("Invalid email")
 		}
 		var profileInformation = models.ProfileInformation{
-			Id: uss.Id,
 			Name: m.Name,
 			LastName: m.LastName,
 			Email:       m.Email,
@@ -380,17 +410,18 @@ func (app *application) updateUser(w http.ResponseWriter, r *http.Request) {
 			DateOfBirth: m.DateOfBirth,
 		}
 
-
 		var user = models.User{
-			Id: uss.Id,
+			Id: intId,
 			ProfileInformation: profileInformation,
 			Biography: m.Biography,
 			Private: m.Private,
-			Verified: false,
+			Verified: uss.Verified,
+			Website: m.Website,
 		}
 
 		insertResult, err := app.users.Update(user)
-		if err != nil {
+
+	if err != nil {
 			app.serverError(w, err)
 		}
 

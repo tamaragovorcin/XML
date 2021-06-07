@@ -79,7 +79,7 @@ class EditProfile extends Component {
 							phoneNumber : res.data.ProfileInformation.PhoneNumber,
 							gender : res.data.ProfileInformation.Gender,
 							dateOfBirth  : res.data.ProfileInformation.DateOfBirth,
-							webSite : res.data.WebSite,
+							webSite : res.data.Website,
 							biography : res.data.Biography,
 							private : res.data.Private
 						});
@@ -187,7 +187,7 @@ class EditProfile extends Component {
 							PhoneNumber : this.state.phoneNumber,
 							Gender : this.state.gender,
 							DateOfBirth  : this.state.dateOfBirth,
-							WebSite : this.state.webSite,
+							Website : this.state.webSite,
 							Biography : this.state.biography,
 							Private : this.state.private
         };
@@ -331,7 +331,7 @@ class EditProfile extends Component {
 									<div className="form-group controls mb-0 pb-2" style={{ color: "#6c757d", opacity: 1 }}>
 										<label>Email address:</label>
 										<input
-											readOnly
+											
 											className="form-control-plaintext"
 											id="email"
 											type="text"
@@ -354,6 +354,7 @@ class EditProfile extends Component {
 										Phone number must be entered.
 									</div>
 								</div>
+								
 								<div className="control-group">
 									<div className="form-group controls mb-0 pb-2" style={{ color: "#6c757d", opacity: 1 }}>
 										<label>Date of birth:</label>
