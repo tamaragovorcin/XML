@@ -33,6 +33,7 @@ function App() {
 				<Link exact to="/closeFriends" path="/closeFriends" component={CloseFriends} />
 				<Link exact to="/followRequests" path="/followRequests" component={FollowRequest} />
 
+
 			</Switch>
 	</Router>
   );

@@ -3,53 +3,42 @@ import Header from "../components/Header";
 import TopBar from "../components/TopBar";
 import { Link } from "react-router-dom";
 import playerLogo from "../static/coach.png";
-
-import { BASE_URL_FEED } from "../constants.js";
-import { BASE_URL_USER_INTERACTION } from "../constants.js";
+import IconTabsFollowerProfile from "../components/Posts/IconTabsFollowerProfile"
+import { BASE_URL_FEED, BASE_URL_STORY,BASE_URL_USER_INTERACTION } from "../constants.js";
+import Axios from "axios";
+import ModalDialog from "../components/ModalDialog";
+import WriteCommentModal from "../components/Posts/WriteCommentModal"
 import LikesModal from "../components/Posts/LikesModal"
 import DislikesModal from "../components/Posts/DislikesModal"
 import CommentsModal from "../components/Posts/CommentsModal"
-import Axios from "axios";
-import ModalDialog from "../components/ModalDialog";
-import AddPostModal from "../components/Posts/AddPostModal";
-import WriteCommentModal from "../components/Posts/WriteCommentModal"
-
 import { BASE_URL_USER } from "../constants.js";
-import { FiHeart } from "react-icons/fi";
-
-import { FaHeartBroken, FaRegCommentDots } from "react-icons/fa"
-import { BsBookmark } from "react-icons/bs"
+import AddPostToCollection from "../components/Posts/AddPostToCollection";
+import WriteCommentAlbumModal from "../components/Posts/WriteCommentAlbumModal"
 import { Lock } from "@material-ui/icons";
 import { Icon } from "@material-ui/core";
+import { isCompositeComponentWithType } from "react-dom/test-utils";
 class FollowerProfilePage extends React.Component {
-	constructor(props) {
-		super(props);
-
-		this.onDrop = this.onDrop.bind(this);
-		this.addressInput = React.createRef();
-
-	}
+	
 	state = {
 		following: true,
 		userId: "",
 		id: "",
-		username: "",
-		numberPosts: 0,
-		numberFollowing: 0,
-		numberFollowers: 0,
-		biography: "",
-		highlihts: [],
-		photos: [],
-		pictures: [],
-		picture: "",
-		hiddenOne: true,
-		hiddenMultiple: true,
-		noPicture: true,
+		username : "",
+		name: "",
+		lastName : "",
+		webSite : "",
+		biography : "",
+		private : false,
+		numberOfPosts : "",
+		numberOfFollowers : "",
+		numberOfFollowings : "",
+		photos : [],
+		albums : [],
+		stories : [],
+		highlights : [],
 		peopleLikes: [],
 		peopleDislikes: [],
 		comments: [],
-		coords: [],
-		addressNotFoundError: "none",
 		textSuccessfulModal: "",
 		showLikesModal: false,
 		showDislikesModal: false,
@@ -60,88 +49,48 @@ class FollowerProfilePage extends React.Component {
 		foundLocation: true,
 		description: "",
 		hashtags: "",
-		showWriteCommentModal: false
+		peopleComments : [],
+		coords: [],
+		addressNotFoundError: "none",
+		showWriteCommentModal : false,
+		storyAlbums : [],
+		showAddHighLightModal : false,
+		highlightNameError : "none",
+		collectionNameError : "none",
+		showAddStoryToHighLightModal : false,
+		showAddPostToCollection : false,
+		selectedStoryId : -1,
+		selectedPostId : -1,
+		hiddenStoriesForHighlight : true,
+		storiesForHightliht : [],
+		collections  :[],
+		postsForCollection : [],
+		hiddenStoriesForCollection : true,
+		showAddCollectionModal : false,
+		showWriteCommentModalAlbum : false,
+		followingThisUser : false,
+		allowPagePreview : false,
+		ableToFollowThisUser : false,
+		sentFollowRequest : false,
+		privateUser : false
 	}
-	onYmapsLoad = (ymaps) => {
-		this.ymaps = ymaps;
-		new this.ymaps.SuggestView(this.addressInput.current, {
-			provider: {
-				suggest: (request, options) => this.ymaps.suggest(request),
-			},
-		});
-	};
+	hasRole = (reqRole) => {
+		let roles = JSON.parse(localStorage.getItem("keyRole"));
 
+		if (roles === null) return false;
+
+		if (reqRole === "*") return true;
+
+		for (let role of roles) {
+			if (role === reqRole) return true;
+		}
+		return false;
+	};
 	fetchData = (id) => {
 		this.setState({
 			userId: id,
 		});
 	};
-
-	onDrop(picture) {
-		this.setState({
-			pictures: this.state.pictures.concat(picture),
-		});
-
-		let pomoc = this.state.pictures.length;
-		pomoc = pomoc + 1;
-		if (pomoc === 0) {
-			this.setState({
-				noPicture: true,
-			});
-			this.setState({
-				showImageModal: false,
-			});
-		}
-		else {
-			this.setState({
-				noPicture: false,
-			});
-			this.setState({
-				showImageModal: true,
-			});
-		}
-		if (pomoc === 1) {
-			this.setState({
-				hiddenOne: false,
-			});
-			this.setState({
-				hiddenMultiple: true,
-			});
-		}
-		else if (pomoc >= 2) {
-			this.setState({
-				hiddenOne: true,
-			});
-			this.setState({
-				hiddenMultiple: false,
-			});
-		}
-
-
-	}
-
-
-
-	test(pic, userId, feedId) {
-
-		this.setState({
-			fileUploadOngoing: true
-		});
-
-		const fileInput = document.querySelector("#fileInput");
-		const formData = new FormData();
-
-		formData.append("file", pic);
-		formData.append("test", "StringValueTest");
-
-		const options = {
-			method: "POST",
-			body: formData
-
-		};
-		fetch(BASE_URL_FEED + "/api/image/" + userId + "/" + feedId, options);
-	}
-
 
 	componentDidMount() {
 		var sentence = window.location.toString()
@@ -152,271 +101,466 @@ class FollowerProfilePage extends React.Component {
 
 
 		this.fetchData(s[5]);
-		let id = localStorage.getItem("userId")
-		alert(s[5])
 		Axios.get(BASE_URL_USER + "/api/" + s[5])
 			.then((res) => {
-				if (res.status === 401) {
-					this.setState({ errorHeader: "Bad credentials!", errorMessage: "Wrong username or password.", hiddenErrorAlert: false });
-				} else if (res.status === 500) {
-					this.setState({ errorHeader: "Internal server error!", errorMessage: "Server error.", hiddenErrorAlert: false });
-				} else {
-					this.setState({ numberPosts: 10 });
-					this.setState({ numberFollowing: 600 });
-					this.setState({ numberFollowers: 750 });
-					this.setState({ biography: res.data.Biography });
-					this.setState({ username: res.data.ProfileInformation.Username });
-					console.log(res.data)
-				}
+				this.setState({
+					id: res.data.Id,
+					username : res.data.ProfileInformation.Username,
+					name: res.data.ProfileInformation.Name,
+					lastName : res.data.ProfileInformation.LastName,
+					webSite : res.data.WebSite,
+					biography : res.data.Biography,
+					private : res.data.Private,
+					numberOfPosts : res.data.numberOfPosts,
+					numberOfFollowers : res.data.numberOfFollowers,
+					numberOfFollowings : res.data.numberOfFollowings
+				});
+
 			})
 			.catch((err) => {
 				console.log(err);
 			});
-
-		//this.handleGetBasicInfo()
-		this.handleGetHighlights()
-		this.handleGetPhotos()
+		this.handleGetHighlights(s[5])
+		this.handleGetFeedPosts(s[5])
+		this.handleGetStories(s[5])
+		this.handleGetAlbums(s[5])
+		this.handleGetStoryAlbums(s[5])
+		this.handleSetAllowPagePreview(s[5])
 
 	}
-	handleGetBasicInfo = () => {
+	handleSetAllowPagePreview = (id)=> {
+		console.log(this.hasRole("*"))
+		if(!this.hasRole("*")) {
+			console.log("fggggggggggggggggggggggggggg")
 
-		this.setState({ numberPosts: 10 });
-		this.setState({ numberFollowing: 600 });
-		this.setState({ numberFollowers: 750 });
-		this.setState({ biography: "bla bla bla" });
-		this.setState({ username: "USERNAME" });
+			this.setState({ followingThisUser: false});
+			this.setState({ sentFollowRequest: false});
+			this.setState({ ableToFollowThisUser: false});
+			Axios.get(BASE_URL_USER + "/api/user/privacy/"+id)
+			.then((res2) => {
+				this.setState({ privateUser: res2.data });
+				if( res2.data==="private") {
+					this.setState({ allowPagePreview: false });
+				}
+				else {
+					this.setState({ allowPagePreview: true });
+				}	
+			})
+			.catch((err) => {
+				console.log(err);
+			});
+		
+		}
+		else {
+			console.log("fggggggg11111111111111111111111111111111111111111111111111111111111gggggggggggggggggggg")
+
+			let loggedId = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length-1)
+			const followReguestDTO = { follower: loggedId, following : id};
+
+			Axios.post(BASE_URL_USER_INTERACTION + "/api/checkInteraction",followReguestDTO)
+				.then((res) => {
+				
+				this.setState({ followingThisUser: res.data });
+				Axios.get(BASE_URL_USER + "/api/user/privacy/"+id)
+					.then((res2) => {
+						this.setState({ privateUser: res2.data });
+						if(!res.data && res2.data==="private") {
+							this.setState({ allowPagePreview: false });
+						}
+						else {
+							this.setState({ allowPagePreview: true });
+						}
+						if(!res.data) {
+							Axios.post(BASE_URL_USER_INTERACTION + "/api/checkIfSentRequest",followReguestDTO)
+							.then((res3) => {
+								this.setState({ sentFollowRequest: res3.data });
+								if(res3.data) {
+									this.setState({ ableToFollowThisUser: false });
+								}
+								else {
+									this.setState({ ableToFollowThisUser: true });
+								}
+							}).catch((err) => {
+								console.log(err);
+							});
+						}
+						else {
+							this.setState({ sentFollowRequest: false });
+							this.setState({ ableToFollowThisUser: false });
+						}
+						
+			
+					})
+					.catch((err) => {
+						console.log(err);
+					});
+				
+				
+			})
+			.catch((err) => {
+				console.log(err);
+			});
+		}
+	}
+	handleAddCollectionClick = () => {
+		this.setState({ showAddCollectionModal: true });
+	};
+	handleOpenAddPostToCollectionModal = (postId)=> {
+		this.setState({ showAddPostToCollection: true });
+		this.setState({ selectedPostId: postId });
+	}
+	handleAddPostToCollectionModalClose = ()=> {
+		this.setState({ showAddPostToCollection: false });
+	}
+	addPostToCollection = (collectionId) => {
+		let postCollectionDTO = {
+			PostId : this.state.selectedPostId,
+			CollectionId : collectionId
+		}
+		Axios.post(BASE_URL_FEED + "/api/collection/addPost/", postCollectionDTO, {
+		}).then((res) => {
+			
+			this.setState({ showAddCollectionModal: false });
+			let id = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length-1)
+			this.handleGetCollections(id);
+			this.setState({ textSuccessfulModal: "You have successfully added post to collection." });
+			this.setState({ openModal: true });
+			this.setState({ showAddPostToCollection: false });
+
+		})
+		.catch((err) => {
+			console.log(err);
+		});
+	}
+	seeStoriesInHighlight = (stories)=> {
+		this.setState({ hiddenStoriesForHighlight: false });
+		this.setState({storiesForHightliht : stories})
+	}
+	handleLikesModalOpen = (postId)=> {
+		Axios.get(BASE_URL_FEED + "/api/feed/likes/"+postId)
+			.then((res) => {
+				this.setState({ peopleLikes: res.data });
+			})
+			.catch((err) => {
+				console.log(err);
+			});
+		this.setState({ showLikesModal: true });    
+	}
+	handleDislikesModalOpen = (postId)=> {
+		Axios.get(BASE_URL_FEED + "/api/feed/dislikes/"+postId)
+			.then((res) => {
+				this.setState({ peopleDislikes: res.data });
+			})
+			.catch((err) => {
+				console.log(err);
+			});
+		this.setState({ showDislikesModal: true });    
+	}
+	handleCommentsModalOpen = (postId)=> {
+		Axios.get(BASE_URL_FEED + "/api/feed/comments/"+postId)
+			.then((res) => {
+				this.setState({ peopleComments: res.data });
+			})
+			.catch((err) => {
+				console.log(err);
+			});
+		this.setState({ showCommentsModal: true });    
+	}
+	
+	handleLikesModalClose = ()=> {
+		this.setState({ showLikesModal: false });    
+	}
+	handleDislikesModalClose = ()=> {
+		this.setState({ showDislikesModal: false });    
+	}
+	handleCommentsModalClose = ()=> {
+		this.setState({ showCommentsModal: false });    
+	}
+	handleWriteCommentModalClose = ()=>{
+		this.setState({showWriteCommentModal : false});
+	}
+	
+	handleLike = (postId)=>{
+		let id = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length-1)
+
+		let postReactionDTO = {
+			PostId : postId,
+			UserId : id
+		}
+		Axios.post(BASE_URL_FEED + "/api/feed/like/", postReactionDTO, {
+		}).then((res) => {
+
+			this.setState({ textSuccessfulModal: "You have successfully liked the photo." });
+			this.setState({ openModal: true });
+
+		})
+		.catch((err) => {
+			console.log(err);
+		});
+	}
+	handleDislike = (postId)=>{
+		let id = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length-1)
+
+		let postReactionDTO = {
+			PostId : postId,
+			UserId : id
+		}
+		Axios.post(BASE_URL_FEED + "/api/feed/dislike/", postReactionDTO, {
+		}).then((res) => {
+
+			this.setState({ textSuccessfulModal: "You have successfully disliked the photo." });
+			this.setState({ openModal: true });
+
+		})
+		.catch((err) => {
+			console.log(err);
+		});
+	}
+	
+	handleAddComment =(comment) => {
+		let id = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length-1)
+
+		let commentDTO = {
+			PostId : this.state.selectedPostId,
+			UserId : id,
+			Content : comment
+
+		}
+		Axios.post(BASE_URL_FEED + "/api/feed/comment/", commentDTO, {
+		}).then((res) => {
+			
+			this.setState({ textSuccessfulModal: "You have successfully commented the photo." });
+			this.setState({ openModal: true });
+			this.setState({ showWriteCommentModal: false });
+
+
+		})
+		.catch((err) => {
+			console.log(err);
+		});
+	}
+	handleLikesModalOpenAlbum = (postId)=> {
+		Axios.get(BASE_URL_FEED + "/api/albumFeed/likes/"+postId)
+			.then((res) => {
+				this.setState({ peopleLikes: res.data });
+			})
+			.catch((err) => {
+				console.log(err);
+			});
+		this.setState({ showLikesModal: true });    
+	}
+	handleDislikesModalOpenAlbum = (postId)=> {
+		Axios.get(BASE_URL_FEED + "/api/albumFeed/dislikes/"+postId)
+			.then((res) => {
+				this.setState({ peopleDislikes: res.data });
+			})
+			.catch((err) => {
+				console.log(err);
+			});
+		this.setState({ showDislikesModal: true });    
+	}
+	handleCommentsModalOpenAlbum = (postId)=> {
+		Axios.get(BASE_URL_FEED + "/api/albumFeed/comments/"+postId)
+			.then((res) => {
+				this.setState({ peopleComments: res.data });
+			})
+			.catch((err) => {
+				console.log(err);
+			});
+		this.setState({ showCommentsModal: true });    
+	}
+	handleAddCommentAlbum =(comment) => {
+		let id = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length-1)
+
+		let commentDTO = {
+			PostId : this.state.selectedPostId,
+			UserId : id,
+			Content : comment
+
+		}
+		Axios.post(BASE_URL_FEED + "/api/albumFeed/comment/", commentDTO, {
+		}).then((res) => {
+			
+			this.setState({ textSuccessfulModal: "You have successfully commented the album." });
+			this.setState({ openModal: true });
+			this.setState({ showWriteCommentModalAlbum: false });
+
+
+		})
+		.catch((err) => {
+			console.log(err);
+		});
+	}
+	handleLikeAlbum = (postId)=>{
+		let id = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length-1)
+
+		let postReactionDTO = {
+			PostId : postId,
+			UserId : id
+		}
+		Axios.post(BASE_URL_FEED + "/api/albumFeed/like/", postReactionDTO, {
+		}).then((res) => {
+
+			this.setState({ textSuccessfulModal: "You have successfully liked the album." });
+			this.setState({ openModal: true });
+
+		})
+		.catch((err) => {
+			console.log(err);
+		});
+	}
+	handleDislikeAlbum= (postId)=>{
+		let id = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length-1)
+
+		let postReactionDTO = {
+			PostId : postId,
+			UserId : id
+		}
+		Axios.post(BASE_URL_FEED + "/api/albumFeed/dislike/", postReactionDTO, {
+		}).then((res) => {
+
+			this.setState({ textSuccessfulModal: "You have successfully disliked the album." });
+			this.setState({ openModal: true });
+
+		})
+		.catch((err) => {
+			console.log(err);
+		});
+	}
+	handleWriteCommentModalAlbum = (postId)=>{
+		this.setState({ selectedPostId: postId });
+		this.setState({showWriteCommentModalAlbum : true});
+	}
+	handleWriteCommentAlbumModalClose = ()=>{
+		this.setState({showWriteCommentModalAlbum : false});
 	}
 
-	handleGetHighlights = () => {
-		let highliht1 = { id: 1, name: "ITALY" };
-		let highliht2 = { id: 2, name: "AMERICA" };
-		let highliht3 = { id: 3, name: "SERBIA" };
-
-		let list = [];
-		list.push(highliht1)
-		list.push(highliht2)
-		list.push(highliht3)
-
-		this.setState({ highlihts: list });
+	handleGetStories = (id)=> {
+		Axios.get(BASE_URL_STORY + "/api/story/user/"+id)
+		.then((res) => {
+			this.setState({ stories: res.data });
+		})
+		.catch((err) => {
+			console.log(err);
+		});
 	}
 
-	handleGetPhotos = () => {
-		let id = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length - 1);
-		Axios.get(BASE_URL_FEED + "/api/feed/usersImages/" + id)
+	handleGetHighlights = (id) => {
+		Axios.get(BASE_URL_STORY + "/api/highlight/user/"+id)
+			.then((res) => {
+				this.setState({ highlights: res.data });
+			})
+			.catch((err) => {
+				console.log(err);
+			});
+	}
+	
+
+	handleGetFeedPosts = (id) => {
+		Axios.get(BASE_URL_FEED + "/api/feed/usersImages/"+id)
 			.then((res) => {
 				this.setState({ photos: res.data });
-				console.log(res.data);
 			})
 			.catch((err) => {
 				console.log(err);
 			});
+	}
+	handleGetAlbums = (id) => {
+		Axios.get(BASE_URL_FEED + "/api/feedAlbum/usersAlbums/"+id)
+			.then((res) => {
+				this.setState({ albums: res.data });
+			})
+			.catch((err) => {
+				console.log(err);
+			});
+	}
+
+	handleGetStoryAlbums = (id) => {
+		Axios.get(BASE_URL_STORY + "/api/storyAlbum/usersAlbums/"+id)
+			.then((res) => {
+				this.setState({ storyAlbums: res.data });
+			})
+			.catch((err) => {
+				console.log(err);
+			});
+	}
+
+	
+	
+	handleWriteCommentModal = (postId)=>{
+		this.setState({ selectedPostId: postId });
+		this.setState({showWriteCommentModal : true});
+	}
+	handleAddComment =(comment) => {
+		let id = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length-1)
+
+		let commentDTO = {
+			PostId : this.state.selectedPostId,
+			UserId : id,
+			Content : comment
+
+		}
+		Axios.post(BASE_URL_FEED + "/api/feed/comment/", commentDTO, {
+		}).then((res) => {
+			
+			this.setState({ textSuccessfulModal: "You have successfully commented the photo." });
+			this.setState({ openModal: true });
+			this.setState({ showWriteCommentModal: false });
 
 
+		})
+		.catch((err) => {
+			console.log(err);
+		});
 	}
-	handleDescriptionChange = (event) => {
-		this.setState({ description: event.target.value });
-	};
-	handleHashtagsChange = (event) => {
-		this.setState({ hashtags: event.target.value });
-	}
+
+
 	handleModalClose = () => {
 		this.setState({ openModal: false });
 	};
-	handlePostModalClose = () => {
-		this.setState({ showImageModal: false });
-	};
-	handlePostModalOpen = () => {
-		this.setState({ showImageModal: true });
-	};
-	handleLikesModalOpen = () => {
-		this.setState({ showLikesModal: true });
-	}
-	handleDislikesModalOpen = () => {
-		this.setState({ showDislikesModal: true });
-	}
-	handleCommentsModalOpen = () => {
-		this.setState({ showCommentsModal: true });
-	}
-	handleLikesModalClose = () => {
-		this.setState({ showLikesModal: false });
-	}
-	handleDislikesModalClose = () => {
-		this.setState({ showDislikesModal: false });
-	}
-	handleCommentsModalClose = () => {
-		this.setState({ showCommentsModal: false });
-	}
 
-	handleWriteCommentModalClose = () => {
-		this.setState({ showWriteCommentModal: false });
-	}
-	handleWriteCommentModal = () => {
-		this.setState({ showWriteCommentModal: true });
-	}
-	handleLike = () => {
-
-	}
-	handleDislike = () => {
-
-	}
-	handleSave = () => {
-
-	}
-	handleAddFeedPost = () => {
-
-		if (this.state.addressInput === "") {
-			const feedPostDTO = {
-				tagged: [],
-				description: this.state.description,
-				hashtags: this.state.hashtags,
-				location: this.state.addressLocation
-			};
-			this.sendRequestForFeed(feedPostDTO);
-
-		}
-		else {
-			let street;
-			let city;
-			let country;
-			let latitude;
-			let longitude;
-			this.ymaps
-				.geocode(this.addressInput.current.value, {
-					results: 1,
-				})
-				.then(function (res) {
-
-					if (typeof res.geoObjects.get(0) === "undefined") { this.setState({ foundLocation: false }); }
-					else {
-						var firstGeoObject = res.geoObjects.get(0),
-							coords = firstGeoObject.geometry.getCoordinates();
-						latitude = coords[0];
-						longitude = coords[1];
-						country = firstGeoObject.getCountry();
-						street = firstGeoObject.getThoroughfare();
-						city = firstGeoObject.getLocalities().join(", ");
-					}
-				}).then((res) => {
-					var locationDTO = {
-						street: street,
-						country: country,
-						town: city,
-						latitude: latitude,
-						longitude: longitude
-					}
-					let feedPostDTO = {
-						tagged: [],
-						description: this.state.description,
-						hashtags: this.state.hashtags,
-						location: locationDTO
-					};
-
-					if (this.state.foundLocation === false) {
-						this.setState({ addressNotFoundError: "initial" });
-					} else {
-						this.sendRequestForFeed(feedPostDTO);
-					}
-
-				});
+	
 
 
-		}
-
-
-	}
-	handleAddStoryPost = () => {
-
-	}
-	handleAddFeedPostAlbum = () => {
-
-	}
-	handleAddStoryPostAlbum = () => {
-
-	}
 	handleFollow = () => {
 		let id = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length-1);
-		const user1Id = {id: id}
-		const user2Id = {id : this.state.userId}
-		alert(this.state.userId);
-		
-		Axios.post(BASE_URL_USER_INTERACTION + "/api/createUser", user1Id)
-		.then((res) => {
-			
-				console.log(res.data)
-				
-			
-		})
-		.catch ((err) => {
-	console.log(err);
-});
-	Axios.post(BASE_URL_USER_INTERACTION + "/api/createUser", user2Id)
-				.then((res) => {
-					
-						console.log(res.data)
-						
-					
-				})
-				.catch ((err) => {
-			console.log(err);
-		});
+	
 		const followReguestDTO = { follower: id, following : this.state.userId};
-		Axios.post(BASE_URL_USER_INTERACTION + "/api/followRequest", followReguestDTO)
-				.then((res) => {
-					
-						console.log(res.data)
-						this.setState({ redirect: true });
-					
-				})
-				.catch ((err) => {
-			console.log(err);
-		});
+		if(this.state.privateUser==="private") {
 
-	}
-
-
-
-	sendRequestForFeed(feedPostDTO) {
-		let id = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length - 1);;
-		console.log(id)
-
-		Axios.post(BASE_URL_FEED + "/api/feed/" + id, feedPostDTO)
+			Axios.post(BASE_URL_USER_INTERACTION + "/api/followRequest", followReguestDTO)
 			.then((res) => {
-				if (res.status === 409) {
-					this.setState({
-						errorHeader: "Resource conflict!",
-						errorMessage: "Email already exist.",
-						hiddenErrorAlert: false,
-					});
-				} else if (res.status === 500) {
-					this.setState({ errorHeader: "Internal server error!", errorMessage: "Server error.", hiddenErrorAlert: false });
-				} else {
-					this.setState({ openModal: true });
-					this.setState({ redirect: true });
-				}
-				let feedId = res.data;
-				console.log(res.data);
-				console.log(res.status);
-				let userid = localStorage.getItem("userId");
-				let pics = [];
-
-				this.state.pictures.forEach((p) => {
-					pics.push(p.name);
-				});
-				this.state.pictures.forEach((pic) => {
-					this.test(pic, userid, feedId);
-				});
-
-				this.setState({ pictures: [] });
-				this.setState({ showImageModal: false, });
+				
+				this.handleSetAllowPagePreview(this.state.userId)
+				
+				this.setState({ textSuccessfulModal: "You have successfully sent follow request." });
 				this.setState({ openModal: true });
-				this.setState({ textSuccessfulModal: "You have successfully added feed post." });
 
 			})
-			.catch((err) => {
+			.catch ((err) => {
 				console.log(err);
 			});
+		}else {
+			Axios.post(BASE_URL_USER_INTERACTION + "/api/followPublic", followReguestDTO)
+			.then((res) => {
+				
+				this.handleSetAllowPagePreview(this.state.userId)
+				
+				this.setState({ textSuccessfulModal: "You are now following this user." });
+				this.setState({ openModal: true });
+
+			})
+			.catch ((err) => {
+				console.log(err);
+			});
+		}
+		
+
 	}
 
+
+
+	
 	render() {
 		return (
 			<React.Fragment>
@@ -446,27 +590,25 @@ class FollowerProfilePage extends React.Component {
 														<label >{this.state.username}</label>
 													</td>
 													<td>
-														<Link to="/userChangeProfile" className="btn btn-outline-secondary btn-sm">Edit profile</Link>
-													<Link onClick={this.handleFollow} className="btn btn-outline-success btn-sm">Follow</Link>
-
+														<div hidden={!this.state.followingThisUser}>
+															<button  className="btn btn-outline-success mt-1"  type="button"><i className="icofont-subscribe mr-1"></i>Following</button>
+														</div>
+														<div hidden={!this.state.ableToFollowThisUser}>
+															<button  className="btn btn-outline-primary mt-1" onClick={() => this.handleFollow()} type="button"><i className="icofont-subscribe mr-1"></i>Follow</button>
+														</div>
+														<div hidden={!this.state.sentFollowRequest}>
+															<button  className="btn btn-outline-warning mt-1"  type="button"><i className="icofont-subscribe mr-1"></i>Sent request</button>
+														</div>
 													</td>
 
 												</div>
-												<div>
-													<td>
-														<label ><b>{this.state.numberPosts}</b> posts</label>
-													</td>
-													<td>
-														<label ><b>{this.state.numberFollowers}</b> followers</label>
-													</td>
-													<td>
-														<label ><b>{this.state.numberFollowing}</b> following</label>
-													</td>
-
-												</div>
+											
 												<div>
 													<td>
 														<label >{this.state.biography}</label>
+													</td>
+													<td>
+														<label >{this.state.webSite}</label>
 													</td>
 												</div>
 
@@ -479,148 +621,114 @@ class FollowerProfilePage extends React.Component {
 								</table>
 							</div>
 						</div>
+						<div hidden={!this.state.allowPagePreview}>
+							<IconTabsFollowerProfile
+								photos = {this.state.photos}
+								handleLike = {this.handleLike}
+								handleDislike = {this.handleDislike}
+								handleWriteCommentModal = {this.handleWriteCommentModal}						
+								handleSave = {this.handleSave}
+								handleLikesModalOpen = {this.handleLikesModalOpen}
+								handleDislikesModalOpen = {this.handleDislikesModalOpen}
+								handleCommentsModalOpen = {this.handleCommentsModalOpen}
+
+								albums ={this.state.albums}
+								handleLikeAlbum = {this.handleLikeAlbum}
+								handleDislikeAlbum  = {this.handleDislikeAlbum }
+								handleWriteCommentModalAlbum  = {this.handleWriteCommentModalAlbum }						
+								handleLikesModalOpenAlbum  = {this.handleLikesModalOpenAlbum }
+								handleDislikesModalOpenAlbum  = {this.handleDislikesModalOpenAlbum}
+								handleCommentsModalOpenAlbum  = {this.handleCommentsModalOpenAlbum }
+
+								stories = {this.state.stories}
+								storyAlbums = {this.state.storyAlbums}
 
 
+								highlights = {this.state.highlights}
+								seeStoriesInHighlight = {this.seeStoriesInHighlight}
+								storiesForHightliht= {this.state.storiesForHightliht}
+								hiddenStoriesForHighlight = {this.state.hiddenStoriesForHighlight}
 
+								handleAddCollectionClick = {this.handleAddCollectionClick}
+								collections = {this.state.collections}
+								seePostsInCollection = {this.seePostsInCollection}
+								postsForCollection = {this.state.postsForCollection}
+								hiddenStoriesForCollection = {this.state.hiddenStoriesForCollection}
+								handleOpenAddPostToCollectionModal = {this.handleOpenAddPostToCollectionModal}
 
+							
+						/>
+						</div>
 
+						<div hidden={this.state.allowPagePreview}>
 
+							<div className="d-flex align-items-top p-3 mb-2 d-flex justify-content-center">
 
+								<label><b>This Account is Private</b></label>
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-						<div hidden={this.state.following}>
-
-							<div className="container-fluid testimonial-group d-flex align-items-top">
-								<div className="container-fluid scrollable" style={{ marginRight: "10rem", marginBottom: "5rem", marginTop: "5rem" }}>
-									<table className="table-responsive" style={{ width: "100%" }}>
-										<tbody>
-
-											<tr >
-												{this.state.highlihts.map((high) => (
-													<td id={high.id} key={high.id} style={{ width: "60em", marginLeft: "10em" }}>
-														<tr width="100em">
-															<img
-																className="img-fluid"
-																src={playerLogo}
-																style={{ borderRadius: "50%", margin: "2%" }}
-																width="60em"
-																alt="description"
-															/>
-														</tr>
-														<tr>
-															<label style={{ marginRight: "15px" }}>{high.username}</label>
-														</tr>
-													</td>
-
-												))}
-											</tr>
-
-
-										</tbody>
-									</table>
-								</div>
-							</div>
-							<div className="d-flex align-items-top">
-								<div className="container-fluid">
-
-									<table className="table">
-										<tbody>
-											{this.state.photos.map((post) => (
-
-												<tr id={post.id} key={post.id}>
-
-													<tr style={{ width: "100%" }}>
-														<td colSpan="3">
-															<img
-																className="img-fluid"
-																src={`data:image/jpg;base64,${post.Media}`}
-																width="100%"
-																alt="description"
-															/>
-														</td>
-													</tr>
-													<tr style={{ width: "100%" }}>
-														<td>
-															<button onClick={this.handleLike} className="btn btn-outline-secondary btn-sm" style={{ marginBottom: "1rem", height: "40px", marginLeft: "6rem" }}><FiHeart /></button>
-														</td>
-														<td>
-															<button onClick={this.handleDislike} className="btn btn-outline-secondary btn-sm" style={{ marginBottom: "1rem", height: "40px", marginLeft: "6rem" }}><FaHeartBroken /></button>
-
-														</td>
-														<td>
-															<button onClick={this.handleWriteCommentModal} className="btn btn-outline-secondary btn-sm" style={{ marginBottom: "1rem", height: "40px", marginLeft: "6rem" }}><FaRegCommentDots /></button>
-														</td>
-														<td>
-															<button onClick={this.handleSave} className="btn btn-outline-secondary btn-sm" style={{ marginBottom: "1rem", height: "40px" }}><BsBookmark /></button>
-														</td>
-													</tr>
-													<tr style={{ width: "100%" }}>
-														<td>
-															<button onClick={this.handleLikesModalOpen} className="btn btn-outline-secondary btn-sm" style={{ marginBottom: "1rem", marginLeft: "4rem" }}><label>likes</label></button>
-														</td>
-														<td>
-															<button onClick={this.handleDislikesModalOpen} className="btn btn-outline-secondary btn-sm" style={{ marginBottom: "1rem", marginLeft: "4rem" }}><label > dislikes</label></button>
-														</td>
-														<td>
-															<button onClick={this.handleCommentsModalOpen} className="btn btn-outline-secondary btn-sm" style={{ marginBottom: "1rem", marginLeft: "4rem" }}><label >Comments</label></button>
-														</td>
-													</tr>
-													<br />
-													<br />
-													<br />
-												</tr>
-
-											))}
-
-										</tbody>
-									</table>
-								</div>
 							</div>
 
-
-
-
-
-
-
-
-
+							<div className="d-flex justify-content-center h-100">
+								<Icon className="d-flex justify-content-center h-100 w-100"><Lock /></Icon>
+							</div>
 
 						</div>
 
 					</div>
 
-					<div hidden={!this.state.following}>
-
-													NE PRATITE SE
-						<div className="d-flex align-items-top p-3 mb-2 d-flex justify-content-center">
-							
-							<label><b>This Account is Private</b></label>
-							
-						</div>
-
-						<div className="d-flex justify-content-center h-100">
-							<Icon className="d-flex justify-content-center h-100 w-100"><Lock /></Icon>
-						</div>
-
-					</div>
+					
 
 				</section>
 				<div>
 
+					<LikesModal
+					        show={this.state.showLikesModal}
+					        onCloseModal={this.handleLikesModalClose}
+					        header="People who liked"
+							peopleLikes = {this.state.peopleLikes}
+				    />
+                    <DislikesModal
+                         show={this.state.showDislikesModal}
+						 onCloseModal={this.handleDislikesModalClose}
+						 header="People who disliked"
+						 peopleDislikes = {this.state.peopleDislikes}
+				    />
+                    <CommentsModal
+                        show={this.state.showCommentsModal}
+						onCloseModal={this.handleCommentsModalClose}
+						header="Comments"
+						peopleComments = {this.state.peopleComments}
+                    />
+					<WriteCommentModal
+                        show={this.state.showWriteCommentModal}
+						onCloseModal={this.handleWriteCommentModalClose}
+						header="Leave your comment"
+						handleAddComment = {this.handleAddComment}
+                    />
+					<WriteCommentAlbumModal
+                        show={this.state.showWriteCommentModalAlbum}
+						onCloseModal={this.handleWriteCommentAlbumModalClose}
+						header="Leave your comment"
+						handleAddCommentAlbum = {this.handleAddCommentAlbum}
+                    />
+                    <ModalDialog
+						show={this.state.openModal}
+						onCloseModal={this.handleModalClose}
+						header="Successful"
+						text={this.state.textSuccessfulModal}
+					/>
 				
+				
+				
+					  <AddPostToCollection
+                          
+					  
+						  show={this.state.showAddPostToCollection}
+						  onCloseModal={this.handleAddPostToCollectionModalClose}
+						  header="Add post to collection"
+						  addPostToCollection={this.addPostToCollection}
+						  collections = {this.state.collections}
+					  />
 
 				</div>
 

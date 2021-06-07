@@ -7,6 +7,7 @@ import HeadingAlert from "../components/HeadingAlert";
 
 import ModalDialog from "../components/ModalDialog";
 import { constants } from "../constants.js";
+import { BASE_URL_USER_INTERACTION } from "../constants.js";
 
 class RegisterPage extends Component {
 	state = {
@@ -150,7 +151,6 @@ class RegisterPage extends Component {
 			Private: this.state.private,
 		};
 
-		console.log(userDTO)
 		if (this.validateForm(userDTO)) {
 			Axios.post(`${constants.BASE_URL_USER}/api/`, userDTO)
 				.then((res) => {
@@ -166,8 +166,17 @@ class RegisterPage extends Component {
 					} else {
 						this.setState({ openModal: true });
 						//this.setState({ redirect: true })
-						console.log(res.data)
 					}
+					console.log("IDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD")
+					console.log(res.data)
+					const user1Id = {id: res.data}
+					Axios.post(BASE_URL_USER_INTERACTION + "/api/createUser", user1Id)
+					.then((res) => {
+							console.log(res.data)
+					})
+					.catch ((err) => {
+				console.log(err);
+			});
 				})
 				.catch((err) => {
 					if (err.response.status === 409) {

@@ -8,7 +8,7 @@ import (
 type FeedPostDTO struct {
 	User        string
 	Media       string
-	Tagged      []primitive.ObjectID
+	Tagged      []string
 	Location    models2.Location
 	Description string
 	Hashtags    string
@@ -23,7 +23,7 @@ type HashTagDTO struct {
 
 type PostInfoDTO struct {
 	DateTime    string
-	Tagged      []primitive.ObjectID
+	Tagged      string
 	Location    models2.Location
 	Description string
 	Hashtags    []string
@@ -33,7 +33,7 @@ type PostInfoDTO struct {
 type FeedPostInfoDTO struct {
 	Id          primitive.ObjectID
 	DateTime    string
-	Tagged      []primitive.ObjectID
+	Tagged      string
 	Location    string
 	Description string
 	Hashtags    string
@@ -58,7 +58,7 @@ type UserCollectionsDTO struct {
 type FeedAlbumInfoDTO struct {
 	Id          primitive.ObjectID
 	DateTime    string
-	Tagged      []primitive.ObjectID
+	Tagged      string
 	Location    string
 	Description string
 	Hashtags    string

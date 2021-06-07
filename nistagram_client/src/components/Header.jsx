@@ -66,8 +66,6 @@ class Header extends React.Component {
 				console.log(err)
 			});
 
-
-
 	};
 
 	render() {
@@ -95,12 +93,16 @@ class Header extends React.Component {
 
 					</div>
 
+<<<<<<< HEAD
 
 
 
 
 
 
+=======
+					
+>>>>>>> 8bcd6392bc6a5d638a456120214098aa2aafbf45
 					<nav className="nav-menu d-none d-lg-block">
 						<ul>
 							<li>
@@ -109,14 +111,14 @@ class Header extends React.Component {
 							<li  >
 								<Link to="/seacrh"><FaSearch /></Link>
 							</li>
-							<li  >
+							<li  hidden={!this.hasRole("*")}>
 								<Link to="/messages"><FiSend /></Link>
 							</li>
-							<li  >
-								<Link to="/follows"><AiOutlineHeart /></Link>
+							<li  hidden={!this.hasRole("*")}>
+								<Link to="/followRequest"><AiOutlineHeart /></Link>
 							</li>
 
-							<li className="drop-down">
+							<li className="drop-down" hidden={!this.hasRole("*")}>
 								<a href="#"><CgProfile /></a>
 								<ul>
 
@@ -161,7 +163,27 @@ class Header extends React.Component {
 					</nav>
 				</div>
 			</header>
-		);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+);
 
 	}
 }

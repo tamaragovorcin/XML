@@ -272,6 +272,7 @@ class HomePage extends React.Component {
 
 	componentDidMount() {
 
+
 		let id = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length - 1)
 
 		Axios.get(BASE_URL_STORY + "/api/story/homePage/" + id)
@@ -306,8 +307,26 @@ class HomePage extends React.Component {
 		this.handleGetAlbums(id)
 
 	}
+	
+	handleAddAllDataCollection = (id) =>{
+		Axios.post(BASE_URL_FEED + "/api/collection/allData/"+id)
+								.then((res) => {
+									if (res.status === 409) {
+										this.setState({
+											errorHeader: "Resource conflict!",
+											errorMessage: "Email already exist.",
+											hiddenErrorAlert: false,
+										});
+									} else if (res.status === 500) {
+										this.setState({ errorHeader: "Internal server error!", errorMessage: "Server error.", hiddenErrorAlert: false });
+									} 
+									
 
-
+								})
+								.catch((err) => {
+									console.log(err);
+								});
+	}
 
 	handleGetPhotos = (id) => {
 
@@ -405,8 +424,9 @@ class HomePage extends React.Component {
 		}).then((res) => {
 
 			this.setState({ textSuccessfulModal: "You have successfully commented the album." });
+			this.setState({ showWriteCommentModalAlbum: false });
+
 			this.setState({ openModal: true });
-			this.setState({ showWriteCommentModal: false });
 
 
 		})
@@ -493,25 +513,26 @@ class HomePage extends React.Component {
 				</div>
 
 				<div>
-
-					<LikesModal
-						show={this.state.showLikesModal}
-						onCloseModal={this.handleLikesModalClose}
-						header="People who liked the photo"
-						peopleLikes={this.state.peopleLikes}
-					/>
-					<DislikesModal
-						show={this.state.showDislikesModal}
-						onCloseModal={this.handleDislikesModalClose}
-						header="People who disliked the photo"
-						peopleDislikes={this.state.peopleDislikes}
-					/>
-					<CommentsModal
-						show={this.state.showCommentsModal}
+                        
+                    <LikesModal
+					        show={this.state.showLikesModal}
+					        onCloseModal={this.handleLikesModalClose}
+					        header="People who liked"
+							peopleLikes = {this.state.peopleLikes}
+				    />
+                    <DislikesModal
+                         show={this.state.showDislikesModal}
+						 onCloseModal={this.handleDislikesModalClose}
+						 header="People who disliked"
+						 peopleDislikes = {this.state.peopleDislikes}
+				    />
+                    <CommentsModal
+                        show={this.state.showCommentsModal}
 						onCloseModal={this.handleCommentsModalClose}
-						header="Comments on the photo"
-						peopleComments={this.state.peopleComments}
-					/>
+						header="Comments"
+						peopleComments = {this.state.peopleComments}
+                    />
+
 					<WriteCommentModal
 						show={this.state.showWriteCommentModal}
 						onCloseModal={this.handleWriteCommentModalClose}

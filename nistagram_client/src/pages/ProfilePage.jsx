@@ -17,8 +17,9 @@ import AddStoryToHighlightModal from "../components/Posts/AddStoryToHighlightMod
 import IconTabsProfile from "../components/Posts/IconTabsProfile"
 import AddCollectionModal  from "../components/Posts/AddCollectionModal";
 import AddPostToCollection from "../components/Posts/AddPostToCollection";
-
+import { BASE_URL_USER_INTERACTION } from "../constants.js";
 import WriteCommentAlbumModal from "../components/Posts/WriteCommentAlbumModal"
+import AddTagsModal from "../components/Posts/AddTagsModal";
 
 class ProfilePage extends React.Component {
 	constructor(props) {
@@ -48,6 +49,8 @@ class ProfilePage extends React.Component {
 		highlihts: [],
 		photos: [],
 		pictures: [],
+		videos : [],
+		video : "",
 		picture: "",
 		hiddenOne: true,
 		hiddenMultiple: true,
@@ -84,8 +87,13 @@ class ProfilePage extends React.Component {
 		postsForCollection : [],
 		hiddenStoriesForCollection : true,
 		showAddCollectionModal : false,
-		showWriteCommentModalAlbum : false
-
+		showWriteCommentModalAlbum : false,
+		selectedFile : "",
+		loaded : "",
+		followingUsers : [],
+		storyAlbums : [],
+		showTagsModal : false,
+		taggedOnPost : []
 	}
 	
 	handleAddCollectionClick = () => {
@@ -107,6 +115,7 @@ class ProfilePage extends React.Component {
 		this.setState({
 			pictures: this.state.pictures.concat(picture),
 		});
+
 		let pomoc = picture.length;
 		if(pomoc===0) {
 			this.setState({
@@ -246,6 +255,7 @@ class ProfilePage extends React.Component {
 		this.handleGetHighlights(id)
 		this.handleGetPhotos(id)
 		this.handleGetAlbums(id)
+		this.handleGetStoryAlbums(id)
 		this.handleGetStories(id)
 		this.handleGetCollections(id)
 
@@ -298,6 +308,15 @@ class ProfilePage extends React.Component {
 				console.log(err);
 			});
 	}
+	handleGetStoryAlbums = (id) => {
+		Axios.get(BASE_URL_STORY + "/api/storyAlbum/usersAlbums/"+id)
+			.then((res) => {
+				this.setState({ storyAlbums: res.data });
+			})
+			.catch((err) => {
+				console.log(err);
+			});
+	}
 
 	handleDescriptionChange = (event) => {
 		this.setState({ description: event.target.value });
@@ -315,8 +334,30 @@ class ProfilePage extends React.Component {
 		this.setState({ showImageModal: true });
 		this.setState({pictures: []})
 	};
-	
-	
+	getFollowing = ()=> {
+		let help = []
+
+        let id = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length-1);
+        const dto = {id: id}
+        Axios.post(BASE_URL_USER_INTERACTION + "/api/user/following", dto)
+			.then((res) => {
+
+				res.data.forEach((user) => {
+					let optionDTO = { id: user.Id, label: user.Username, value: user.Id }
+					help.push(optionDTO)
+				});
+				
+
+				this.setState({ followingUsers: help });
+			})
+			.catch((err) => {
+				console.log(err)
+			});
+    }
+	handleAddTagsModal = ()=> {
+		this.getFollowing()
+		this.setState({ showTagsModal: true });
+	}
 	
 	handleAddStoryPostCloseFriends =()=>{
 		if (this.state.addressInput === "") {
@@ -381,10 +422,13 @@ class ProfilePage extends React.Component {
 	};
 	
 	handleAddFeedPost = ()=> {
-		
+		var taggedHelp = []
+		this.state.taggedOnPost.forEach((user) => {
+			taggedHelp.push(user.id)
+		});
 		if (this.state.addressInput === "") {
 			const feedPostDTO = {
-				tagged: [],
+				tagged: taggedHelp,
 				description: this.state.description,
 				hashtags: this.state.hashtags,
 				location : this.state.addressLocation
@@ -423,7 +467,7 @@ class ProfilePage extends React.Component {
 						longitude : longitude
 					}
 					let feedPostDTO = {
-						tagged: [],
+						tagged: taggedHelp,
 						description: this.state.description,
 						hashtags: this.state.hashtags,
 						location : locationDTO
@@ -443,10 +487,13 @@ class ProfilePage extends React.Component {
 		
 	}
 	handleAddStoryPost = ()=> {
-
+		var taggedHelp = []
+		this.state.taggedOnPost.forEach((user) => {
+			taggedHelp.push(user.id)
+		});
 		if (this.state.addressInput === "") {
 			const storyPostDTO = {
-				tagged: [],
+				tagged: taggedHelp,
 				description: this.state.description,
 				hashtags: this.state.hashtags,
 				location : this.state.addressLocation,
@@ -486,7 +533,7 @@ class ProfilePage extends React.Component {
 						longitude : longitude
 					}
 					let storyPostDTO = {
-						tagged: [],
+						tagged: taggedHelp,
 						description: this.state.description,
 						hashtags: this.state.hashtags,
 						location : locationDTO,
@@ -506,9 +553,13 @@ class ProfilePage extends React.Component {
 
 	}
 	handleAddFeedPostAlbum = ()=> {
+		var taggedHelp = []
+		this.state.taggedOnPost.forEach((user) => {
+			taggedHelp.push(user.id)
+		});
 		if (this.state.addressInput === "") {
 			const feedPostDTO = {
-				tagged: [],
+				tagged: taggedHelp,
 				description: this.state.description,
 				hashtags: this.state.hashtags,
 				location : this.state.addressLocation
@@ -547,7 +598,7 @@ class ProfilePage extends React.Component {
 						longitude : longitude
 					}
 					let feedPostDTO = {
-						tagged: [],
+						tagged: taggedHelp,
 						description: this.state.description,
 						hashtags: this.state.hashtags,
 						location : locationDTO
@@ -566,9 +617,13 @@ class ProfilePage extends React.Component {
 
 	}
 	handleAddStoryPostAlbum = ()=> {
+		var taggedHelp = []
+		this.state.taggedOnPost.forEach((user) => {
+			taggedHelp.push(user.id)
+		});
 		if (this.state.addressInput === "") {
 			const storyPostDTO = {
-				tagged: [],
+				tagged: taggedHelp,
 				description: this.state.description,
 				hashtags: this.state.hashtags,
 				location : this.state.addressLocation,
@@ -608,7 +663,7 @@ class ProfilePage extends React.Component {
 						longitude : longitude
 					}
 					let storyPostDTO = {
-						tagged: [],
+						tagged: taggedHelp,
 						description: this.state.description,
 						hashtags: this.state.hashtags,
 						location : locationDTO,
@@ -627,9 +682,13 @@ class ProfilePage extends React.Component {
 		}
 	}
 	handleAddStoryPostAlbumCloseFriends = ()=> {
+		var taggedHelp = []
+		this.state.taggedOnPost.forEach((user) => {
+			taggedHelp.push(user.id)
+		});
 		if (this.state.addressInput === "") {
 			const storyPostDTO = {
-				tagged: [],
+				tagged: taggedHelp,
 				description: this.state.description,
 				hashtags: this.state.hashtags,
 				location : this.state.addressLocation,
@@ -669,7 +728,7 @@ class ProfilePage extends React.Component {
 						longitude : longitude
 					}
 					let storyPostDTO = {
-						tagged: [],
+						tagged: taggedHelp,
 						description: this.state.description,
 						hashtags: this.state.hashtags,
 						location : locationDTO,
@@ -687,6 +746,7 @@ class ProfilePage extends React.Component {
 
 		}
 	}
+
 
 	
 
@@ -831,7 +891,7 @@ class ProfilePage extends React.Component {
 				this.setState({ showImageModal: false, });
 				this.setState({ openModal: true });
 				this.setState({ textSuccessfulModal: "You have successfully added album story post." });
-				this.handleGetStories(id)
+				this.handleGetStoryAlbums(id)
 			})
 			.catch((err) => {
 				console.log(err);
@@ -1106,7 +1166,7 @@ class ProfilePage extends React.Component {
 			
 			this.setState({ textSuccessfulModal: "You have successfully commented the album." });
 			this.setState({ openModal: true });
-			this.setState({ showWriteCommentModal: false });
+			this.setState({ showWriteCommentModalAlbum: false });
 
 
 		})
@@ -1157,6 +1217,50 @@ class ProfilePage extends React.Component {
 	handleWriteCommentAlbumModalClose = ()=>{
 		this.setState({showWriteCommentModalAlbum : false});
 	}
+	onChangeHandler = (event) => {
+        this.setState({
+            selectedFile: event.target.files[0],
+            loaded: 0,
+        });
+        console.log(event.target.files[0]);
+    };
+
+    handleSubmit = (event) => {
+		
+		let id = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length-1)
+		event.preventDefault();
+        const formData = new FormData();
+        const { selectedFile } = this.state;	
+		formData.append('inputFile', selectedFile);
+		Axios.post(BASE_URL_FEED + "/api/video/" + id, formData)
+			.then((res) => {
+
+				this.setState({ showImageModal: false, });
+				this.setState({ openModal: true });
+				this.setState({ textSuccessfulModal: "You have successfully added feed post." });
+				this.handleGetPhotos(id)
+
+			})
+			.catch((err) => {
+				console.log(err);
+			});
+        event.preventDefault();
+        
+    };
+	handleTagsModalClose = () =>{
+		this.setState({ showTagsModal: false });
+
+	}
+	handleChangeTags = (event) => {
+	
+		let optionDTO = { id: event.value, label: event.label, value: event.value }
+		let helpDto = this.state.taggedOnPost.concat(optionDTO)
+		
+		this.setState({ taggedOnPost: helpDto });
+
+		const newList2 = this.state.followingUsers.filter((item) => item.Id !== event.value);
+		this.setState({ followingUsers: newList2 });		
+	};
 	render() {
 		return (
 			<React.Fragment>
@@ -1164,6 +1268,18 @@ class ProfilePage extends React.Component {
 				<Header />
 
 				<section id="hero" className="d-flex align-items-top">
+				< div >
+                <form onSubmit={this.handleSubmit}>
+                    <label>
+                        Upload a file: <br /><br />
+                        <input type="file" name="file" onChange={this.onChangeHandler} />
+                    </label>
+                    <br /><br />
+                    <button type="submit">
+                        Upload
+                    </button>
+                </form >
+            </div >
 				<div className="container">
 				<div className="d-flex align-items-top">
 					<div className="container" style={{ marginTop: "10rem", marginRight: "10rem" }}>
@@ -1184,7 +1300,7 @@ class ProfilePage extends React.Component {
 											onChange={this.handleAddProfileImage}
 											imgExtension={['.jpg', '.gif', '.png', '.gif']}
 											withPreview={true}
-						/>
+										/>
 									</td>
 
 									<td>
@@ -1196,6 +1312,7 @@ class ProfilePage extends React.Component {
 												<Link to="/settings" className="btn btn-outline-secondary btn-sm">Edit profile</Link>
 
 											</td>
+											
 											<td>
 												<button onClick={this.handlePostModalOpen} className="btn btn-outline-secondary btn-sm" style={{ marginBottom: "1rem" }}>Add new post/video</button>
 
@@ -1240,6 +1357,9 @@ class ProfilePage extends React.Component {
 						stories = {this.state.stories}
 						handleOpenAddStoryToHighlightModal = {this.handleOpenAddStoryToHighlightModal}
 
+
+						storyAlbums = {this.state.storyAlbums}
+
 						handleAddHighLightClick = {this.handleAddHighLightClick}
 						highlights = {this.state.highlights}
 						seeStoriesInHighlight = {this.seeStoriesInHighlight}
@@ -1265,19 +1385,19 @@ class ProfilePage extends React.Component {
 				<LikesModal
 					        show={this.state.showLikesModal}
 					        onCloseModal={this.handleLikesModalClose}
-					        header="People who liked the photo"
+					        header="People who liked"
 							peopleLikes = {this.state.peopleLikes}
 				    />
                     <DislikesModal
                          show={this.state.showDislikesModal}
 						 onCloseModal={this.handleDislikesModalClose}
-						 header="People who disliked the photo"
+						 header="People who disliked"
 						 peopleDislikes = {this.state.peopleDislikes}
 				    />
                     <CommentsModal
                         show={this.state.showCommentsModal}
 						onCloseModal={this.handleCommentsModalClose}
-						header="Comments on the photo"
+						header="Comments"
 						peopleComments = {this.state.peopleComments}
                     />
 					<WriteCommentModal
@@ -1319,6 +1439,7 @@ class ProfilePage extends React.Component {
 						addressNotFoundError = {this.state.addressNotFoundError}
 						handleDescriptionChange = {this.handleDescriptionChange}
 						handleHashtagsChange = {this.handleHashtagsChange}
+						handleAddTagsModal = {this.handleAddTagsModal}
 					/>
 					 <AddHighlightModal
                           
@@ -1354,6 +1475,17 @@ class ProfilePage extends React.Component {
 						  header="Add post to collection"
 						  addPostToCollection={this.addPostToCollection}
 						  collections = {this.state.collections}
+					  />
+					   <AddTagsModal
+                          
+					  
+						  show={this.state.showTagsModal}
+						  onCloseModal={this.handleTagsModalClose}
+						  header="Add tags"
+						  followingUsers = {this.state.followingUsers}
+						  taggedOnPost = {this.state.taggedOnPost}
+						  tagUserOnPost={this.tagUserOnPost}
+						  handleChangeTags = {this.handleChangeTags}
 					  />
                     </div>
 

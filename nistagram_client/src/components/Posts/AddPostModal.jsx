@@ -95,6 +95,9 @@ class AddPostModal extends Component {
 										/>
 									</div>
 								</div>
+								<div className="control-group">
+									<button style={{ width: "10rem", margin : "1rem" }}  onClick={this.props.handleAddTagsModal} className="btn btn-outline-secondary btn-sm">Add tags<br/> <CgFeed/> </button>
+								</div>
 								</div>
 
 						</div>

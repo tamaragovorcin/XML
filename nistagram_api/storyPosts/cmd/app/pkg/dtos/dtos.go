@@ -8,7 +8,7 @@ import (
 type StoryPostDTO struct {
 	User string
 	Media string
-	Tagged []primitive.ObjectID
+	Tagged []string
 	Location models.Location
 	Description string
 	Hashtags string
@@ -20,7 +20,7 @@ type IdDTO struct {
 type StoryPostInfoDTO struct {
 	Id          primitive.ObjectID
 	DateTime    string
-	Tagged      []primitive.ObjectID
+	Tagged      string
 	Location    string
 	Description string
 	Hashtags    string
@@ -46,3 +46,18 @@ type StoryPostInfoHomePageDTO struct {
 	Stories    []StoryPostInfoDTO
 }
 
+type StoryAlbumInfoDTO struct {
+	Id          primitive.ObjectID
+	DateTime    string
+	Tagged      string
+	Location    string
+	Description string
+	Hashtags    string
+	Media       [][]byte
+	Username    string
+}
+type StoryAlbumInfoHomePageDTO struct {
+	UserId          primitive.ObjectID
+	UserUsername    string
+	Albums    []StoryAlbumInfoDTO
+}

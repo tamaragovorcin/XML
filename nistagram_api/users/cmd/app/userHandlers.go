@@ -136,9 +136,6 @@ func (app *application) search(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-
-
-
 	b, err := json.Marshal(u)
 	if err != nil {
 		app.serverError(w, err)
@@ -328,8 +325,14 @@ func (app *application) insertUser(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			app.serverError(w, err)
 		}
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+		fmt.Println("---------------------------------------------------------------------")
+		fmt.Println(insertResult)
+		idMarshaled, err := json.Marshal(insertResult.InsertedID)
+		fmt.Println(idMarshaled)
 
-		app.infoLog.Printf("New user have been created, id=%s", insertResult.InsertedID)
+		w.Write(idMarshaled)
 	}
 }
 
