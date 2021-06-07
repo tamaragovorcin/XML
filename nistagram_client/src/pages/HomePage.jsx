@@ -29,7 +29,7 @@ class HomePage extends React.Component {
 		showLikesModal: false,
 		showDislikesModal: false,
 		showCommentsModal: false,
-		
+
 		showStories: false,
 		showWriteCommentModal: false,
 		showAddPostToCollection: false,
@@ -67,10 +67,13 @@ class HomePage extends React.Component {
 
 
 	handleConvertedImage = (converted) => {
-		
+
 		var hh = this.state.stories;
-		let st = {id: 1, stories:[]}
-		st.stories.push(converted)
+		var username = this.state.ss[hh.length].username
+		
+		let st = { id: 1, stories: [] }
+		let storiji = {url: converted, header: username}
+		st.stories.push(storiji)
 		hh.push(st)
 		this.setState({
 			stories: hh,
@@ -80,12 +83,12 @@ class HomePage extends React.Component {
 		});
 
 
-		
-		if(this.state.ss.length === hh.length){
-		this.setState({
-			ready: true,
-		});
-	}
+
+		if (this.state.ss.length === hh.length) {
+			this.setState({
+				ready: true,
+			});
+		}
 		console.log(hh)
 	}
 
@@ -267,8 +270,8 @@ class HomePage extends React.Component {
 				res.data.forEach(story => {
 					let luna = [];
 					story.Stories.forEach(s => {
-						
-						
+
+
 						let aa = `data:image/jpg;base64,${s.Media}`
 						luna.push(aa)
 						//st.push(luna)
@@ -277,9 +280,9 @@ class HomePage extends React.Component {
 
 					});
 
-					let highliht1 = { id: res.data.id, username: story.UserUsername, storiess: luna};
+					let highliht1 = { id: res.data.id, username: story.UserUsername, storiess: luna };
 					list.push(highliht1)
-					
+
 
 				});
 				//this.setState({ image: st });
@@ -431,139 +434,139 @@ class HomePage extends React.Component {
 				<TopBar />
 				<Header />
 				{this.state.ss.map((user) => (
-					<div  hidden={this.state.hid}>
-					{user.storiess.map((post) => (
-				<div hidden={this.state.hid}>
-					<ConvertImage
-						image={post}
-						onConversion={this.handleConvertedImage}
+					<div hidden={this.state.hid}>
+						{user.storiess.map((post) => (
+							<div hidden={this.state.hid}>
+								<ConvertImage
+									image={post}
+									onConversion={this.handleConvertedImage}
 
-					/>
-				</div>))}</div>
-				
+								/>
+							</div>))}</div>
+
 				))}
 
-				<div className="container-fluid testimonial-group d-flex align-items-top">
-
-					<div className="container-fluid scrollable" style={{ marginRight: "10rem", marginBottom: "5rem", marginTop: "10rem" }}>
-						<table style={{ width: "100%" }}>
-							<thead></thead>
-							<tbody>
-
-
-							{this.state.ss.map((post) => (
-								<td id={post.id} style={{ width: "20em", marginLeft: "10em" }}>
-									<tr width="100em">
-										<img
-											className="img-fluid"
-											src={post.storiess[0]}
-											style={{ borderRadius: "50%", margin: "2%" }}
-											width="60em"
-											alt="description"
-											onClick = {this.onClickImage}
-										/>
-
-									</tr>
+				<section id="hero" className="d-flex align-items-top">
+					<div className="container">
+						<div className="container-fluid testimonial-group d-flex align-items-top">
+							<div className="container-fluid scrollable" style={{ marginRight: "10rem", marginBottom: "5rem", marginTop: "5rem" }}>
+								<table className="table-responsive" style={{ width: "100%" }}>
+									<thead></thead>
+									<tbody>
 
 
+										{this.state.ss.map((post) => (
+											<td  id="td" style={{ width: "15em", height: "15em" ,marginLeft: "8em" }}>
+												<tr >
+													<img
+														class="td"
+														src={post.storiess[0]}
+														style={{ borderRadius: "50%", margin: "2%" }}
+														width="100em"
+														height="100em"
+														max-width= "100%"
+														max-height= "100%"
+														alt="description"
+														onClick={this.onClickImage}
+													/>
 
-								</td>
-							))}
+												</tr>
 
-						
 
+
+											</td>
+										))}
+
+
+
+									</tbody>
+								</table>
+							</div>
+						</div>
+
+
+						<div className="d-flex align-items-top">
+							<IconTabsHomePage
+								photos={this.state.photos}
+								handleLike={this.handleLike}
+								handleDislike={this.handleDislike}
+								handleWriteCommentModal={this.handleWriteCommentModal}
+								handleLikesModalOpen={this.handleLikesModalOpen}
+								handleDislikesModalOpen={this.handleDislikesModalOpen}
+								handleCommentsModalOpen={this.handleCommentsModalOpen}
+								albums={this.state.albums}
+								handleLikeAlbum={this.handleLikeAlbum}
+								handleDislikeAlbum={this.handleDislikeAlbum}
+								handleWriteCommentModalAlbum={this.handleWriteCommentModalAlbum}
+								handleLikesModalOpenAlbum={this.handleLikesModalOpenAlbum}
+								handleDislikesModalOpenAlbum={this.handleDislikesModalOpenAlbum}
+								handleCommentsModalOpenAlbum={this.handleCommentsModalOpenAlbum}
+
+								handleOpenAddPostToCollectionModal={this.handleOpenAddPostToCollectionModal}
+
+							/>
+						</div>
 
 					
+						</div>
+					</section>
 
+<div>
+						<LikesModal
+							show={this.state.showLikesModal}
+							onCloseModal={this.handleLikesModalClose}
+							header="People who liked"
+							peopleLikes={this.state.peopleLikes}
+						/>
+						<DislikesModal
+							show={this.state.showDislikesModal}
+							onCloseModal={this.handleDislikesModalClose}
+							header="People who disliked"
+							peopleDislikes={this.state.peopleDislikes}
+						/>
+						<CommentsModal
+							show={this.state.showCommentsModal}
+							onCloseModal={this.handleCommentsModalClose}
+							header="Comments"
+							peopleComments={this.state.peopleComments}
+						/>
 
-
-<td>
-					<div className="d-flex align-items-top">
-						<IconTabsHomePage
-							photos={this.state.photos}
-							handleLike={this.handleLike}
-							handleDislike={this.handleDislike}
-							handleWriteCommentModal={this.handleWriteCommentModal}
-							handleLikesModalOpen={this.handleLikesModalOpen}
-							handleDislikesModalOpen={this.handleDislikesModalOpen}
-							handleCommentsModalOpen={this.handleCommentsModalOpen}
-							albums={this.state.albums}
-							handleLikeAlbum={this.handleLikeAlbum}
-							handleDislikeAlbum={this.handleDislikeAlbum}
-							handleWriteCommentModalAlbum={this.handleWriteCommentModalAlbum}
-							handleLikesModalOpenAlbum={this.handleLikesModalOpenAlbum}
-							handleDislikesModalOpenAlbum={this.handleDislikesModalOpenAlbum}
-							handleCommentsModalOpenAlbum={this.handleCommentsModalOpenAlbum}
-
-							handleOpenAddPostToCollectionModal={this.handleOpenAddPostToCollectionModal}
+						<StoriesModal
+							show={this.state.showStories}
+							onCloseModal={this.handleStoriesClose}
+							stories={this.state.stories}
+							ready={this.state.ready}
 
 						/>
-					</div></td>
-					
-					</tbody>
-						</table>
+
+						<WriteCommentModal
+							show={this.state.showWriteCommentModal}
+							onCloseModal={this.handleWriteCommentModalClose}
+							header="Leave your comment"
+							handleAddComment={this.handleAddComment}
+						/>
+						<WriteCommentAlbumModal
+							show={this.state.showWriteCommentModalAlbum}
+							onCloseModal={this.handleWriteCommentAlbumModalClose}
+							header="Leave your comment"
+							handleAddCommentAlbum={this.handleAddCommentAlbum}
+						/>
+						<AddPostToCollection
+							show={this.state.showAddPostToCollection}
+							onCloseModal={this.handleAddPostToCollectionModalClose}
+							header="Add post to collection"
+							addPostToCollection={this.addPostToCollection}
+							collections={this.state.collections}
+
+						/>
+						<ModalDialog
+							show={this.state.openModal}
+							onCloseModal={this.handleModalClose}
+							header="Successful"
+							text={this.state.textSuccessfulModal}
+						/>
 
 					</div>
-
-				</div>
-
-				<div>
-
-					<LikesModal
-						show={this.state.showLikesModal}
-						onCloseModal={this.handleLikesModalClose}
-						header="People who liked"
-						peopleLikes={this.state.peopleLikes}
-					/>
-					<DislikesModal
-						show={this.state.showDislikesModal}
-						onCloseModal={this.handleDislikesModalClose}
-						header="People who disliked"
-						peopleDislikes={this.state.peopleDislikes}
-					/>
-					<CommentsModal
-						show={this.state.showCommentsModal}
-						onCloseModal={this.handleCommentsModalClose}
-						header="Comments"
-						peopleComments={this.state.peopleComments}
-					/>
-
-					<StoriesModal
-						show={this.state.showStories}
-						onCloseModal={this.handleStoriesClose}
-						stories={this.state.stories}
-						ready = {this.state.ready}
-
-					/>
-
-					<WriteCommentModal
-						show={this.state.showWriteCommentModal}
-						onCloseModal={this.handleWriteCommentModalClose}
-						header="Leave your comment"
-						handleAddComment={this.handleAddComment}
-					/>
-					<WriteCommentAlbumModal
-						show={this.state.showWriteCommentModalAlbum}
-						onCloseModal={this.handleWriteCommentAlbumModalClose}
-						header="Leave your comment"
-						handleAddCommentAlbum={this.handleAddCommentAlbum}
-					/>
-					<AddPostToCollection
-						show={this.state.showAddPostToCollection}
-						onCloseModal={this.handleAddPostToCollectionModalClose}
-						header="Add post to collection"
-						addPostToCollection={this.addPostToCollection}
-						collections={this.state.collections}
-
-					/>
-					<ModalDialog
-						show={this.state.openModal}
-						onCloseModal={this.handleModalClose}
-						header="Successful"
-						text={this.state.textSuccessfulModal}
-					/>
-
-				</div>
 			</React.Fragment>
 		);
 	}
