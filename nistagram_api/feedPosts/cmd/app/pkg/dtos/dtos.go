@@ -59,6 +59,11 @@ type CollectionInfoDTO struct {
 	Posts []FeedPostInfoDTO
 	Name string
 }
+type CollectionAlbumInfoDTO struct {
+	Id  primitive.ObjectID
+	Albums []FeedAlbumInfoDTO
+	Name string
+}
 type SavedPostDTO struct {
 	User       string
 	FeedPost   string

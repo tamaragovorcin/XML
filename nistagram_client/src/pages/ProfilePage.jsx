@@ -89,6 +89,7 @@ class ProfilePage extends React.Component {
 		postsForCollection : [],
 		hiddenStoriesForCollection : true,
 		showAddCollectionModal : false,
+		showAddCollectionAlbumModal : false,
 		showWriteCommentModalAlbum : false,
 		selectedFile : "",
 		loaded : "",
@@ -102,7 +103,12 @@ class ProfilePage extends React.Component {
 		showAddStoryAlbumToHighLightModal : false,
 		storiesForHightlihtAlbum : [],
 		hiddenStoriesForHighlightalbum : [],
-		showAddHighLightAlbumModal : false
+		showAddHighLightAlbumModal : false,
+		collectionAlbums : [],
+		hiddenPostsForCollectionAlbums: false,
+		postsForCollectionAlbum : [],
+		showAddAlbumToCollectionAlbum : false,
+		
 	}
 	
 	onYmapsLoad = (ymaps) => {
@@ -266,6 +272,7 @@ class ProfilePage extends React.Component {
 		this.handleGetCollections(id)
 		// this.handleGetVideos(id)
 		this.handleGetHighlightAlbums(id)
+		this.handleGetCollectionAlbums(id)
 
 	}
 	handleGetStories = (id)=> {
@@ -291,6 +298,16 @@ class ProfilePage extends React.Component {
 		Axios.get(BASE_URL_STORY + "/api/highlight/user/album/"+id)
 			.then((res) => {
 				this.setState({ highlightsAlbums: res.data });
+			})
+			.catch((err) => {
+				console.log(err);
+			});
+	}
+	
+	handleGetCollectionAlbums = (id) => {
+		Axios.get(BASE_URL_FEED + "/api/collection/user/album/"+id)
+			.then((res) => {
+				this.setState({ collectionAlbums: res.data });
 			})
 			.catch((err) => {
 				console.log(err);
@@ -933,12 +950,20 @@ class ProfilePage extends React.Component {
 	handleAddHighLightAlbumClick = () => {
 		this.setState({ showAddHighLightAlbumModal: true });
 	};
+	handleAddCollectionClick = () => {
+		this.setState({ showAddCollectionModal: true });
+	};
+	handleAddCollectionAlbumClick = () => {
+		this.setState({ showAddCollectionAlbumModal: true });
+	};
     handleAddHighLightModalClose = () => {
 		this.setState({ showAddHighLightModal: false });
 		this.setState({ showAddHighLightAlbumModal: false });
 	};
 	handleAddCollectionModalClose = () => {
 		this.setState({ showAddCollectionModal: false });
+		this.setState({ showAddCollectionAlbumModal: false });
+
 	};
 	handleAddHighlight = (name)=> {
 		this.setState({highlightNameError: "none"});
@@ -1011,6 +1036,32 @@ class ProfilePage extends React.Component {
                 });
 		}
 	}
+	
+	handleAddCollectionAlbum = (name)=> {
+		this.setState({collectionNameError: "none"});
+
+        if (name === "") {
+			this.setState({ collectionNameError: "initial" });
+		} 
+        else {
+			let collectionDTO = {
+                name: name,
+            };
+			let id = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length-1)
+
+			Axios.post(BASE_URL_FEED + "/api/collection/album/"+id, collectionDTO, {
+				}).then((res) => {
+					
+                    this.setState({ showAddCollectionModal: false });
+					this.setState({ showAddCollectionAlbumModal: false });
+
+                    this.handleGetCollectionAlbums(id);
+                })
+                .catch((err) => {
+                    console.log(err);
+                });
+		}
+	}
 	handleOpenAddStoryToHighlightModal = (storyId)=> {
 		this.setState({ showAddStoryAlbumToHighLightModal: true });
 		this.setState({ selectedStoryId: storyId });
@@ -1023,6 +1074,11 @@ class ProfilePage extends React.Component {
 		this.setState({ showAddPostToCollection: true });
 		this.setState({ selectedPostId: postId });
 	}
+	
+	handleOpenAddAlbumToCollectionAlbumModal = (postId)=> {
+		this.setState({ showAddAlbumToCollectionAlbum: true });
+		this.setState({ selectedPostId: postId });
+	}
 	handleAddStoryToHighlightModalClose = ()=> {
 		this.setState({ showAddStoryToHighLightModal: false });
 	}
@@ -1031,6 +1087,7 @@ class ProfilePage extends React.Component {
 	}
 	handleAddPostToCollectionModalClose = ()=> {
 		this.setState({ showAddPostToCollection: false });
+		this.setState({ showAddAlbumToCollectionAlbumToCollection: false });
 	}
 	addStoryToHighlight = (highlightId) => {
 		let storyHighlightDTO = {
@@ -1094,6 +1151,27 @@ class ProfilePage extends React.Component {
 			console.log(err);
 		});
 	}
+	
+	addAlbumToCollectionAlbum = (collectionId) => {
+		let postCollectionDTO = {
+			PostId : this.state.selectedPostId,
+			CollectionId : collectionId
+		}
+		Axios.post(BASE_URL_FEED + "/api/collection/album/addPost/", postCollectionDTO, {
+		}).then((res) => {
+			
+			this.setState({ showAddCollectionAlbumModal: false });
+			let id = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length-1)
+			this.handleGetCollectionAlbums(id);
+			this.setState({ textSuccessfulModal: "You have successfully added album to collection." });
+			this.setState({ openModal: true });
+			this.setState({ showAddAlbumToCollectionAlbum: false });
+
+		})
+		.catch((err) => {
+			console.log(err);
+		});
+	}
 	seeStoriesInHighlight = (stories)=> {
 		this.setState({ hiddenStoriesForHighlight: false });
 		this.setState({storiesForHightliht : stories})
@@ -1101,11 +1179,15 @@ class ProfilePage extends React.Component {
 	seeStoriesInHighlightAlbum = (stories)=> {
 		this.setState({ hiddenStoriesForHighlightAlbum: false });
 		this.setState({storiesForHightlihtAlbum : stories})
-		console.log(stories)
 	}
 	seePostsInCollection = (posts)=> {
 		this.setState({ hiddenStoriesForCollection: false });
 		this.setState({postsForCollection : posts})
+	}
+	
+	seePostsInCollectionAlbum = (albums)=> {
+		this.setState({ hiddenPostsForCollectionAlbums: false });
+		this.setState({postsForCollectionAlbum : albums})
 	}
 	handleLikesModalOpen = (postId)=> {
 		Axios.get(BASE_URL_FEED + "/api/feed/likes/"+postId)
@@ -1488,7 +1570,12 @@ class ProfilePage extends React.Component {
 						hiddenStoriesForCollection = {this.state.hiddenStoriesForCollection}
 						handleOpenAddPostToCollectionModal = {this.handleOpenAddPostToCollectionModal}
 
-						
+						handleAddCollectionAlbumClick = {this.handleAddCollectionAlbumClick}
+						collectionAlbums = {this.state.collectionAlbums}
+						seePostsInCollectionAlbum = {this.seePostsInCollectionAlbum}
+						hiddenPostsForCollectionAlbums= {this.state.hiddenPostsForCollectionAlbums}
+						postsForCollectionAlbum = {this.state.postsForCollectionAlbum}
+						handleOpenAddAlbumToCollectionAlbumModal = {this.handleOpenAddAlbumToCollectionAlbumModal}
 					/>
 				</div>
 				
@@ -1582,6 +1669,14 @@ class ProfilePage extends React.Component {
 						  header="Add new collection"
 						  handleAddCollection={this.handleAddCollection}
 					  />
+					  <AddCollectionModal
+                          collectionNameError={this.state.collectionNameError}
+                        
+						  show={this.state.showAddCollectionAlbumModal}
+						  onCloseModal={this.handleAddCollectionModalClose}
+						  header="Add new collection"
+						  handleAddCollection={this.handleAddCollectionAlbum}
+					  />
 					<AddStoryToHighlightModal
                           
 					  
@@ -1608,6 +1703,15 @@ class ProfilePage extends React.Component {
 						  header="Add post to collection"
 						  addPostToCollection={this.addPostToCollection}
 						  collections = {this.state.collections}
+					  />
+					   <AddPostToCollection
+                          
+					  
+						  show={this.state.showAddAlbumToCollectionAlbumToCollection}
+						  onCloseModal={this.handleAddPostToCollectionModalClose}
+						  header="Add album to collection album"
+						  addPostToCollection={this.addAlbumToCollectionAlbum}
+						  collections = {this.state.collectionAlbums}
 					  />
 					   <AddTagsModal
                           
