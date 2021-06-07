@@ -1,15 +1,11 @@
 package main
 
 import (
-	"bytes"
 	"encoding/json"
 	"feedPosts/pkg/dtos"
 	"feedPosts/pkg/models"
 	"github.com/gorilla/mux"
 	"go.mongodb.org/mongo-driver/bson/primitive"
-	"image"
-	"image/jpeg"
-	"log"
 	"net/http"
 	"os"
 	"strings"
@@ -324,29 +320,27 @@ func getImageByFeedPost(images []models.Image,highlightsId primitive.ObjectID) s
 	}
 	return storyImage.Media
 }
-func toResponseFeedPost(storyPost models.FeedPost, image2 string) dtos.FeedPostInfoDTO {
-	f, _ := os.Open(image2)
-	defer f.Close()
-	image, _, _ := image.Decode(f)
-	buffer := new(bytes.Buffer)
-	if err := jpeg.Encode(buffer, image, nil); err != nil {
-		log.Println("unable to encode image.")
-	}
+func toResponseFeedPost(storyPost models.FeedPost, image2 string) dtos.FeedPostInfoDTO1 {
+
 	taggedPeople :=getTaggedPeople(storyPost.Post.Tagged)
 
-	return dtos.FeedPostInfoDTO{
+	file1, _:=os.Open(image2)
+	FileHeader:=make([]byte,512)
+	file1.Read(FileHeader)
+	ContentType:= http.DetectContentType(FileHeader)
+	return dtos.FeedPostInfoDTO1{
 		Id: storyPost.Id,
 		DateTime : strings.Split(storyPost.Post.DateTime.String(), " ")[0],
 		Tagged :  taggedPeople,
 		Location : locationToString(storyPost.Post.Location),
 		Description : storyPost.Post.Description,
 		Hashtags : hashTagsToString(storyPost.Post.Hashtags),
-		Media : buffer.Bytes(),
+		ContentType: ContentType,
 
 	}
 }
 func toResponseCollections(highlight models.Collection, storyPosts []models.FeedPost, images []models.Image) dtos.CollectionInfoDTO {
-	storiesInfoDtos := []dtos.FeedPostInfoDTO{}
+	storiesInfoDtos := []dtos.FeedPostInfoDTO1{}
 	for _, storyPost := range storyPosts {
 		image := getImageByFeedPost(images,storyPost.Id)
 		storyPostInfoDTO :=toResponseFeedPost(storyPost,image)

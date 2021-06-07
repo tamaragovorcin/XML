@@ -179,9 +179,6 @@ class ProfilePage extends React.Component {
 	
 
 	testVideo(pic,userId, feedId) {
-		alert("pogodio")
-	
-
 		const formData = new FormData();
 
 		formData.append("file", pic);
@@ -850,6 +847,7 @@ class ProfilePage extends React.Component {
 				this.setState({ selectedFile : ""});
 				this.setState({ pictures: [] });
 				this.setState({ showImageModal: false, });
+				this.setState({ showVideoModal: false, });
 				this.setState({ openModal: true });
 				this.setState({ textSuccessfulModal: "You have successfully added feed post." });
 				this.handleGetPhotos(id)
@@ -928,6 +926,7 @@ class ProfilePage extends React.Component {
 				this.setState({selectedFile : ""});
 				this.setState({ pictures: [] });
 				this.setState({ showImageModal: false, });
+				this.setState({ showVideoModal: false, });
 				this.setState({ openModal: true });
 				this.setState({ textSuccessfulModal: "You have successfully added story post." });
 				this.handleGetStories(id)
