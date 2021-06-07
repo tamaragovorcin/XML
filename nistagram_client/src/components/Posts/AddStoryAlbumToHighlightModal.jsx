@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 import { Button, Modal } from "react-bootstrap";
 
-class AddStoryToHighlightModal extends Component {
+class AddStoryAlbumToHighlightModal extends Component {
    
 
 	render() {
@@ -21,7 +21,7 @@ class AddStoryToHighlightModal extends Component {
 				
 						<table className="table" style={{ width: "100%", marginTop: "3rem" }}>
                             <tbody>
-                                {this.props.highlights.map((highlight) => (
+                                {this.props.highlightsAlbums.map((highlight) => (
                                     <tr id={highlight.Id} key={highlight.Id}>
                                        
                                         <td>
@@ -37,11 +37,11 @@ class AddStoryToHighlightModal extends Component {
                                                <td>
                                                     <br></br>
                                                     <button style={{height:'30px'},{verticalAlign:'center'},{marginTop:'2%'}} className="btn btn-outline-secondary mt-1"
-                                                        onClick={() => this.props.addStoryToHighlight(highlight.Id)}
+                                                        onClick={() => this.props.addStoryAlbumToHighlight(highlight.Id)}
                                                          type="button">
                                                             <i className="icofont-subscribe mr-1"> </i>
-                                                             Add to highlight</button
-                                                             >
+                                                             Add to highlight album
+                                                             </button >
                                                 </td>
                                              </div>  
                                         </td>
@@ -65,4 +65,4 @@ class AddStoryToHighlightModal extends Component {
 	}
 }
 
-export default AddStoryToHighlightModal;
+export default AddStoryAlbumToHighlightModal;

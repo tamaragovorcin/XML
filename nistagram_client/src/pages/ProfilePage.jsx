@@ -21,8 +21,8 @@ import { BASE_URL_USER_INTERACTION } from "../constants.js";
 import WriteCommentAlbumModal from "../components/Posts/WriteCommentAlbumModal"
 import AddTagsModal from "../components/Posts/AddTagsModal";
 import ConvertVideo from "react-convert-image";
-
-
+import AddStoryAlbumToHighlightModal from "../components/Posts/AddStoryAlbumToHighlightModal";
+ 
 class ProfilePage extends React.Component {
 	constructor(props) {
 		super(props);
@@ -97,8 +97,12 @@ class ProfilePage extends React.Component {
 		showTagsModal : false,
 		taggedOnPost : [],
 		stories: ["blob:http://localhost:3000/ac876899-5147-482c-9086-998ee05c765f"],
-		urlVideo : ""
-
+		urlVideo : "",
+		highlightsAlbums : [],
+		showAddStoryAlbumToHighLightModal : false,
+		storiesForHightlihtAlbum : [],
+		hiddenStoriesForHighlightalbum : [],
+		showAddHighLightAlbumModal : false
 	}
 	
 	onYmapsLoad = (ymaps) => {
@@ -261,6 +265,7 @@ class ProfilePage extends React.Component {
 		this.handleGetStories(id)
 		this.handleGetCollections(id)
 		// this.handleGetVideos(id)
+		this.handleGetHighlightAlbums(id)
 
 	}
 	handleGetStories = (id)=> {
@@ -277,6 +282,15 @@ class ProfilePage extends React.Component {
 		Axios.get(BASE_URL_STORY + "/api/highlight/user/"+id)
 			.then((res) => {
 				this.setState({ highlights: res.data });
+			})
+			.catch((err) => {
+				console.log(err);
+			});
+	}
+	handleGetHighlightAlbums = (id) => {
+		Axios.get(BASE_URL_STORY + "/api/highlight/user/album/"+id)
+			.then((res) => {
+				this.setState({ highlightsAlbums: res.data });
 			})
 			.catch((err) => {
 				console.log(err);
@@ -916,8 +930,12 @@ class ProfilePage extends React.Component {
 	handleAddHighLightClick = () => {
 		this.setState({ showAddHighLightModal: true });
 	};
+	handleAddHighLightAlbumClick = () => {
+		this.setState({ showAddHighLightAlbumModal: true });
+	};
     handleAddHighLightModalClose = () => {
 		this.setState({ showAddHighLightModal: false });
+		this.setState({ showAddHighLightAlbumModal: false });
 	};
 	handleAddCollectionModalClose = () => {
 		this.setState({ showAddCollectionModal: false });
@@ -939,6 +957,30 @@ class ProfilePage extends React.Component {
 					
                     this.setState({ showAddHighLightModal: false });
                     this.handleGetHighlights(id);
+                    
+                })
+                .catch((err) => {
+                    console.log(err);
+                });
+		}
+	}
+	handleAddHighlightAlbum = (name)=> {
+		this.setState({highlightNameError: "none"});
+
+        if (name === "") {
+			this.setState({ highlightNameError: "initial" });
+		} 
+        else {
+			let highlightDTO = {
+                name: name,
+            };
+			let id = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length-1)
+
+			Axios.post(BASE_URL_STORY + "/api/highlight/album/"+id, highlightDTO, {
+				}).then((res) => {
+					
+                    this.setState({ showAddHighLightAlbumModal: false });
+                    this.handleGetHighlightAlbums(id);
                     
                 })
                 .catch((err) => {
@@ -970,8 +1012,12 @@ class ProfilePage extends React.Component {
 		}
 	}
 	handleOpenAddStoryToHighlightModal = (storyId)=> {
-		this.setState({ showAddStoryToHighLightModal: true });
+		this.setState({ showAddStoryAlbumToHighLightModal: true });
 		this.setState({ selectedStoryId: storyId });
+	}
+	handleOpenAddStoryAlbumToHighlightModal = (highlightId)=> {
+		this.setState({ showAddStoryAlbumToHighLightModal: true });
+		this.setState({ selectedStoryId: highlightId });
 	}
 	handleOpenAddPostToCollectionModal = (postId)=> {
 		this.setState({ showAddPostToCollection: true });
@@ -979,6 +1025,9 @@ class ProfilePage extends React.Component {
 	}
 	handleAddStoryToHighlightModalClose = ()=> {
 		this.setState({ showAddStoryToHighLightModal: false });
+	}
+	handleAddStoryAlbumToHighlightModalClose = ()=> {
+		this.setState({ showAddStoryAlbumToHighLightModal: false });
 	}
 	handleAddPostToCollectionModalClose = ()=> {
 		this.setState({ showAddPostToCollection: false });
@@ -997,6 +1046,28 @@ class ProfilePage extends React.Component {
 			this.setState({ textSuccessfulModal: "You have successfully added story to highlight." });
 			this.setState({ openModal: true });
 			this.setState({ showAddStoryToHighLightModal: false });
+
+		})
+		.catch((err) => {
+			console.log(err);
+		});
+	}
+	addStoryAlbumToHighlight = (highlightId) => {
+		let storyHighlightDTO = {
+			StoryId : this.state.selectedStoryId,
+			HighlightId : highlightId
+		}
+		Axios.post(BASE_URL_STORY + "/api/highlight/addStoryAlbum/", storyHighlightDTO, {
+		}).then((res) => {
+			
+			this.setState({ showAddHighLightModal: false });
+			this.setState({ showAddHighLightAlbumModal: false });
+
+			let id = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length-1)
+			this.handleGetHighlights(id);
+			this.setState({ textSuccessfulModal: "You have successfully added story album to highlight." });
+			this.setState({ openModal: true });
+			this.setState({ showAddStoryAlbumToHighLightModal: false });
 
 		})
 		.catch((err) => {
@@ -1026,6 +1097,10 @@ class ProfilePage extends React.Component {
 	seeStoriesInHighlight = (stories)=> {
 		this.setState({ hiddenStoriesForHighlight: false });
 		this.setState({storiesForHightliht : stories})
+	}
+	seeStoriesInHighlightAlbum = (stories)=> {
+		this.setState({ hiddenStoriesForHighlightAlbum: false });
+		this.setState({storiesForHightlihtAlbum : stories})
 	}
 	seePostsInCollection = (posts)=> {
 		this.setState({ hiddenStoriesForCollection: false });
@@ -1388,6 +1463,7 @@ class ProfilePage extends React.Component {
 
 						stories = {this.state.stories}
 						handleOpenAddStoryToHighlightModal = {this.handleOpenAddStoryToHighlightModal}
+						handleOpenAddStoryAlbumToHighlightModal = {this.handleOpenAddStoryAlbumToHighlightModal}
 
 
 						storyAlbums = {this.state.storyAlbums}
@@ -1397,6 +1473,12 @@ class ProfilePage extends React.Component {
 						seeStoriesInHighlight = {this.seeStoriesInHighlight}
 						storiesForHightliht= {this.state.storiesForHightliht}
 						hiddenStoriesForHighlight = {this.state.hiddenStoriesForHighlight}
+
+						handleAddHighLightAlbumClick = {this.handleAddHighLightAlbumClick}
+						highlightsAlbums = {this.state.highlightsAlbums}
+						seeStoriesInHighlightAlbum = {this.seeStoriesInHighlightAlbum}
+						storiesForHightlihtAlbum= {this.state.storiesForHightlihtAlbum}
+						hiddenStoriesForHighlightalbum = {this.state.hiddenStoriesForHighlightAlbum}
 
 						handleAddCollectionClick = {this.handleAddCollectionClick}
 						collections = {this.state.collections}
@@ -1482,6 +1564,15 @@ class ProfilePage extends React.Component {
 					        header="Add new highlight"
                             handleAddHighlight={this.handleAddHighlight}
 				        />
+					<AddHighlightModal
+                          
+						  highlightNameError={this.state.highlightNameError}
+					  
+						  show={this.state.showAddHighLightAlbumModal}
+						  onCloseModal={this.handleAddHighLightModalClose}
+						  header="Add new highlight album"
+						  handleAddHighlight={this.handleAddHighlightAlbum}
+					  />
 						<AddCollectionModal
                           collectionNameError={this.state.collectionNameError}
                         
@@ -1498,6 +1589,15 @@ class ProfilePage extends React.Component {
 						  header="Add story to highlight"
 						  addStoryToHighlight={this.addStoryToHighlight}
 						  highlights = {this.state.highlights}
+					  />
+					  <AddStoryAlbumToHighlightModal
+                          
+					  
+						  show={this.state.showAddStoryAlbumToHighLightModal}
+						  onCloseModal={this.handleAddStoryAlbumToHighlightModalClose}
+						  header="Add story album to highlight album"
+						  addStoryAlbumToHighlight={this.addStoryAlbumToHighlight}
+						  highlightsAlbums = {this.state.highlightsAlbums}
 					  />
 					  <AddPostToCollection
                           

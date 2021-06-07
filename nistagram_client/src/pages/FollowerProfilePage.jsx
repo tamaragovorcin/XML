@@ -131,7 +131,6 @@ class FollowerProfilePage extends React.Component {
 	handleSetAllowPagePreview = (id)=> {
 		console.log(this.hasRole("*"))
 		if(!this.hasRole("*")) {
-			console.log("fggggggggggggggggggggggggggg")
 
 			this.setState({ followingThisUser: false});
 			this.setState({ sentFollowRequest: false});
@@ -152,7 +151,6 @@ class FollowerProfilePage extends React.Component {
 		
 		}
 		else {
-			console.log("fggggggg11111111111111111111111111111111111111111111111111111111111gggggggggggggggggggg")
 
 			let loggedId = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length-1)
 			const followReguestDTO = { follower: loggedId, following : id};

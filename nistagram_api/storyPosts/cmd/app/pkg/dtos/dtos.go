@@ -33,10 +33,18 @@ type HighlightStoryDTO struct {
 	StoryId primitive.ObjectID
 	HighlightId primitive.ObjectID
 }
-
+type HighlightStoryAlbumDTO struct {
+	StoryId primitive.ObjectID
+	HighlightId primitive.ObjectID
+}
 type HighlightsInfoDTO struct {
 	Id  primitive.ObjectID
 	Stories []StoryPostInfoDTO
+	Name string
+}
+type HighlightsAlbumInfoDTO struct {
+	Id  primitive.ObjectID
+	Albums []StoryAlbumInfoDTO
 	Name string
 }
 

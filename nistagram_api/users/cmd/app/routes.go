@@ -18,8 +18,10 @@ func (app *application) routes() *mux.Router {
 	r.HandleFunc("/api/login", app.loginUser).Methods("POST")
 	r.HandleFunc("/api/user/privacy/{userId}", app.findUserPrivacy).Methods("GET")
 	r.HandleFunc("/api/user/username/{userId}", app.findUserUsername).Methods("GET")
-	r.HandleFunc("//api/user/closeFriends/{userId}", app.findUserCloseFriends).Methods("GET")
+	r.HandleFunc("/api/user/closeFriends/{userId}", app.findUserCloseFriends).Methods("GET")
 
+	r.HandleFunc("/api/user/addToCloseFriends/", app.addUserToCloseFriends).Methods("POST")
+	r.HandleFunc("/api/user/removeFromCloseFriends/", app.removeUserFromCloseFriends).Methods("POST")
 
 	//r.HandleFunc("/api/getLoggedIn", app.getLoggedIn).Methods("GET")
 
@@ -50,11 +52,6 @@ func (app *application) routes() *mux.Router {
 	r.HandleFunc("/notification/{id}", app.findByIDNotification).Methods("GET")
 	r.HandleFunc("/notification/", app.insertNotification).Methods("POST")
 	r.HandleFunc("/notification/{id}", app.deleteNotification).Methods("DELETE")
-
-	r.HandleFunc("/settings/", app.getAllNotification).Methods("GET")
-	r.HandleFunc("/settings/{id}", app.findByIDNotification).Methods("GET")
-	r.HandleFunc("/settings/", app.insertNotification).Methods("POST")
-	r.HandleFunc("/settings/{id}", app.deleteNotification).Methods("DELETE")
 
 	return r
 }

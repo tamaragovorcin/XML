@@ -49,3 +49,9 @@ type Image struct {
 	UserId primitive.ObjectID `bson:"userId"`
 	PostId primitive.ObjectID `bson:"postId"`
 }
+type HighLightAlbum struct {
+	Id primitive.ObjectID `bson:"_id,omitempty"`
+	User primitive.ObjectID `bson:"user"`
+	Albums []AlbumStory `bson:"albums"`
+	Name string `bson:"name"`
+}

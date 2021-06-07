@@ -380,6 +380,7 @@ func ReturnUsersFollowRequests(driver neo4j.Driver, database string) func(http.R
 			}
 
 			if users==nil {
+
 				return []followUserStructDTO{},nil
 			}
 			return users,nil
@@ -399,7 +400,6 @@ func ReturnUsersFollowRequestsByMe(driver neo4j.Driver, database string) func(ht
 	return func(w http.ResponseWriter, req *http.Request) {
 		var m User
 		err := json.NewDecoder(req.Body).Decode(&m)
-		fmt.Println(m.Id)
 		if err != nil {
 			fmt.Println("Error")
 		}
@@ -420,7 +420,6 @@ func ReturnUsersFollowRequestsByMe(driver neo4j.Driver, database string) func(ht
 			for records.Next() {
 				record := records.Record()
 				id, _ := record.Get("id")
-				fmt.Println(record.Get("id"))
 				username:=getUserUsername(id.(string))
 				var dto = followUserStructDTO{
 					Id : id.(string),
@@ -449,7 +448,6 @@ func ReturnUsersFollowings(driver neo4j.Driver, database string) func(http.Respo
 	return func(w http.ResponseWriter, req *http.Request) {
 		var m User
 		err := json.NewDecoder(req.Body).Decode(&m)
-		fmt.Println(m.Id)
 		if err != nil {
 			fmt.Println("Error")
 		}
@@ -470,7 +468,6 @@ func ReturnUsersFollowings(driver neo4j.Driver, database string) func(http.Respo
 			for records.Next() {
 				record := records.Record()
 				id, _ := record.Get("id")
-				fmt.Println(record.Get("id"))
 				username:=getUserUsername(id.(string))
 				var dto = followUserStructDTO{
 					Id : id.(string),
@@ -499,7 +496,6 @@ func ReturnUsersFollowers(driver neo4j.Driver, database string) func(http.Respon
 	return func(w http.ResponseWriter, req *http.Request) {
 		var m User
 		err := json.NewDecoder(req.Body).Decode(&m)
-		fmt.Println(m.Id)
 		if err != nil {
 			fmt.Println("Error")
 		}
@@ -520,7 +516,6 @@ func ReturnUsersFollowers(driver neo4j.Driver, database string) func(http.Respon
 			for records.Next() {
 				record := records.Record()
 				id, _ := record.Get("id")
-				fmt.Println(record.Get("id"))
 				username:=getUserUsername(id.(string))
 				var dto = followUserStructDTO{
 					Id : id.(string),
@@ -693,7 +688,6 @@ func ReturnUsersCloseFriends(driver neo4j.Driver, database string) func(http.Res
 			for records.Next() {
 				record := records.Record()
 				id, _ := record.Get("id")
-				fmt.Println(record.Get("id"))
 				username:=getUserUsername(id.(string))
 				var dto = followUserStructDTO{
 					Id : id.(string),
@@ -702,8 +696,12 @@ func ReturnUsersCloseFriends(driver neo4j.Driver, database string) func(http.Res
 				users = append(users,  dto)
 			}
 
-			if users==nil {
-				return followUserCloseFriendsDTO{},nil
+			if users==nil || len(users)==0 {
+				 var dto =followUserCloseFriendsDTO{
+					CloseFriends :[]followUserStructDTO{},
+					NotCloseFriends :[]followUserStructDTO{},
+				}
+				return dto,nil
 			}
 			listCloseFriendsIds := getListCloseFriends(m.Id)
 			closeFriends = organizeFollowersAccordingToCloseFriends(listCloseFriendsIds,users)
@@ -739,7 +737,15 @@ func organizeFollowersAccordingToCloseFriends(ids []string, users []followUserSt
 }
 
 func userIsCloseFriends(user2 followUserStructDTO, ids []string) bool {
-	for _, id := range ids {
+
+	for index, id := range ids {
+		if index==0 {
+			id = id[1:]
+		}
+		if index == len(ids)-1 {
+			id = id[:len(id)-1]
+		}
+
 		if id==user2.Id {
 			return true
 		}
@@ -753,12 +759,14 @@ func getListCloseFriends(id string) []string {
 		log.Fatalln(err)
 	}
 	body, err := ioutil.ReadAll(resp.Body)
+
 	if err != nil {
 		log.Fatalln(err)
 	}
-	listStrings := []string{}
-	for _, str := range body {
-		listStrings = append(listStrings,string(str))
+	var listStrings []string
+	sb := string(body)
+	if sb!="" {
+		listStrings =strings.Split(sb, ",")
 	}
 	return listStrings
 }

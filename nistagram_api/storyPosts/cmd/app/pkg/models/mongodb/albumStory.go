@@ -35,24 +35,18 @@ func (m *AlbumStoryModel) All() ([]models.AlbumStory, error) {
 }
 
 // FindByID will be used to find a new movie registry by id
-func (m *AlbumStoryModel) FindByID(id string) (*models.AlbumStory, error) {
-	p, err := primitive.ObjectIDFromHex(id)
+func (m *AlbumStoryModel) FindByID(id primitive.ObjectID) (*models.AlbumStory, error) {
+	var story = models.AlbumStory{}
+	err := m.C.FindOne(context.TODO(), bson.M{"_id": id}).Decode(&story)
 	if err != nil {
-		return nil, err
-	}
-
-	// Find movie by id
-	var album = models.AlbumStory{}
-	err = m.C.FindOne(context.TODO(), bson.M{"_id": p}).Decode(&album)
-	if err != nil {
-		// Checks if the movie was not found
+		// Checks if the user was not found
 		if err == mongo.ErrNoDocuments {
 			return nil, errors.New("ErrNoDocuments")
 		}
 		return nil, err
 	}
 
-	return &album, nil
+	return &story, nil
 }
 
 // Insert will be used to insert a new movie registry
