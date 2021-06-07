@@ -87,7 +87,8 @@ class RegisterPage extends Component {
 			repeatPasswordError: "none",
 			repeatPasswordSameError: "none",
 			usernameError: "none",
-			usernameNotValid: "none"
+			usernameNotValid: "none",
+			website : "",
 		});
 
 		if (this.state.username === "") {
@@ -149,6 +150,7 @@ class RegisterPage extends Component {
 			Password: this.state.password,
 			Biography: this.state.biography,
 			Private: this.state.private,
+			Website : this.state.website
 		};
 
 		if (this.validateForm(userDTO)) {
@@ -165,10 +167,7 @@ class RegisterPage extends Component {
 						this.setState({ errorHeader: "Internal server error!", errorMessage: "Server error.", hiddenErrorAlert: false });
 					} else {
 						this.setState({ openModal: true });
-						//this.setState({ redirect: true })
 					}
-					console.log("IDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD")
-					console.log(res.data)
 					const user1Id = {id: res.data}
 					Axios.post(BASE_URL_USER_INTERACTION + "/api/createUser", user1Id)
 					.then((res) => {
@@ -213,6 +212,9 @@ class RegisterPage extends Component {
 	handleCloseAlert = () => {
 		this.setState({ hiddenErrorAlert: true });
 	};
+	handleWebsiteChange = (event) => {
+		this.setState({website: event.target.value})
+	}
 
 	render() {
 		if (this.state.redirect) return <Redirect push to="/login" />;
@@ -339,7 +341,20 @@ class RegisterPage extends Component {
 										Phone number must be entered.
 									</div>
 								</div>
-
+								<div className="control-group">
+									<div className="form-group controls mb-0 pb-2" style={{ color: "#6c757d", opacity: 1 }}>
+										<label>Website:</label>
+										<input
+											placeholder="Website"
+											class="form-control"
+											type="text"
+											id="website"
+											onChange={this.handleWebsiteChange}
+											value={this.state.website}
+										/>
+									</div>
+									
+								</div>
 								<div className="control-group">
 									<div className="form-group controls mb-0 pb-2" style={{ color: "#6c757d", opacity: 1 }}>
 										<label>Date of birth:</label>

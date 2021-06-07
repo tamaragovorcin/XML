@@ -39,7 +39,7 @@ class AddCollectionModal extends Component {
 											value={this.state.name}
 										/>
 									</div>
-									<div className="text-danger" style={{ display: this.props.highlightNameError }}>
+									<div className="text-danger" style={{ display: this.props.collectionNameError }}>
 										Name must be entered.
 									</div>
 								</div>

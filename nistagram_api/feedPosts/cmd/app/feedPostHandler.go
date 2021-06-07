@@ -477,13 +477,14 @@ func (app *application) getPhototsForHomePage(w http.ResponseWriter, r *http.Req
 	}
 	feedPostResponse := []dtos.FeedPostInfoDTO{}
 	for _, feedPost := range postsForHomePage {
-
-		images, err := findImageByPostId(allImages,feedPost.Id)
-		if err != nil {
-			app.serverError(w, err)
+		if iAmFollowingThisUser(userId,feedPost.Post.User.Hex()) {
+			images, err := findImageByPostId(allImages,feedPost.Id)
+			if err != nil {
+				app.serverError(w, err)
+			}
+			userUsername :=getUserUsername(feedPost.Post.User)
+			feedPostResponse = append(feedPostResponse, toResponseHomePage(feedPost, images.Media,userUsername))
 		}
-		userUsername :=getUserUsername(feedPost.Post.User)
-		feedPostResponse = append(feedPostResponse, toResponseHomePage(feedPost, images.Media,userUsername))
 
 	}
 
@@ -494,6 +495,35 @@ func (app *application) getPhototsForHomePage(w http.ResponseWriter, r *http.Req
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	w.Write(imagesMarshaled)
+}
+
+func iAmFollowingThisUser(logged string, userWithPost string) bool {
+
+	postBody, _ := json.Marshal(map[string]string{
+		"follower":  logged,
+		"following": userWithPost,
+	})
+	responseBody := bytes.NewBuffer(postBody)
+	//Leverage Go's HTTP Post function to make request
+	resp, err := http.Post("http://localhost:4005/api/checkInteraction", "application/json", responseBody)
+	//Handle Error
+	if err != nil {
+		log.Fatalf("An Error Occured %v", err)
+	}
+	defer resp.Body.Close()
+	//Read the response body
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		log.Fatalln(err)
+	}
+	sb := string(body)
+	sbbtext := strings.ToLower(strings.Trim(sb," \r\n"))
+
+	if sbbtext=="true" {
+			return true
+		} else {
+			return false
+		}
 }
 
 func getUserUsername(user primitive.ObjectID) string {

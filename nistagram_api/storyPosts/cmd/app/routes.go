@@ -20,7 +20,6 @@ func (app *application) routes() *mux.Router {
 	r.HandleFunc("/api/storyAlbum/usersAlbums/{userIdd}", app.getUsersStoryAlbums).Methods("GET")
 	r.HandleFunc("/api/storyAlbum/homePage/{userId}", app.getStoryAlbumsForHomePage).Methods("GET")
 
-
 	r.HandleFunc("/api/image/{userId}/{storyId}", app.saveImage).Methods("POST")
 
 	r.HandleFunc("/highlight/", app.getAllHighlights).Methods("GET")

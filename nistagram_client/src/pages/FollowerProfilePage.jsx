@@ -72,7 +72,14 @@ class FollowerProfilePage extends React.Component {
 		allowPagePreview : false,
 		ableToFollowThisUser : false,
 		sentFollowRequest : false,
-		privateUser : false
+		privateUser : false,
+		showAddAlbumToCollectionAlbum : false,
+		collectionAlbums : [],
+		highlightsAlbums : [],
+		storiesForHightlihtAlbum : [],
+		hiddenStoriesForHighlightalbum : false,
+		myCollectionAlbums : [],
+		myCollections : []
 	}
 	hasRole = (reqRole) => {
 		let roles = JSON.parse(localStorage.getItem("keyRole"));
@@ -126,6 +133,9 @@ class FollowerProfilePage extends React.Component {
 		this.handleGetAlbums(s[5])
 		this.handleGetStoryAlbums(s[5])
 		this.handleSetAllowPagePreview(s[5])
+		this.handleGetCollectionAlbums(s[5])
+		this.handleGetHighlightAlbums(s[5])
+
 
 	}
 	handleSetAllowPagePreview = (id)=> {
@@ -204,12 +214,22 @@ class FollowerProfilePage extends React.Component {
 		this.setState({ showAddCollectionModal: true });
 	};
 	handleOpenAddPostToCollectionModal = (postId)=> {
+		let id = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length-1)
+
+		Axios.get(BASE_URL_FEED + "/api/collection/user/"+id)
+			.then((res) => {
+				this.setState({ myCollections: res.data });
+			})
+			.catch((err) => {
+				console.log(err);
+			});
 		this.setState({ showAddPostToCollection: true });
 		this.setState({ selectedPostId: postId });
 	}
 	handleAddPostToCollectionModalClose = ()=> {
 		this.setState({ showAddPostToCollection: false });
-	}
+		this.setState({ showAddAlbumToCollectionAlbumToCollection: false });
+		}
 	addPostToCollection = (collectionId) => {
 		let postCollectionDTO = {
 			PostId : this.state.selectedPostId,
@@ -224,7 +244,7 @@ class FollowerProfilePage extends React.Component {
 			this.setState({ textSuccessfulModal: "You have successfully added post to collection." });
 			this.setState({ openModal: true });
 			this.setState({ showAddPostToCollection: false });
-
+			
 		})
 		.catch((err) => {
 			console.log(err);
@@ -555,10 +575,63 @@ class FollowerProfilePage extends React.Component {
 		
 
 	}
+	handleOpenAddAlbumToCollectionAlbumModal = (postId)=> {
+		let id = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length-1)
 
+			Axios.get(BASE_URL_FEED + "/api/collection/user/album/"+id)
+				.then((res) => {
+					this.setState({ myCollectionAlbums: res.data });
+				})
+				.catch((err) => {
+					console.log(err);
+				});
+		
+		this.setState({ showAddAlbumToCollectionAlbum: true });
+		this.setState({ selectedPostId: postId });
+	}
 
+	handleGetCollectionAlbums = (id) => {
+		Axios.get(BASE_URL_FEED + "/api/collection/user/album/"+id)
+			.then((res) => {
+				this.setState({ collectionAlbums: res.data });
+			})
+			.catch((err) => {
+				console.log(err);
+			});
+	}
+	addAlbumToCollectionAlbum = (collectionId) => {
+		let postCollectionDTO = {
+			PostId : this.state.selectedPostId,
+			CollectionId : collectionId
+		}
+		Axios.post(BASE_URL_FEED + "/api/collection/album/addPost/", postCollectionDTO, {
+		}).then((res) => {
+			
+			this.setState({ showAddCollectionAlbumModal: false });
+			let id = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length-1)
+			this.handleGetCollectionAlbums(id);
+			this.setState({ textSuccessfulModal: "You have successfully added album to collection." });
+			this.setState({ openModal: true });
+			this.setState({ showAddAlbumToCollectionAlbum: false });
 
-	
+		})
+		.catch((err) => {
+			console.log(err);
+		});
+	}
+	handleGetHighlightAlbums = (id) => {
+		Axios.get(BASE_URL_STORY + "/api/highlight/user/album/"+id)
+			.then((res) => {
+				this.setState({ highlightsAlbums: res.data });
+			})
+			.catch((err) => {
+				console.log(err);
+			});
+	}
+	seeStoriesInHighlightAlbum = (stories)=> {
+		this.setState({ hiddenStoriesForHighlightAlbum: false });
+		this.setState({storiesForHightlihtAlbum : stories})
+	}
 	render() {
 		return (
 			<React.Fragment>
@@ -653,7 +726,12 @@ class FollowerProfilePage extends React.Component {
 								postsForCollection = {this.state.postsForCollection}
 								hiddenStoriesForCollection = {this.state.hiddenStoriesForCollection}
 								handleOpenAddPostToCollectionModal = {this.handleOpenAddPostToCollectionModal}
+								handleOpenAddAlbumToCollectionAlbumModal = {this.handleOpenAddAlbumToCollectionAlbumModal}
 
+								highlightsAlbums = {this.state.highlightsAlbums}
+								seeStoriesInHighlightAlbum = {this.seeStoriesInHighlightAlbum}
+								storiesForHightlihtAlbum= {this.state.storiesForHightlihtAlbum}
+								hiddenStoriesForHighlightalbum = {this.state.hiddenStoriesForHighlightAlbum}
 							
 						/>
 						</div>
@@ -716,16 +794,21 @@ class FollowerProfilePage extends React.Component {
 						text={this.state.textSuccessfulModal}
 					/>
 				
-				
-				
 					  <AddPostToCollection
                           
-					  
 						  show={this.state.showAddPostToCollection}
 						  onCloseModal={this.handleAddPostToCollectionModalClose}
 						  header="Add post to collection"
 						  addPostToCollection={this.addPostToCollection}
-						  collections = {this.state.collections}
+						  collections = {this.state.myCollections}
+					  />
+					  <AddPostToCollection
+                          
+						  show={this.state.showAddAlbumToCollectionAlbum}
+						  onCloseModal={this.handleAddPostToCollectionModalClose}
+						  header="Add album to collection album"
+						  addPostToCollection={this.addAlbumToCollectionAlbum}
+						  collections = {this.state.myCollectionAlbums}
 					  />
 
 				</div>

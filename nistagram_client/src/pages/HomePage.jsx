@@ -14,6 +14,7 @@ import IconTabsHomePage from "../components/Posts/IconTabsHomePage"
 import AddPostToCollection from "../components/Posts/AddPostToCollection";
 import ModalDialog from "../components/ModalDialog";
 import ConvertImage from "react-convert-image";
+import StoriesModal from "../components/Posts/StoriesModal.jsx";
 //import $ from 'jquery';
 class HomePage extends React.Component {
 
@@ -28,6 +29,8 @@ class HomePage extends React.Component {
 		showLikesModal: false,
 		showDislikesModal: false,
 		showCommentsModal: false,
+
+		showStories: false,
 		showWriteCommentModal: false,
 		showAddPostToCollection: false,
 		selectedPostId: -1,
@@ -35,14 +38,22 @@ class HomePage extends React.Component {
 		showWriteCommentModalAlbum: false,
 		users: [],
 		pics: [],
-		image: "",
+		image: [],
 		converted: undefined,
 		help: [],
+		ubiucse: "",
 		pictures: [],
-		bla: [],
+		bla: [1, 2],
+		imageUrl: "",
+		helpImage: "",
 		hid: true,
-		stories: ["blob:http://localhost:3000/ac876899-5147-482c-9086-998ee05c765f"],
-		image: ""
+		ready: false,
+		stories: [],
+		convertedImage: "",
+		count: 0,
+		userIsLogged : false,
+
+
 
 	}
 
@@ -56,60 +67,46 @@ class HomePage extends React.Component {
 
 	}
 
-	handleBlob = (im) => {
+	hasRole = (reqRole) => {
+		let roles = JSON.parse(localStorage.getItem("keyRole"));
 
-		
-		var ab = new ArrayBuffer(im.length);
-		var ia = new Uint8Array(ab);
-	
-		for (var i = 0; i < im.length; i++) {
-			ia[i] = im.charCodeAt(i);
+		if (roles === null) return false;
+
+		if (reqRole === "*") return true;
+
+		for (let role of roles) {
+			if (role === reqRole) return true;
 		}
-		var blob =  new Blob([ab], { type: 'image/jpg' });
-		var url = window.URL.createObjectURL(blob);
-		alert(url)
-
-
-
-		//const byteCharacters = atob(converted);
-		/*const byteNumbers = new Array(im.length);
-		for (let i = 0; i < im.length; i++) {
-			byteNumbers[i] = im.charCodeAt(i);
-		}
-		const byteArray = new Uint8Array(byteNumbers);
-
-		let image = new Blob([byteArray], { type: contentType });
-
-
-
-
-		let imageUrl = URL.createObjectURL(image);
-		alert(imageUrl)
-		//imageUrl = imageUrl.replace("blob:", "");
-		this.setState({ image: imageUrl });
-		let hh = this.state.pictures;
-		hh.push(imageUrl)
-		console.log(hh)
-		this.setState({
-			pictures: hh,
-		});*/
-
-
-	}
+		return false;
+	};
 	handleConvertedImage = (converted) => {
 
+		var hh = this.state.stories;
+		var username = this.state.ss[hh.length].username
+		
+		let st = { id: 1, stories: [] }
+		let storiji = {url: converted, header: {
+			heading: username,
+			subheading: 'CLOSE FRIENDS',
+			
+		},}
+		st.stories.push(storiji)
+		hh.push(st)
+		this.setState({
+			stories: hh,
+		});
+		this.setState({
+			convertedImage: converted,
+		});
 
 
 
-		/*	converted = converted.replace("webp", "jpg");
-			console.log(converted)
-			let hh = this.state.pictures;
-			hh.push(converted)
-			console.log(hh)
+		if (this.state.ss.length === hh.length) {
 			this.setState({
-				pictures: hh,
-			});*/
-
+				ready: true,
+			});
+		}
+		console.log(hh)
 	}
 
 	handleLikesModalOpen = (postId) => {
@@ -192,8 +189,14 @@ class HomePage extends React.Component {
 	handleCommentsModalClose = () => {
 		this.setState({ showCommentsModal: false });
 	}
+	handleStoriesClose = () => {
+		this.setState({ showStories: false });
+	}
 	handleWriteCommentModalClose = () => {
 		this.setState({ showWriteCommentModal: false });
+	}
+	onClickImage = () => {
+		this.setState({ showStories: true });
 	}
 
 	handleLike = (postId) => {
@@ -271,61 +274,71 @@ class HomePage extends React.Component {
 
 
 	componentDidMount() {
+		if(this.hasRole("*")) {
+			
+			this.setState({ userIsLogged: true });
 
+			let id = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length - 1)
 
-		let id = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length - 1)
+			Axios.get(BASE_URL_STORY + "/api/story/homePage/" + id)
 
-		Axios.get(BASE_URL_STORY + "/api/story/homePage/" + id)
+				.then((res) => {
+					let list = [];
+					let st = [];
+					let luna = [];
+					
+					
+					res.data.forEach(story => {
+						//alert(story.CloseFriends)
+						let luna = [];
+						story.Stories.forEach(s => {
 
-			.then((res) => {
-				let list = [];
-				let st = [];
-				let luna = [];
-				res.data.forEach(story => {
-					story.Stories.forEach(s => {
-						luna.push(s.Media)
-						this.handleBlob(s.Media)
+							let aa = `data:image/jpg;base64,${s.Media}`
+							luna.push(aa)
+							//st.push(luna)
 
+						});
+
+						let highliht1 = { id: res.data.id, username: story.UserUsername, storiess: luna };
+						list.push(highliht1)
 					});
-					let highliht1 = { id: res.data.id, username: story.UserUsername, storiess: luna };
+					//this.setState({ image: st });
+					this.setState({ ss: list });
+					//this.setState({ bla: luna });
 
-					list.push(highliht1)
-
+				})
+				.catch((err) => {
+					console.log(err);
 				});
 
-				this.setState({ ss: list });
-				this.setState({ bla: luna });
+			//this.setState({ showCommentsModal: true });
+
+			this.handleGetPhotos(id)
+			this.handleGetAlbums(id)
+		}else {
+			this.setState({ userIsLogged: false });
+		}
+
+	}
+
+	handleAddAllDataCollection = (id) => {
+		Axios.post(BASE_URL_FEED + "/api/collection/allData/" + id)
+			.then((res) => {
+				if (res.status === 409) {
+					this.setState({
+						errorHeader: "Resource conflict!",
+						errorMessage: "Email already exist.",
+						hiddenErrorAlert: false,
+					});
+				} else if (res.status === 500) {
+					this.setState({ errorHeader: "Internal server error!", errorMessage: "Server error.", hiddenErrorAlert: false });
+				}
+
 
 			})
 			.catch((err) => {
 				console.log(err);
 			});
-
-		//this.setState({ showCommentsModal: true });
-
-		this.handleGetPhotos(id)
-		this.handleGetAlbums(id)
-
-	}
-	
-	handleAddAllDataCollection = (id) =>{
-		Axios.post(BASE_URL_FEED + "/api/collection/allData/"+id)
-								.then((res) => {
-									if (res.status === 409) {
-										this.setState({
-											errorHeader: "Resource conflict!",
-											errorMessage: "Email already exist.",
-											hiddenErrorAlert: false,
-										});
-									} else if (res.status === 500) {
-										this.setState({ errorHeader: "Internal server error!", errorMessage: "Server error.", hiddenErrorAlert: false });
-									} 
-									
-
-								})
-								.catch((err) => {
-									console.log(err);
-								});
 	}
 
 	handleGetPhotos = (id) => {
@@ -435,85 +448,101 @@ class HomePage extends React.Component {
 			});
 	}
 	render() {
-		const { state: { converted } } = this;
+
 		return (
 			<React.Fragment>
 				<TopBar />
 				<Header />
-
-				<div className="container-fluid testimonial-group d-flex align-items-top">
-					<div className="container-fluid scrollable" style={{ marginRight: "10rem", marginBottom: "5rem", marginTop: "10rem" }}>
-						<table style={{ width: "100%" }}>
-							<thead></thead>
-							<tbody>
-
-
-								{this.state.bla.map((high) => (
-									<tr style={{ width: "60em", marginLeft: "10em" }}>
-										<td width="100em">
-											<img
-												className="img-fluid"
-												src={playerLogo}
-												style={{ borderRadius: "50%", margin: "2%" }}
-												width="60em"
-												alt="description"
-											/>
-
-										</td>
-
-										<td>
-										
-										</td>
-
-
-									</tr>))}
-
-
-							</tbody>
-						</table>
-
-					</div>
-
-					<div style={{ marginTop: "150px" }}>
-
-						<button onClick={this.Change}>Button</button>
-					</div>
+				{this.state.ss.map((user) => (
 					<div hidden={this.state.hid}>
-						{this.state.bla.map((high) => (
-							<ConvertImage
-								image={`data:image/jpg;base64,${high}`}
-								onConversion={this.handleConvertedImage}
+						{user.storiess.map((post) => (
+							<div hidden={this.state.hid}>
+								<ConvertImage
+									image={post}
+									onConversion={this.handleConvertedImage}
 
-							/>))}
-					</div>
+								/>
+							</div>))}</div>
+
+				))}
+
+				<section id="hero" className="d-flex align-items-top" >
+					<div className="container" hidden={!this.state.userIsLogged}>
+						<div className="container-fluid testimonial-group d-flex align-items-top">
+							<div className="container-fluid scrollable" style={{ marginRight: "10rem", marginBottom: "5rem", marginTop: "5rem" }}>
+								<table className="table-responsive" style={{ width: "100%" }}>
+									<thead></thead>
+									<tbody>
+
+									<td><p> STORIES </p>  </td>
+										{this.state.ss.map((post) => (
+											<td  id="td" style={{ width: "15em", height: "15em" ,marginLeft: "8em" }}>
+												<tr >
+													<img
+														class="td"
+														src={post.storiess[0]}
+														style={{ borderRadius: "50%", margin: "2%" }}
+														width="100em"
+														height="100em"
+														max-width= "100%"
+														max-height= "100%"
+														alt="description"
+														onClick={this.onClickImage}
+													/>
+
+												</tr>
 
 
-					<div className="d-flex align-items-top">
-						<IconTabsHomePage
-							photos={this.state.photos}
-							handleLike={this.handleLike}
-							handleDislike={this.handleDislike}
-							handleWriteCommentModal={this.handleWriteCommentModal}
-							handleLikesModalOpen={this.handleLikesModalOpen}
-							handleDislikesModalOpen={this.handleDislikesModalOpen}
-							handleCommentsModalOpen={this.handleCommentsModalOpen}
-							albums={this.state.albums}
-							handleLikeAlbum={this.handleLikeAlbum}
-							handleDislikeAlbum={this.handleDislikeAlbum}
-							handleWriteCommentModalAlbum={this.handleWriteCommentModalAlbum}
-							handleLikesModalOpenAlbum={this.handleLikesModalOpenAlbum}
-							handleDislikesModalOpenAlbum={this.handleDislikesModalOpenAlbum}
-							handleCommentsModalOpenAlbum={this.handleCommentsModalOpenAlbum}
 
-							handleOpenAddPostToCollectionModal={this.handleOpenAddPostToCollectionModal}
+											</td>
+										))}
+<td><p> ALBUM STORIES </p> </td>
 
-						/>
-					</div>
 
+									</tbody>
+								</table>
+							</div>
+						</div>
+
+
+						<div className="d-flex align-items-top">
+							<IconTabsHomePage
+								photos={this.state.photos}
+								handleLike={this.handleLike}
+								handleDislike={this.handleDislike}
+								handleWriteCommentModal={this.handleWriteCommentModal}
+								handleLikesModalOpen={this.handleLikesModalOpen}
+								handleDislikesModalOpen={this.handleDislikesModalOpen}
+								handleCommentsModalOpen={this.handleCommentsModalOpen}
+								albums={this.state.albums}
+								handleLikeAlbum={this.handleLikeAlbum}
+								handleDislikeAlbum={this.handleDislikeAlbum}
+								handleWriteCommentModalAlbum={this.handleWriteCommentModalAlbum}
+								handleLikesModalOpenAlbum={this.handleLikesModalOpenAlbum}
+								handleDislikesModalOpenAlbum={this.handleDislikesModalOpenAlbum}
+								handleCommentsModalOpenAlbum={this.handleCommentsModalOpenAlbum}
+
+								handleOpenAddPostToCollectionModal={this.handleOpenAddPostToCollectionModal}
+
+							/>
+						</div>
+
+					
+						</div>
+					</section>
+
+<div>
+		
 				</div>
 
 				<div>
-                        
+				<StoriesModal
+							show={this.state.showStories}
+							onCloseModal={this.handleStoriesClose}
+							stories={this.state.stories}
+							ready={this.state.ready}
+							count = {this.state.count}
+						/>
                     <LikesModal
 					        show={this.state.showLikesModal}
 					        onCloseModal={this.handleLikesModalClose}
