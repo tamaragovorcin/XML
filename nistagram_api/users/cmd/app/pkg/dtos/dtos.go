@@ -19,6 +19,7 @@ type UserRequest struct {
 	DateOfBirth string
 	Private bool
 	Biography string
+	Website string
 }
 
 type CloseFriendsDTO struct {
@@ -37,6 +38,7 @@ type UserUpdateRequest struct {
 	DateOfBirth string `bson:"dateOfBirth,omitempty"`
 	Private bool `bson:"private,omitempty"`
 	Biography string `bson:"biography,omitempty"`
+	Website string
 }
 
 type LoginRequest struct {
