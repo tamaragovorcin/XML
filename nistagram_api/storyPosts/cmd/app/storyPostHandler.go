@@ -226,25 +226,27 @@ func (app *application) getStoriesForHomePage(w http.ResponseWriter, r *http.Req
 	}
 	storyPostsResponse := []dtos.StoryPostInfoHomePageDTO{}
 	for _, storyPost := range storiesForHomePage {
+		if iAmFollowingThisUser(userId,storyPost.Post.User.Hex()) {
 
-		images, err := findImageByPostId(allImages,storyPost.Id)
-		if err != nil {
-			app.serverError(w, err)
-		}
-		userInList :=getIndexInListOfUsersStories(userIdPrimitive,storyPostsResponse)
-		if userInList==-1 {
-			userUsername := getUserUsername(storyPost.Post.User)
-			userId := storyPost.Post.User
-			stories := []dtos.StoryPostInfoDTO{}
-			var dto = dtos.StoryPostInfoHomePageDTO{
-				UserId:       userId,
-				UserUsername: userUsername,
-				Stories:      append(stories, toResponseStoryPost(storyPost, images.Media)),
+			images, err := findImageByPostId(allImages, storyPost.Id)
+			if err != nil {
+				app.serverError(w, err)
 			}
-			storyPostsResponse = append(storyPostsResponse, dto)
-		}else if userInList!=-1 {
-			existingDto :=storyPostsResponse[userInList]
-			existingDto.Stories = append(existingDto.Stories, toResponseStoryPost(storyPost, images.Media))
+			userInList := getIndexInListOfUsersStories(userIdPrimitive, storyPostsResponse)
+			if userInList == -1 {
+				userUsername := getUserUsername(storyPost.Post.User)
+				userId := storyPost.Post.User
+				stories := []dtos.StoryPostInfoDTO{}
+				var dto = dtos.StoryPostInfoHomePageDTO{
+					UserId:       userId,
+					UserUsername: userUsername,
+					Stories:      append(stories, toResponseStoryPost(storyPost, images.Media)),
+				}
+				storyPostsResponse = append(storyPostsResponse, dto)
+			} else if userInList != -1 {
+				existingDto := storyPostsResponse[userInList]
+				existingDto.Stories = append(existingDto.Stories, toResponseStoryPost(storyPost, images.Media))
+			}
 		}
 	}
 
@@ -381,5 +383,34 @@ func toResponseAlbum(feedAlbum models.AlbumStory, imageList []string) dtos.Story
 		Media : imagesBuffered,
 		Username : "",
 
+	}
+}
+
+func iAmFollowingThisUser(logged string, userWithPost string) bool {
+
+	postBody, _ := json.Marshal(map[string]string{
+		"follower":  logged,
+		"following": userWithPost,
+	})
+	responseBody := bytes.NewBuffer(postBody)
+	//Leverage Go's HTTP Post function to make request
+	resp, err := http.Post("http://localhost:4005/api/checkInteraction", "application/json", responseBody)
+	//Handle Error
+	if err != nil {
+		log.Fatalf("An Error Occured %v", err)
+	}
+	defer resp.Body.Close()
+	//Read the response body
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		log.Fatalln(err)
+	}
+	sb := string(body)
+	sbbtext := strings.ToLower(strings.Trim(sb," \r\n"))
+
+	if sbbtext=="true" {
+		return true
+	} else {
+		return false
 	}
 }
