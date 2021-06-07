@@ -93,16 +93,6 @@ class Header extends React.Component {
 
 					</div>
 
-<<<<<<< HEAD
-
-
-
-
-
-
-=======
-					
->>>>>>> 8bcd6392bc6a5d638a456120214098aa2aafbf45
 					<nav className="nav-menu d-none d-lg-block">
 						<ul>
 							<li>
