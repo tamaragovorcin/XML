@@ -169,4 +169,34 @@ func (app *application) insetStoryInHighlight(w http.ResponseWriter, r *http.Req
 		}
 		app.infoLog.Printf("New user have been created, id=%s", insertResult.UpsertedID)
 }
+func (app *application) insetStoryAlbumInHighlight(w http.ResponseWriter, r *http.Request) {
 
+	var m dtos.HighlightStoryAlbumDTO
+	err := json.NewDecoder(r.Body).Decode(&m)
+	if err != nil {
+		app.serverError(w, err)
+	}
+
+	highlightAlbum, err := app.highlightsAlbum.FindByID(m.HighlightId)
+	if highlightAlbum == nil {
+		app.infoLog.Println("Hihglight not found")
+	}
+	storyAlbum, err := app.storyPosts.FindByID(m.StoryId)
+	if storyAlbum == nil {
+		app.infoLog.Println("Hihglight not found")
+	}
+
+
+	var highlightUpdate = models.HighLightAlbum{
+		Id: m.HighlightId,
+		User:highlightAlbum.User,
+		Name : highlightAlbum.Name,
+		Stories: append(highlightAlbum.Stories, *storyAlbum),
+	}
+
+	insertResult, err := app.highlightsAlbum.Update(highlightUpdate)
+	if err != nil {
+		app.serverError(w, err)
+	}
+	app.infoLog.Printf("New user have been created, id=%s", insertResult.UpsertedID)
+}
