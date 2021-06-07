@@ -51,7 +51,7 @@ class HomePage extends React.Component {
 		stories: [],
 		convertedImage: "",
 		count: 0,
-
+		userIsLogged : false,
 
 
 
@@ -67,7 +67,18 @@ class HomePage extends React.Component {
 
 	}
 
+	hasRole = (reqRole) => {
+		let roles = JSON.parse(localStorage.getItem("keyRole"));
 
+		if (roles === null) return false;
+
+		if (reqRole === "*") return true;
+
+		for (let role of roles) {
+			if (role === reqRole) return true;
+		}
+		return false;
+	};
 	handleConvertedImage = (converted) => {
 
 		var hh = this.state.stories;
@@ -263,47 +274,47 @@ class HomePage extends React.Component {
 
 
 	componentDidMount() {
+		if(this.hasRole("*")) {
+			
+			this.setState({ userIsLogged: true });
 
+			let id = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length - 1)
 
-		let id = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length - 1)
+			Axios.get(BASE_URL_STORY + "/api/story/homePage/" + id)
 
-		Axios.get(BASE_URL_STORY + "/api/story/homePage/" + id)
-
-			.then((res) => {
-				let list = [];
-				let st = [];
-				let luna = [];
-				res.data.forEach(story => {
+				.then((res) => {
+					let list = [];
+					let st = [];
 					let luna = [];
-					story.Stories.forEach(s => {
+					res.data.forEach(story => {
+						let luna = [];
+						story.Stories.forEach(s => {
 
+							let aa = `data:image/jpg;base64,${s.Media}`
+							luna.push(aa)
+							//st.push(luna)
 
-						let aa = `data:image/jpg;base64,${s.Media}`
-						luna.push(aa)
-						//st.push(luna)
+						});
 
-
-
+						let highliht1 = { id: res.data.id, username: story.UserUsername, storiess: luna };
+						list.push(highliht1)
 					});
+					//this.setState({ image: st });
+					this.setState({ ss: list });
+					//this.setState({ bla: luna });
 
-					let highliht1 = { id: res.data.id, username: story.UserUsername, storiess: luna };
-					list.push(highliht1)
-
-
+				})
+				.catch((err) => {
+					console.log(err);
 				});
-				//this.setState({ image: st });
-				this.setState({ ss: list });
-				//this.setState({ bla: luna });
 
-			})
-			.catch((err) => {
-				console.log(err);
-			});
+			//this.setState({ showCommentsModal: true });
 
-		//this.setState({ showCommentsModal: true });
-
-		this.handleGetPhotos(id)
-		this.handleGetAlbums(id)
+			this.handleGetPhotos(id)
+			this.handleGetAlbums(id)
+		}else {
+			this.setState({ userIsLogged: false });
+		}
 
 	}
 
@@ -452,8 +463,8 @@ class HomePage extends React.Component {
 
 				))}
 
-				<section id="hero" className="d-flex align-items-top">
-					<div className="container">
+				<section id="hero" className="d-flex align-items-top" >
+					<div className="container" hidden={!this.state.userIsLogged}>
 						<div className="container-fluid testimonial-group d-flex align-items-top">
 							<div className="container-fluid scrollable" style={{ marginRight: "10rem", marginBottom: "5rem", marginTop: "5rem" }}>
 								<table className="table-responsive" style={{ width: "100%" }}>

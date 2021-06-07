@@ -1063,7 +1063,7 @@ class ProfilePage extends React.Component {
 		}
 	}
 	handleOpenAddStoryToHighlightModal = (storyId)=> {
-		this.setState({ showAddStoryAlbumToHighLightModal: true });
+		this.setState({ showAddStoryToHighLightModal: true });
 		this.setState({ selectedStoryId: storyId });
 	}
 	handleOpenAddStoryAlbumToHighlightModal = (highlightId)=> {
@@ -1076,7 +1076,7 @@ class ProfilePage extends React.Component {
 	}
 	
 	handleOpenAddAlbumToCollectionAlbumModal = (postId)=> {
-		this.setState({ showAddAlbumToCollectionAlbum: true });
+		this.setState({ showAddAlbumToCollectionAlbumToCollection: true });
 		this.setState({ selectedPostId: postId });
 	}
 	handleAddStoryToHighlightModalClose = ()=> {

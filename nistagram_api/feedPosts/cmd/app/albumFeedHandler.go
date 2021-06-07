@@ -186,14 +186,15 @@ func (app *application) getAlbumsForHomePage(w http.ResponseWriter, r *http.Requ
 
 	feedAlbumResponse := []dtos.FeedAlbumInfoDTO{}
 	for _, album := range feedAlbumsForHomePage {
+		if iAmFollowingThisUser(userId,album.Post.User.Hex()) {
 
-		images, err := findAlbumByPostId(allImages,album.Id)
-		if err != nil {
-			app.serverError(w, err)
+			images, err := findAlbumByPostId(allImages, album.Id)
+			if err != nil {
+				app.serverError(w, err)
+			}
+			userUsername := getUserUsername(album.Post.User)
+			feedAlbumResponse = append(feedAlbumResponse, toResponseAlbumHomePage(album, images, userUsername))
 		}
-		userUsername :=getUserUsername(album.Post.User)
-		feedAlbumResponse = append(feedAlbumResponse, toResponseAlbumHomePage(album, images,userUsername))
-
 	}
 
 	imagesMarshaled, err := json.Marshal(feedAlbumResponse)

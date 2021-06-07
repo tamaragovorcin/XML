@@ -113,6 +113,34 @@ func (app *application) getAllUsers(w http.ResponseWriter, r *http.Request) {
 	w.Write(b)
 }
 
+func (app *application) getAllUsersWithoutLogged(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	vars := mux.Vars(r)
+
+	user := vars["userId"]
+	users, err := app.users.GetAll()
+	if err != nil {
+		app.serverError(w, err)
+	}
+	userWithoutLogged := []models.User{}
+	for _, oneUser := range users {
+
+		if oneUser.Id.Hex()!=user {
+			userWithoutLogged = append(userWithoutLogged,oneUser)
+		}
+	}
+
+	b, err := json.Marshal(userWithoutLogged)
+	if err != nil {
+		app.serverError(w, err)
+	}
+
+	app.infoLog.Println("Users have been listed")
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	w.Write(b)
+}
 func (app *application) search(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	vars := mux.Vars(r)

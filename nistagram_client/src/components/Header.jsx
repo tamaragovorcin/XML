@@ -46,25 +46,51 @@ class Header extends React.Component {
 
 
 	componentDidMount() {
-		let help = []
-		Axios.get(BASE_URL_USER + "/api/")
-			.then((res) => {
+		if(this.hasRole("*")) {
+			let help = []
+			let id = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length-1)
 
-				console.log(res.data)
-				this.setState({ users: res.data });
-
-				res.data.forEach((user) => {
-					let optionDTO = { id: user.ID, label: user.ProfileInformation.Username, value: user.Id }
-					help.push(optionDTO)
+			Axios.get(BASE_URL_USER + "/api/all/"+id)
+				.then((res) => {
+	
+					console.log(res.data)
+					this.setState({ users: res.data });
+	
+					res.data.forEach((user) => {
+						let optionDTO = { id: user.ID, label: user.ProfileInformation.Username, value: user.Id }
+						help.push(optionDTO)
+					});
+	
+					this.setState({ options: help });
+					console.log(help)
+				})
+				.catch((err) => {
+	
+					console.log(err)
 				});
-
-				this.setState({ options: help });
-				console.log(help)
-			})
-			.catch((err) => {
-
-				console.log(err)
-			});
+		}
+		else {
+			let help = []
+			Axios.get(BASE_URL_USER + "/api/")
+				.then((res) => {
+	
+					console.log(res.data)
+					this.setState({ users: res.data });
+	
+					res.data.forEach((user) => {
+						let optionDTO = { id: user.ID, label: user.ProfileInformation.Username, value: user.Id }
+						help.push(optionDTO)
+					});
+	
+					this.setState({ options: help });
+					console.log(help)
+				})
+				.catch((err) => {
+	
+					console.log(err)
+				});
+		}
+		
 
 	};
 
