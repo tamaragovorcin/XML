@@ -506,6 +506,7 @@ class HomePage extends React.Component {
 							handleCommentsModalOpenAlbum={this.handleCommentsModalOpenAlbum}
 
 							handleOpenAddPostToCollectionModal={this.handleOpenAddPostToCollectionModal}
+							handleOpenAddAlbumToCollectionAlbumModal = {this.handleOpenAddAlbumToCollectionAlbumModal}
 
 						/>
 					</div>

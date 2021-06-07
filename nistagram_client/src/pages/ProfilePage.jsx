@@ -107,7 +107,8 @@ class ProfilePage extends React.Component {
 		collectionAlbums : [],
 		hiddenPostsForCollectionAlbums: false,
 		postsForCollectionAlbum : [],
-		showAddAlbumToCollectionAlbum : false
+		showAddAlbumToCollectionAlbum : false,
+		
 	}
 	
 	onYmapsLoad = (ymaps) => {
@@ -1178,7 +1179,6 @@ class ProfilePage extends React.Component {
 	seeStoriesInHighlightAlbum = (stories)=> {
 		this.setState({ hiddenStoriesForHighlightAlbum: false });
 		this.setState({storiesForHightlihtAlbum : stories})
-		console.log(stories)
 	}
 	seePostsInCollection = (posts)=> {
 		this.setState({ hiddenStoriesForCollection: false });
@@ -1707,7 +1707,7 @@ class ProfilePage extends React.Component {
 					   <AddPostToCollection
                           
 					  
-						  show={this.state.showAddAlbumToCollectionAlbum}
+						  show={this.state.showAddAlbumToCollectionAlbumToCollection}
 						  onCloseModal={this.handleAddPostToCollectionModalClose}
 						  header="Add album to collection album"
 						  addPostToCollection={this.addAlbumToCollectionAlbum}
