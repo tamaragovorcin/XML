@@ -33,36 +33,6 @@ func (app *application) getAllStory(w http.ResponseWriter, r *http.Request) {
 	w.Write(b)
 }
 
-func (app *application) findAlbumStoryByID(w http.ResponseWriter, r *http.Request) {
-	// Get id from incoming url
-	vars := mux.Vars(r)
-	id := vars["id"]
-
-	// Find movie by id
-	m, err := app.albumStories.FindByID(id)
-	if err != nil {
-		if err.Error() == "ErrNoDocuments" {
-			app.infoLog.Println("albumStory not found")
-			return
-		}
-		// Any other error will send an internal server error
-		app.serverError(w, err)
-	}
-
-	// Convert movie to json encoding
-	b, err := json.Marshal(m)
-	if err != nil {
-		app.serverError(w, err)
-	}
-
-	app.infoLog.Println("Have been found a albumStory")
-
-	// Send response back
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	w.Write(b)
-}
-
 func (app *application) insertAlbumStory(w http.ResponseWriter, req *http.Request) {
 
 	vars := mux.Vars(req)

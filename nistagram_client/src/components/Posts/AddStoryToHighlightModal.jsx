@@ -15,7 +15,7 @@ class AddStoryToHighlightModal extends Component {
 				onHide={this.props.onCloseModal}
 			>
 				<Modal.Header closeButton>
-					<Modal.Title id="contained-modal-title-vcenter">{this.props.selectedPlayerName}</Modal.Title>
+					<Modal.Title id="contained-modal-title-vcenter"></Modal.Title>
 				</Modal.Header>
 				<Modal.Body>
 				
