@@ -50,6 +50,8 @@ class HomePage extends React.Component {
 		ready: false,
 		stories: [],
 		convertedImage: "",
+		count: 0,
+
 
 
 
@@ -72,7 +74,11 @@ class HomePage extends React.Component {
 		var username = this.state.ss[hh.length].username
 		
 		let st = { id: 1, stories: [] }
-		let storiji = {url: converted, header: username}
+		let storiji = {url: converted, header: {
+			heading: username,
+			subheading: 'CLOSE FRIENDS',
+			
+		},}
 		st.stories.push(storiji)
 		hh.push(st)
 		this.setState({
@@ -517,6 +523,7 @@ class HomePage extends React.Component {
 							onCloseModal={this.handleLikesModalClose}
 							header="People who liked"
 							peopleLikes={this.state.peopleLikes}
+						
 						/>
 						<DislikesModal
 							show={this.state.showDislikesModal}
@@ -536,7 +543,7 @@ class HomePage extends React.Component {
 							onCloseModal={this.handleStoriesClose}
 							stories={this.state.stories}
 							ready={this.state.ready}
-
+							count = {this.state.count}
 						/>
 
 						<WriteCommentModal

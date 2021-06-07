@@ -11,6 +11,14 @@ class StoriesModal extends Component {
 	state = {
 		count : 0,
 	}
+
+	close = () => {
+
+		this.setState({ count: 0 });
+
+
+
+	}
    onClick = () =>{
 	   let a = this.state.count;
 	   if(a+1 === this.props.stories.length){
@@ -44,7 +52,7 @@ class StoriesModal extends Component {
 				centered
 				onHide={this.props.onCloseModal}
 			>
-				<Modal.Header closeButton  style={{ alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(0,0,0,0.5)'}}>
+				<Modal.Header closeButton onClick = {this.close}  style={{ alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(0,0,0,0.5)'}}>
 					
 				</Modal.Header>
 				<Modal.Body   style={{flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(0,0,0,0.5)'}}>
