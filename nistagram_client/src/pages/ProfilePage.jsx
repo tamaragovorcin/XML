@@ -48,7 +48,7 @@ class ProfilePage extends React.Component {
 		highlihts: [],
 		photos: [],
 		pictures: [],
-		videos : [],
+		videos : "",
 		video : "",
 		picture: "",
 		hiddenOne: true,
@@ -252,6 +252,7 @@ class ProfilePage extends React.Component {
 		this.handleGetStoryAlbums(id)
 		this.handleGetStories(id)
 		this.handleGetCollections(id)
+		this.handleGetVideos(id)
 
 	}
 	handleGetStories = (id)=> {
@@ -287,6 +288,18 @@ class ProfilePage extends React.Component {
 		Axios.get(BASE_URL_FEED + "/api/feed/usersImages/"+id)
 			.then((res) => {
 				this.setState({ photos: res.data });
+				alert(this.state.photos[0].Media)
+			})
+			.catch((err) => {
+				console.log(err);
+			});
+	}
+
+	handleGetVideos = (id)=>{
+		Axios.get(BASE_URL_FEED + "/api/feed/usersVideos/"+id)
+			.then((res) => {
+				this.setState({ videos: res.data });
+				console.log(res.data)
 			})
 			.catch((err) => {
 				console.log(err);
@@ -1189,8 +1202,8 @@ class ProfilePage extends React.Component {
 
 				this.setState({ showImageModal: false, });
 				this.setState({ openModal: true });
-				this.setState({ textSuccessfulModal: "You have successfully added feed post." });
-				this.handleGetPhotos(id)
+				this.setState({ textSuccessfulModal: "You have successfully added video feed post." });
+				// this.handleGetVideos(id)
 
 			})
 			.catch((err) => {
@@ -1276,6 +1289,7 @@ class ProfilePage extends React.Component {
 				<div>
 					<IconTabsProfile
 						photos = {this.state.photos}
+						videos = {this.state.videos}
 						handleLike = {this.handleLike}
 						handleDislike = {this.handleDislike}
 						handleWriteCommentModal = {this.handleWriteCommentModal}						

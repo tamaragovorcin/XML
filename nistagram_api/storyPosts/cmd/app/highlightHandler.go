@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/json"
-	"fmt"
 	"github.com/gorilla/mux"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"net/http"
@@ -77,7 +76,6 @@ func (app *application) deleteHighlight(w http.ResponseWriter, r *http.Request) 
 	app.infoLog.Printf("Have been eliminated %d content(s)", deleteResult.DeletedCount)
 }
 func (app *application) getUsersHiglights(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("-----------------------------")
 	vars := mux.Vars(r)
 	userId := vars["userId"]
 	userIdPrimitive, _ := primitive.ObjectIDFromHex(userId)

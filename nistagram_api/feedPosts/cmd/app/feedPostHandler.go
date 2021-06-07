@@ -162,15 +162,22 @@ func (app *application) getUsersFeedPosts(w http.ResponseWriter, r *http.Request
 }
 
 func toResponse(feedPost models.FeedPost, image2 string) dtos.FeedPostInfoDTO {
-	fmt.Println(image2)
 	f, _ := os.Open(image2)
+	fmt.Println("-------------1----------------")
 	defer f.Close()
+	fmt.Println("-------------1----------------")
+
 	image, _, _ := image.Decode(f)
+	fmt.Println("-------------1----------------")
 
 	buffer := new(bytes.Buffer)
+	fmt.Println("-------------1----------------")
+
 	if err := jpeg.Encode(buffer, image, nil); err != nil {
 		log.Println("unable to encode image.")
 	}
+	fmt.Println("-------------1----------------")
+
 	return dtos.FeedPostInfoDTO{
 		Id: feedPost.Id,
 		DateTime : strings.Split(feedPost.Post.DateTime.String(), " ")[0],

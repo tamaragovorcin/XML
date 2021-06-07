@@ -9,6 +9,7 @@ import "react-responsive-carousel/lib/styles/carousel.min.css"; // requires a lo
 import { Carousel } from 'react-responsive-carousel';
 import playerLogo from "../../static/coach.png";
 import logo from "../../static/collection.png";
+import ReactPlayer from 'react-player'
 
 class IconTabsProfile extends React.Component {
   constructor(props){
@@ -449,6 +450,35 @@ render(){
                     </div>
                 </div>
 				
+            </Tab>
+            <Tab eventKey={7} title="Videos">
+              <div className="d-flex align-items-top">
+                <div className="container-fluid">
+                  
+                  <table className="table">
+                    <tbody>                      
+                          
+                          <tr  style={{ width: "100%"}}>
+                            VIDEOO
+                            <img
+                              className="img-fluid"
+                              src={`data:image/jpg;base64,${this.props.videos}`}
+                              width="100%"
+                              alt="description"
+                            />
+                          </tr>
+                         
+                         
+                         
+                          <br/>
+                          <br/>
+                          <br/>
+                        
+                 
+                    </tbody>
+                  </table>
+                </div>
+              </div>
             </Tab>
         </Tabs>
     );

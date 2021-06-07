@@ -40,6 +40,9 @@ type FeedPostInfoDTO struct {
 	Media       []byte
 	Username    string
 }
+type VideoDTO struct {
+	 Media []byte
+}
 
 type CollectionInfoDTO struct {
 	Id  primitive.ObjectID
