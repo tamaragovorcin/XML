@@ -141,3 +141,4 @@ func (app *application) deleteImage(w http.ResponseWriter, r *http.Request) {
 
 	app.infoLog.Printf("Have been eliminated %d image(s)", deleteResult.DeletedCount)
 }
+

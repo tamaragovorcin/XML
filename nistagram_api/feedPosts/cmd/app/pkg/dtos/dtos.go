@@ -47,11 +47,12 @@ type FeedPostInfoDTO1 struct {
 	Location    string
 	Description string
 	Hashtags    string
-	Media       string
 	Username    string
+	ContentType string
 }
-type VideoDTO struct {
-	 Media string
+type MediaDTO struct {
+	 Type string
+	 URL string
 }
 
 type CollectionInfoDTO struct {

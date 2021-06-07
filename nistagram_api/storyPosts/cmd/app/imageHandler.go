@@ -105,7 +105,7 @@ func (app *application) saveImage(w http.ResponseWriter, r *http.Request)  {
 }
 
 func imgPath(carID int) string {
-	return fmt.Sprintf("../../images/story/%v/", carID)
+	return fmt.Sprintf("../../images/%v/", carID)
 }
 
 func imagePath(carID int) (string, error) {
