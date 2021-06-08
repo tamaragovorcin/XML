@@ -3,7 +3,6 @@ package main
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
 	"github.com/gorilla/mux"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"image"
@@ -415,9 +414,7 @@ func (app *application) getStoriesForHomePage(w http.ResponseWriter, r *http.Req
 	}
 	storyPostsResponse := []dtos.StoryPostInfoHomePageDTO{}
 	for _, storyPost := range storiesForHomePage {
-		fmt.Println("JA:  " + userId)
-		fmt.Println("User slike:   " + storyPost.Post.User.Hex())
-		fmt.Println(iAmFollowingThisUser(userId,storyPost.Post.User.Hex()))
+
 		if iAmFollowingThisUser(userId,storyPost.Post.User.Hex()) {
 			if storyCanBeSeen(storyPost,userIdPrimitive)==true {
 				images, err := findImageByPostId(allImages, storyPost.Id)
