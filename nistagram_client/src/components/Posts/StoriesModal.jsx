@@ -77,10 +77,6 @@ class StoriesModal extends Component {
 							height={768}
 						/> 
 						</td>
-
-
-					
-						
 						</div>
 						}
 							<td><BiRightArrow onClick = {this.onClick} /></td>

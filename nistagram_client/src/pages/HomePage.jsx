@@ -163,7 +163,6 @@ class HomePage extends React.Component {
 				url: converted, header: {
 					heading: username.username,
 					subheading: 'CLOSE FRIENDS',
-
 				},
 			}
 			st.stories.push(storiji)

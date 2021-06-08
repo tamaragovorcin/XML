@@ -57,14 +57,17 @@ services:
     networks:
       - backend
 
-  notificationsettings:
-    restart: always
-    build:
-      context: ./notificationSettings/cmd/app
-    ports:
-      - '4003:4003'
+  neo4j-db:
+    image: neo4j:latest
+    container_name: db_neo
     networks:
       - backend
+    environment:
+      NEO4J_AUTH: neo4j/root
+    ports:
+      - '7687:7687'
+      - '7474:7474'
+
 
   storyposts:
     restart: always
