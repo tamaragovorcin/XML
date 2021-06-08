@@ -15,7 +15,7 @@ import ModalDialog from "../components/ModalDialog";
 import AddPostToCollection from "../components/Posts/AddPostToCollection";
 import Select from 'react-select';
 import { BASE_URL_USER } from "../constants.js";
-
+import { BASE_URL } from "../constants.js";
 const mapState = {
 	center: [44, 21],
 	zoom: 8,
@@ -72,7 +72,7 @@ class Search extends React.Component {
 		}
 
 		let help = []
-		Axios.get(BASE_URL_USER + "/api/")
+		Axios.get(BASE_URL + "/api/users/api/")
 			.then((res) => {
 
 				console.log(res.data)
@@ -151,7 +151,7 @@ class Search extends React.Component {
                     this.setState({ photos: [] });
                     this.setState({ albums: [] });
 
-                    Axios.get(BASE_URL_FEED + "/api/feed/searchByLocation/"+country + "/"+city+"/"+street)
+                    Axios.get(BASE_URL + "/api/feedPosts/api/feed/searchByLocation/"+country + "/"+city+"/"+street)
                     .then((res) => {
                         this.setState({ photos: res.data });
                         this.setState({ hashtags: "" });
@@ -159,7 +159,7 @@ class Search extends React.Component {
                     .catch((err) => {
                         console.log(err);
                     });
-					Axios.get(BASE_URL_FEED + "/api/albumFeed/searchByLocation/"+country + "/"+city+"/"+street)
+					Axios.get(BASE_URL + "/api/feedPosts/api/albumFeed/searchByLocation/"+country + "/"+city+"/"+street)
                     .then((res) => {
                         this.setState({ albums: res.data });
                         this.setState({ hashtags: "" });
@@ -182,7 +182,7 @@ class Search extends React.Component {
 		this.setState({ photos: [] });
 		this.setState({ albums: [] });
 
-       Axios.post(BASE_URL_FEED + "/api/feed/searchByHashTags/",helpDTO)
+       Axios.post(BASE_URL + "/api/feedPosts/api/feed/searchByHashTags/",helpDTO)
         .then((res) => {
             this.setState({ photos: res.data });
             this.setState({ hashtags: "" });
@@ -190,7 +190,7 @@ class Search extends React.Component {
         .catch((err) => {
             console.log(err);
         });
-		Axios.post(BASE_URL_FEED + "/api/albumFeed/searchByHashTags/",helpDTO)
+		Axios.post(BASE_URL + "/api/feedPosts/api/albumFeed/searchByHashTags/",helpDTO)
         .then((res) => {
             this.setState({ albums: res.data });
             this.setState({ hashtags: "" });
@@ -200,7 +200,7 @@ class Search extends React.Component {
         });
     }
 	handleLikesModalOpen = (postId)=> {
-		Axios.get(BASE_URL_FEED + "/api/feed/likes/"+postId)
+		Axios.get(BASE_URL + "/api/feedPosts/api/feed/likes/"+postId)
 			.then((res) => {
 				this.setState({ peopleLikes: res.data });
 			})
@@ -210,7 +210,7 @@ class Search extends React.Component {
 		this.setState({ showLikesModal: true });    
 	}
 	handleDislikesModalOpen = (postId)=> {
-		Axios.get(BASE_URL_FEED + "/api/feed/dislikes/"+postId)
+		Axios.get(BASE_URL + "/api/feedPosts/api/feed/dislikes/"+postId)
 			.then((res) => {
 				this.setState({ peopleDislikes: res.data });
 			})
@@ -220,7 +220,7 @@ class Search extends React.Component {
 		this.setState({ showDislikesModal: true });    
 	}
 	handleCommentsModalOpen = (postId)=> {
-		Axios.get(BASE_URL_FEED + "/api/feed/comments/"+postId)
+		Axios.get(BASE_URL + "/api/feedPosts/api/feed/comments/"+postId)
 			.then((res) => {
 				this.setState({ peopleComments: res.data });
 			})
@@ -230,7 +230,7 @@ class Search extends React.Component {
 		this.setState({ showCommentsModal: true });    
 	}
 	handleLikesModalOpenAlbum = (postId)=> {
-		Axios.get(BASE_URL_FEED + "/api/albumFeed/likes/"+postId)
+		Axios.get(BASE_URL + "/api/feedPosts/api/albumFeed/likes/"+postId)
 			.then((res) => {
 				this.setState({ peopleLikes: res.data });
 			})
@@ -240,7 +240,7 @@ class Search extends React.Component {
 		this.setState({ showLikesModal: true });    
 	}
 	handleDislikesModalOpenAlbum = (postId)=> {
-		Axios.get(BASE_URL_FEED + "/api/albumFeed/dislikes/"+postId)
+		Axios.get(BASE_URL + "/api/feedPosts/api/albumFeed/dislikes/"+postId)
 			.then((res) => {
 				this.setState({ peopleDislikes: res.data });
 			})
@@ -250,7 +250,7 @@ class Search extends React.Component {
 		this.setState({ showDislikesModal: true });    
 	}
 	handleCommentsModalOpenAlbum = (postId)=> {
-		Axios.get(BASE_URL_FEED + "/api/albumFeed/comments/"+postId)
+		Axios.get(BASE_URL + "/api/feedPosts/api/albumFeed/comments/"+postId)
 			.then((res) => {
 				this.setState({ peopleComments: res.data });
 			})
@@ -290,7 +290,7 @@ class Search extends React.Component {
 			PostId : postId,
 			UserId : id
 		}
-		Axios.post(BASE_URL_FEED + "/api/feed/like/", postReactionDTO, {
+		Axios.post(BASE_URL + "/api/feedPosts/api/feed/like/", postReactionDTO, {
 		}).then((res) => {
 
 			this.setState({ textSuccessfulModal: "You have successfully liked the photo." });
@@ -308,7 +308,7 @@ class Search extends React.Component {
 			PostId : postId,
 			UserId : id
 		}
-		Axios.post(BASE_URL_FEED + "/api/albumFeed/like/", postReactionDTO, {
+		Axios.post(BASE_URL + "/api/feedPosts/api/albumFeed/like/", postReactionDTO, {
 		}).then((res) => {
 
 			this.setState({ textSuccessfulModal: "You have successfully liked the album." });
@@ -326,7 +326,7 @@ class Search extends React.Component {
 			PostId : postId,
 			UserId : id
 		}
-		Axios.post(BASE_URL_FEED + "/api/feed/dislike/", postReactionDTO, {
+		Axios.post(BASE_URL + "/api/feedPosts/api/feed/dislike/", postReactionDTO, {
 		}).then((res) => {
 
 			this.setState({ textSuccessfulModal: "You have successfully disliked the photo." });
@@ -344,7 +344,7 @@ class Search extends React.Component {
 			PostId : postId,
 			UserId : id
 		}
-		Axios.post(BASE_URL_FEED + "/api/albumFeed/dislike/", postReactionDTO, {
+		Axios.post(BASE_URL + "/api/feedPosts/api/albumFeed/dislike/", postReactionDTO, {
 		}).then((res) => {
 
 			this.setState({ textSuccessfulModal: "You have successfully disliked the album." });
@@ -363,7 +363,7 @@ class Search extends React.Component {
 		this.setState({ selectedPostId: postId });
 	}
 	handleGetCollections = (id) => {
-		Axios.get(BASE_URL_FEED + "/api/collection/user/"+id)
+		Axios.get(BASE_URL + "/api/feedPosts/api/collection/user/"+id)
 			.then((res) => {
 				this.setState({ collections: res.data });
 			})
@@ -380,7 +380,7 @@ class Search extends React.Component {
 			PostId : this.state.selectedPostId,
 			CollectionId : collectionId
 		}
-		Axios.post(BASE_URL_FEED + "/api/collection/addPost/", postCollectionDTO, {
+		Axios.post(BASE_URL + "/api/feedPosts/api/collection/addPost/", postCollectionDTO, {
 		}).then((res) => {
 			
 			this.setState({ showAddCollectionModal: false });
@@ -405,7 +405,7 @@ class Search extends React.Component {
 			Content : comment
 
 		}
-		Axios.post(BASE_URL_FEED + "/api/feed/comment/", commentDTO, {
+		Axios.post(BASE_URL + "/api/feedPosts/api/feed/comment/", commentDTO, {
 		}).then((res) => {
 			
 			this.setState({ textSuccessfulModal: "You have successfully commented the photo." });
@@ -427,7 +427,7 @@ class Search extends React.Component {
 			Content : comment
 
 		}
-		Axios.post(BASE_URL_FEED + "/api/albumFeed/comment/", commentDTO, {
+		Axios.post(BASE_URL + "/api/feedPosts/api/albumFeed/comment/", commentDTO, {
 		}).then((res) => {
 			
 			this.setState({ textSuccessfulModal: "You have successfully commented the album." });
@@ -446,7 +446,7 @@ class Search extends React.Component {
 		 this.setState({ photos: [] });
 		 this.setState({ albums: [] });
  
-		Axios.get(BASE_URL_FEED + "/api/feed/searchByTags/"+event.value)
+		Axios.get(BASE_URL + "/api/feedPosts/api/feed/searchByTags/"+event.value)
 		 .then((res) => {
 			 this.setState({ photos: res.data });
 			 this.setState({ hashtags: "" });
@@ -454,7 +454,7 @@ class Search extends React.Component {
 		 .catch((err) => {
 			 console.log(err);
 		 });
-		 Axios.get(BASE_URL_FEED + "/api/albumFeed/searchByTags/"+event.value)
+		 Axios.get(BASE_URL + "/api/feedPosts/api/albumFeed/searchByTags/"+event.value)
 		 .then((res) => {
 			 this.setState({ albums: res.data });
 			 this.setState({ hashtags: "" });
@@ -466,7 +466,7 @@ class Search extends React.Component {
 	handleOpenAddAlbumToCollectionAlbumModal = (postId)=> {
 		let id = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length-1)
 
-			Axios.get(BASE_URL_FEED + "/api/collection/user/album/"+id)
+			Axios.get(BASE_URL + "/api/feedPosts/api/collection/user/album/"+id)
 				.then((res) => {
 					this.setState({ myCollectionAlbums: res.data });
 				})
@@ -482,7 +482,7 @@ class Search extends React.Component {
 			PostId : this.state.selectedPostId,
 			CollectionId : collectionId
 		}
-		Axios.post(BASE_URL_FEED + "/api/collection/album/addPost/", postCollectionDTO, {
+		Axios.post(BASE_URL + "/api/feedPosts/api/collection/album/addPost/", postCollectionDTO, {
 		}).then((res) => {
 			
 			this.setState({ showAddCollectionAlbumModal: false });

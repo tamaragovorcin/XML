@@ -32,7 +32,7 @@ class Login extends Component {
 
 		if (this.validateForm()) {
 			let loginDTO = { username: this.state.email, password: this.state.password };
-			Axios.post(BASE_URL_USER + "/api/login", loginDTO)
+			Axios.post(BASE_URL + "/api/users/api/login", loginDTO)
 				.then((res) => {
 					if (res.status === 401) {
 						this.setState({ errorHeader: "Bad credentials!", errorMessage: "Wrong username or password.", hiddenErrorAlert: false });
