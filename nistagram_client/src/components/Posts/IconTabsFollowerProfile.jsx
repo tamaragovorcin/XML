@@ -43,15 +43,18 @@ render(){
                           <tr  style={{ width: "100%"}}>
                             <td colSpan="3">
                             {post.ContentType === "image/jpeg" ? (
-                                    <img
-                                    className="img-fluid"
-                                    src={"http://localhost:4004/api/story/file/"+post.Id}
-                                    width="100%"
-                                    alt="description"
-                                  /> ) : (
-                                <video width="100%"  controls autoPlay loop muted>
-                                  <source src={"http://localhost:4004/api/story/file/"+post.Id} type ="video/mp4"></source>
-                                </video>)}
+                                <img
+                                className="img-fluid"
+                                src={"http://localhost:4001/api/feed/file/"+post.Id}
+                                width="100%"
+                                alt="description"
+                              />
+                              ) : (
+                                
+                                <video width="100%"  controls autoPlay loop muted><source src={"http://localhost:4001/api/feed/file/"+post.Id} type ="video/mp4"></source></video>
+                                
+                              )}
+
                             </td>
                           </tr>
                           <tr>
@@ -75,19 +78,19 @@ render(){
                             </td>
                             
                           </tr>
-                          <tr  style={{ width: "100%" }}>
-                           <td>
-                              <button onClick={() =>  this.props.handleLike(post.Id)}  className="btn btn-outline-secondary btn-sm" style={{ marginBottom: "1rem", height:"40px",marginLeft:"6rem" }}><FiHeart/></button>
-                            </td>
-                            <td>
-                              <button onClick={() =>  this.props.handleDislike(post.Id)}  className="btn btn-outline-secondary btn-sm" style={{ marginBottom: "1rem", height:"40px",marginLeft:"6rem" }}><FaHeartBroken/></button>
-                            </td>
-                            <td>
-                              <button onClick={() =>  this.props.handleWriteCommentModal(post.Id)}  className="btn btn-outline-secondary btn-sm" style={{ marginBottom: "1rem", height:"40px",marginLeft:"6rem" }}><FaRegCommentDots/></button>
-                            </td>
-                            <td>
-                                  <button onClick={() =>  this.props.handleOpenAddPostToCollectionModal(post.Id)} style={{ marginBottom: "1rem", height:"40px" }} className="btn btn-outline-secondary btn-sm"><label ><BsBookmark/></label></button>
-                            </td>
+                          <tr  style={{ width: "100%" }} hidden={!this.props.userIsLoggedIn}>
+                                 <td>
+                                  <button onClick={() =>  this.props.handleLike(post.Id)}  className="btn btn-outline-secondary btn-sm" style={{ marginBottom: "1rem", height:"40px",marginLeft:"6rem" }}><FiHeart/></button>
+                                </td>
+                                <td>
+                                  <button onClick={() =>  this.props.handleDislike(post.Id)}  className="btn btn-outline-secondary btn-sm" style={{ marginBottom: "1rem", height:"40px",marginLeft:"6rem" }}><FaHeartBroken/></button>
+                                </td>
+                                <td>
+                                  <button onClick={() =>  this.props.handleWriteCommentModal(post.Id)}  className="btn btn-outline-secondary btn-sm" style={{ marginBottom: "1rem", height:"40px",marginLeft:"6rem" }}><FaRegCommentDots/></button>
+                                </td>
+                                <td>
+                                      <button onClick={() =>  this.props.handleOpenAddPostToCollectionModal(post.Id)} style={{ marginBottom: "1rem", height:"40px" }} className="btn btn-outline-secondary btn-sm"><label ><BsBookmark/></label></button>
+                                </td>
                           </tr>
                           <tr  style={{ width: "100%" }}>
                             <td>
@@ -157,7 +160,8 @@ render(){
                             </td>
                             
                           </tr>
-                          <tr  style={{ width: "100%" }}>
+                          <tr  style={{ width: "100%" }} hidden={!this.props.userIsLoggedIn}>
+
                                 <td>
                                   <button onClick={() =>  this.props.handleLikeAlbum(post.Id)}  className="btn btn-outline-secondary btn-sm" style={{ marginBottom: "1rem", height:"40px",marginLeft:"6rem" }}><FiHeart/></button>
                                 </td>
@@ -195,121 +199,8 @@ render(){
                 </div>
               </div>
             </Tab>
-            <Tab eventKey={3} title="Stories">
-                <div className="d-flex align-items-top">
-                    <div className="container-fluid">
-                    
-                    <table className="table">
-                        <tbody>
-                        {this.props.stories.map((post) => (
-                            
-                            <tr id={post.Id} key={post.Id}>
-                            
-                            <tr  style={{ width: "100%"}}>
-                                <td colSpan="3">
-                                {post.ContentType === "image/jpeg" ? (
-                                    <img
-                                    className="img-fluid"
-                                    src={"http://localhost:4004/api/story/file/"+post.Id}
-                                    width="100%"
-                                    alt="description"
-                                  /> ) : (
-                                <video width="100%"  controls autoPlay loop muted>
-                                  <source src={"http://localhost:4004/api/story/file/"+post.Id} type ="video/mp4"></source>
-                                </video>)}
-                                </td>
-                            </tr>
-                            <tr>
-                                <td colSpan="3">
-                                    {post.Location}
-                                </td>
-                            </tr>
-                            <tr>
-                                <td colSpan="3">
-                                    {post.Description}
-                                </td>
-                            </tr>
-                            <tr>
-                                <td colSpan="3">
-                                    {post.Hashtags}
-                                </td>
-                            </tr>
-                            <tr>
-                            <td colSpan="3">
-                                {post.Tagged}
-                            </td>
-                            
-                          </tr>
-                            <br/>
-                            <br/>
-                            <br/>
-                            </tr>
-                            
-                        ))}
-
-                        </tbody>
-                    </table>
-                    </div>
-                </div>
-            </Tab>
-            <Tab eventKey={4} title="Story Albums">
-            <div className="d-flex align-items-top">
-                <div className="container-fluid">
-                  
-                  <table className="table">
-                    <tbody>
-                      {this.props.storyAlbums.map((post) => (
-                        
-                        <tr id={post.id} key={post.id}>
-                          
-                          <tr  style={{ width: "100%"}}>
-                            <td colSpan="3">
-                             <Carousel dynamicHeight={true}>
-							                	{post.Media.map(img => (<div>
-                                    <img
-                                    className="img-fluid"
-                                    src={`data:image/jpg;base64,${img}`}
-                                    width="100%"
-                                    alt="description"
-                                    />		
-                                </div>))}
-							                </Carousel>
-                            </td>
-                          </tr>
-                          <tr>
-                            <td colSpan="3">
-                                {post.Location}
-                            </td>
-                          </tr>
-                          <tr>
-                            <td colSpan="3">
-                                {post.Description}
-                            </td>
-                          </tr>
-                          <tr>
-                            <td colSpan="3">
-                                {post.Hashtags}
-                            </td>
-                          </tr>
-                          <tr>
-                            <td colSpan="3">
-                                {post.Tagged}
-                            </td>
-                            
-                          </tr>
-                          <br/>
-                          <br/>
-                          <br/>
-                        </tr>
-                        
-                      ))}
-
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            </Tab>
-            <Tab eventKey={5} title="Highlights">
+           
+            <Tab eventKey={3} title="Highlights">
                  <div className="container">
                     <div className="container-fluid testimonial-group d-flex align-items-top">
                         <div className="container-fluid scrollable" style={{ marginRight: "10rem" , marginBottom:"5rem",marginTop:"5rem"}}>
@@ -401,7 +292,7 @@ render(){
                     </div>
                 </div>
             </Tab>
-            <Tab eventKey={6} title="HighlightsAlbums">
+            <Tab eventKey={4} title="HighlightsAlbums">
                  <div className="container">
                     <div className="container-fluid testimonial-group d-flex align-items-top">
                         <div className="container-fluid scrollable" style={{ marginRight: "10rem" , marginBottom:"5rem",marginTop:"5rem"}}>

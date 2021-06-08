@@ -55,7 +55,10 @@ class HomePage extends React.Component {
 		ssAlbums: [],
 		usern: "",
 		brojac : 0,
-		br: 0
+		br: 0,
+		myCollectionAlbums : [],
+		showAddAlbumToCollectionAlbum : false,
+		userIsLoggedIn : true,
 
 	}
 
@@ -479,7 +482,8 @@ class HomePage extends React.Component {
 	}
 	handleAddPostToCollectionModalClose = () => {
 		this.setState({ showAddPostToCollection: false });
-	}
+		this.setState({ showAddAlbumToCollectionAlbum: false });
+		}
 	addPostToCollection = (collectionId) => {
 		let postCollectionDTO = {
 			PostId: this.state.selectedPostId,
@@ -489,7 +493,7 @@ class HomePage extends React.Component {
 		}).then((res) => {
 
 			this.setState({ showAddCollectionModal: false });
-			this.setState({ textSuccessfulModal: "You have successfully added post to highlight." });
+			this.setState({ textSuccessfulModal: "You have successfully added post to collection." });
 			this.setState({ openModal: true });
 			this.setState({ showAddPostToCollection: false });
 
@@ -545,6 +549,40 @@ class HomePage extends React.Component {
 			.catch((err) => {
 				console.log(err);
 			});
+	}
+	handleOpenAddAlbumToCollectionAlbumModal = (postId)=> {
+		let id = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length-1)
+
+			Axios.get(BASE_URL_FEED + "/api/collection/user/album/"+id)
+				.then((res) => {
+					this.setState({ myCollectionAlbums: res.data });
+				})
+				.catch((err) => {
+					console.log(err);
+				});
+		
+		this.setState({ showAddAlbumToCollectionAlbum: true });
+		this.setState({ selectedPostId: postId });
+	}
+	addAlbumToCollectionAlbum = (collectionId) => {
+		let postCollectionDTO = {
+			PostId : this.state.selectedPostId,
+			CollectionId : collectionId
+		}
+		Axios.post(BASE_URL_FEED + "/api/collection/album/addPost/", postCollectionDTO, {
+		}).then((res) => {
+			
+			this.setState({ showAddCollectionAlbumModal: false });
+			let id = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length-1)
+			this.handleGetCollectionAlbums(id);
+			this.setState({ textSuccessfulModal: "You have successfully added album to collection." });
+			this.setState({ openModal: true });
+			this.setState({ showAddAlbumToCollectionAlbum: false });
+
+		})
+		.catch((err) => {
+			console.log(err);
+		});
 	}
 	render() {
 	
@@ -622,6 +660,8 @@ class HomePage extends React.Component {
 								handleCommentsModalOpenAlbum={this.handleCommentsModalOpenAlbum}
 
 								handleOpenAddPostToCollectionModal={this.handleOpenAddPostToCollectionModal}
+								handleOpenAddAlbumToCollectionAlbumModal = {this.handleOpenAddAlbumToCollectionAlbumModal}
+								userIsLoggedIn = {this.state.userIsLoggedIn}
 
 							/>
 						</div>
@@ -681,6 +721,14 @@ class HomePage extends React.Component {
 						collections={this.state.collections}
 
 					/>
+					 <AddPostToCollection
+                          
+						  show={this.state.showAddAlbumToCollectionAlbum}
+						  onCloseModal={this.handleAddPostToCollectionModalClose}
+						  header="Add album to collection album"
+						  addPostToCollection={this.addAlbumToCollectionAlbum}
+						  collections = {this.state.myCollectionAlbums}
+					  />
 					<ModalDialog
 						show={this.state.openModal}
 						onCloseModal={this.handleModalClose}

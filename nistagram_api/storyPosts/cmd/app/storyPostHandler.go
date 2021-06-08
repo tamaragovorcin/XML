@@ -413,47 +413,30 @@ func (app *application) getStoriesForHomePage(w http.ResponseWriter, r *http.Req
 	}
 	storyPostsResponse := []dtos.StoryPostInfoHomePageDTO{}
 	for _, storyPost := range storiesForHomePage {
+		if iAmFollowingThisUser(userId,storyPost.Post.User.Hex()) {
+			if storyCanBeSeen(storyPost,userIdPrimitive)==true {
+				images, err := findImageByPostId(allImages, storyPost.Id)
+				if err != nil {
+					app.serverError(w, err)
+				}
+				userInList := getIndexInListOfUsersStories(userIdPrimitive, storyPostsResponse)
+				if userInList == -1 {
+					userUsername := getUserUsername(storyPost.Post.User)
 
-		images, err := findImageByPostId(allImages,storyPost.Id)
-		if err != nil {
-			app.serverError(w, err)
-		}
-		userInList :=getIndexInListOfUsersStories(userIdPrimitive,storyPostsResponse)
-		if userInList==-1 {
-			userUsername := getUserUsername(storyPost.Post.User)
-			userId := storyPost.Post.User
 
-
-			inClose := false
-			closeFriends := getListCloseFriends(userId.String())
-			app.infoLog.Printf("idddddddddddDDDDDDDDDD." , userId.String())
-			app.infoLog.Printf("Evo",closeFriends )
-			for _, storyPost := range closeFriends {
-				app.infoLog.Printf("CLOSEEEEEEEE",storyPost )
+					stories := []dtos.StoryPostInfoDTO{}
+					var dto = dtos.StoryPostInfoHomePageDTO{
+						UserId:       storyPost.Post.User,
+						UserUsername: userUsername,
+						Stories:      append(stories, toResponseStoryPost(storyPost, images.Media)),
+						CloseFriends: storyPost.OnlyCloseFriends,
+					}
+					storyPostsResponse = append(storyPostsResponse, dto)
+				} else if userInList != -1 {
+					existingDto := storyPostsResponse[userInList]
+					existingDto.Stories = append(existingDto.Stories, toResponseStoryPost(storyPost, images.Media))
+				}
 			}
-
-
-
-			if userIsCloseFriends(userIdPrimitive.String(), closeFriends){
-				inClose = true
-			}
-
-
-
-
-			stories := []dtos.StoryPostInfoDTO{}
-			//ako je slika close friends proveri da li sam u close friend
-			var dto = dtos.StoryPostInfoHomePageDTO{
-				UserId:       userId,
-				UserUsername: userUsername,
-				Stories:      append(stories, toResponseStoryPost(storyPost, images.Media)),
-				CloseFriends: inClose,
-
-			}
-			storyPostsResponse = append(storyPostsResponse, dto)
-		}else if userInList!=-1 {
-			existingDto :=storyPostsResponse[userInList]
-			existingDto.Stories = append(existingDto.Stories, toResponseStoryPost(storyPost, images.Media))
 		}
 	}
 
@@ -465,6 +448,7 @@ func (app *application) getStoriesForHomePage(w http.ResponseWriter, r *http.Req
 	w.WriteHeader(http.StatusOK)
 	w.Write(imagesMarshaled)
 }
+
 func getListCloseFriends(id string) []string { //id usera ciji je stori
 
 	resp, err := http.Get("http://localhost:4006/api/user/closeFriends/"+id)
@@ -488,7 +472,6 @@ func getListCloseFriends(id string) []string { //id usera ciji je stori
 
 
 func userIsCloseFriends(user2 string, ids []string) bool { // svoj id
-
 	for index, id := range ids {
 		if index == 0 {
 			id = id[1:]
@@ -496,10 +479,20 @@ func userIsCloseFriends(user2 string, ids []string) bool { // svoj id
 		if index == len(ids)-1 {
 			id = id[:len(id)-1]
 		}
-
-		if id == user2 {
+		if strings.ToLower(strings.Trim(id," \r\n")) == strings.ToLower(strings.Trim(user2," \r\n")) {
 			return true
 		}
+	}
+	return false
+}
+
+func storyCanBeSeen(post models.StoryPost, idPrimitive primitive.ObjectID) bool {
+	if post.OnlyCloseFriends==false {return true}
+	userId := post.Post.User
+
+	closeFriends := getListCloseFriends(userId.Hex())
+	if userIsCloseFriends(idPrimitive.Hex(), closeFriends){
+		return true
 	}
 	return false
 }

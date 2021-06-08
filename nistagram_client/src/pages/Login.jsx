@@ -32,7 +32,6 @@ class Login extends Component {
 
 		if (this.validateForm()) {
 			let loginDTO = { username: this.state.email, password: this.state.password };
-			console.log(loginDTO)
 			Axios.post(BASE_URL_USER + "/api/login", loginDTO)
 				.then((res) => {
 					if (res.status === 401) {
