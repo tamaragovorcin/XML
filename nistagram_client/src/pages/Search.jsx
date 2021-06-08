@@ -49,8 +49,9 @@ class Search extends React.Component {
 		tags : "",
 		tagsError :"none",
 		options: [],
-
-
+		userIsLoggedIn : false,
+		myCollectionAlbums : [],
+		showAddAlbumToCollectionAlbum : false,
 	}
 
     onYmapsLoad = (ymaps) => {
@@ -64,6 +65,12 @@ class Search extends React.Component {
 
 
 	componentDidMount() {
+		if(!this.hasRole("*")) {
+			this.setState({ userIsLoggedIn: false });
+		}else {	
+				this.setState({ userIsLoggedIn: true });
+		}
+
 		let help = []
 		Axios.get(BASE_URL_USER + "/api/")
 			.then((res) => {
@@ -88,7 +95,18 @@ class Search extends React.Component {
 	handleHashTagsChange = (event) => {
 		this.setState({ hashtags:  event.target.value });
 	}
-	
+	hasRole = (reqRole) => {
+		let roles = JSON.parse(localStorage.getItem("keyRole"));
+
+		if (roles === null) return false;
+
+		if (reqRole === "*") return true;
+
+		for (let role of roles) {
+			if (role === reqRole) return true;
+		}
+		return false;
+	};
 	handleSearchByLocation = ()=> {
 
 
@@ -355,7 +373,8 @@ class Search extends React.Component {
 	}
 	handleAddPostToCollectionModalClose = ()=> {
 		this.setState({ showAddPostToCollection: false });
-	}
+		this.setState({ showAddAlbumToCollectionAlbum: false });
+		}
 	addPostToCollection = (collectionId) => {
 		let postCollectionDTO = {
 			PostId : this.state.selectedPostId,
@@ -365,7 +384,7 @@ class Search extends React.Component {
 		}).then((res) => {
 			
 			this.setState({ showAddCollectionModal: false });
-			this.setState({ textSuccessfulModal: "You have successfully added post to highlight." });
+			this.setState({ textSuccessfulModal: "You have successfully added post to collection." });
 			this.setState({ openModal: true });
 			this.setState({ showAddPostToCollection: false });
 
@@ -444,6 +463,40 @@ class Search extends React.Component {
 			 console.log(err);
 		 });
 	};
+	handleOpenAddAlbumToCollectionAlbumModal = (postId)=> {
+		let id = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length-1)
+
+			Axios.get(BASE_URL_FEED + "/api/collection/user/album/"+id)
+				.then((res) => {
+					this.setState({ myCollectionAlbums: res.data });
+				})
+				.catch((err) => {
+					console.log(err);
+				});
+		
+		this.setState({ showAddAlbumToCollectionAlbum: true });
+		this.setState({ selectedPostId: postId });
+	}
+	addAlbumToCollectionAlbum = (collectionId) => {
+		let postCollectionDTO = {
+			PostId : this.state.selectedPostId,
+			CollectionId : collectionId
+		}
+		Axios.post(BASE_URL_FEED + "/api/collection/album/addPost/", postCollectionDTO, {
+		}).then((res) => {
+			
+			this.setState({ showAddCollectionAlbumModal: false });
+			let id = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length-1)
+			this.handleGetCollectionAlbums(id);
+			this.setState({ textSuccessfulModal: "You have successfully added album to collection." });
+			this.setState({ openModal: true });
+			this.setState({ showAddAlbumToCollectionAlbum: false });
+
+		})
+		.catch((err) => {
+			console.log(err);
+		});
+	}
 	render() {
 		return (
 			<React.Fragment>
@@ -560,7 +613,9 @@ class Search extends React.Component {
 							handleCommentsModalOpenAlbum  = {this.handleCommentsModalOpenAlbum }
 
 							handleOpenAddPostToCollectionModal = {this.handleOpenAddPostToCollectionModal}
-
+							handleOpenAddAlbumToCollectionAlbumModal = {this.handleOpenAddAlbumToCollectionAlbumModal}
+							userIsLoggedIn = {this.state.userIsLoggedIn}
+							
 						/>
 					</div>
 
@@ -606,6 +661,14 @@ class Search extends React.Component {
 						  addPostToCollection={this.addPostToCollection}
 						  collections = {this.state.collections}
 
+					  />
+					   <AddPostToCollection
+                          
+						  show={this.state.showAddAlbumToCollectionAlbum}
+						  onCloseModal={this.handleAddPostToCollectionModalClose}
+						  header="Add album to collection album"
+						  addPostToCollection={this.addAlbumToCollectionAlbum}
+						  collections = {this.state.myCollectionAlbums}
 					  />
 					  <ModalDialog
 						show={this.state.openModal}

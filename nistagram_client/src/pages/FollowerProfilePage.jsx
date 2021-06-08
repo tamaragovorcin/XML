@@ -34,7 +34,6 @@ class FollowerProfilePage extends React.Component {
 		numberOfFollowings : "",
 		photos : [],
 		albums : [],
-		stories : [],
 		highlights : [],
 		peopleLikes: [],
 		peopleDislikes: [],
@@ -53,7 +52,6 @@ class FollowerProfilePage extends React.Component {
 		coords: [],
 		addressNotFoundError: "none",
 		showWriteCommentModal : false,
-		storyAlbums : [],
 		showAddHighLightModal : false,
 		highlightNameError : "none",
 		collectionNameError : "none",
@@ -79,7 +77,8 @@ class FollowerProfilePage extends React.Component {
 		storiesForHightlihtAlbum : [],
 		hiddenStoriesForHighlightalbum : false,
 		myCollectionAlbums : [],
-		myCollections : []
+		myCollections : [],
+		userIsLoggedIn : false
 	}
 	hasRole = (reqRole) => {
 		let roles = JSON.parse(localStorage.getItem("keyRole"));
@@ -129,9 +128,7 @@ class FollowerProfilePage extends React.Component {
 			});
 		this.handleGetHighlights(s[5])
 		this.handleGetFeedPosts(s[5])
-		this.handleGetStories(s[5])
 		this.handleGetAlbums(s[5])
-		this.handleGetStoryAlbums(s[5])
 		this.handleSetAllowPagePreview(s[5])
 		this.handleGetCollectionAlbums(s[5])
 		this.handleGetHighlightAlbums(s[5])
@@ -139,8 +136,8 @@ class FollowerProfilePage extends React.Component {
 
 	}
 	handleSetAllowPagePreview = (id)=> {
-		console.log(this.hasRole("*"))
 		if(!this.hasRole("*")) {
+			this.setState({ userIsLoggedIn: false });
 
 			this.setState({ followingThisUser: false});
 			this.setState({ sentFollowRequest: false});
@@ -164,10 +161,10 @@ class FollowerProfilePage extends React.Component {
 
 			let loggedId = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length-1)
 			const followReguestDTO = { follower: loggedId, following : id};
+			this.setState({ userIsLoggedIn: true });
 
 			Axios.post(BASE_URL_USER_INTERACTION + "/api/checkInteraction",followReguestDTO)
 				.then((res) => {
-				
 				this.setState({ followingThisUser: res.data });
 				Axios.get(BASE_URL_USER + "/api/user/privacy/"+id)
 					.then((res2) => {
@@ -228,7 +225,7 @@ class FollowerProfilePage extends React.Component {
 	}
 	handleAddPostToCollectionModalClose = ()=> {
 		this.setState({ showAddPostToCollection: false });
-		this.setState({ showAddAlbumToCollectionAlbumToCollection: false });
+		this.setState({ showAddAlbumToCollectionAlbum: false });
 		}
 	addPostToCollection = (collectionId) => {
 		let postCollectionDTO = {
@@ -453,15 +450,6 @@ class FollowerProfilePage extends React.Component {
 		this.setState({showWriteCommentModalAlbum : false});
 	}
 
-	handleGetStories = (id)=> {
-		Axios.get(BASE_URL_STORY + "/api/story/user/"+id)
-		.then((res) => {
-			this.setState({ stories: res.data });
-		})
-		.catch((err) => {
-			console.log(err);
-		});
-	}
 
 	handleGetHighlights = (id) => {
 		Axios.get(BASE_URL_STORY + "/api/highlight/user/"+id)
@@ -493,16 +481,7 @@ class FollowerProfilePage extends React.Component {
 			});
 	}
 
-	handleGetStoryAlbums = (id) => {
-		Axios.get(BASE_URL_STORY + "/api/storyAlbum/usersAlbums/"+id)
-			.then((res) => {
-				this.setState({ storyAlbums: res.data });
-			})
-			.catch((err) => {
-				console.log(err);
-			});
-	}
-
+	
 	
 	
 	handleWriteCommentModal = (postId)=>{
@@ -711,9 +690,6 @@ class FollowerProfilePage extends React.Component {
 								handleDislikesModalOpenAlbum  = {this.handleDislikesModalOpenAlbum}
 								handleCommentsModalOpenAlbum  = {this.handleCommentsModalOpenAlbum }
 
-								stories = {this.state.stories}
-								storyAlbums = {this.state.storyAlbums}
-
 
 								highlights = {this.state.highlights}
 								seeStoriesInHighlight = {this.seeStoriesInHighlight}
@@ -732,7 +708,7 @@ class FollowerProfilePage extends React.Component {
 								seeStoriesInHighlightAlbum = {this.seeStoriesInHighlightAlbum}
 								storiesForHightlihtAlbum= {this.state.storiesForHightlihtAlbum}
 								hiddenStoriesForHighlightalbum = {this.state.hiddenStoriesForHighlightAlbum}
-							
+								userIsLoggedIn = {this.state.userIsLoggedIn}
 						/>
 						</div>
 

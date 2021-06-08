@@ -40,19 +40,23 @@ render(){
                         <label style={{fontSize:"20px",fontWeight:"bold"}}>{post.Username}</label>
                     </tr>
                     <tr  style={{ width: "100%"}}>
-                      <td colSpan="3">
-                      {post.ContentType === "image/jpeg" ? (
-                                    <img
-                                    className="img-fluid"
-                                    src={"http://localhost:4004/api/story/file/"+post.Id}
-                                    width="100%"
-                                    alt="description"
-                                  /> ) : (
-                                <video width="100%"  controls autoPlay loop muted>
-                                  <source src={"http://localhost:4004/api/story/file/"+post.Id} type ="video/mp4"></source>
-                                </video>)}
-                      </td>
-                    </tr>
+                            <td colSpan="3">
+                            {post.ContentType === "image/jpeg" ? (
+                              <img
+                              className="img-fluid"
+                              src={"http://localhost:4001/api/feed/file/"+post.Id}
+                              width="100%"
+                              alt="description"
+                            />
+                            ) : (
+                              
+                              <video width="100%"  controls autoPlay loop muted><source src={"http://localhost:4001/api/feed/file/"+post.Id} type ="video/mp4"></source></video>
+                              
+                            )}
+
+                            </td>
+                          </tr>
+                          <tr></tr>
                     <tr>
                       <td colSpan="3">
                           {post.Location}
@@ -88,7 +92,7 @@ render(){
                               <button onClick={() =>  this.props.handleOpenAddPostToCollectionModal(post.Id)} style={{ marginBottom: "1rem", height:"40px" }} className="btn btn-outline-secondary btn-sm"><label ><BsBookmark/></label></button>
                         </td>
                     </tr>
-                    <tr  style={{ width: "100%" }}>
+                    <tr  style={{ width: "100%" }} hidden={!this.props.userIsLoggedIn}>
                         <td>
                           <button onClick={(e) =>  this.props.handleLikesModalOpen(e,post.Id)} className="btn btn-outline-secondary btn-sm" style={{ marginBottom: "1rem" , marginLeft:"4rem"}}><label>likes</label></button>
                         </td>
@@ -158,7 +162,7 @@ render(){
                             </td>
                             
                           </tr>
-                    <tr  style={{ width: "100%" }}>
+                    <tr  style={{ width: "100%" }} hidden={!this.props.userIsLoggedIn}>
                         <td>
                            <button onClick={() =>  this.props.handleLikeAlbum(post.Id)}  className="btn btn-outline-secondary btn-sm" style={{ marginBottom: "1rem", height:"40px",marginLeft:"6rem" }}><FiHeart/></button>
                         </td>

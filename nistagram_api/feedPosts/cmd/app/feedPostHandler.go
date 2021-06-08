@@ -5,10 +5,9 @@ import (
 	"encoding/json"
 	"feedPosts/pkg/dtos"
 	"feedPosts/pkg/models"
+	"fmt"
 	"github.com/gorilla/mux"
 	"go.mongodb.org/mongo-driver/bson/primitive"
-	"image"
-	"image/jpeg"
 	"io"
 	"io/ioutil"
 	"log"
@@ -186,6 +185,7 @@ func(app *application) GetFileTypeByPostId(feedId primitive.ObjectID) string {
 
 }
 func(app *application) GetFileByPostId(w http.ResponseWriter, r *http.Request){
+	fmt.Println("")
 	vars := mux.Vars(r)
 	feedId := vars["feedId"]
 	feedIdPrim, _ := primitive.ObjectIDFromHex(feedId)
@@ -321,7 +321,7 @@ func (app *application) getFeedPostByTags(w http.ResponseWriter, r *http.Request
 	allImages,_ := app.images.All()
 	tagsFeedAlbums =findFeedPostsByTags(tagsFeedAlbums,userIdPrimitive)
 
-	feedPostResponse := []dtos.FeedPostInfoDTO{}
+	feedPostResponse := []dtos.FeedPostInfoDTO1{}
 	for _, feedPost := range tagsFeedAlbums {
 
 		images, err := findImageByPostId(allImages,feedPost.Id)
