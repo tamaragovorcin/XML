@@ -49,7 +49,7 @@ services:
     networks:
       - backend
     volumes:
-      - ./feedPosts/cmd/app/files:/go/app/files
+      - feed-data:/var/lib/feedposts/data
 
   messages:
     restart: always
@@ -81,7 +81,7 @@ services:
     networks:
       - backend
     volumes:
-      - ./storyPosts/cmd/app/files:/go/app/files
+      - story-data:/var/lib/storyposts/data
 
   userinteraction:
     restart: always
@@ -94,6 +94,8 @@ services:
 
 volumes:
   mongodb:
+  story-data:
+  feed-data:
 
 networks:
   backend:
