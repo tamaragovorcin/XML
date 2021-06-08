@@ -301,7 +301,7 @@ func checkIfStoryIsInLast24h(dateTime time.Time) bool {
 func getUserUsername(user primitive.ObjectID) string {
 
 	stringObjectID := user.Hex()
-	resp, err := http.Get("http://localhost:4006/api/user/username/"+stringObjectID)
+	resp, err := http.Get("http://localhost:80/api/users/api/user/username/"+stringObjectID)
 	if err != nil {
 		log.Fatalln(err)
 	}
@@ -401,6 +401,7 @@ func toResponseAlbum(feedAlbum models.AlbumStory, imageList []string) dtos.Story
 
 
 func (app *application) getStoriesForHomePage(w http.ResponseWriter, r *http.Request) {
+	app.infoLog.Println("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
 	vars := mux.Vars(r)
 	userId := vars["userId"]
 	userIdPrimitive, _ := primitive.ObjectIDFromHex(userId)
@@ -408,6 +409,7 @@ func (app *application) getStoriesForHomePage(w http.ResponseWriter, r *http.Req
 	allImages,_ := app.images.All()
 	allPosts, _ :=app.storyPosts.All()
 	storiesForHomePage,err :=findStoryPostsForHomePage(allPosts,userIdPrimitive)
+	app.infoLog.Println("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA", storiesForHomePage)
 	if err != nil {
 		app.serverError(w, err)
 	}
@@ -471,7 +473,7 @@ func toResponseStoryPost2(storyPost models.StoryPost, image2 string) dtos.StoryP
 }
 func getListCloseFriends(id string) []string { //id usera ciji je stori
 
-	resp, err := http.Get("http://localhost:4006/api/user/closeFriends/"+id)
+	resp, err := http.Get("http://localhost:80/api/users/api/user/closeFriends/"+id)
 	log.Println("unable to encode image.", resp)
 	if err != nil {
 		log.Fatalln(err)
@@ -525,7 +527,7 @@ func iAmFollowingThisUser(logged string, userWithPost string) bool {
 	})
 	responseBody := bytes.NewBuffer(postBody)
 	//Leverage Go's HTTP Post function to make request
-	resp, err := http.Post("http://localhost:4005/api/checkInteraction", "application/json", responseBody)
+	resp, err := http.Post("http://localhost:80/api/userInteraction/api/checkInteraction", "application/json", responseBody)
 	//Handle Error
 	if err != nil {
 		log.Fatalf("An Error Occured %v", err)
