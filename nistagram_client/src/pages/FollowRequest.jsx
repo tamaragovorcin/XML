@@ -4,7 +4,7 @@ import Header from "../components/Header";
 import TopBar from "../components/TopBar";
 import { BASE_URL_USER_INTERACTION } from "../constants.js";
 import ModalDialog from "../components/ModalDialog";
-
+import { BASE_URL } from "../constants.js";
 class FollowRequest extends Component {
 	state = {
         followerRequests: [],
@@ -25,7 +25,7 @@ class FollowRequest extends Component {
     handleAccept  = (followerId) => {
         let id = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length-1);
             const acceptedDTO = { following: id, follower: followerId};
-            Axios.post(BASE_URL_USER_INTERACTION  + "/api/acceptFollowRequest", acceptedDTO)
+            Axios.post(BASE_URL  + "/api/userInteraction/api/acceptFollowRequest", acceptedDTO)
                     .then((res) => {
                         this.setState({ openModal: true });
                         this.setState({ textSuccessfulModal: "You have successfully accepted follow request." });			
@@ -40,7 +40,7 @@ class FollowRequest extends Component {
     handleDelete  = (followerId) => {
         let id = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length-1);
         const dto = { following: id, follower: followerId};
-        Axios.post(BASE_URL_USER_INTERACTION  + "/api/deleteFollowRequest", dto)
+        Axios.post(BASE_URL  + "/api/userInteraction/api/deleteFollowRequest", dto)
                 .then((res) => {
                     this.setState({ openModal: true });
                     this.setState({ textSuccessfulModal: "You have successfully deleted follow request." });			
@@ -54,7 +54,7 @@ class FollowRequest extends Component {
 	getFollowRequests = ()=> {
         let id = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length-1);
         const dto = {id: id}
-        Axios.post(BASE_URL_USER_INTERACTION + "/api/user/followRequests", dto)
+        Axios.post(BASE_URL + "/api/userInteraction/api/user/followRequests", dto)
 			.then((res) => {
 				this.setState({ followerRequests: res.data });
 			})
@@ -65,7 +65,7 @@ class FollowRequest extends Component {
     getFollowRequestsByMe = ()=> {
         let id = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length-1);
         const dto = {id: id}
-        Axios.post(BASE_URL_USER_INTERACTION + "/api/user/followRequestsByMe", dto)
+        Axios.post(BASE_URL + "/api/userInteraction/api/user/followRequestsByMe", dto)
 			.then((res) => {
 				this.setState({ followerRequestsByMe: res.data });
 			})
@@ -76,7 +76,7 @@ class FollowRequest extends Component {
     getFollowers = ()=> {
         let id = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length-1);
         const dto = {id: id}
-        Axios.post(BASE_URL_USER_INTERACTION + "/api/user/followers", dto)
+        Axios.post(BASE_URL + "/api/userInteraction/api/user/followers", dto)
 			.then((res) => {
 				this.setState({ followers: res.data });
 			})
@@ -88,7 +88,7 @@ class FollowRequest extends Component {
     getFollowing = ()=> {
         let id = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length-1);
         const dto = {id: id}
-        Axios.post(BASE_URL_USER_INTERACTION + "/api/user/following", dto)
+        Axios.post(BASE_URL + "/api/userInteraction/api/user/following", dto)
 			.then((res) => {
 				this.setState({ following: res.data });
 			})

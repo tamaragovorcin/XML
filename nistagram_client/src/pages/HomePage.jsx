@@ -16,6 +16,7 @@ import ModalDialog from "../components/ModalDialog";
 import ConvertImage from "react-convert-image";
 import StoriesModal from "../components/Posts/StoriesModal.jsx";
 //import $ from 'jquery';
+import { BASE_URL } from "../constants.js";
 class HomePage extends React.Component {
 
 
@@ -55,7 +56,10 @@ class HomePage extends React.Component {
 		ssAlbums: [],
 		usern: "",
 		brojac : 0,
-		br: 0
+		br: 0,
+		myCollectionAlbums : [],
+		showAddAlbumToCollectionAlbum : false,
+		userIsLoggedIn : true,
 
 	}
 
@@ -180,7 +184,7 @@ class HomePage extends React.Component {
 	}
 
 	handleLikesModalOpen = (postId) => {
-		Axios.get(BASE_URL_FEED + "/api/feed/likes/" + postId)
+		Axios.get(BASE_URL + "/api/feedPosts/api/feed/likes/" + postId)
 			.then((res) => {
 				this.setState({ peopleLikes: res.data });
 			})
@@ -190,7 +194,7 @@ class HomePage extends React.Component {
 		this.setState({ showLikesModal: true });
 	}
 	handleDislikesModalOpen = (postId) => {
-		Axios.get(BASE_URL_FEED + "/api/feed/dislikes/" + postId)
+		Axios.get(BASE_URL + "/api/feedPosts/api/feed/dislikes/" + postId)
 			.then((res) => {
 				this.setState({ peopleDislikes: res.data });
 			})
@@ -200,7 +204,7 @@ class HomePage extends React.Component {
 		this.setState({ showDislikesModal: true });
 	}
 	handleCommentsModalOpen = (postId) => {
-		Axios.get(BASE_URL_FEED + "/api/feed/comments/" + postId)
+		Axios.get(BASE_URL + "/api/feedPosts/api/feed/comments/" + postId)
 			.then((res) => {
 				this.setState({ peopleComments: res.data });
 			})
@@ -210,7 +214,7 @@ class HomePage extends React.Component {
 		this.setState({ showCommentsModal: true });
 	}
 	handleLikesModalOpenAlbum = (postId) => {
-		Axios.get(BASE_URL_FEED + "/api/albumFeed/likes/" + postId)
+		Axios.get(BASE_URL + "/api/feedPosts/api/albumFeed/likes/" + postId)
 			.then((res) => {
 				this.setState({ peopleLikes: res.data });
 			})
@@ -220,7 +224,7 @@ class HomePage extends React.Component {
 		this.setState({ showLikesModal: true });
 	}
 	handleDislikesModalOpenAlbum = (postId) => {
-		Axios.get(BASE_URL_FEED + "/api/albumFeed/dislikes/" + postId)
+		Axios.get(BASE_URL + "/api/feedPosts/api/albumFeed/dislikes/" + postId)
 			.then((res) => {
 				this.setState({ peopleDislikes: res.data });
 			})
@@ -230,7 +234,7 @@ class HomePage extends React.Component {
 		this.setState({ showDislikesModal: true });
 	}
 	handleCommentsModalOpenAlbum = (postId) => {
-		Axios.get(BASE_URL_FEED + "/api/albumFeed/comments/" + postId)
+		Axios.get(BASE_URL + "/api/feedPosts/api/albumFeed/comments/" + postId)
 			.then((res) => {
 				this.setState({ peopleComments: res.data });
 			})
@@ -277,7 +281,7 @@ class HomePage extends React.Component {
 			PostId: postId,
 			UserId: id
 		}
-		Axios.post(BASE_URL_FEED + "/api/feed/like/", postReactionDTO, {
+		Axios.post(BASE_URL + "/api/feedPosts/api/feed/like/", postReactionDTO, {
 		}).then((res) => {
 
 			this.setState({ textSuccessfulModal: "You have successfully liked the photo." });
@@ -295,7 +299,7 @@ class HomePage extends React.Component {
 			PostId: postId,
 			UserId: id
 		}
-		Axios.post(BASE_URL_FEED + "/api/albumFeed/like/", postReactionDTO, {
+		Axios.post(BASE_URL + "/api/feedPosts/api/albumFeed/like/", postReactionDTO, {
 		}).then((res) => {
 
 			this.setState({ textSuccessfulModal: "You have successfully liked the album." });
@@ -313,7 +317,7 @@ class HomePage extends React.Component {
 			PostId: postId,
 			UserId: id
 		}
-		Axios.post(BASE_URL_FEED + "/api/feed/dislike/", postReactionDTO, {
+		Axios.post(BASE_URL + "/api/feedPosts/api/feed/dislike/", postReactionDTO, {
 		}).then((res) => {
 
 			this.setState({ textSuccessfulModal: "You have successfully disliked the photo." });
@@ -331,7 +335,7 @@ class HomePage extends React.Component {
 			PostId: postId,
 			UserId: id
 		}
-		Axios.post(BASE_URL_FEED + "/api/albumFeed/dislike/", postReactionDTO, {
+		Axios.post(BASE_URL + "/api/feedPosts/api/albumFeed/dislike/", postReactionDTO, {
 		}).then((res) => {
 
 			this.setState({ textSuccessfulModal: "You have successfully disliked the album." });
@@ -350,7 +354,7 @@ class HomePage extends React.Component {
 			this.setState({ userIsLogged: true });
 
 			let id = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length - 1)
-			Axios.get(BASE_URL_STORY + "/api/storyAlbum/homePage/" + id)
+			Axios.get(BASE_URL + "/api/storyPosts/api/storyAlbum/homePage/" + id)
 
 				.then((res) => {
 					let list = [];
@@ -382,7 +386,7 @@ class HomePage extends React.Component {
 					console.log(err);
 				});
 
-				Axios.get(BASE_URL_STORY + "/api/story/homePage/" + id)
+				Axios.get(BASE_URL + "/api/storyPosts/api/story/homePage/" + id)
 	
 					.then((res) => {
 						let br = this.state.brojac;
@@ -420,7 +424,7 @@ class HomePage extends React.Component {
 	}
 
 	handleAddAllDataCollection = (id) => {
-		Axios.post(BASE_URL_FEED + "/api/collection/allData/" + id)
+		Axios.post(BASE_URL + "/api/feedPosts/api/collection/allData/" + id)
 			.then((res) => {
 				if (res.status === 409) {
 					this.setState({
@@ -441,7 +445,7 @@ class HomePage extends React.Component {
 
 	handleGetPhotos = (id) => {
 
-		Axios.get(BASE_URL_FEED + "/api/feed/homePage/" + id)
+		Axios.get(BASE_URL + "/api/feedPosts/api/feed/homePage/" + id)
 			.then((res) => {
 				this.setState({ photos: res.data });
 			})
@@ -451,7 +455,7 @@ class HomePage extends React.Component {
 	}
 	handleGetAlbums = (id) => {
 
-		Axios.get(BASE_URL_FEED + "/api/albumFeed/homePage/" + id)
+		Axios.get(BASE_URL + "/api/feedPosts/api/albumFeed/homePage/" + id)
 			.then((res) => {
 				this.setState({ albums: res.data });
 			})
@@ -468,7 +472,7 @@ class HomePage extends React.Component {
 		this.setState({ selectedPostId: postId });
 	}
 	handleGetCollections = (id) => {
-		Axios.get(BASE_URL_FEED + "/api/collection/user/" + id)
+		Axios.get(BASE_URL + "/api/feedPosts/api/collection/user/" + id)
 			.then((res) => {
 				this.setState({ collections: res.data });
 			})
@@ -478,17 +482,18 @@ class HomePage extends React.Component {
 	}
 	handleAddPostToCollectionModalClose = () => {
 		this.setState({ showAddPostToCollection: false });
-	}
+		this.setState({ showAddAlbumToCollectionAlbum: false });
+		}
 	addPostToCollection = (collectionId) => {
 		let postCollectionDTO = {
 			PostId: this.state.selectedPostId,
 			CollectionId: collectionId
 		}
-		Axios.post(BASE_URL_FEED + "/api/collection/addPost/", postCollectionDTO, {
+		Axios.post(BASE_URL + "/api/feedPosts/api/collection/addPost/", postCollectionDTO, {
 		}).then((res) => {
 
 			this.setState({ showAddCollectionModal: false });
-			this.setState({ textSuccessfulModal: "You have successfully added post to highlight." });
+			this.setState({ textSuccessfulModal: "You have successfully added post to collection." });
 			this.setState({ openModal: true });
 			this.setState({ showAddPostToCollection: false });
 
@@ -509,7 +514,7 @@ class HomePage extends React.Component {
 			Content: comment
 
 		}
-		Axios.post(BASE_URL_FEED + "/api/feed/comment/", commentDTO, {
+		Axios.post(BASE_URL + "/api/feedPosts/api/feed/comment/", commentDTO, {
 		}).then((res) => {
 
 			this.setState({ textSuccessfulModal: "You have successfully commented the photo." });
@@ -531,7 +536,7 @@ class HomePage extends React.Component {
 			Content: comment
 
 		}
-		Axios.post(BASE_URL_FEED + "/api/albumFeed/comment/", commentDTO, {
+		Axios.post(BASE_URL + "/api/feedPosts/api/albumFeed/comment/", commentDTO, {
 		}).then((res) => {
 
 			this.setState({ textSuccessfulModal: "You have successfully commented the album." });
@@ -544,6 +549,40 @@ class HomePage extends React.Component {
 			.catch((err) => {
 				console.log(err);
 			});
+	}
+	handleOpenAddAlbumToCollectionAlbumModal = (postId)=> {
+		let id = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length-1)
+
+			Axios.get(BASE_URL + "/api/feedPosts/api/collection/user/album/"+id)
+				.then((res) => {
+					this.setState({ myCollectionAlbums: res.data });
+				})
+				.catch((err) => {
+					console.log(err);
+				});
+		
+		this.setState({ showAddAlbumToCollectionAlbum: true });
+		this.setState({ selectedPostId: postId });
+	}
+	addAlbumToCollectionAlbum = (collectionId) => {
+		let postCollectionDTO = {
+			PostId : this.state.selectedPostId,
+			CollectionId : collectionId
+		}
+		Axios.post(BASE_URL + "/api/feedPosts/api/collection/album/addPost/", postCollectionDTO, {
+		}).then((res) => {
+			
+			this.setState({ showAddCollectionAlbumModal: false });
+			let id = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length-1)
+			this.handleGetCollectionAlbums(id);
+			this.setState({ textSuccessfulModal: "You have successfully added album to collection." });
+			this.setState({ openModal: true });
+			this.setState({ showAddAlbumToCollectionAlbum: false });
+
+		})
+		.catch((err) => {
+			console.log(err);
+		});
 	}
 	render() {
 	
@@ -621,6 +660,8 @@ class HomePage extends React.Component {
 								handleCommentsModalOpenAlbum={this.handleCommentsModalOpenAlbum}
 
 								handleOpenAddPostToCollectionModal={this.handleOpenAddPostToCollectionModal}
+								handleOpenAddAlbumToCollectionAlbumModal = {this.handleOpenAddAlbumToCollectionAlbumModal}
+								userIsLoggedIn = {this.state.userIsLoggedIn}
 
 							/>
 						</div>
@@ -680,6 +721,14 @@ class HomePage extends React.Component {
 						collections={this.state.collections}
 
 					/>
+					 <AddPostToCollection
+                          
+						  show={this.state.showAddAlbumToCollectionAlbum}
+						  onCloseModal={this.handleAddPostToCollectionModalClose}
+						  header="Add album to collection album"
+						  addPostToCollection={this.addAlbumToCollectionAlbum}
+						  collections = {this.state.myCollectionAlbums}
+					  />
 					<ModalDialog
 						show={this.state.openModal}
 						onCloseModal={this.handleModalClose}

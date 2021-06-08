@@ -8,7 +8,7 @@ import HeadingAlert from "../components/HeadingAlert";
 import ModalDialog from "../components/ModalDialog";
 import { constants } from "../constants.js";
 import { BASE_URL_USER_INTERACTION } from "../constants.js";
-
+import { BASE_URL } from "../constants.js";
 class RegisterPage extends Component {
 	state = {
 		errorHeader: "",
@@ -154,7 +154,7 @@ class RegisterPage extends Component {
 		};
 
 		if (this.validateForm(userDTO)) {
-			Axios.post(`${constants.BASE_URL_USER}/api/`, userDTO)
+			Axios.post(`${constants.BASE_URL}/api/users/api/`, userDTO)
 				.then((res) => {
 
 					if (res.status === 409) {
@@ -169,7 +169,7 @@ class RegisterPage extends Component {
 						this.setState({ openModal: true });
 					}
 					const user1Id = {id: res.data}
-					Axios.post(BASE_URL_USER_INTERACTION + "/api/createUser", user1Id)
+					Axios.post(BASE_URL + "/api/userInteraction/api/createUser", user1Id)
 					.then((res) => {
 							console.log(res.data)
 					})

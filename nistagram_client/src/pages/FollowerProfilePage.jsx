@@ -4,7 +4,6 @@ import TopBar from "../components/TopBar";
 import { Link } from "react-router-dom";
 import playerLogo from "../static/coach.png";
 import IconTabsFollowerProfile from "../components/Posts/IconTabsFollowerProfile"
-import { BASE_URL_FEED, BASE_URL_STORY,BASE_URL_USER_INTERACTION } from "../constants.js";
 import Axios from "axios";
 import ModalDialog from "../components/ModalDialog";
 import WriteCommentModal from "../components/Posts/WriteCommentModal"
@@ -16,9 +15,11 @@ import AddPostToCollection from "../components/Posts/AddPostToCollection";
 import WriteCommentAlbumModal from "../components/Posts/WriteCommentAlbumModal"
 import { Lock } from "@material-ui/icons";
 import { Icon } from "@material-ui/core";
+import { BASE_URL } from "../constants.js";
 import { isCompositeComponentWithType } from "react-dom/test-utils";
 class FollowerProfilePage extends React.Component {
 	
+
 	state = {
 		following: true,
 		userId: "",
@@ -34,7 +35,6 @@ class FollowerProfilePage extends React.Component {
 		numberOfFollowings : "",
 		photos : [],
 		albums : [],
-		stories : [],
 		highlights : [],
 		peopleLikes: [],
 		peopleDislikes: [],
@@ -53,7 +53,6 @@ class FollowerProfilePage extends React.Component {
 		coords: [],
 		addressNotFoundError: "none",
 		showWriteCommentModal : false,
-		storyAlbums : [],
 		showAddHighLightModal : false,
 		highlightNameError : "none",
 		collectionNameError : "none",
@@ -79,7 +78,8 @@ class FollowerProfilePage extends React.Component {
 		storiesForHightlihtAlbum : [],
 		hiddenStoriesForHighlightalbum : false,
 		myCollectionAlbums : [],
-		myCollections : []
+		myCollections : [],
+		userIsLoggedIn : false
 	}
 	hasRole = (reqRole) => {
 		let roles = JSON.parse(localStorage.getItem("keyRole"));
@@ -108,7 +108,7 @@ class FollowerProfilePage extends React.Component {
 
 
 		this.fetchData(s[5]);
-		Axios.get(BASE_URL_USER + "/api/" + s[5])
+		Axios.get(BASE_URL + "/api/users/api/" + s[5])
 			.then((res) => {
 				this.setState({
 					id: res.data.Id,
@@ -129,9 +129,7 @@ class FollowerProfilePage extends React.Component {
 			});
 		this.handleGetHighlights(s[5])
 		this.handleGetFeedPosts(s[5])
-		this.handleGetStories(s[5])
 		this.handleGetAlbums(s[5])
-		this.handleGetStoryAlbums(s[5])
 		this.handleSetAllowPagePreview(s[5])
 		this.handleGetCollectionAlbums(s[5])
 		this.handleGetHighlightAlbums(s[5])
@@ -139,13 +137,13 @@ class FollowerProfilePage extends React.Component {
 
 	}
 	handleSetAllowPagePreview = (id)=> {
-		console.log(this.hasRole("*"))
 		if(!this.hasRole("*")) {
+			this.setState({ userIsLoggedIn: false });
 
 			this.setState({ followingThisUser: false});
 			this.setState({ sentFollowRequest: false});
 			this.setState({ ableToFollowThisUser: false});
-			Axios.get(BASE_URL_USER + "/api/user/privacy/"+id)
+			Axios.get(BASE_URL + "/api/users/api/user/privacy/"+id)
 			.then((res2) => {
 				this.setState({ privateUser: res2.data });
 				if( res2.data==="private") {
@@ -164,12 +162,12 @@ class FollowerProfilePage extends React.Component {
 
 			let loggedId = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length-1)
 			const followReguestDTO = { follower: loggedId, following : id};
+			this.setState({ userIsLoggedIn: true });
 
-			Axios.post(BASE_URL_USER_INTERACTION + "/api/checkInteraction",followReguestDTO)
+			Axios.post(BASE_URL + "/api/userInteraction/api/checkInteraction",followReguestDTO)
 				.then((res) => {
-				
 				this.setState({ followingThisUser: res.data });
-				Axios.get(BASE_URL_USER + "/api/user/privacy/"+id)
+				Axios.get(BASE_URL + "/api/users/api/user/privacy/"+id)
 					.then((res2) => {
 						this.setState({ privateUser: res2.data });
 						if(!res.data && res2.data==="private") {
@@ -179,7 +177,7 @@ class FollowerProfilePage extends React.Component {
 							this.setState({ allowPagePreview: true });
 						}
 						if(!res.data) {
-							Axios.post(BASE_URL_USER_INTERACTION + "/api/checkIfSentRequest",followReguestDTO)
+							Axios.post(BASE_URL + "/api/userInteraction/api/checkIfSentRequest",followReguestDTO)
 							.then((res3) => {
 								this.setState({ sentFollowRequest: res3.data });
 								if(res3.data) {
@@ -216,7 +214,7 @@ class FollowerProfilePage extends React.Component {
 	handleOpenAddPostToCollectionModal = (postId)=> {
 		let id = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length-1)
 
-		Axios.get(BASE_URL_FEED + "/api/collection/user/"+id)
+		Axios.get(BASE_URL + "/api/feedPosts/api/collection/user/"+id)
 			.then((res) => {
 				this.setState({ myCollections: res.data });
 			})
@@ -228,14 +226,14 @@ class FollowerProfilePage extends React.Component {
 	}
 	handleAddPostToCollectionModalClose = ()=> {
 		this.setState({ showAddPostToCollection: false });
-		this.setState({ showAddAlbumToCollectionAlbumToCollection: false });
+		this.setState({ showAddAlbumToCollectionAlbum: false });
 		}
 	addPostToCollection = (collectionId) => {
 		let postCollectionDTO = {
 			PostId : this.state.selectedPostId,
 			CollectionId : collectionId
 		}
-		Axios.post(BASE_URL_FEED + "/api/collection/addPost/", postCollectionDTO, {
+		Axios.post(BASE_URL + "/api/feedPosts/api/collection/addPost/", postCollectionDTO, {
 		}).then((res) => {
 			
 			this.setState({ showAddCollectionModal: false });
@@ -255,7 +253,7 @@ class FollowerProfilePage extends React.Component {
 		this.setState({storiesForHightliht : stories})
 	}
 	handleLikesModalOpen = (postId)=> {
-		Axios.get(BASE_URL_FEED + "/api/feed/likes/"+postId)
+		Axios.get(BASE_URL + "/api/feedPosts/api/feed/likes/"+postId)
 			.then((res) => {
 				this.setState({ peopleLikes: res.data });
 			})
@@ -265,7 +263,7 @@ class FollowerProfilePage extends React.Component {
 		this.setState({ showLikesModal: true });    
 	}
 	handleDislikesModalOpen = (postId)=> {
-		Axios.get(BASE_URL_FEED + "/api/feed/dislikes/"+postId)
+		Axios.get(BASE_URL + "/api/feedPosts/api/feed/dislikes/"+postId)
 			.then((res) => {
 				this.setState({ peopleDislikes: res.data });
 			})
@@ -275,7 +273,7 @@ class FollowerProfilePage extends React.Component {
 		this.setState({ showDislikesModal: true });    
 	}
 	handleCommentsModalOpen = (postId)=> {
-		Axios.get(BASE_URL_FEED + "/api/feed/comments/"+postId)
+		Axios.get(BASE_URL + "/api/feedPosts/api/feed/comments/"+postId)
 			.then((res) => {
 				this.setState({ peopleComments: res.data });
 			})
@@ -305,7 +303,7 @@ class FollowerProfilePage extends React.Component {
 			PostId : postId,
 			UserId : id
 		}
-		Axios.post(BASE_URL_FEED + "/api/feed/like/", postReactionDTO, {
+		Axios.post(BASE_URL + "/api/feedPosts/api/feed/like/", postReactionDTO, {
 		}).then((res) => {
 
 			this.setState({ textSuccessfulModal: "You have successfully liked the photo." });
@@ -323,7 +321,7 @@ class FollowerProfilePage extends React.Component {
 			PostId : postId,
 			UserId : id
 		}
-		Axios.post(BASE_URL_FEED + "/api/feed/dislike/", postReactionDTO, {
+		Axios.post(BASE_URL + "/api/feedPosts/api/feed/dislike/", postReactionDTO, {
 		}).then((res) => {
 
 			this.setState({ textSuccessfulModal: "You have successfully disliked the photo." });
@@ -344,7 +342,7 @@ class FollowerProfilePage extends React.Component {
 			Content : comment
 
 		}
-		Axios.post(BASE_URL_FEED + "/api/feed/comment/", commentDTO, {
+		Axios.post(BASE_URL + "/api/feedPosts/api/feed/comment/", commentDTO, {
 		}).then((res) => {
 			
 			this.setState({ textSuccessfulModal: "You have successfully commented the photo." });
@@ -358,7 +356,7 @@ class FollowerProfilePage extends React.Component {
 		});
 	}
 	handleLikesModalOpenAlbum = (postId)=> {
-		Axios.get(BASE_URL_FEED + "/api/albumFeed/likes/"+postId)
+		Axios.get(BASE_URL + "/api/feedPosts/api/albumFeed/likes/"+postId)
 			.then((res) => {
 				this.setState({ peopleLikes: res.data });
 			})
@@ -368,7 +366,7 @@ class FollowerProfilePage extends React.Component {
 		this.setState({ showLikesModal: true });    
 	}
 	handleDislikesModalOpenAlbum = (postId)=> {
-		Axios.get(BASE_URL_FEED + "/api/albumFeed/dislikes/"+postId)
+		Axios.get(BASE_URL + "/api/feedPosts/api/albumFeed/dislikes/"+postId)
 			.then((res) => {
 				this.setState({ peopleDislikes: res.data });
 			})
@@ -378,7 +376,7 @@ class FollowerProfilePage extends React.Component {
 		this.setState({ showDislikesModal: true });    
 	}
 	handleCommentsModalOpenAlbum = (postId)=> {
-		Axios.get(BASE_URL_FEED + "/api/albumFeed/comments/"+postId)
+		Axios.get(BASE_URL + "/api/feedPosts/api/albumFeed/comments/"+postId)
 			.then((res) => {
 				this.setState({ peopleComments: res.data });
 			})
@@ -396,7 +394,7 @@ class FollowerProfilePage extends React.Component {
 			Content : comment
 
 		}
-		Axios.post(BASE_URL_FEED + "/api/albumFeed/comment/", commentDTO, {
+		Axios.post(BASE_URL + "/api/feedPosts/api/albumFeed/comment/", commentDTO, {
 		}).then((res) => {
 			
 			this.setState({ textSuccessfulModal: "You have successfully commented the album." });
@@ -416,7 +414,7 @@ class FollowerProfilePage extends React.Component {
 			PostId : postId,
 			UserId : id
 		}
-		Axios.post(BASE_URL_FEED + "/api/albumFeed/like/", postReactionDTO, {
+		Axios.post(BASE_URL + "/api/feedPosts/api/albumFeed/like/", postReactionDTO, {
 		}).then((res) => {
 
 			this.setState({ textSuccessfulModal: "You have successfully liked the album." });
@@ -434,7 +432,7 @@ class FollowerProfilePage extends React.Component {
 			PostId : postId,
 			UserId : id
 		}
-		Axios.post(BASE_URL_FEED + "/api/albumFeed/dislike/", postReactionDTO, {
+		Axios.post(BASE_URL + "/api/feedPosts/api/albumFeed/dislike/", postReactionDTO, {
 		}).then((res) => {
 
 			this.setState({ textSuccessfulModal: "You have successfully disliked the album." });
@@ -453,18 +451,9 @@ class FollowerProfilePage extends React.Component {
 		this.setState({showWriteCommentModalAlbum : false});
 	}
 
-	handleGetStories = (id)=> {
-		Axios.get(BASE_URL_STORY + "/api/story/user/"+id)
-		.then((res) => {
-			this.setState({ stories: res.data });
-		})
-		.catch((err) => {
-			console.log(err);
-		});
-	}
 
 	handleGetHighlights = (id) => {
-		Axios.get(BASE_URL_STORY + "/api/highlight/user/"+id)
+		Axios.get(BASE_URL + "/api/storyPosts/api/highlight/user/"+id)
 			.then((res) => {
 				this.setState({ highlights: res.data });
 			})
@@ -475,7 +464,7 @@ class FollowerProfilePage extends React.Component {
 	
 
 	handleGetFeedPosts = (id) => {
-		Axios.get(BASE_URL_FEED + "/api/feed/usersImages/"+id)
+		Axios.get(BASE_URL + "/api/feedPosts/api/feed/usersImages/"+id)
 			.then((res) => {
 				this.setState({ photos: res.data });
 			})
@@ -484,7 +473,7 @@ class FollowerProfilePage extends React.Component {
 			});
 	}
 	handleGetAlbums = (id) => {
-		Axios.get(BASE_URL_FEED + "/api/feedAlbum/usersAlbums/"+id)
+		Axios.get(BASE_URL + "/api/feedPosts/api/feedAlbum/usersAlbums/"+id)
 			.then((res) => {
 				this.setState({ albums: res.data });
 			})
@@ -493,16 +482,7 @@ class FollowerProfilePage extends React.Component {
 			});
 	}
 
-	handleGetStoryAlbums = (id) => {
-		Axios.get(BASE_URL_STORY + "/api/storyAlbum/usersAlbums/"+id)
-			.then((res) => {
-				this.setState({ storyAlbums: res.data });
-			})
-			.catch((err) => {
-				console.log(err);
-			});
-	}
-
+	
 	
 	
 	handleWriteCommentModal = (postId)=>{
@@ -518,7 +498,7 @@ class FollowerProfilePage extends React.Component {
 			Content : comment
 
 		}
-		Axios.post(BASE_URL_FEED + "/api/feed/comment/", commentDTO, {
+		Axios.post(BASE_URL + "/api/feedPosts/api/feed/comment/", commentDTO, {
 		}).then((res) => {
 			
 			this.setState({ textSuccessfulModal: "You have successfully commented the photo." });
@@ -546,7 +526,7 @@ class FollowerProfilePage extends React.Component {
 		const followReguestDTO = { follower: id, following : this.state.userId};
 		if(this.state.privateUser==="private") {
 
-			Axios.post(BASE_URL_USER_INTERACTION + "/api/followRequest", followReguestDTO)
+			Axios.post(BASE_URL + "/api/userInteraction/api/followRequest", followReguestDTO)
 			.then((res) => {
 				
 				this.handleSetAllowPagePreview(this.state.userId)
@@ -559,7 +539,7 @@ class FollowerProfilePage extends React.Component {
 				console.log(err);
 			});
 		}else {
-			Axios.post(BASE_URL_USER_INTERACTION + "/api/followPublic", followReguestDTO)
+			Axios.post(BASE_URL + "/api/userInteraction/api/followPublic", followReguestDTO)
 			.then((res) => {
 				
 				this.handleSetAllowPagePreview(this.state.userId)
@@ -578,7 +558,7 @@ class FollowerProfilePage extends React.Component {
 	handleOpenAddAlbumToCollectionAlbumModal = (postId)=> {
 		let id = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length-1)
 
-			Axios.get(BASE_URL_FEED + "/api/collection/user/album/"+id)
+			Axios.get(BASE_URL + "/api/feedPosts/api/collection/user/album/"+id)
 				.then((res) => {
 					this.setState({ myCollectionAlbums: res.data });
 				})
@@ -591,7 +571,7 @@ class FollowerProfilePage extends React.Component {
 	}
 
 	handleGetCollectionAlbums = (id) => {
-		Axios.get(BASE_URL_FEED + "/api/collection/user/album/"+id)
+		Axios.get(BASE_URL + "/api/feedPosts/api/collection/user/album/"+id)
 			.then((res) => {
 				this.setState({ collectionAlbums: res.data });
 			})
@@ -604,7 +584,7 @@ class FollowerProfilePage extends React.Component {
 			PostId : this.state.selectedPostId,
 			CollectionId : collectionId
 		}
-		Axios.post(BASE_URL_FEED + "/api/collection/album/addPost/", postCollectionDTO, {
+		Axios.post(BASE_URL + "/api/feedPosts/api/collection/album/addPost/", postCollectionDTO, {
 		}).then((res) => {
 			
 			this.setState({ showAddCollectionAlbumModal: false });
@@ -620,7 +600,7 @@ class FollowerProfilePage extends React.Component {
 		});
 	}
 	handleGetHighlightAlbums = (id) => {
-		Axios.get(BASE_URL_STORY + "/api/highlight/user/album/"+id)
+		Axios.get(BASE_URL + "/api/storyPosts/api/highlight/user/album/"+id)
 			.then((res) => {
 				this.setState({ highlightsAlbums: res.data });
 			})
@@ -711,9 +691,6 @@ class FollowerProfilePage extends React.Component {
 								handleDislikesModalOpenAlbum  = {this.handleDislikesModalOpenAlbum}
 								handleCommentsModalOpenAlbum  = {this.handleCommentsModalOpenAlbum }
 
-								stories = {this.state.stories}
-								storyAlbums = {this.state.storyAlbums}
-
 
 								highlights = {this.state.highlights}
 								seeStoriesInHighlight = {this.seeStoriesInHighlight}
@@ -732,7 +709,7 @@ class FollowerProfilePage extends React.Component {
 								seeStoriesInHighlightAlbum = {this.seeStoriesInHighlightAlbum}
 								storiesForHightlihtAlbum= {this.state.storiesForHightlihtAlbum}
 								hiddenStoriesForHighlightalbum = {this.state.hiddenStoriesForHighlightAlbum}
-							
+								userIsLoggedIn = {this.state.userIsLoggedIn}
 						/>
 						</div>
 

@@ -678,8 +678,8 @@ func ReturnUsersCloseFriends(driver neo4j.Driver, database string) func(http.Res
 
 		movieResults, err := session.ReadTransaction(func(tx neo4j.Transaction) (interface{}, error) {
 			records, err := tx.Run(
-				`MATCH (following:User)<-[f:FOLLOW]-(follower:User) WHERE follower.id = $followerId return following.id as id`,
-				map[string]interface{}{ "followerId": m.Id})
+				`MATCH (following:User)<-[f:FOLLOW]-(follower:User) WHERE following.id = $followingId return follower.id as id`,
+				map[string]interface{}{ "followingId": m.Id})
 			if err != nil {
 				return nil, err
 			}

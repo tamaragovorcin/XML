@@ -63,7 +63,7 @@ class EditProfile extends Component {
 	componentDidMount() {
 	
 		let id = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length-1)
-	Axios.get(BASE_URL_USER + "/api/" + id)
+	Axios.get(BASE_URL + "/api/users/api/" + id)
 				.then((res) => {
 					if (res.status === 401) {
 						this.setState({ errorHeader: "Bad credentials!", errorMessage: "Wrong username or password.", hiddenErrorAlert: false });
@@ -193,7 +193,7 @@ class EditProfile extends Component {
         };
 
         if (this.validateForm(userDTO)) {
-			Axios.post(`${BASE_URL_USER}/api/user/update/`, userDTO)
+			Axios.post(`${BASE_URL}/api/users/api/user/update/`, userDTO)
 			.then((res) => {
                         if (res.status === 400) {
                             this.setState({ hiddenFailAlert: false, failHeader: "Bad request", failMessage: "Invalid argument." });
