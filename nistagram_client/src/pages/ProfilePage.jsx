@@ -23,7 +23,7 @@ import WriteCommentAlbumModal from "../components/Posts/WriteCommentAlbumModal"
 import AddTagsModal from "../components/Posts/AddTagsModal";
 import ConvertVideo from "react-convert-image";
 import AddStoryAlbumToHighlightModal from "../components/Posts/AddStoryAlbumToHighlightModal";
- 
+import { BASE_URL } from "../constants.js";
 class ProfilePage extends React.Component {
 	constructor(props) {
 		super(props);
@@ -189,7 +189,7 @@ class ProfilePage extends React.Component {
 			body: formData
 
 		};
-		fetch(BASE_URL_FEED + "/api/image/"+userId+"/"+feedId , options);
+		fetch(BASE_URL + "/api/feedPosts/api/image/"+userId+"/"+feedId , options);
 	}
 	test(pic,userId, feedId) {
 		this.setState({
@@ -207,7 +207,7 @@ class ProfilePage extends React.Component {
 			body: formData
 
 		};
-		fetch(BASE_URL_FEED + "/api/image/"+userId+"/"+feedId , options);
+		fetch(BASE_URL + "/api/feedPosts/api/image/"+userId+"/"+feedId , options);
 	}
 	testProfileImage(pic,userId) {
 		
@@ -226,7 +226,7 @@ class ProfilePage extends React.Component {
 			body: formData
 
 		};
-		fetch(BASE_URL_USER + "/api/user/profileImage/"+userId , options);
+		fetch(BASE_URL + "/api/users/api/user/profileImage/"+userId , options);
 	}
 	testStory(pic,userId, storyId) {
 		this.setState({
@@ -244,14 +244,14 @@ class ProfilePage extends React.Component {
 			body: formData
 
 		};
-		fetch(BASE_URL_STORY + "/api/image/"+userId+"/"+storyId , options);
+		fetch(BASE_URL + "/api/storyPosts/api/image/"+userId+"/"+storyId , options);
 	}
 
 
 	componentDidMount() {
 
 		let id = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length-1)
-		Axios.get(BASE_URL_USER + "/api/" + id)
+		Axios.get(BASE_URL + "/api/users/api/" + id)
 				.then((res) => {
 					if (res.status === 401) {
 						this.setState({ errorHeader: "Bad credentials!", errorMessage: "Wrong username or password.", hiddenErrorAlert: false });
@@ -288,7 +288,7 @@ class ProfilePage extends React.Component {
 
 	}
 	handleGetStories = (id)=> {
-		Axios.get(BASE_URL_STORY + "/api/story/user/"+id)
+		Axios.get(BASE_URL + "/api/storyPosts/api/story/user/"+id)
 		.then((res) => {
 			this.setState({ stories: res.data });
 		})
@@ -298,7 +298,7 @@ class ProfilePage extends React.Component {
 	}
 
 	handleGetHighlights = (id) => {
-		Axios.get(BASE_URL_STORY + "/api/highlight/user/"+id)
+		Axios.get(BASE_URL + "/api/storyPosts/api/highlight/user/"+id)
 			.then((res) => {
 				this.setState({ highlights: res.data });
 			})
@@ -307,7 +307,7 @@ class ProfilePage extends React.Component {
 			});
 	}
 	handleGetHighlightAlbums = (id) => {
-		Axios.get(BASE_URL_STORY + "/api/highlight/user/album/"+id)
+		Axios.get(BASE_URL + "/api/storyPosts/api/highlight/user/album/"+id)
 			.then((res) => {
 				this.setState({ highlightsAlbums: res.data });
 			})
@@ -317,7 +317,7 @@ class ProfilePage extends React.Component {
 	}
 	
 	handleGetCollectionAlbums = (id) => {
-		Axios.get(BASE_URL_FEED + "/api/collection/user/album/"+id)
+		Axios.get(BASE_URL + "/api/feedPosts/api/collection/user/album/"+id)
 			.then((res) => {
 				this.setState({ collectionAlbums: res.data });
 			})
@@ -326,7 +326,7 @@ class ProfilePage extends React.Component {
 			});
 	}
 	handleGetCollections = (id) => {
-		Axios.get(BASE_URL_FEED + "/api/collection/user/"+id)
+		Axios.get(BASE_URL + "/api/feedPosts/api/collection/user/"+id)
 			.then((res) => {
 				this.setState({ collections: res.data });
 			})
@@ -336,7 +336,7 @@ class ProfilePage extends React.Component {
 	}
 
 	handleGetPhotos = (id) => {
-		Axios.get(BASE_URL_FEED + "/api/feed/usersImages/"+id)
+		Axios.get(BASE_URL + "/api/feedPosts/api/feed/usersImages/"+id)
 			.then((res) => {
 				this.setState({ photos: res.data });
 			})
@@ -348,7 +348,7 @@ class ProfilePage extends React.Component {
 	}
 
 	handleGetVideos = (id)=>{
-		Axios.get(BASE_URL_FEED + "/api/feed/usersVideos/" + id)
+		Axios.get(BASE_URL + "/api/feedPosts/api/feed/usersVideos/" + id)
 			.then((res) => {
 				this.setState({ videos: res.data });
 
@@ -359,7 +359,7 @@ class ProfilePage extends React.Component {
 	}
 	
 	handleGetAlbums = (id) => {
-		Axios.get(BASE_URL_FEED + "/api/feedAlbum/usersAlbums/"+id)
+		Axios.get(BASE_URL + "/api/feedPosts/api/feedAlbum/usersAlbums/"+id)
 			.then((res) => {
 				this.setState({ albums: res.data });
 				console.log("sfsfsf" + res.data)
@@ -369,7 +369,7 @@ class ProfilePage extends React.Component {
 			});
 	}
 	handleGetStoryAlbums = (id) => {
-		Axios.get(BASE_URL_STORY + "/api/storyAlbum/usersAlbums/"+id)
+		Axios.get(BASE_URL + "/api/storyPosts/api/storyAlbum/usersAlbums/"+id)
 			.then((res) => {
 				this.setState({ storyAlbums: res.data });
 			})
@@ -407,7 +407,7 @@ class ProfilePage extends React.Component {
 
         let id = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length-1);
         const dto = {id: id}
-        Axios.post(BASE_URL_USER_INTERACTION + "/api/user/following", dto)
+        Axios.post(BASE_URL + "/api/userInteraction/api/user/following", dto)
 			.then((res) => {
 
 				res.data.forEach((user) => {
@@ -820,7 +820,7 @@ class ProfilePage extends React.Component {
 	sendRequestForFeed(feedPostDTO) {
 		let id = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length-1)
 				
-		Axios.post(BASE_URL_FEED + "/api/feed/" + id, feedPostDTO)
+		Axios.post(BASE_URL + "/api/feedPosts/api/feed/" + id, feedPostDTO)
 			.then((res) => {
 				if (res.status === 409) {
 					this.setState({
@@ -859,7 +859,7 @@ class ProfilePage extends React.Component {
 	}
 	sendRequestForFeedAlbum(feedPostDTO){
 		let id = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length-1)
-		Axios.post(BASE_URL_FEED + "/api/feedAlbum/" + id, feedPostDTO)
+		Axios.post(BASE_URL + "/api/feedPosts/api/feedAlbum/" + id, feedPostDTO)
 			.then((res) => {
 				if (res.status === 409) {
 					this.setState({
@@ -895,7 +895,7 @@ class ProfilePage extends React.Component {
 	sendRequestForStory(storyPostDTO) {
 		let id = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length-1)
 
-		Axios.post(BASE_URL_STORY + "/api/story/" + id, storyPostDTO)
+		Axios.post(BASE_URL + "/api/storyPosts/api/story/" + id, storyPostDTO)
 			.then((res) => {
 				if (res.status === 409) {
 					this.setState({
@@ -937,7 +937,7 @@ class ProfilePage extends React.Component {
 	}
 	sendRequestForAlbumStory(storyPostDTO){
 		let id = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length-1)
-		Axios.post(BASE_URL_STORY + "/api/storyAlbum/" + id, storyPostDTO)
+		Axios.post(BASE_URL + "/api/storyPosts/api/storyAlbum/" + id, storyPostDTO)
 			.then((res) => {
 				if (res.status === 409) {
 					this.setState({
@@ -1006,7 +1006,7 @@ class ProfilePage extends React.Component {
             };
 			let id = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length-1)
 
-			Axios.post(BASE_URL_STORY + "/api/highlight/"+id, highlightDTO, {
+			Axios.post(BASE_URL + "/api/storyPosts/api/highlight/"+id, highlightDTO, {
 				}).then((res) => {
 					
                     this.setState({ showAddHighLightModal: false });
@@ -1030,7 +1030,7 @@ class ProfilePage extends React.Component {
             };
 			let id = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length-1)
 
-			Axios.post(BASE_URL_STORY + "/api/highlight/album/"+id, highlightDTO, {
+			Axios.post(BASE_URL + "/api/storyPosts/api/highlight/album/"+id, highlightDTO, {
 				}).then((res) => {
 					
                     this.setState({ showAddHighLightAlbumModal: false });
@@ -1054,7 +1054,7 @@ class ProfilePage extends React.Component {
             };
 			let id = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length-1)
 
-			Axios.post(BASE_URL_FEED + "/api/collection/"+id, collectionDTO, {
+			Axios.post(BASE_URL + "/api/feedPosts/api/collection/"+id, collectionDTO, {
 				}).then((res) => {
 					
                     this.setState({ showAddCollectionModal: false });
@@ -1078,7 +1078,7 @@ class ProfilePage extends React.Component {
             };
 			let id = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length-1)
 
-			Axios.post(BASE_URL_FEED + "/api/collection/album/"+id, collectionDTO, {
+			Axios.post(BASE_URL + "/api/feedPosts/api/collection/album/"+id, collectionDTO, {
 				}).then((res) => {
 					
                     this.setState({ showAddCollectionModal: false });
@@ -1123,7 +1123,7 @@ class ProfilePage extends React.Component {
 			StoryId : this.state.selectedStoryId,
 			HighlightId : highlightId
 		}
-		Axios.post(BASE_URL_STORY + "/api/highlight/addStory/", storyHighlightDTO, {
+		Axios.post(BASE_URL + "/api/storyPosts/api/highlight/addStory/", storyHighlightDTO, {
 		}).then((res) => {
 			
 			this.setState({ showAddHighLightModal: false });
@@ -1143,7 +1143,7 @@ class ProfilePage extends React.Component {
 			StoryId : this.state.selectedStoryId,
 			HighlightId : highlightId
 		}
-		Axios.post(BASE_URL_STORY + "/api/highlight/addStoryAlbum/", storyHighlightDTO, {
+		Axios.post(BASE_URL + "/api/storyPosts/api/highlight/addStoryAlbum/", storyHighlightDTO, {
 		}).then((res) => {
 			
 			this.setState({ showAddHighLightModal: false });
@@ -1165,7 +1165,7 @@ class ProfilePage extends React.Component {
 			PostId : this.state.selectedPostId,
 			CollectionId : collectionId
 		}
-		Axios.post(BASE_URL_FEED + "/api/collection/addPost/", postCollectionDTO, {
+		Axios.post(BASE_URL + "/api/feedPosts/api/collection/addPost/", postCollectionDTO, {
 		}).then((res) => {
 			
 			this.setState({ showAddCollectionModal: false });
@@ -1186,7 +1186,7 @@ class ProfilePage extends React.Component {
 			PostId : this.state.selectedPostId,
 			CollectionId : collectionId
 		}
-		Axios.post(BASE_URL_FEED + "/api/collection/album/addPost/", postCollectionDTO, {
+		Axios.post(BASE_URL + "/api/feedPosts/api/collection/album/addPost/", postCollectionDTO, {
 		}).then((res) => {
 			
 			this.setState({ showAddCollectionAlbumModal: false });
@@ -1219,7 +1219,7 @@ class ProfilePage extends React.Component {
 		this.setState({postsForCollectionAlbum : albums})
 	}
 	handleLikesModalOpen = (postId)=> {
-		Axios.get(BASE_URL_FEED + "/api/feed/likes/"+postId)
+		Axios.get(BASE_URL + "/api/feedPosts/api/feed/likes/"+postId)
 			.then((res) => {
 				this.setState({ peopleLikes: res.data });
 			})
@@ -1229,7 +1229,7 @@ class ProfilePage extends React.Component {
 		this.setState({ showLikesModal: true });    
 	}
 	handleDislikesModalOpen = (postId)=> {
-		Axios.get(BASE_URL_FEED + "/api/feed/dislikes/"+postId)
+		Axios.get(BASE_URL + "/api/feedPosts/api/feed/dislikes/"+postId)
 			.then((res) => {
 				this.setState({ peopleDislikes: res.data });
 			})
@@ -1239,7 +1239,7 @@ class ProfilePage extends React.Component {
 		this.setState({ showDislikesModal: true });    
 	}
 	handleCommentsModalOpen = (postId)=> {
-		Axios.get(BASE_URL_FEED + "/api/feed/comments/"+postId)
+		Axios.get(BASE_URL + "/api/feedPosts/api/feed/comments/"+postId)
 			.then((res) => {
 				this.setState({ peopleComments: res.data });
 			})
@@ -1272,7 +1272,7 @@ class ProfilePage extends React.Component {
 			PostId : postId,
 			UserId : id
 		}
-		Axios.post(BASE_URL_FEED + "/api/feed/like/", postReactionDTO, {
+		Axios.post(BASE_URL + "/api/feedPosts/api/feed/like/", postReactionDTO, {
 		}).then((res) => {
 
 			this.setState({ textSuccessfulModal: "You have successfully liked the photo." });
@@ -1290,7 +1290,7 @@ class ProfilePage extends React.Component {
 			PostId : postId,
 			UserId : id
 		}
-		Axios.post(BASE_URL_FEED + "/api/feed/dislike/", postReactionDTO, {
+		Axios.post(BASE_URL + "/api/feedPosts/api/feed/dislike/", postReactionDTO, {
 		}).then((res) => {
 
 			this.setState({ textSuccessfulModal: "You have successfully disliked the photo." });
@@ -1311,7 +1311,7 @@ class ProfilePage extends React.Component {
 			Content : comment
 
 		}
-		Axios.post(BASE_URL_FEED + "/api/feed/comment/", commentDTO, {
+		Axios.post(BASE_URL + "/api/feedPosts/api/feed/comment/", commentDTO, {
 		}).then((res) => {
 			
 			this.setState({ textSuccessfulModal: "You have successfully commented the photo." });
@@ -1325,7 +1325,7 @@ class ProfilePage extends React.Component {
 		});
 	}
 	handleLikesModalOpenAlbum = (postId)=> {
-		Axios.get(BASE_URL_FEED + "/api/albumFeed/likes/"+postId)
+		Axios.get(BASE_URL + "/api/feedPosts/api/albumFeed/likes/"+postId)
 			.then((res) => {
 				this.setState({ peopleLikes: res.data });
 			})
@@ -1335,7 +1335,7 @@ class ProfilePage extends React.Component {
 		this.setState({ showLikesModal: true });    
 	}
 	handleDislikesModalOpenAlbum = (postId)=> {
-		Axios.get(BASE_URL_FEED + "/api/albumFeed/dislikes/"+postId)
+		Axios.get(BASE_URL + "/api/feedPosts/api/albumFeed/dislikes/"+postId)
 			.then((res) => {
 				this.setState({ peopleDislikes: res.data });
 			})
@@ -1345,7 +1345,7 @@ class ProfilePage extends React.Component {
 		this.setState({ showDislikesModal: true });    
 	}
 	handleCommentsModalOpenAlbum = (postId)=> {
-		Axios.get(BASE_URL_FEED + "/api/albumFeed/comments/"+postId)
+		Axios.get(BASE_URL + "/api/feedPosts/api/albumFeed/comments/"+postId)
 			.then((res) => {
 				this.setState({ peopleComments: res.data });
 			})
@@ -1363,7 +1363,7 @@ class ProfilePage extends React.Component {
 			Content : comment
 
 		}
-		Axios.post(BASE_URL_FEED + "/api/albumFeed/comment/", commentDTO, {
+		Axios.post(BASE_URL + "/api/feedPosts/api/albumFeed/comment/", commentDTO, {
 		}).then((res) => {
 			
 			this.setState({ textSuccessfulModal: "You have successfully commented the album." });
@@ -1383,7 +1383,7 @@ class ProfilePage extends React.Component {
 			PostId : postId,
 			UserId : id
 		}
-		Axios.post(BASE_URL_FEED + "/api/albumFeed/like/", postReactionDTO, {
+		Axios.post(BASE_URL + "/api/feedPosts/api/albumFeed/like/", postReactionDTO, {
 		}).then((res) => {
 
 			this.setState({ textSuccessfulModal: "You have successfully liked the album." });
@@ -1401,7 +1401,7 @@ class ProfilePage extends React.Component {
 			PostId : postId,
 			UserId : id
 		}
-		Axios.post(BASE_URL_FEED + "/api/albumFeed/dislike/", postReactionDTO, {
+		Axios.post(BASE_URL + "/api/feedPosts/api/albumFeed/dislike/", postReactionDTO, {
 		}).then((res) => {
 
 			this.setState({ textSuccessfulModal: "You have successfully disliked the album." });
