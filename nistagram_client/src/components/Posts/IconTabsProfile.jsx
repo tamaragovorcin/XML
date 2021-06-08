@@ -45,13 +45,13 @@ render(){
                             {post.ContentType === "image/jpeg" ? (
          <img
          className="img-fluid"
-         src={"http://localhost:4001/api/feed/file/"+post.Id}
+         src={"http://localhost:80/api/feedPosts/api/feed/file/"+post.Id}
          width="100%"
          alt="description"
        />
       ) : (
         
-        <video width="100%"  controls autoPlay loop muted><source src={"http://localhost:4001/api/feed/file/"+post.Id} type ="video/mp4"></source></video>
+        <video width="100%"  controls autoPlay loop muted><source src={"http://localhost:80/api/feedPosts/api/feed/file/"+post.Id} type ="video/mp4"></source></video>
         
       )}
 
@@ -214,14 +214,14 @@ render(){
                                 {post.ContentType === "image/jpeg" ? (
                                                   <img
                                                         className="img-fluid"
-                                                        src={"http://localhost:4004/api/story/file/"+post.Id}
+                                                        src={"http://localhost:80/api/storyPosts/api/story/file/"+post.Id}
                                                         width="100%"
                                                         alt="description"
                                                     />
                                                  ) : (
         
                                           <video width="100%"  controls autoPlay loop muted>
-                                            <source src={"http://localhost:4004/api/story/file/"+post.Id} type ="video/mp4"></source>
+                                            <source src={"http://localhost:80/api/storyPosts/api/story/file/"+post.Id} type ="video/mp4"></source>
                                             </video>
         
       )}
@@ -374,12 +374,12 @@ render(){
                                 {post.ContentType === "image/jpeg" ? (
                                     <img
                                     className="img-fluid"
-                                    src={"http://localhost:4004/api/story/file/"+post.Id}
+                                    src={"http://localhost:80/api/storyPosts/api/story/file/"+post.Id}
                                     width="100%"
                                     alt="description"
                                   /> ) : (
                                 <video width="100%"  controls autoPlay loop muted>
-                                  <source src={"http://localhost:4004/api/story/file/"+post.Id} type ="video/mp4"></source>
+                                  <source src={"http://localhost:80/api/storyPosts/api/story/file/"+post.Id} type ="video/mp4"></source>
                                 </video>)}
                                 </td>
                             </tr>
@@ -561,12 +561,12 @@ render(){
                                 {post.ContentType === "image/jpeg" ? (
                                     <img
                                     className="img-fluid"
-                                    src={"http://localhost:4001/api/feed/file/"+post.Id}
+                                    src={"http://localhost:80/api/feedPosts/api/feed/file/"+post.Id}
                                     width="100%"
                                     alt="description"
                                   /> ) : (
                                 <video width="100%"  controls autoPlay loop muted>
-                                  <source src={"http://localhost:4001/api/feed/file/"+post.Id} type ="video/mp4"></source>
+                                  <source src={"http://localhost:80/api/feedPosts/api/feed/file/"+post.Id} type ="video/mp4"></source>
                                 </video>)}
                                 </td>
                             </tr>

@@ -19,6 +19,7 @@ services:
     networks:
       - backend
 
+
   mongo:
     image: mongo
     container_name: db_users
@@ -47,6 +48,8 @@ services:
       - '4001:4001'
     networks:
       - backend
+    volumes:
+      - ./feedPosts/cmd/app/files:/go/app/files
 
   messages:
     restart: always
@@ -77,6 +80,8 @@ services:
       - '4004:4004'
     networks:
       - backend
+    volumes:
+      - ./storyPosts/cmd/app/files:/go/app/files
 
   userinteraction:
     restart: always
