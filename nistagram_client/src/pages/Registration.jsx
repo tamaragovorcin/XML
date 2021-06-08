@@ -154,7 +154,7 @@ class RegisterPage extends Component {
 		};
 
 		if (this.validateForm(userDTO)) {
-			Axios.post(`${constants.BASE_URL}/api/users/api/`, userDTO)
+			Axios.post(BASE_URL + "/api/users/api/", userDTO)
 				.then((res) => {
 
 					if (res.status === 409) {
