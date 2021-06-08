@@ -754,7 +754,7 @@ func userIsCloseFriends(user2 followUserStructDTO, ids []string) bool {
 }
 
 func getListCloseFriends(id string) []string {
-	resp, err := http.Get("http://localhost:4006/api/user/closeFriends/"+id)
+	resp, err := http.Get("http://localhost:80/api/users/api/user/closeFriends/"+id)
 	if err != nil {
 		log.Fatalln(err)
 	}
@@ -775,7 +775,7 @@ func getListCloseFriends(id string) []string {
 
 func getUserUsername(user string) string {
 
-	resp, err := http.Get("http://localhost:4006/api/user/username/"+user)
+	resp, err := http.Get("http://localhost:80/api/users/api/user/username/"+user)
 	if err != nil {
 		log.Fatalln(err)
 	}

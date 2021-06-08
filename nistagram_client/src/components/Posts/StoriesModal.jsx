@@ -23,9 +23,7 @@ class StoriesModal extends Component {
 	
 	   let a = this.state.count;
 	   if(a === this.props.brojac-1){
-		alert("Preko je")
 	   }else{
-		alert("Povecavam")
 		a = a+1;
 		this.setState({ count: a });
 	   }
@@ -33,15 +31,12 @@ class StoriesModal extends Component {
    }
 
    componentDidMount(){
-	alert(this.state.count)
    }
    onClickBack = () =>{
 	alert(this.state.count)
 	let a = this.state.count;
 	if(a-1 === -1){
-		alert("Minus jedan je")
 	}else{
-		alert("Smanjujem" + a)
 	 a = a-1;
 	 this.setState({ count: a });
 	}
