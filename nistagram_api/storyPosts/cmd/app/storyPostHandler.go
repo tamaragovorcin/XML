@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"github.com/gorilla/mux"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"image"
@@ -228,6 +229,7 @@ func toResponseStoryPost(storyPost models.StoryPost, image2 string) dtos.StoryPo
 func toResponseStoryPost1(storyPost models.StoryPost, contentType string) dtos.StoryPostInfoDTO {
 	taggedPeople :=getTaggedPeople(storyPost.Post.Tagged)
 
+
 	return dtos.StoryPostInfoDTO{
 		Id: storyPost.Id,
 		DateTime : strings.Split(storyPost.Post.DateTime.String(), " ")[0],
@@ -413,6 +415,9 @@ func (app *application) getStoriesForHomePage(w http.ResponseWriter, r *http.Req
 	}
 	storyPostsResponse := []dtos.StoryPostInfoHomePageDTO{}
 	for _, storyPost := range storiesForHomePage {
+		fmt.Println("JA:  " + userId)
+		fmt.Println("User slike:   " + storyPost.Post.User.Hex())
+		fmt.Println(iAmFollowingThisUser(userId,storyPost.Post.User.Hex()))
 		if iAmFollowingThisUser(userId,storyPost.Post.User.Hex()) {
 			if storyCanBeSeen(storyPost,userIdPrimitive)==true {
 				images, err := findImageByPostId(allImages, storyPost.Id)
@@ -428,13 +433,13 @@ func (app *application) getStoriesForHomePage(w http.ResponseWriter, r *http.Req
 					var dto = dtos.StoryPostInfoHomePageDTO{
 						UserId:       storyPost.Post.User,
 						UserUsername: userUsername,
-						Stories:      append(stories, toResponseStoryPost(storyPost, images.Media)),
+						Stories:      append(stories, toResponseStoryPost2(storyPost, images.Media)),
 						CloseFriends: storyPost.OnlyCloseFriends,
 					}
 					storyPostsResponse = append(storyPostsResponse, dto)
 				} else if userInList != -1 {
 					existingDto := storyPostsResponse[userInList]
-					existingDto.Stories = append(existingDto.Stories, toResponseStoryPost(storyPost, images.Media))
+					existingDto.Stories = append(existingDto.Stories, toResponseStoryPost2(storyPost, images.Media))
 				}
 			}
 		}
@@ -448,7 +453,27 @@ func (app *application) getStoriesForHomePage(w http.ResponseWriter, r *http.Req
 	w.WriteHeader(http.StatusOK)
 	w.Write(imagesMarshaled)
 }
+func toResponseStoryPost2(storyPost models.StoryPost, image2 string) dtos.StoryPostInfoDTO {
+	f, _ := os.Open(image2)
+	defer f.Close()
+	image,_,_:= image.Decode(f)
+	buffer := new(bytes.Buffer)
+	if err := jpeg.Encode(buffer, image, nil); err != nil {
+		log.Println("unable to encode image.")
+	}
+	taggedPeople :=getTaggedPeople(storyPost.Post.Tagged)
 
+	return dtos.StoryPostInfoDTO{
+		Id: storyPost.Id,
+		DateTime : strings.Split(storyPost.Post.DateTime.String(), " ")[0],
+		Tagged : taggedPeople,
+		Location : locationToString(storyPost.Post.Location),
+		Description : storyPost.Post.Description,
+		Hashtags : hashTagsToString(storyPost.Post.Hashtags),
+		Media : buffer.Bytes(),
+
+	}
+}
 func getListCloseFriends(id string) []string { //id usera ciji je stori
 
 	resp, err := http.Get("http://localhost:4006/api/user/closeFriends/"+id)
