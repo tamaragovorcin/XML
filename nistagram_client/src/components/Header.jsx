@@ -152,7 +152,7 @@ class Header extends React.Component {
 									<li>
 
 
-										<Link to="/settings"><FiSettings /> Settings </Link>
+										<Link to="/editProfile"><FiSettings /> Settings </Link>
 
 
 									</li>

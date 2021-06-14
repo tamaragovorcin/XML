@@ -55,5 +55,15 @@ func (app *application) routes() *mux.Router {
 	r.HandleFunc("/notification/", app.insertNotification).Methods("POST")
 	r.HandleFunc("/notification/{id}", app.deleteNotification).Methods("DELETE")
 
+	r.HandleFunc("/api/user/privacySettings/", app.changePrivacySettings).Methods("POST")
+	r.HandleFunc("/api/user/privacySettings/{userId}",app.getUsersPrivacySettings).Methods("GET")
+	r.HandleFunc("/api/mute/",app.muteUser).Methods("POST")
+	r.HandleFunc("/api/block/",app.blockUser).Methods("POST")
+	r.HandleFunc("/api/unmute/",app.unmuteUser).Methods("POST")
+	r.HandleFunc("/api/unblock/",app.unblockUser).Methods("POST")
+	r.HandleFunc("/api/user/blockedUsers/{userId}", app.findBlockedUsers).Methods("GET")
+	r.HandleFunc("/api/user/mutedUsers/{userId}", app.findMutedUsers).Methods("GET")
+	r.HandleFunc("/api/checkIfMuted/{subjectId}/{objectId}", app.checkIfUserIsMuted).Methods("GET")
+
 	return r
 }

@@ -56,3 +56,13 @@ type UserTokenState struct {
 type ProfileImageInfoDTO struct {
 	Media       []byte
 }
+
+type SettingsDTO struct {
+	UserId     string
+	AllowTags bool
+	AcceptMessages bool
+}
+type MuteDTO struct {
+	Subject string
+	Object string
+}

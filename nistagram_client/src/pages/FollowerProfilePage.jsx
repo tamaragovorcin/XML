@@ -67,6 +67,7 @@ class FollowerProfilePage extends React.Component {
 		showAddCollectionModal : false,
 		showWriteCommentModalAlbum : false,
 		followingThisUser : false,
+		mutedThisUser : false,
 		allowPagePreview : false,
 		ableToFollowThisUser : false,
 		sentFollowRequest : false,
@@ -162,6 +163,12 @@ class FollowerProfilePage extends React.Component {
 			let loggedId = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length-1)
 			const followReguestDTO = { follower: loggedId, following : id};
 			this.setState({ userIsLoggedIn: true });
+			Axios.get(BASE_URL_USER + "/api/checkIfMuted/"+loggedId+"/"+id)
+							.then((response) => {
+								this.setState({ mutedThisUser: response.data });
+							}).catch((err) => {
+								console.log(err);
+							});
 
 			Axios.post(BASE_URL_USER_INTERACTION + "/api/checkInteraction",followReguestDTO)
 				.then((res) => {
@@ -554,6 +561,61 @@ class FollowerProfilePage extends React.Component {
 		
 
 	}
+	handleMute = () => {
+		let id = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length-1);
+	
+		const dto = { Subject: id, Object : this.state.userId};
+			Axios.post(BASE_URL_USER + "/api/mute/", dto)
+			.then((res) => {
+								
+				this.setState({ textSuccessfulModal: "You have successfully muted this user." });
+				this.setState({ openModal: true });
+
+			})
+			.catch ((err) => {
+				console.log(err);
+			});
+			
+		
+		
+
+	}
+	handleUnMute = () => {
+		let id = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length-1);
+	
+		const dto = { Subject: id, Object : this.state.userId};
+			Axios.post(BASE_URL_USER + "/api/unmute/", dto)
+			.then((res) => {
+								
+				this.setState({ textSuccessfulModal: "You have successfully unmuted this user." });
+				this.setState({ openModal: true });
+
+			})
+			.catch ((err) => {
+				console.log(err);
+			});
+			
+		
+		
+
+	}
+	handleBlock = () => {
+		let id = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length-1);
+	
+		const dto = { Subject: id, Object : this.state.userId};
+			Axios.post(BASE_URL_USER + "/api/block/", dto)
+			.then((res) => {
+								
+				this.setState({ textSuccessfulModal: "You have successfully blocked this user." });
+				this.setState({ openModal: true });
+
+			})
+			.catch ((err) => {
+				console.log(err);
+			});
+			
+
+	}
 	handleOpenAddAlbumToCollectionAlbumModal = (postId)=> {
 		let id = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length-1)
 
@@ -648,6 +710,15 @@ class FollowerProfilePage extends React.Component {
 														</div>
 														<div hidden={!this.state.sentFollowRequest}>
 															<button  className="btn btn-outline-warning mt-1"  type="button"><i className="icofont-subscribe mr-1"></i>Sent request</button>
+														</div>
+														<div hidden={!this.state.followingThisUser || this.state.mutedThisUser}>
+															<button  className="btn btn-outline-primary mt-1" onClick={() => this.handleMute()} type="button"><i className="icofont-subscribe mr-1"></i>Mute</button>
+														</div>
+														<div hidden={!this.state.mutedThisUser}>
+															<button  className="btn btn-outline-primary mt-1" onClick={() => this.handleUnMute()} type="button"><i className="icofont-subscribe mr-1"></i>Unmute</button>
+														</div>
+														<div>
+															<button  className="btn btn-outline-primary mt-1" onClick={() => this.handleBlock()} type="button"><i className="icofont-subscribe mr-1"></i>Block</button>
 														</div>
 													</td>
 

@@ -13,6 +13,9 @@ import PharmacyProfilePage from './pages/FollowerProfilePage';
 import Search from './pages/Search';
 import CloseFriends from './pages/CloseFriends';
 import FollowRequest from './pages/FollowRequest';
+import Settings from './pages/Settings';
+
+
 
 function App() {
   return (
@@ -27,12 +30,12 @@ function App() {
 				<Link exact to="/favorites" path="/favorites" component={Favorites} />
 
 				<Link exact to="/passwordChange" path="/passwordChange" component={PasswordChange} />
-				<Link exact to="/settings" path="/settings" component={EditProfile} />
+				<Link exact to="/editProfile" path="/editProfile" component={EditProfile} />
 				<Route path="/followerProfilePage/:id" children={<PharmacyProfilePage />} />
 				<Link exact to="/seacrh" path="/seacrh" component={Search} />
 				<Link exact to="/closeFriends" path="/closeFriends" component={CloseFriends} />
 				<Link exact to="/followRequest" path="/followRequest" component={FollowRequest} />
-
+				<Link exact to="/settings" path="/settings" component={Settings} />
 
 			</Switch>
 	</Router>

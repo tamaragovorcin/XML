@@ -331,6 +331,7 @@ func (app *application) insertUser(w http.ResponseWriter, r *http.Request) {
 
 	if able  {
 		hashAndSalt, err := HashAndSaltPasswordIfStrong(m.Password)
+
 		var profileInformation = models.ProfileInformation{
 			Name: m.Name, LastName: m.LastName,
 			Email:       m.Email,
