@@ -2,7 +2,7 @@ import React, { Component } from "react";
 import Axios from "axios";
 import Header from "../components/Header";
 import TopBar from "../components/TopBar";
-import { BASE_URL_USER_INTERACTION } from "../constants.js";
+import { BASE_URL_USER_INTERACTION, BASE_URL_USER } from "../constants.js";
 import ModalDialog from "../components/ModalDialog";
 
 class FollowRequest extends Component {
@@ -11,6 +11,7 @@ class FollowRequest extends Component {
         following : [],
         followers : [],
         followerRequestsByMe : [],
+        blockedUsers : [],
         textSuccessfulModal : "",
         openModal : false,
 
@@ -21,6 +22,7 @@ class FollowRequest extends Component {
         this.getFollowers()
         this.getFollowing()
         this.getFollowRequestsByMe()
+        this.getBlockedUsers()
 	}
     handleAccept  = (followerId) => {
         let id = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length-1);
@@ -96,7 +98,30 @@ class FollowRequest extends Component {
 				console.log(err)
 			});
     }
-
+    getBlockedUsers = ()=> {
+        let id = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length-1);
+        Axios.get(BASE_URL_USER + "/api/user/blockedUsers/"+id)
+			.then((res) => {
+				this.setState({ blockedUsers: res.data });
+                console.log(res.data)
+			})
+			.catch((err) => {
+				console.log(err)
+			});
+    }
+    handleUnblock = (followerId) =>{
+        let id = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length-1);
+        const dto = { Subject: id, Object: followerId};
+        Axios.post(BASE_URL_USER  + "/api/unblock/", dto)
+                .then((res) => {
+                    this.setState({ openModal: true });
+                    this.setState({ textSuccessfulModal: "You have successfully unblocked user" });			
+                    this.getBlockedUsers();
+                })
+                .catch ((err) => {
+            console.log(err);
+        });
+    }
     handleModalClose = () => {
 		this.setState({ openModal: false });
 	};
@@ -212,6 +237,37 @@ class FollowRequest extends Component {
                                                         <div style={{ marginTop: "1rem"}}>
                                                             <b>Username: </b> {follower.Username}
                                                         </div>
+                                                    </td>
+                                                </tr>
+
+                                            ))}
+                                            <tr>
+                                                <td></td>
+                                                <td></td>
+                                                <td></td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                            </div>
+                        </div>
+                        <div className="container">
+                        <div className="container" style={{ marginTop: "10rem", marginRight: "10rem" }}>
+                            <h3>
+                               Blocked users:
+                            </h3>
+                            <table className="table" style={{ width: "100%" }}>
+                                        <tbody>
+                                        {this.state.blockedUsers.map((follower) => (
+                                                <tr id={follower.Id} key={follower.Id}>
+                                                    
+                                                    <td >
+                                                        <div style={{ marginTop: "1rem"}}>
+                                                            <b>Username: </b> {follower.ProfileInformation.Username}
+                                                        </div>
+                                                    </td>
+                                                    <td>
+                                                    <button  className="btn btn-success mt-1" onClick={() => this.handleUnblock(follower.Id)} type="button"><i className="icofont-subscribe mr-1"></i>Unblock</button>
+
                                                     </td>
                                                 </tr>
 

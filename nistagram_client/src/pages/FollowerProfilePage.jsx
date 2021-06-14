@@ -79,7 +79,8 @@ class FollowerProfilePage extends React.Component {
 		hiddenStoriesForHighlightalbum : false,
 		myCollectionAlbums : [],
 		myCollections : [],
-		userIsLoggedIn : false
+		userIsLoggedIn : false,
+		blockedUser : false
 	}
 	hasRole = (reqRole) => {
 		let roles = JSON.parse(localStorage.getItem("keyRole"));
@@ -121,6 +122,17 @@ class FollowerProfilePage extends React.Component {
 					numberOfPosts : res.data.numberOfPosts,
 					numberOfFollowers : res.data.numberOfFollowers,
 					numberOfFollowings : res.data.numberOfFollowings
+				});
+
+			})
+			.catch((err) => {
+				console.log(err);
+			});
+			let id = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length-1);
+			Axios.get(BASE_URL_USER + "/api/checkIfBlocked/"+id+"/" + s[5])
+			.then((res) => {
+				this.setState({
+					blockedUser : res.data
 				});
 
 			})
@@ -680,7 +692,7 @@ class FollowerProfilePage extends React.Component {
 				<Header />
 
 				<section id="hero" className="d-flex align-items-top">
-					<div className="container">
+					<div className="container" hidden={this.state.blockedUser}>
 						<div className="d-flex align-items-top">
 							<div className="container" style={{ marginTop: "10rem", marginRight: "10rem" }}>
 								<table className="table" style={{ width: "100%" }}>
@@ -796,6 +808,21 @@ class FollowerProfilePage extends React.Component {
 							</div>
 
 						</div>
+						<div hidden={!this.state.blockedUser}>
+
+				<div className="d-flex p-3 mb-2 d-flex justify-content-center">
+
+					<label><b>Nistagram user</b></label>
+
+				</div>
+
+				<div className="d-flex justify-content-center h-100">
+					<Icon className="d-flex justify-content-center h-100 w-100"><Lock /></Icon>
+				</div>
+
+</div>
+
+
 
 					</div>
 

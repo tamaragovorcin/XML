@@ -109,6 +109,7 @@ class ProfilePage extends React.Component {
 		hiddenPostsForCollectionAlbums: false,
 		postsForCollectionAlbum : [],
 		showAddAlbumToCollectionAlbum : false,
+		followingsThatAllowTags : []
 		
 	}
 	
@@ -285,6 +286,7 @@ class ProfilePage extends React.Component {
 		this.handleGetCollections(id)
 		this.handleGetHighlightAlbums(id)
 		this.handleGetCollectionAlbums(id)
+		this.getFollowingThatCanBeTagged()
 
 	}
 	handleGetStories = (id)=> {
@@ -417,6 +419,24 @@ class ProfilePage extends React.Component {
 				
 
 				this.setState({ followingUsers: help });
+			})
+			.catch((err) => {
+				console.log(err)
+			});
+    }
+	getFollowingThatCanBeTagged = ()=> {
+		let help = []
+
+        let id = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length-1);
+        const dto = {id: id}
+        Axios.post(BASE_URL_USER_INTERACTION + "/api/user/following/tagged", dto)
+			.then((res) => {
+				res.data.forEach((user) => {
+					let optionDTO = { id: user.Id, label: user.Username, value: user.Id }
+					help.push(optionDTO)
+				});
+				
+				this.setState({ followingsThatAllowTags: help });
 			})
 			.catch((err) => {
 				console.log(err)
@@ -1736,7 +1756,7 @@ class ProfilePage extends React.Component {
 						  show={this.state.showTagsModal}
 						  onCloseModal={this.handleTagsModalClose}
 						  header="Add tags"
-						  followingUsers = {this.state.followingUsers}
+						  followingUsers = {this.state.followingsThatAllowTags}
 						  taggedOnPost = {this.state.taggedOnPost}
 						  tagUserOnPost={this.tagUserOnPost}
 						  handleChangeTags = {this.handleChangeTags}

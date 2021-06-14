@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	"log"
 	"net/http"
 	"strings"
 	dtos2 "users/pkg/dtos"
@@ -62,11 +63,18 @@ func (app *application) findBlockedUsers(w http.ResponseWriter, r *http.Request)
 	userId := vars["userId"]
 	intVar, err := primitive.ObjectIDFromHex(userId)
 	allSettings,_ := app.settings.GetAll()
-
-	usersCloseFriens := getBlockedUsers(allSettings,intVar)
-	fmt.Println("list   " + usersCloseFriens)
-
-	b, err := json.Marshal(usersCloseFriens)
+	var listBlockedUsers []primitive.ObjectID
+	for _, settingsItem := range allSettings {
+		if settingsItem.User.Hex()==intVar.Hex() {
+			listBlockedUsers = settingsItem.Blocked
+		}
+	}
+	var listOfUsers []models.User
+	for _,user := range  listBlockedUsers{
+		us, _ := app.users.FindByID(user)
+		listOfUsers = append(listOfUsers, *us)
+	}
+	b, err := json.Marshal(listOfUsers)
 	if err != nil {
 		app.serverError(w, err)
 	}
@@ -98,6 +106,27 @@ func (app *application) findMutedUsers(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 	w.Write(b)
 }
+func (app *application) checkIfUserAllowsTags(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	vars := mux.Vars(r)
+	userId := vars["userId"]
+	intVar, err := primitive.ObjectIDFromHex(userId)
+	allSettings,_ := app.settings.GetAll()
+
+	allows := getAllowTags(allSettings,intVar)
+
+	b, err := json.Marshal(allows)
+
+	if err != nil {
+		app.serverError(w, err)
+	}
+
+	app.infoLog.Println("Have been found a user")
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	w.Write(b)
+}
 func (app *application) checkIfUserIsMuted(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	vars := mux.Vars(r)
@@ -113,6 +142,44 @@ func (app *application) checkIfUserIsMuted(w http.ResponseWriter, r *http.Reques
 	list  := strings.Split(mutedList, ",")
 	for _, muted := range list {
 		if muted == objVar.Hex() {
+			found = true
+		}
+
+	}
+	b, err := json.Marshal(found)
+	if err != nil {
+		app.serverError(w, err)
+	}
+
+	app.infoLog.Println("Have been found a user")
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	w.Write(b)
+}
+func (app *application) checkIfUserIsBlocked(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	vars := mux.Vars(r)
+	subjectId := vars["subjectId"]
+	objectId := vars["objectId"]
+	subjVar, err := primitive.ObjectIDFromHex(subjectId)
+	objVar, err := primitive.ObjectIDFromHex(objectId)
+	allSettings,_ := app.settings.GetAll()
+
+	blockedList1 := getBlockedUsers(allSettings,subjVar)
+
+	found := false
+	list  := strings.Split(blockedList1, ",")
+	for _, muted := range list {
+		if muted == objVar.Hex() {
+			found = true
+		}
+
+	}
+	blockedList2 := getBlockedUsers(allSettings,objVar)
+	list1  := strings.Split(blockedList2, ",")
+	for _, muted := range list1 {
+		if muted == subjVar.Hex() {
 			found = true
 		}
 
@@ -185,6 +252,19 @@ func getMutedUsers(settings []models.Settings, user primitive.ObjectID) string {
 
 
 	return listCloseFriendsString
+}
+func getAllowTags(settings []models.Settings, user primitive.ObjectID) bool {
+	var allows bool
+	fmt.Println(user.Hex())
+	for _, settingsItem := range settings {
+		fmt.Println(settingsItem.User.Hex())
+
+		if settingsItem.User.Hex()==user.Hex() {
+			fmt.Println(settingsItem.AllowTags)
+			allows = settingsItem.AllowTags
+		}
+	}
+	return allows
 }
 func (app *application) addUserToCloseFriends(w http.ResponseWriter, r *http.Request) {
 
@@ -315,7 +395,6 @@ func (app *application) changePrivacySettings(w http.ResponseWriter, r *http.Req
 	if err != nil {
 		app.serverError(w, err)
 	}
-	fmt.Println("lalalal")
 	fmt.Println(m.AllowTags)
 	fmt.Println(m.AcceptMessages)
 	allSettings,_ := app.settings.GetAll()
@@ -389,6 +468,13 @@ func (app *application) blockUser(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		app.serverError(w, err)
 	}
+
+	resp, err := http.Get("http://localhost:4005/api/deleteFollow/"+m.Subject+"/"+m.Object)
+	log.Println("unable to encode image.", resp)
+	if err != nil {
+		log.Fatalln(err)
+	}
+
 	app.infoLog.Printf("New user have been created, id=%s", insertResult.UpsertedID)
 }
 func (app *application) unmuteUser(w http.ResponseWriter, r *http.Request) {

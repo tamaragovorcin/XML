@@ -71,7 +71,8 @@ class Header extends React.Component {
 		}
 		else {
 			let help = []
-			Axios.get(BASE_URL_USER + "/api/")
+			let id = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length-1);
+			Axios.get(BASE_URL_USER + "/api/"+id)
 				.then((res) => {
 	
 					console.log(res.data)

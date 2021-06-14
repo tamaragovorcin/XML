@@ -64,6 +64,8 @@ func (app *application) routes() *mux.Router {
 	r.HandleFunc("/api/user/blockedUsers/{userId}", app.findBlockedUsers).Methods("GET")
 	r.HandleFunc("/api/user/mutedUsers/{userId}", app.findMutedUsers).Methods("GET")
 	r.HandleFunc("/api/checkIfMuted/{subjectId}/{objectId}", app.checkIfUserIsMuted).Methods("GET")
+	r.HandleFunc("/api/checkIfBlocked/{subjectId}/{objectId}", app.checkIfUserIsBlocked).Methods("GET")
+	r.HandleFunc("/api/user/allowTags/{userId}", app.checkIfUserAllowsTags).Methods("GET")
 
 	return r
 }
