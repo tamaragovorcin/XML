@@ -212,7 +212,14 @@ class ProfilePage extends React.Component {
 			body: formData
 
 		};
-		fetch(BASE_URL + "/api/feedPosts/api/image/"+userId+"/"+feedId , options);
+		/*Axios.post( BASE_URL + " /api/feedPosts/api/image/"+userId+"/"+feedId,formData)
+		.then((res) => {
+			console.log("USPEO")
+		})
+		.catch((err) => {
+			console.log(err);
+		});*/
+		fetch( BASE_URL + " /api/feedPosts/api/image/"+userId+"/"+feedId, options);
 	}
 	testProfileImage(pic,userId) {
 		

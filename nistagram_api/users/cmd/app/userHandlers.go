@@ -58,8 +58,7 @@ func (app *application) loginUser(w http.ResponseWriter, r *http.Request)  {
 	token, err := generateToken(user)
 
 
-	rolesString, _ := json.Marshal(user.ProfileInformation.Roles)
-
+	//rolesString, _ := json.Marshal(user.ProfileInformation.Roles[0].Name)
 	//b, err := json.Marshal(user)
 	if err != nil {
 		app.serverError(w, err)
@@ -70,7 +69,7 @@ func (app *application) loginUser(w http.ResponseWriter, r *http.Request)  {
 	w.WriteHeader(http.StatusOK)
 
 
-	userToken := dtos.UserTokenState{ AccessToken: token, Roles: string(rolesString), UserId: user.Id,
+	userToken := dtos.UserTokenState{ AccessToken: token, Roles: user.ProfileInformation.Roles[0].Name, UserId: user.Id,
 
 	}
 	bb, err := json.Marshal(userToken)
@@ -364,6 +363,100 @@ func (app *application) insertUser(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func (app *application) insertAdmin(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	var m dtos.UserRequest
+	var able = true
+	err := json.NewDecoder(r.Body).Decode(&m)
+	if err != nil {
+		app.serverError(w, err)
+	}
+
+
+	users, err := app.users.GetAll()
+	if err != nil {
+		app.serverError(w, err)
+	}
+
+	for i, s := range users {
+		fmt.Println(i, s)
+		if(s.ProfileInformation.Username == m.Username){
+			app.infoLog.Printf("This username is already taken")
+
+			able = false
+
+
+			var e = errors.New("This username is already taken")
+			b, err := json.Marshal(e)
+			if err != nil {
+				app.serverError(w, err)
+			}
+
+
+
+			w.Header().Set("Content-Type", "text")
+			w.WriteHeader(http.StatusInternalServerError)
+			w.Write(b)
+			app.serverError(w, errors.New("This username is already taken"))
+			break
+
+		}
+
+		if( s.ProfileInformation.Email == m.Email){
+			app.infoLog.Printf("User with this email already exists")
+			able = false
+
+			var e = errors.New("User with this email already exists")
+			b, err := json.Marshal(e)
+			if err != nil {
+				app.serverError(w, err)
+			}
+
+
+
+			w.Header().Set("Content-Type", "text")
+			w.WriteHeader(http.StatusConflict)
+			w.Write(b)
+			app.serverError(w, errors.New("User with this email already exists"))
+			break
+
+		}
+
+	}
+
+	if able  {
+		hashAndSalt, err := HashAndSaltPasswordIfStrong(m.Password)
+
+		var profileInformation = models.ProfileInformation{
+			Name: m.Name, LastName: m.LastName,
+			Email:       m.Email,
+			Username:    m.Username,
+			Password:    hashAndSalt,
+			Roles:       []models.Role{{Name: "ADMIN"}},
+			PhoneNumber: m.PhoneNumber,
+			Gender:      m.Gender, //models.Gender(m.Gender),
+			DateOfBirth: m.DateOfBirth,
+		}
+
+		var user = models.User{
+			ProfileInformation: profileInformation,
+			Biography:          m.Biography,
+			Private:            m.Private,
+			Verified:           false,
+			Website: m.Website,
+		}
+
+		insertResult, err := app.users.Insert(user)
+		if err != nil {
+			app.serverError(w, err)
+		}
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+		idMarshaled, err := json.Marshal(insertResult.InsertedID)
+
+		w.Write(idMarshaled)
+	}
+}
 func (app *application) deleteUser(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	vars := mux.Vars(r)

@@ -45,6 +45,11 @@ func (app *application) routes() *mux.Router {
 	r.HandleFunc("/api/albumFeed/searchByLocation/{country}/{city}/{street}", app.getFeedAlbumsByLocation).Methods("GET")
 	r.HandleFunc("/api/albumFeed/searchByHashTags/", app.getFeedAlbumsByHashTags).Methods("POST")
 	r.HandleFunc("/api/albumFeed/searchByTags/{userId}", app.getFeedAlbumsByTags).Methods("GET")
+	r.HandleFunc("/albumFeed/liked/{userId}", app.getLikedAlbums).Methods("GET")
+	r.HandleFunc("/albumFeed/disliked/{userId}", app.getDislikedAlbums).Methods("GET")
+
+
+
 
 	r.HandleFunc("/api/image/{userIdd}/{feedId}", app.saveImage).Methods("POST")
 	r.HandleFunc("/api/feed/usersImages/{userIdd}", app.getUsersFeedPosts).Methods("GET")
@@ -58,6 +63,8 @@ func (app *application) routes() *mux.Router {
 	r.HandleFunc("/api/feed/dislikes/{postId}", app.getdislikesFeedPost).Methods("GET")
 	r.HandleFunc("/api/feed/comments/{postId}", app.getcommentsFeedPost).Methods("GET")
 	r.HandleFunc("/api/feed/searchByTags/{userId}", app.getFeedPostByTags).Methods("GET")
+	r.HandleFunc("/feed/liked/{userId}", app.getLikedPhotos).Methods("GET")
+	r.HandleFunc("/feed/disliked/{userId}", app.getDislikedPhotos).Methods("GET")
 
 
 	r.HandleFunc("/api/collection/allData/{userId}", app.insertAllDataCollection).Methods("POST")
