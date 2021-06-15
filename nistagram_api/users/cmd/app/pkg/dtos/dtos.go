@@ -40,7 +40,13 @@ type UserUpdateRequest struct {
 	Biography string `bson:"biography,omitempty"`
 	Website string
 }
-
+type VerifyRequest struct {
+	Id string `bson:"_id,omitempty"`
+	Name  string `bson:"name,omitempty"`
+	LastName string `bson:"lastName,omitempty"`
+	Approved bool      `bson:"approved"`
+	Category string  `bson:"category"`
+}
 type LoginRequest struct {
 	Username string `bson:"username,omitempty"`
 	Password string `bson:"password,omitempty"`
@@ -65,4 +71,15 @@ type SettingsDTO struct {
 type MuteDTO struct {
 	Subject string
 	Object string
+}
+type RequestDTO struct {
+	Id          primitive.ObjectID
+	Name  string `bson:"name,omitempty"`
+	LastName string `bson:"lastName,omitempty"`
+	ContentType string
+	Category string
+}
+type VerificationReactionDTO struct {
+	RequestId primitive.ObjectID
+	UserId primitive.ObjectID
 }

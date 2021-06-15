@@ -4,7 +4,7 @@ import { CgProfile } from 'react-icons/cg';
 import Axios from "axios";
 import { FiSettings, FiSend } from 'react-icons/fi';
 import { VscHome } from 'react-icons/vsc';
-import { FaSearch } from 'react-icons/fa';
+import { FaRegQuestionCircle, FaSearch } from 'react-icons/fa';
 
 import { GiThreeFriends } from 'react-icons/gi';
 import { AiOutlineHeart,AiFillLike } from 'react-icons/ai';
@@ -22,13 +22,14 @@ class Header extends React.Component {
 
 	hasRole = (reqRole) => {
 		let roles = JSON.parse(localStorage.getItem("keyRole"));
-
 		if (roles === null) return false;
 
 		if (reqRole === "*") return true;
 
-		for (let role of roles) {
-			if (role === reqRole) return true;
+	
+		if (roles.trim() === reqRole.trim()) 
+		{
+			return true;
 		}
 		return false;
 	};
@@ -46,6 +47,7 @@ class Header extends React.Component {
 
 	componentDidMount() {
 		if(this.hasRole("*")) {
+			console.log("ovde sam")
 			let help = []
 			let id = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length-1)
 
@@ -70,7 +72,6 @@ class Header extends React.Component {
 		}
 		else {
 			let help = []
-			let id = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length-1);
 			Axios.get(BASE_URL + "/api/users/api/")
 				.then((res) => {
 	
@@ -126,14 +127,17 @@ class Header extends React.Component {
 							<li  >
 								<Link to="/seacrh"><FaSearch /></Link>
 							</li>
-							<li  hidden={!this.hasRole("*")}>
+							<li  hidden={!this.hasRole("USER")}>
 								<Link to="/messages"><FiSend /></Link>
 							</li>
-							<li  hidden={!this.hasRole("*")}>
+							<li  hidden={!this.hasRole("USER")}>
 								<Link to="/followRequest"><AiOutlineHeart /></Link>
 							</li>
+							<li  hidden={!this.hasRole("USER")}>
+								<Link to="/verifyRequest"><FaRegQuestionCircle /></Link>
+							</li>
 
-							<li className="drop-down" hidden={!this.hasRole("*")}>
+							<li className="drop-down" hidden={!this.hasRole("USER")}>
 								<a href="#"><CgProfile /></a>
 								<ul>
 
@@ -160,6 +164,31 @@ class Header extends React.Component {
 									<li>
 										<Link to="/likedAndDisliked"><AiFillLike /> Liked and disliked photos </Link>
 									</li>
+									<li>
+
+
+										<Link to="/login"> Log out </Link>
+
+
+									</li>
+
+								</ul>
+							</li>
+							<li className="drop-down" hidden={!this.hasRole("ADMIN")}>
+								<a href="#"><CgProfile /></a>
+								<ul>
+
+									<li >
+										<Link to="/profilePage" ><CgProfile /> Profile</Link>
+
+									</li>
+									
+									<li>
+
+										<Link to="/editProfile"><FiSettings /> Settings </Link>
+
+									</li>
+
 									<li>
 
 

@@ -58,8 +58,7 @@ func (app *application) loginUser(w http.ResponseWriter, r *http.Request)  {
 	token, err := generateToken(user)
 
 
-	rolesString, _ := json.Marshal(user.ProfileInformation.Roles)
-
+	//rolesString, _ := json.Marshal(user.ProfileInformation.Roles[0].Name)
 	//b, err := json.Marshal(user)
 	if err != nil {
 		app.serverError(w, err)
@@ -70,7 +69,7 @@ func (app *application) loginUser(w http.ResponseWriter, r *http.Request)  {
 	w.WriteHeader(http.StatusOK)
 
 
-	userToken := dtos.UserTokenState{ AccessToken: token, Roles: string(rolesString), UserId: user.Id,
+	userToken := dtos.UserTokenState{ AccessToken: token, Roles: user.ProfileInformation.Roles[0].Name, UserId: user.Id,
 
 	}
 	bb, err := json.Marshal(userToken)
