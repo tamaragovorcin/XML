@@ -50,6 +50,18 @@ type FeedPostInfoDTO1 struct {
 	Username    string
 	ContentType string
 }
+type FeedPostInfoReportDTO struct {
+	Id          primitive.ObjectID
+	UserId primitive.ObjectID
+	DateTime    string
+	Tagged      string
+	Location    string
+	Description string
+	Hashtags    string
+	Username    string
+	ContentType string
+	ReportId primitive.ObjectID
+}
 type MediaDTO struct {
 	 Type string
 	 URL string
@@ -84,6 +96,19 @@ type FeedAlbumInfoDTO struct {
 	Media       [][]byte
 	Username    string
 }
+type FeedAlbumInfoReportDTO struct {
+	Id          primitive.ObjectID
+	UserId primitive.ObjectID
+	DateTime    string
+	Tagged      string
+	Location    string
+	Description string
+	Hashtags    string
+	Media       [][]byte
+	Username    string
+	ReportId primitive.ObjectID
+}
+
 type CollectionDTO struct {
 	Name string
 }
@@ -109,4 +134,10 @@ type CommentDTO struct {
 }
 type LikeDTO struct {
 	Username string
+}
+
+type ReportDTO struct {
+	PostId primitive.ObjectID
+	UserId primitive.ObjectID
+	Type string
 }

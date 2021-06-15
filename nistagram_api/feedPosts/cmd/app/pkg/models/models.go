@@ -77,3 +77,9 @@ type Video struct {
 	UserId primitive.ObjectID `bson:"userId"`
 	PostId primitive.ObjectID `bson:"postId"`
 }
+type Report struct {
+	Id primitive.ObjectID `bson:"_id,omitempty"`
+	ComplainingUser primitive.ObjectID `bson:"complainingUser"`
+	Post primitive.ObjectID `bson:"feedPost"`
+	Type string `bson:"type"`
+}

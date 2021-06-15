@@ -2,11 +2,9 @@ import React, { Component } from "react";
 import TopBar from "../components/TopBar";
 import Header from "../components/Header";
 import Axios from "axios";
-import { BASE_URL_USER } from "../constants.js";
 import PharmacyLogo from "../static/coach.png";
 import "../App.js";
 import { Redirect } from "react-router-dom";
-import { BASE_URL_USER_INTERACTION } from "../constants.js";
 import { BASE_URL } from "../constants.js";
 
 import ModalDialog from "../components/ModalDialog";

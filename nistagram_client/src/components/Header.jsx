@@ -5,7 +5,7 @@ import Axios from "axios";
 import { FiSettings, FiSend } from 'react-icons/fi';
 import { VscHome } from 'react-icons/vsc';
 import { FaRegQuestionCircle, FaSearch } from 'react-icons/fa';
-
+import {MdReportProblem} from 'react-icons/md';
 import { GiThreeFriends } from 'react-icons/gi';
 import { AiOutlineHeart,AiFillLike } from 'react-icons/ai';
 import { BASE_URL } from "../constants.js";
@@ -47,7 +47,6 @@ class Header extends React.Component {
 
 	componentDidMount() {
 		if(this.hasRole("*")) {
-			console.log("ovde sam")
 			let help = []
 			let id = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length-1)
 
@@ -136,44 +135,34 @@ class Header extends React.Component {
 							<li  hidden={!this.hasRole("USER")}>
 								<Link to="/verifyRequest"><FaRegQuestionCircle /></Link>
 							</li>
-
+							<li  hidden={!this.hasRole("ADMIN")}>
+								<Link to="/reportedPosts"><MdReportProblem /></Link>
+							</li>
 							<li className="drop-down" hidden={!this.hasRole("USER")}>
 								<a href="#"><CgProfile /></a>
 								<ul>
 
 									<li >
 										<Link to="/profilePage" ><CgProfile /> Profile</Link>
-
 									</li>
 									
 									<li>
-
-
 										<Link to="/editProfile"><FiSettings /> Settings </Link>
-
-
 									</li>
 
 									<li>
-
-
 										<Link to="/closeFriends"><GiThreeFriends /> Close friends </Link>
-
-
 									</li>
 									<li>
 										<Link to="/likedAndDisliked"><AiFillLike /> Liked and disliked photos </Link>
 									</li>
 									<li>
-
-
 										<Link to="/login"> Log out </Link>
-
-
 									</li>
 
 								</ul>
 							</li>
+							
 							<li className="drop-down" hidden={!this.hasRole("ADMIN")}>
 								<a href="#"><CgProfile /></a>
 								<ul>
@@ -184,17 +173,11 @@ class Header extends React.Component {
 									</li>
 									
 									<li>
-
 										<Link to="/editProfile"><FiSettings /> Settings </Link>
-
 									</li>
-
+								
 									<li>
-
-
 										<Link to="/login"> Log out </Link>
-
-
 									</li>
 
 								</ul>
