@@ -24,6 +24,8 @@ import AddTagsModal from "../components/Posts/AddTagsModal";
 import ConvertVideo from "react-convert-image";
 import AddStoryAlbumToHighlightModal from "../components/Posts/AddStoryAlbumToHighlightModal";
 import { BASE_URL } from "../constants.js";
+import VerifyModal from "../pages/VerifyModal";
+
 class ProfilePage extends React.Component {
 	constructor(props) {
 		super(props);
@@ -68,6 +70,7 @@ class ProfilePage extends React.Component {
 		showDislikesModal : false,
 		showCommentsModal : false,
 		showImageModal : false,
+		showVerifyModal : false,
 		openModal : false,
 		addressLocation :null,
 		foundLocation : true,
@@ -109,7 +112,8 @@ class ProfilePage extends React.Component {
 		hiddenPostsForCollectionAlbums: false,
 		postsForCollectionAlbum : [],
 		showAddAlbumToCollectionAlbum : false,
-		followingsThatAllowTags : []
+		followingsThatAllowTags : [],
+		category : ""
 		
 	}
 	
@@ -404,6 +408,13 @@ class ProfilePage extends React.Component {
 		this.setState({ showVideoModal: true });
 		this.setState({selectedFile: ""})
 	};
+	handleVerifyModalOpen = () => {
+		this.setState({ showVerifyModal: true });
+		this.setState({pictures: []})
+	};
+	handleVerifyModalClose = () => {
+		this.setState({ showVerifyModal: false });
+	}
 	getFollowing = ()=> {
 		let help = []
 
@@ -573,6 +584,22 @@ class ProfilePage extends React.Component {
 		}
 		
 		
+	}
+	handleSendRequestVerification = ()=> {
+	
+		let id = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length-1)
+			const verificationDTO = {
+				Id : id,
+				Name: this.state.name,
+				LastName: this.state.lastName,
+				Category : this.state.category
+				
+			};
+			alert(this.state.name);
+			this.sendRequestForVerification(verificationDTO);
+
+		
+			
 	}
 	handleAddStoryPost = ()=> {
 		var taggedHelp = []
@@ -835,7 +862,47 @@ class ProfilePage extends React.Component {
 	}
 
 
-	
+	sendRequestForVerification(verificationDTO) {
+		let id = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length-1)
+				
+		Axios.post(BASE_URL + "/api/users/api/verification/", verificationDTO)
+			.then((res) => {
+				if (res.status === 409) {
+					this.setState({
+						errorHeader: "Resource conflict!",
+						errorMessage: "Email already exist.",
+						hiddenErrorAlert: false,
+					});
+				} else if (res.status === 500) {
+					this.setState({ errorHeader: "Internal server error!", errorMessage: "Server error.", hiddenErrorAlert: false });
+				} else {
+					this.setState({ openModal: true });
+					this.setState({ redirect: true });
+				}
+				let feedId = res.data;
+				
+				let userid = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length-1)
+			
+				this.state.pictures.forEach((pic) => {
+					this.test(pic, userid, feedId);
+				});
+				if(this.state.selectedFile != ""){
+				this.testVideo(this.state.selectedFile, userid, feedId)
+				}
+				this.setState({ selectedFile : ""});
+				this.setState({ pictures: [] });
+				this.setState({ showVerifyModal: false, });
+				this.setState({ showVideoModal: false, });
+				this.setState({ openModal: true });
+				this.setState({ textSuccessfulModal: "You successfully sent request." });
+				this.handleGetPhotos(id)
+
+			})
+			.catch((err) => {
+				console.log(err);
+			});
+	}
+
 
 	sendRequestForFeed(feedPostDTO) {
 		let id = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length-1)
@@ -1651,6 +1718,22 @@ class ProfilePage extends React.Component {
 						handleDescriptionChange = {this.handleDescriptionChange}
 						handleHashtagsChange = {this.handleHashtagsChange}
 						handleAddTagsModal = {this.handleAddTagsModal}
+
+
+					/>
+					<VerifyModal
+						show={this.state.showVerifyModal}
+						onCloseModal={this.handleVerifyModalClose}
+						header="Verify your profile"
+						hiddenMultiple = {this.state.hiddenMultiple}
+						hiddenOne = {this.state.hiddenOne}
+						noPicture = {this.state.noPicture}
+						onDrop = {this.onDrop}
+
+						addressInput = {this.addressInput}
+						onYmapsLoad = {this.onYmapsLoad}
+						
+						handleSendRequestVerification = {this.handleSendRequestVerification}
 
 
 					/>

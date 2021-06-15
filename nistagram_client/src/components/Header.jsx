@@ -5,7 +5,7 @@ import { BiBookmark } from 'react-icons/bi';
 import Axios from "axios";
 import { FiSettings, FiSend } from 'react-icons/fi';
 import { VscHome } from 'react-icons/vsc';
-import { FaSearch } from 'react-icons/fa';
+import { FaRegQuestionCircle, FaSearch } from 'react-icons/fa';
 
 import { GiThreeFriends } from 'react-icons/gi';
 import { AiOutlineHeart } from 'react-icons/ai';
@@ -133,6 +133,9 @@ class Header extends React.Component {
 							</li>
 							<li  hidden={!this.hasRole("*")}>
 								<Link to="/followRequest"><AiOutlineHeart /></Link>
+							</li>
+							<li  hidden={!this.hasRole("*")}>
+								<Link to="/verifyRequest"><FaRegQuestionCircle /></Link>
 							</li>
 
 							<li className="drop-down" hidden={!this.hasRole("*")}>
