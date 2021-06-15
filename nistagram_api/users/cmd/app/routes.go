@@ -67,5 +67,7 @@ func (app *application) routes() *mux.Router {
 	r.HandleFunc("/api/checkIfBlocked/{subjectId}/{objectId}", app.checkIfUserIsBlocked).Methods("GET")
 	r.HandleFunc("/api/user/allowTags/{userId}", app.checkIfUserAllowsTags).Methods("GET")
 
+	//r.HandleFunc("api/allVerificationRequest/", app.getAllRequestVerification).Methods("GET")
+
 	return r
 }

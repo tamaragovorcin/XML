@@ -62,13 +62,13 @@ type User struct {
 }
 
 type Verification struct {
-	Id       uuid.UUID `bson:"_id,omitempty"`
-	User     uuid.UUID `bson:"user"`
+	Id       primitive.ObjectID `bson:"_id,omitempty"`
+	User     primitive.ObjectID `bson:"user"`
 	Name     string    `bson:"name"`
 	LastName string    `bson:"lastname"`
 	Approved bool      `bson:"approved"`
-	Document string    `bson:"document"`
-	Category Category  `bson:"category"`
+
+	Category string  `bson:"category"`
 }
 type ProfileImage struct {
 	Id  primitive.ObjectID `bson:"_id,omitempty"`

@@ -28,15 +28,11 @@ func (m *VerificationModel) GetAll() ([]models.Verification, error) {
 	return mm, err
 }
 
-func (m *VerificationModel) FindByID(id string) (*models.Verification, error) {
-	p, err := primitive.ObjectIDFromHex(id)
-	if err != nil {
-		return nil, err
-	}
-
+func (m *VerificationModel) FindByID(id primitive.ObjectID) (*models.Verification, error) {
 	var verification = models.Verification{}
-	err = m.C.FindOne(context.TODO(), bson.M{"_id": p}).Decode(&verification)
+	err := m.C.FindOne(context.TODO(), bson.M{"_id": id}).Decode(&verification)
 	if err != nil {
+		// Checks if the user was not found
 		if err == mongo.ErrNoDocuments {
 			return nil, errors.New("ErrNoDocuments")
 		}
@@ -56,4 +52,8 @@ func (m *VerificationModel) Delete(id string) (*mongo.DeleteResult, error) {
 		return nil, err
 	}
 	return m.C.DeleteOne(context.TODO(), bson.M{"_id": p})
+}
+func (m *VerificationModel) Update(feed models.Verification)  (*mongo.UpdateResult, error) {
+	return m.C.UpdateOne(context.TODO(),bson.M{"_id":feed.Id},bson.D{{"$set",bson.M{"user":feed.User,"name":feed.Name,"lastname":feed.LastName,"approved":feed.Approved,
+		"category":feed.Category}}})
 }
