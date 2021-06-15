@@ -208,7 +208,7 @@ class ProfilePage extends React.Component {
 			body: formData
 
 		};
-		fetch(BASE_URL + "/api/feedPosts/api/image/"+userId+"/"+feedId , options);
+		fetch(BASE_URL + " /api/feedPosts/api/image/"+userId+"/"+feedId , options);
 	}
 	testProfileImage(pic,userId) {
 		

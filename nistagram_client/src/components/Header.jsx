@@ -1,15 +1,13 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { CgProfile } from 'react-icons/cg';
-import { BiBookmark } from 'react-icons/bi';
 import Axios from "axios";
 import { FiSettings, FiSend } from 'react-icons/fi';
 import { VscHome } from 'react-icons/vsc';
 import { FaSearch } from 'react-icons/fa';
 
 import { GiThreeFriends } from 'react-icons/gi';
-import { AiOutlineHeart } from 'react-icons/ai';
-import { BASE_URL_USER } from "../constants.js";
+import { AiOutlineHeart,AiFillLike } from 'react-icons/ai';
 import { BASE_URL } from "../constants.js";
 import Select from 'react-select';
 
@@ -143,14 +141,7 @@ class Header extends React.Component {
 										<Link to="/profilePage" ><CgProfile /> Profile</Link>
 
 									</li>
-									<li>
-
-
-										<Link to="/favorites"><BiBookmark /> Saved </Link>
-
-
-
-									</li>
+									
 									<li>
 
 
@@ -165,6 +156,9 @@ class Header extends React.Component {
 										<Link to="/closeFriends"><GiThreeFriends /> Close friends </Link>
 
 
+									</li>
+									<li>
+										<Link to="/likedAndDisliked"><AiFillLike /> Liked and disliked photos </Link>
 									</li>
 									<li>
 

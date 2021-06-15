@@ -14,7 +14,7 @@ import Search from './pages/Search';
 import CloseFriends from './pages/CloseFriends';
 import FollowRequest from './pages/FollowRequest';
 import Settings from './pages/Settings';
-
+import LikedAndDislikedPosts from './pages/LikedAndDislikedPosts';
 
 
 function App() {
@@ -36,6 +36,7 @@ function App() {
 				<Link exact to="/closeFriends" path="/closeFriends" component={CloseFriends} />
 				<Link exact to="/followRequest" path="/followRequest" component={FollowRequest} />
 				<Link exact to="/settings" path="/settings" component={Settings} />
+				<Link exact to="/likedAndDisliked" path="/likedAndDisliked" component={LikedAndDislikedPosts} />
 
 			</Switch>
 	</Router>
