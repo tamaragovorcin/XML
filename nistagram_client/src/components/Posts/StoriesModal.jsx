@@ -69,10 +69,13 @@ class StoriesModal extends Component {
    }
 
    componentDidMount(){
+<<<<<<< HEAD
 	this.setState({ brojac :0 });
 	
 	
 	   console.log(this.props.stories)
+=======
+>>>>>>> ba6a2c689101995bf4799b59846ac879006a58c9
    }
    onClickBack = () =>{
 	let a = this.state.count;
@@ -259,10 +262,6 @@ handleConvertedImage = (converted, username) => {
 							height={768}
 						/> 
 						</td>
-
-
-					
-						
 						</div>
 						}
 						

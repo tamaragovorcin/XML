@@ -96,7 +96,7 @@ func parseConfiguration() *Neo4jConfiguration {
 	}
 
 	return &Neo4jConfiguration{
-		Url:      lookupEnvOrGetDefault("NEO4J_URI", "bolt://localhost:7687"),
+		Url:      lookupEnvOrGetDefault("NEO4J_URI", "bolt://db_neo:7687"),
 		Username: lookupEnvOrGetDefault("NEO4J_USER", "neo4j"),
 		Password: lookupEnvOrGetDefault("NEO4J_PASSWORD", "root"),
 
@@ -871,7 +871,7 @@ func userIsCloseFriends(user2 followUserStructDTO, ids []string) bool {
 }
 
 func getListCloseFriends(id string) []string {
-	resp, err := http.Get("http://localhost:4006/api/user/closeFriends/"+id)
+	resp, err := http.Get("http://localhost:80/api/users/api/user/closeFriends/"+id)
 	if err != nil {
 		log.Fatalln(err)
 	}
@@ -892,7 +892,7 @@ func getListCloseFriends(id string) []string {
 
 func getUserUsername(user string) string {
 
-	resp, err := http.Get("http://localhost:4006/api/user/username/"+user)
+	resp, err := http.Get("http://localhost:80/api/users/api/user/username/"+user)
 	if err != nil {
 		log.Fatalln(err)
 	}

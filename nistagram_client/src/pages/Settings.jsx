@@ -71,7 +71,7 @@ class Settings extends Component {
 	componentDidMount() {
 	
 		let id = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length-1)
-	Axios.get(BASE_URL_USER + "/api/user/privacySettings/" + id)
+	Axios.get(BASE_URL + "/api/users/api/user/privacySettings/" + id)
 				.then((res) => {
 					if (res.status === 401) {
 						this.setState({ errorHeader: "Bad credentials!", errorMessage: "Wrong username or password.", hiddenErrorAlert: false });
@@ -114,7 +114,7 @@ class Settings extends Component {
                          AcceptTags : this.state.tags
         };
 
-			Axios.post(`${BASE_URL_USER}/api/user/privacySettings/`, dto)
+			Axios.post(`${BASE_URL}/api/users/api/user/privacySettings/`, dto)
 			.then((res) => {
                         if (res.status === 400) {
                             this.setState({ hiddenFailAlert: false, failHeader: "Bad request", failMessage: "Invalid argument." });

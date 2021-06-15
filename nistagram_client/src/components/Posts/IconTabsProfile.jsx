@@ -35,8 +35,47 @@ render(){
                 <div className="container-fluid">
                   
                   <table className="table">
+<<<<<<< HEAD
                   <tbody>
                         {this.props.postsForCollection.map((post) => (
+=======
+                    <tbody>
+                      {this.props.photos.map((post) => (
+                        
+                        <tr id={post.id} key={post.id}>
+                          
+                          <tr  style={{ width: "100%"}}>
+                            <td colSpan="3">
+                            {post.ContentType === "image/jpeg" ? (
+         <img
+         className="img-fluid"
+         src={"http://localhost:80/api/feedPosts/api/feed/file/"+post.Id}
+         width="100%"
+         alt="description"
+       />
+      ) : (
+        
+        <video width="100%"  controls autoPlay loop muted><source src={"http://localhost:80/api/feedPosts/api/feed/file/"+post.Id} type ="video/mp4"></source></video>
+        
+      )}
+
+                            </td>
+                          </tr>
+                          <tr>
+                            <td colSpan="3">
+                                {post.Location}
+                            </td>
+                          </tr>
+                          <tr>
+                            <td colSpan="3">
+                                {post.Description}
+                            </td>
+                          </tr>
+                          <tr>
+                            <td colSpan="3">
+                                {post.Hashtags}
+                            </td>
+>>>>>>> ba6a2c689101995bf4799b59846ac879006a58c9
                             
                             <tr id={post.Id} key={post.Id}>
                             
@@ -196,14 +235,14 @@ render(){
                                 {post.ContentType === "image/jpeg" ? (
                                                   <img
                                                         className="img-fluid"
-                                                        src={"http://localhost:4004/api/story/file/"+post.Id}
+                                                        src={"http://localhost:80/api/storyPosts/api/story/file/"+post.Id}
                                                         width="100%"
                                                         alt="description"
                                                     />
                                                  ) : (
         
                                           <video width="100%"  controls autoPlay loop muted>
-                                            <source src={"http://localhost:4004/api/story/file/"+post.Id} type ="video/mp4"></source>
+                                            <source src={"http://localhost:80/api/storyPosts/api/story/file/"+post.Id} type ="video/mp4"></source>
                                             </video>
         
       )}
@@ -356,12 +395,12 @@ render(){
                                 {post.ContentType === "image/jpeg" ? (
                                     <img
                                     className="img-fluid"
-                                    src={"http://localhost:4004/api/story/file/"+post.Id}
+                                    src={"http://localhost:80/api/storyPosts/api/story/file/"+post.Id}
                                     width="100%"
                                     alt="description"
                                   /> ) : (
                                 <video width="100%"  controls autoPlay loop muted>
-                                  <source src={"http://localhost:4004/api/story/file/"+post.Id} type ="video/mp4"></source>
+                                  <source src={"http://localhost:80/api/storyPosts/api/story/file/"+post.Id} type ="video/mp4"></source>
                                 </video>)}
                                 </td>
                             </tr>
@@ -543,12 +582,12 @@ render(){
                                 {post.ContentType === "image/jpeg" ? (
                                     <img
                                     className="img-fluid"
-                                    src={"http://localhost:4001/api/feed/file/"+post.Id}
+                                    src={"http://localhost:80/api/feedPosts/api/feed/file/"+post.Id}
                                     width="100%"
                                     alt="description"
                                   /> ) : (
                                 <video width="100%"  controls autoPlay loop muted>
-                                  <source src={"http://localhost:4001/api/feed/file/"+post.Id} type ="video/mp4"></source>
+                                  <source src={"http://localhost:80/api/feedPosts/api/feed/file/"+post.Id} type ="video/mp4"></source>
                                 </video>)}
                                 </td>
                             </tr>

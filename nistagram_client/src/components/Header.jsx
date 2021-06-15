@@ -10,6 +10,7 @@ import { FaSearch } from 'react-icons/fa';
 import { GiThreeFriends } from 'react-icons/gi';
 import { AiOutlineHeart } from 'react-icons/ai';
 import { BASE_URL_USER } from "../constants.js";
+import { BASE_URL } from "../constants.js";
 import Select from 'react-select';
 
 class Header extends React.Component {
@@ -50,7 +51,7 @@ class Header extends React.Component {
 			let help = []
 			let id = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length-1)
 
-			Axios.get(BASE_URL_USER + "/api/all/"+id)
+			Axios.get(BASE_URL + "/api/users/api/all/"+id)
 				.then((res) => {
 	
 					console.log(res.data)
@@ -72,7 +73,7 @@ class Header extends React.Component {
 		else {
 			let help = []
 			let id = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length-1);
-			Axios.get(BASE_URL_USER + "/api/"+id)
+			Axios.get(BASE_URL + "/api/users/api/")
 				.then((res) => {
 	
 					console.log(res.data)
