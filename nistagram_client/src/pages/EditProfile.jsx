@@ -112,8 +112,13 @@ class EditProfile extends Component {
 		this.setState({ biography: event.target.value });
 	};
 	handlePrivateChange(event) {
-
-		this.setState({ private: event.target.value });
+		alert("lalalal")
+		if(this.state.private=== true) {
+			this.setState({ private: false });
+		}
+		if(this.state.private=== false) {
+			this.setState({ private: true });
+		}
 	}
 	handleWebSiteChange = (event) => {
 		this.setState({ webSite: event.target.value });
@@ -238,10 +243,7 @@ class EditProfile extends Component {
 	handleCloseAlertFail = () => {
 		this.setState({ hiddenFailAlert: true });
 	};
-	handlePrivateChange(event) {
 
-		this.setState({ private: true });
-	}
 
 
 	render() {
@@ -397,13 +399,12 @@ class EditProfile extends Component {
 								
 								<br />
 								<div>
-								<label>Private:</label>
-									<br/>
-									<label class="switch">
-									<input type="checkbox" value={this.state.private} onChange={(e) => this.handlePrivateChange(e)}/>
-										<span class="slider round"></span>
-									
-								</label>
+									<p style={{ color: "#6c757d", opacity: 1 }} >Private: </p>
+									<label class="switch" >
+										<input checked ={this.state.private} type="checkbox"  onChange={(e) => this.handlePrivateChange(e)}/>
+										<span  class="slider round"></span>
+
+									</label>
 								</div>
 
 								<div className="form-group">

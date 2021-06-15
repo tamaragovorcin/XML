@@ -8,12 +8,10 @@ import DislikesModal from "../components/Posts/DislikesModal"
 import CommentsModal from "../components/Posts/CommentsModal"
 import WriteCommentModal from "../components/Posts/WriteCommentModal"
 import WriteCommentAlbumModal from "../components/Posts/WriteCommentAlbumModal"
-import Stories from 'react-insta-stories';
 import Axios from "axios";
 import IconTabsHomePage from "../components/Posts/IconTabsHomePage"
 import AddPostToCollection from "../components/Posts/AddPostToCollection";
 import ModalDialog from "../components/ModalDialog";
-import ConvertImage from "react-convert-image";
 import StoriesModal from "../components/Posts/StoriesModal.jsx";
 //import $ from 'jquery';
 import { BASE_URL } from "../constants.js";
@@ -60,6 +58,8 @@ class HomePage extends React.Component {
 		myCollectionAlbums : [],
 		showAddAlbumToCollectionAlbum : false,
 		userIsLoggedIn : true,
+		stoori: [],
+		stt: "",
 
 	}
 
@@ -78,6 +78,7 @@ class HomePage extends React.Component {
 		}
 		return false;
 	};
+
 	handleConvertedImage = (converted, username) => {
 		
 		var hh = this.state.stories;
@@ -269,8 +270,11 @@ class HomePage extends React.Component {
 	handleWriteCommentModalClose = () => {
 		this.setState({ showWriteCommentModal: false });
 	}
-	onClickImage = () => {
-		alert(this.state.brojac)
+	onClickImage = (e, stor) => {
+		console.log(stor)
+		this.setState({ stoori: [] });
+		this.setState({ stt: stor });
+		this.setState({ stoori: stor });
 		this.setState({ showStories: true });
 	}
 
@@ -354,6 +358,8 @@ class HomePage extends React.Component {
 			this.setState({ userIsLogged: true });
 
 			let id = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length - 1)
+			/*Axios.get(BASE_URL_STORY + "/api/storyAlbum/homePage/" + id)
+
 			Axios.get(BASE_URL + "/api/storyPosts/api/storyAlbum/homePage/" + id)
 
 				.then((res) => {
@@ -384,7 +390,7 @@ class HomePage extends React.Component {
 				})
 				.catch((err) => {
 					console.log(err);
-				});
+				});*/
 
 				Axios.get(BASE_URL + "/api/storyPosts/api/story/homePage/" + id)
 	
@@ -396,7 +402,6 @@ class HomePage extends React.Component {
 						
 						res.data.forEach(story => {
 							br = br + 1
-							//alert(story.CloseFriends)
 							let luna = [];
 							story.Stories.forEach(s => {
 								let aa = `data:image/jpg;base64,${s.Media}`
@@ -404,7 +409,7 @@ class HomePage extends React.Component {
 	
 							});
 	
-							let highliht1 = { id: res.data.id, username: story.UserUsername, storiess: luna };
+							let highliht1 = { id: res.data.id, username: story.UserUsername, storiess: {s: luna[0], username: story.UserUsername} };
 							list.push(highliht1)
 						});
 						this.setState({ ss: this.state.ss.concat(list) });
@@ -590,18 +595,6 @@ class HomePage extends React.Component {
 			<React.Fragment>
 				<TopBar />
 				<Header />
-				{this.state.ss.map((user) => (
-					<div hidden={this.state.hid}>
-						{user.storiess.map((post) => (
-							<div hidden={this.state.hid}>
-								<ConvertImage
-									image={post}
-									onConversion={e => this.handleConvertedImage(e, user)}
-
-								/>
-							</div>))}</div>
-
-				))}
 
 				<section id="hero" className="d-flex align-items-top" >
 					<div className="container" hidden={!this.state.userIsLogged}>
@@ -611,20 +604,21 @@ class HomePage extends React.Component {
 									<thead></thead>
 									<tbody>
 
+										
 									
 										{this.state.ss.map((post) => (
 											<td id="td" style={{ width: "15em", height: "15em", marginLeft: "8em" }}>
 												<tr >
 													<img
 														class="td"
-														src={post.storiess[0]}
+														src={post.storiess.s}
 														style={{ borderRadius: "50%", margin: "2%" }}
 														width="100em"
 														height="100em"
 														max-width="100%"
 														max-height="100%"
 														alt="description"
-														onClick={this.onClickImage}
+														onClick={e => this.onClickImage(e, post.storiess)}
 													/>
 
 												</tr>
@@ -633,7 +627,6 @@ class HomePage extends React.Component {
 
 											</td>
 										))}
-										
 
 
 									</tbody>
@@ -678,7 +671,8 @@ class HomePage extends React.Component {
 					<StoriesModal
 						show={this.state.showStories}
 						onCloseModal={this.handleStoriesClose}
-						stories={this.state.stories}
+						stories={this.state.stoori}
+						stt= {this.state.stt}
 						ready={this.state.ready}
 						brojac = {this.state.brojac}
 					/>

@@ -97,6 +97,7 @@ func generateToken(user *models.User) (string, error) {
 func (app *application) getAllUsers(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	chats, err := app.users.GetAll()
+
 	if err != nil {
 		app.serverError(w, err)
 	}
@@ -331,6 +332,7 @@ func (app *application) insertUser(w http.ResponseWriter, r *http.Request) {
 
 	if able  {
 		hashAndSalt, err := HashAndSaltPasswordIfStrong(m.Password)
+
 		var profileInformation = models.ProfileInformation{
 			Name: m.Name, LastName: m.LastName,
 			Email:       m.Email,
@@ -357,7 +359,6 @@ func (app *application) insertUser(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
 		idMarshaled, err := json.Marshal(insertResult.InsertedID)
-		fmt.Println(idMarshaled)
 
 		w.Write(idMarshaled)
 	}

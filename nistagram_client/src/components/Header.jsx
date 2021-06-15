@@ -72,6 +72,7 @@ class Header extends React.Component {
 		}
 		else {
 			let help = []
+			let id = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length-1);
 			Axios.get(BASE_URL + "/api/users/api/")
 				.then((res) => {
 	
@@ -153,7 +154,7 @@ class Header extends React.Component {
 									<li>
 
 
-										<Link to="/settings"><FiSettings /> Settings </Link>
+										<Link to="/editProfile"><FiSettings /> Settings </Link>
 
 
 									</li>

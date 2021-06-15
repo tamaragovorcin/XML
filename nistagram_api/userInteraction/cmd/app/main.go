@@ -33,6 +33,7 @@ func routes() *mux.Router {
 
 	r.HandleFunc("/api/acceptFollowRequest", AcceptFollowRequest(driver, configuration.Database)).Methods("POST")
 	r.HandleFunc("/api/deleteFollowRequest", DeleteFollowRequest(driver, configuration.Database)).Methods("POST")
+	r.HandleFunc("/api/deleteFollow/{subjectId}/{objectId}", DeleteFollow(driver, configuration.Database)).Methods("GET")
 	r.HandleFunc("/api/createUser", CreateUser(driver, configuration.Database)).Methods("POST")
 	r.HandleFunc("/api/user/followRequests", ReturnUsersFollowRequests(driver, configuration.Database)).Methods("POST")
 	r.HandleFunc("/api/user/followRequestsByMe", ReturnUsersFollowRequestsByMe(driver, configuration.Database)).Methods("POST")
@@ -41,6 +42,8 @@ func routes() *mux.Router {
 	r.HandleFunc("/api/checkInteraction", ReturnUsersInteraction(driver, configuration.Database)).Methods("POST")
 	r.HandleFunc("/api/checkIfSentRequest", ReturnIfRequestSent(driver, configuration.Database)).Methods("POST")
 	r.HandleFunc("/api/user/followingCloseFriends", ReturnUsersCloseFriends(driver, configuration.Database)).Methods("POST")
+	r.HandleFunc("/api/deleteFollow", ReturnUsersCloseFriends(driver, configuration.Database)).Methods("POST")
+	r.HandleFunc("/api/user/following/tagged", ReturnUsersFollowingsThatAllowTags(driver, configuration.Database)).Methods("POST")
 
 
 	r.HandleFunc("/api/createUser", CreateUser(driver, configuration.Database)).Methods("POST")
@@ -308,6 +311,53 @@ func DeleteFollowRequest(driver neo4j.Driver, database string) func(w http.Respo
 	}
 }
 
+func DeleteFollow(driver neo4j.Driver, database string) func(w http.ResponseWriter,r *http.Request) {
+	return func(w http.ResponseWriter, req *http.Request) {
+		fmt.Println("DELETE FOLLOW")
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+		vars := mux.Vars(req)
+		subjectId := vars["subjectId"]
+		objectId := vars["objectId"]
+		fmt.Println(subjectId)
+		fmt.Println(objectId)
+		session := driver.NewSession(neo4j.SessionConfig{
+			AccessMode:   neo4j.AccessModeWrite,
+			DatabaseName: database,
+		})
+		defer unsafeClose(session)
+
+		voteResult, err := session.WriteTransaction(func(tx neo4j.Transaction) (interface{}, error) {
+			result, err := tx.Run(
+				"MATCH (following:User)<-[f:FOLLOW]-(follower:User) WHERE following.id = $followingId AND follower.id = $followerId DELETE f",
+				map[string]interface{}{"followerId": subjectId,
+					"followingId": objectId,
+				})
+
+			if err != nil {
+				return nil, err
+			}
+			var summary, _ = result.Consume()
+			var voteResult VoteResult
+			voteResult.Updates = summary.Counters().PropertiesSet()
+			result1, _ := tx.Run(
+				"MATCH (following:User)<-[f:FOLLOW]-(follower:User) WHERE following.id = $followingId AND follower.id = $followerId DELETE f",
+				map[string]interface{}{"followerId": objectId,
+					"followingId": subjectId,
+				})
+
+			return result1, nil
+		})
+		if err != nil {
+			log.Println("error voting for movie:", err)
+			return
+		}
+		err = json.NewEncoder(w).Encode(voteResult)
+		if err != nil {
+			log.Println("error writing volte result response:", err)
+		}
+	}
+}
+
 func CreateFollowPublicProfile(driver neo4j.Driver, database string) func(w http.ResponseWriter,r *http.Request) {
 	return func(w http.ResponseWriter, req *http.Request) {
 		w.Header().Set("Access-Control-Allow-Origin", "*")
@@ -479,6 +529,73 @@ func ReturnUsersFollowings(driver neo4j.Driver, database string) func(http.Respo
 			if users==nil {
 				return []followUserStructDTO{},nil
 			}
+			return users,nil
+		})
+		if err != nil {
+			log.Println("error querying search:", err)
+			return
+		}
+		err = json.NewEncoder(w).Encode(movieResults)
+		if err != nil {
+			log.Println("error writing search response:", err)
+		}
+	}
+}
+func ReturnUsersFollowingsThatAllowTags(driver neo4j.Driver, database string) func(http.ResponseWriter, *http.Request) {
+	return func(w http.ResponseWriter, req *http.Request) {
+	fmt.Println("lalalaalalall")
+		var m User
+		err := json.NewDecoder(req.Body).Decode(&m)
+		if err != nil {
+			fmt.Println("Error")
+		}
+		session := driver.NewSession(neo4j.SessionConfig{
+			AccessMode:   neo4j.AccessModeRead,
+			DatabaseName: database,
+		})
+		defer unsafeClose(session)
+
+		movieResults, err := session.ReadTransaction(func(tx neo4j.Transaction) (interface{}, error) {
+			records, err := tx.Run(
+				`MATCH (following:User)<-[f:FOLLOW]-(follower:User) WHERE follower.id = $followerId return following.id as id`,
+				map[string]interface{}{ "followerId": m.Id})
+			if err != nil {
+				return nil, err
+			}
+			var users  []followUserStructDTO
+			for records.Next() {
+				record := records.Record()
+				id, _ := record.Get("id")
+				username:=getUserUsername(id.(string))
+				resp, err := http.Get("http://localhost:4006/api/user/allowTags/"+id.(string))
+				log.Println("unable to encode image.", resp)
+				if err != nil {
+					log.Fatalln(err)
+				}
+				body, err := ioutil.ReadAll(resp.Body)
+
+				if err != nil {
+					log.Fatalln(err)
+				}
+				sb := string(body)
+				if sb!="" {
+					fmt.Println(sb)
+				}
+
+				var dto = followUserStructDTO{
+					Id : id.(string),
+					Username: username,
+				}
+				if(sb == "true"){
+					fmt.Println("upisao")
+					users = append(users, dto)
+				}
+			}
+
+			if users==nil {
+				return []followUserStructDTO{},nil
+			}
+
 			return users,nil
 		})
 		if err != nil {

@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"github.com/gorilla/mux"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"image"
@@ -228,6 +229,7 @@ func toResponseStoryPost(storyPost models.StoryPost, image2 string) dtos.StoryPo
 func toResponseStoryPost1(storyPost models.StoryPost, contentType string) dtos.StoryPostInfoDTO {
 	taggedPeople :=getTaggedPeople(storyPost.Post.Tagged)
 
+
 	return dtos.StoryPostInfoDTO{
 		Id: storyPost.Id,
 		DateTime : strings.Split(storyPost.Post.DateTime.String(), " ")[0],
@@ -401,7 +403,6 @@ func toResponseAlbum(feedAlbum models.AlbumStory, imageList []string) dtos.Story
 
 
 func (app *application) getStoriesForHomePage(w http.ResponseWriter, r *http.Request) {
-	app.infoLog.Println("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
 	vars := mux.Vars(r)
 	userId := vars["userId"]
 	userIdPrimitive, _ := primitive.ObjectIDFromHex(userId)
@@ -415,33 +416,57 @@ func (app *application) getStoriesForHomePage(w http.ResponseWriter, r *http.Req
 	}
 	storyPostsResponse := []dtos.StoryPostInfoHomePageDTO{}
 	for _, storyPost := range storiesForHomePage {
-		if iAmFollowingThisUser(userId,storyPost.Post.User.Hex()) {
-			if storyCanBeSeen(storyPost,userIdPrimitive)==true {
-				images, err := findImageByPostId(allImages, storyPost.Id)
-				if err != nil {
-					app.serverError(w, err)
-				}
-				userInList := getIndexInListOfUsersStories(userIdPrimitive, storyPostsResponse)
-				if userInList == -1 {
-					userUsername := getUserUsername(storyPost.Post.User)
 
+		if iAmFollowingThisUser(userId, storyPost.Post.User.Hex()) {
+			if storyCanBeSeen(storyPost, userIdPrimitive) == true {
+				if (!iBlockedThisUser(userId, storyPost.Post.User.Hex())) {
+					if (!iMutedThisUser(userId, storyPost.Post.User.Hex())) {
 
-					stories := []dtos.StoryPostInfoDTO{}
-					var dto = dtos.StoryPostInfoHomePageDTO{
-						UserId:       storyPost.Post.User,
-						UserUsername: userUsername,
-						Stories:      append(stories, toResponseStoryPost2(storyPost, images.Media)),
-						CloseFriends: storyPost.OnlyCloseFriends,
+						images, err := findImageByPostId(allImages, storyPost.Id)
+						if err != nil {
+							app.serverError(w, err)
+						}
+						userInList := getIndexInListOfUsersStories(userIdPrimitive, storyPostsResponse)
+						if userInList == -1 {
+							userUsername := getUserUsername(storyPost.Post.User)
+
+							stories := []dtos.StoryPostInfoDTO{}
+							var dto = dtos.StoryPostInfoHomePageDTO{
+								UserId:       storyPost.Post.User,
+								UserUsername: userUsername,
+								Stories:      append(stories, toResponseStoryPost2(storyPost, images.Media)),
+								CloseFriends: storyPost.OnlyCloseFriends,
+							}
+							storyPostsResponse = append(storyPostsResponse, dto)
+						} else if userInList != -1 {
+							existingDto := storyPostsResponse[userInList]
+							existingDto.Stories = append(existingDto.Stories, toResponseStoryPost2(storyPost, images.Media))
+						}
 					}
-					storyPostsResponse = append(storyPostsResponse, dto)
-				} else if userInList != -1 {
-					existingDto := storyPostsResponse[userInList]
-					existingDto.Stories = append(existingDto.Stories, toResponseStoryPost2(storyPost, images.Media))
+					images, err := findImageByPostId(allImages, storyPost.Id)
+					if err != nil {
+						app.serverError(w, err)
+					}
+					userInList := getIndexInListOfUsersStories(userIdPrimitive, storyPostsResponse)
+					if userInList == -1 {
+						userUsername := getUserUsername(storyPost.Post.User)
+
+						stories := []dtos.StoryPostInfoDTO{}
+						var dto = dtos.StoryPostInfoHomePageDTO{
+							UserId:       storyPost.Post.User,
+							UserUsername: userUsername,
+							Stories:      append(stories, toResponseStoryPost2(storyPost, images.Media)),
+							CloseFriends: storyPost.OnlyCloseFriends,
+						}
+						storyPostsResponse = append(storyPostsResponse, dto)
+					} else if userInList != -1 {
+						existingDto := storyPostsResponse[userInList]
+						existingDto.Stories = append(existingDto.Stories, toResponseStoryPost2(storyPost, images.Media))
+					}
 				}
 			}
 		}
 	}
-
 	imagesMarshaled, err := json.Marshal(storyPostsResponse)
 	if err != nil {
 		app.serverError(w, err)
@@ -450,8 +475,9 @@ func (app *application) getStoriesForHomePage(w http.ResponseWriter, r *http.Req
 	w.WriteHeader(http.StatusOK)
 	w.Write(imagesMarshaled)
 }
+
 func toResponseStoryPost2(storyPost models.StoryPost, image2 string) dtos.StoryPostInfoDTO {
-	f,_  := os.Open(image2)
+	f, _ := os.Open(image2)
 	defer f.Close()
 	image,_,_:= image.Decode(f)
 	buffer := new(bytes.Buffer)
@@ -459,6 +485,9 @@ func toResponseStoryPost2(storyPost models.StoryPost, image2 string) dtos.StoryP
 		log.Println("unable to encode image.")
 	}
 	taggedPeople :=getTaggedPeople(storyPost.Post.Tagged)
+
+
+
 
 	return dtos.StoryPostInfoDTO{
 		Id: storyPost.Id,
@@ -474,6 +503,44 @@ func toResponseStoryPost2(storyPost models.StoryPost, image2 string) dtos.StoryP
 func getListCloseFriends(id string) []string { //id usera ciji je stori
 
 	resp, err := http.Get("http://localhost:80/api/users/api/user/closeFriends/"+id)
+	log.Println("unable to encode image.", resp)
+	if err != nil {
+		log.Fatalln(err)
+	}
+	body, err := ioutil.ReadAll(resp.Body)
+
+	if err != nil {
+		log.Fatalln(err)
+	}
+	var listStrings []string
+	sb := string(body)
+	if sb!="" {
+		listStrings =strings.Split(sb, ",")
+	}
+	return listStrings
+}
+func getListOfBlockedUsers(id string) []string { //id usera ciji je stori
+
+	resp, err := http.Get("http://localhost:4006/api/user/blockedUsers/"+id)
+	log.Println("unable to encode image.", resp)
+	if err != nil {
+		log.Fatalln(err)
+	}
+	body, err := ioutil.ReadAll(resp.Body)
+
+	if err != nil {
+		log.Fatalln(err)
+	}
+	var listStrings []string
+	sb := string(body)
+	if sb!="" {
+		listStrings =strings.Split(sb, ",")
+	}
+	return listStrings
+}
+func getListOfMutedUsers(id string) []string { //id usera ciji je stori
+
+	resp, err := http.Get("http://localhost:4006/api/user/mutedUsers/"+id)
 	log.Println("unable to encode image.", resp)
 	if err != nil {
 		log.Fatalln(err)
@@ -507,6 +574,34 @@ func userIsCloseFriends(user2 string, ids []string) bool { // svoj id
 	}
 	return false
 }
+func userIsBlocked(user2 string, ids []string) bool { // svoj id
+	for index, id := range ids {
+		if index == 0 {
+			id = id[1:]
+		}
+		if index == len(ids)-1 {
+			id = id[:len(id)-1]
+		}
+		if strings.ToLower(strings.Trim(id," \r\n")) == strings.ToLower(strings.Trim(user2," \r\n")) {
+			return true
+		}
+	}
+	return false
+}
+func userIsMuted(user2 string, ids []string) bool { // svoj id
+	for index, id := range ids {
+		if index == 0 {
+			id = id[1:]
+		}
+		if index == len(ids)-1 {
+			id = id[:len(id)-1]
+		}
+		if strings.ToLower(strings.Trim(id," \r\n")) == strings.ToLower(strings.Trim(user2," \r\n")) {
+			return true
+		}
+	}
+	return false
+}
 
 func storyCanBeSeen(post models.StoryPost, idPrimitive primitive.ObjectID) bool {
 	if post.OnlyCloseFriends==false {return true}
@@ -514,6 +609,31 @@ func storyCanBeSeen(post models.StoryPost, idPrimitive primitive.ObjectID) bool 
 
 	closeFriends := getListCloseFriends(userId.Hex())
 	if userIsCloseFriends(idPrimitive.Hex(), closeFriends){
+		return true
+	}
+	return false
+}
+func iBlockedThisUser(logged string, userWithPost string) bool {
+	userId := userWithPost
+
+	blockedUsers := getListOfBlockedUsers(logged)
+	if userIsBlocked(userId, blockedUsers){
+		return true
+	}
+	return false
+}
+func iMutedThisUser(logged string, userWithPost string) bool {
+	fmt.Println("POGODIO")
+	userId := userWithPost
+
+	blockedUsers := getListOfMutedUsers(logged)
+	for _, s := range blockedUsers {
+fmt.Println("lalalala")
+		fmt.Println(s)
+
+	}
+
+	if userIsMuted(userId, blockedUsers){
 		return true
 	}
 	return false

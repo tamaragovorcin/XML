@@ -10,7 +10,6 @@ import WriteCommentModal from "../components/Posts/WriteCommentModal"
 import LikesModal from "../components/Posts/LikesModal"
 import DislikesModal from "../components/Posts/DislikesModal"
 import CommentsModal from "../components/Posts/CommentsModal"
-import { BASE_URL_USER } from "../constants.js";
 import AddPostToCollection from "../components/Posts/AddPostToCollection";
 import WriteCommentAlbumModal from "../components/Posts/WriteCommentAlbumModal"
 import { Lock } from "@material-ui/icons";
@@ -68,6 +67,7 @@ class FollowerProfilePage extends React.Component {
 		showAddCollectionModal : false,
 		showWriteCommentModalAlbum : false,
 		followingThisUser : false,
+		mutedThisUser : false,
 		allowPagePreview : false,
 		ableToFollowThisUser : false,
 		sentFollowRequest : false,
@@ -79,7 +79,8 @@ class FollowerProfilePage extends React.Component {
 		hiddenStoriesForHighlightalbum : false,
 		myCollectionAlbums : [],
 		myCollections : [],
-		userIsLoggedIn : false
+		userIsLoggedIn : false,
+		blockedUser : false
 	}
 	hasRole = (reqRole) => {
 		let roles = JSON.parse(localStorage.getItem("keyRole"));
@@ -127,6 +128,17 @@ class FollowerProfilePage extends React.Component {
 			.catch((err) => {
 				console.log(err);
 			});
+			let id = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length-1);
+			Axios.get(BASE_URL + "/api/users/api/checkIfBlocked/"+id+"/" + s[5])
+			.then((res) => {
+				this.setState({
+					blockedUser : res.data
+				});
+
+			})
+			.catch((err) => {
+				console.log(err);
+			});
 		this.handleGetHighlights(s[5])
 		this.handleGetFeedPosts(s[5])
 		this.handleGetAlbums(s[5])
@@ -163,6 +175,12 @@ class FollowerProfilePage extends React.Component {
 			let loggedId = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length-1)
 			const followReguestDTO = { follower: loggedId, following : id};
 			this.setState({ userIsLoggedIn: true });
+			Axios.get(BASE_URL + "/api/users/api/checkIfMuted/"+loggedId+"/"+id)
+							.then((response) => {
+								this.setState({ mutedThisUser: response.data });
+							}).catch((err) => {
+								console.log(err);
+							});
 
 			Axios.post(BASE_URL + "/api/userInteraction/api/checkInteraction",followReguestDTO)
 				.then((res) => {
@@ -555,6 +573,61 @@ class FollowerProfilePage extends React.Component {
 		
 
 	}
+	handleMute = () => {
+		let id = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length-1);
+	
+		const dto = { Subject: id, Object : this.state.userId};
+			Axios.post(BASE_URL + "/api/users/api/mute/", dto)
+			.then((res) => {
+								
+				this.setState({ textSuccessfulModal: "You have successfully muted this user." });
+				this.setState({ openModal: true });
+
+			})
+			.catch ((err) => {
+				console.log(err);
+			});
+			
+		
+		
+
+	}
+	handleUnMute = () => {
+		let id = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length-1);
+	
+		const dto = { Subject: id, Object : this.state.userId};
+			Axios.post(BASE_URL + "/api/users/api/unmute/", dto)
+			.then((res) => {
+								
+				this.setState({ textSuccessfulModal: "You have successfully unmuted this user." });
+				this.setState({ openModal: true });
+
+			})
+			.catch ((err) => {
+				console.log(err);
+			});
+			
+		
+		
+
+	}
+	handleBlock = () => {
+		let id = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length-1);
+	
+		const dto = { Subject: id, Object : this.state.userId};
+			Axios.post(BASE_URL + "/api/users/api/block/", dto)
+			.then((res) => {
+								
+				this.setState({ textSuccessfulModal: "You have successfully blocked this user." });
+				this.setState({ openModal: true });
+
+			})
+			.catch ((err) => {
+				console.log(err);
+			});
+			
+
+	}
 	handleOpenAddAlbumToCollectionAlbumModal = (postId)=> {
 		let id = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length-1)
 
@@ -619,7 +692,7 @@ class FollowerProfilePage extends React.Component {
 				<Header />
 
 				<section id="hero" className="d-flex align-items-top">
-					<div className="container">
+					<div className="container" hidden={this.state.blockedUser}>
 						<div className="d-flex align-items-top">
 							<div className="container" style={{ marginTop: "10rem", marginRight: "10rem" }}>
 								<table className="table" style={{ width: "100%" }}>
@@ -649,6 +722,15 @@ class FollowerProfilePage extends React.Component {
 														</div>
 														<div hidden={!this.state.sentFollowRequest}>
 															<button  className="btn btn-outline-warning mt-1"  type="button"><i className="icofont-subscribe mr-1"></i>Sent request</button>
+														</div>
+														<div hidden={!this.state.followingThisUser || this.state.mutedThisUser}>
+															<button  className="btn btn-outline-primary mt-1" onClick={() => this.handleMute()} type="button"><i className="icofont-subscribe mr-1"></i>Mute</button>
+														</div>
+														<div hidden={!this.state.mutedThisUser}>
+															<button  className="btn btn-outline-primary mt-1" onClick={() => this.handleUnMute()} type="button"><i className="icofont-subscribe mr-1"></i>Unmute</button>
+														</div>
+														<div>
+															<button  className="btn btn-outline-primary mt-1" onClick={() => this.handleBlock()} type="button"><i className="icofont-subscribe mr-1"></i>Block</button>
 														</div>
 													</td>
 
@@ -726,6 +808,21 @@ class FollowerProfilePage extends React.Component {
 							</div>
 
 						</div>
+						<div hidden={!this.state.blockedUser}>
+
+				<div className="d-flex p-3 mb-2 d-flex justify-content-center">
+
+					<label><b>Nistagram user</b></label>
+
+				</div>
+
+				<div className="d-flex justify-content-center h-100">
+					<Icon className="d-flex justify-content-center h-100 w-100"><Lock /></Icon>
+				</div>
+
+</div>
+
+
 
 					</div>
 

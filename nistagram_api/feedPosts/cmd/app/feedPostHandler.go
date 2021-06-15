@@ -478,14 +478,18 @@ func (app *application) getPhototsForHomePage(w http.ResponseWriter, r *http.Req
 	feedPostResponse := []dtos.FeedPostInfoDTO1{}
 	for _, feedPost := range postsForHomePage {
 		if iAmFollowingThisUser(userId,feedPost.Post.User.Hex()) {
-			images, err := findImageByPostId(allImages,feedPost.Id)
-			if err != nil {
-				app.serverError(w, err)
-			}
-			userUsername :=getUserUsername(feedPost.Post.User)
-			feedPostResponse = append(feedPostResponse, toResponseHomePage(feedPost, images.Media,userUsername))
-		}
+			if (!iBlockedThisUser(userId, feedPost.Post.User.Hex())) {
+				if (!iMutedThisUser(userId, feedPost.Post.User.Hex())) {
 
+					images, err := findImageByPostId(allImages, feedPost.Id)
+					if err != nil {
+						app.serverError(w, err)
+					}
+					userUsername := getUserUsername(feedPost.Post.User)
+					feedPostResponse = append(feedPostResponse, toResponseHomePage(feedPost, images.Media, userUsername))
+				}
+			}
+		}
 	}
 
 	imagesMarshaled, err := json.Marshal(feedPostResponse)
@@ -495,6 +499,98 @@ func (app *application) getPhototsForHomePage(w http.ResponseWriter, r *http.Req
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	w.Write(imagesMarshaled)
+}
+func getListOfBlockedUsers(id string) []string { //id usera ciji je stori
+
+	resp, err := http.Get("http://localhost:4006/api/user/blockedUsers/"+id)
+	log.Println("unable to encode image.", resp)
+	if err != nil {
+		log.Fatalln(err)
+	}
+	body, err := ioutil.ReadAll(resp.Body)
+
+	if err != nil {
+		log.Fatalln(err)
+	}
+	var listStrings []string
+	sb := string(body)
+	if sb!="" {
+		listStrings =strings.Split(sb, ",")
+	}
+	return listStrings
+}
+func getListOfMutedUsers(id string) []string { //id usera ciji je stori
+
+	resp, err := http.Get("http://localhost:4006/api/user/mutedUsers/"+id)
+	log.Println("unable to encode image.", resp)
+	if err != nil {
+		log.Fatalln(err)
+	}
+	body, err := ioutil.ReadAll(resp.Body)
+
+	if err != nil {
+		log.Fatalln(err)
+	}
+	var listStrings []string
+	sb := string(body)
+	if sb!="" {
+		listStrings =strings.Split(sb, ",")
+	}
+	return listStrings
+}
+
+func iBlockedThisUser(logged string, userWithPost string) bool {
+	userId := userWithPost
+
+	blockedUsers := getListOfBlockedUsers(logged)
+	if userIsBlocked(userId, blockedUsers){
+		return true
+	}
+	return false
+}
+func iMutedThisUser(logged string, userWithPost string) bool {
+	fmt.Println("POGODIO")
+	userId := userWithPost
+
+	blockedUsers := getListOfMutedUsers(logged)
+	for _, s := range blockedUsers {
+		fmt.Println("lalalala")
+		fmt.Println(s)
+
+	}
+
+	if userIsMuted(userId, blockedUsers){
+		return true
+	}
+	return false
+}
+func userIsBlocked(user2 string, ids []string) bool { // svoj id
+	for index, id := range ids {
+		if index == 0 {
+			id = id[1:]
+		}
+		if index == len(ids)-1 {
+			id = id[:len(id)-1]
+		}
+		if strings.ToLower(strings.Trim(id," \r\n")) == strings.ToLower(strings.Trim(user2," \r\n")) {
+			return true
+		}
+	}
+	return false
+}
+func userIsMuted(user2 string, ids []string) bool { // svoj id
+	for index, id := range ids {
+		if index == 0 {
+			id = id[1:]
+		}
+		if index == len(ids)-1 {
+			id = id[:len(id)-1]
+		}
+		if strings.ToLower(strings.Trim(id," \r\n")) == strings.ToLower(strings.Trim(user2," \r\n")) {
+			return true
+		}
+	}
+	return false
 }
 
 func iAmFollowingThisUser(logged string, userWithPost string) bool {
