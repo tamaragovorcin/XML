@@ -201,6 +201,62 @@ class RegisterPage extends Component {
 
 
 	};
+	handleRequestForAgent = () => {
+
+		let userDTO = {
+			Email: this.state.email,
+			Username: this.state.username,
+			Name: this.state.name,
+			LastName: this.state.surname,
+			PhoneNumber: this.state.phoneNumber,
+			Gender: this.state.gender,
+			DateOfBirth: this.state.selectedDate,
+			Password: this.state.password,
+			Biography: this.state.biography,
+			Private: this.state.private,
+			Website : this.state.website
+		};
+
+		if (this.validateForm(userDTO)) {
+			Axios.post(BASE_URL + "/api/users/agent", userDTO)
+				.then((res) => {
+
+					if (res.status === 409) {
+						this.setState({
+							errorHeader: "Resource conflict!",
+							errorMessage: "Email already exist.",
+							hiddenErrorAlert: false,
+						});
+					} else if (res.status === 500) {
+						this.setState({ errorHeader: "Internal server error!", errorMessage: "Server error.", hiddenErrorAlert: false });
+					} else {
+						this.setState({ openModal: true });
+					}
+					const user1Id = {id: res.data}
+					Axios.post(BASE_URL + "/api/userInteraction/api/createUser", user1Id)
+					.then((res) => {
+							console.log(res.data)
+					})
+					.catch ((err) => {
+				console.log(err);
+			});
+				})
+				.catch((err) => {
+					if (err.response.status === 409) {
+						this.setState({
+							errorHeader: "Email taken",
+							errorMessage: "Email already exist.",
+							hiddenErrorAlert: false,
+						});
+					}
+					else if (err.response.status === 500) {
+						this.setState({ errorHeader: "Username taken", errorMessage: "User with this username already exists", hiddenErrorAlert: false });}
+
+				});
+		}
+
+
+	};
 	handleGenderChange(event) {
 
 		this.setState({ gender: event.target.value });
@@ -433,7 +489,7 @@ class RegisterPage extends Component {
 										style={{
 											background: "#1977cc",
 											marginTop: "15px",
-											marginLeft: "40%",
+											marginLeft: "20%",
 											width: "20%",
 										}}
 										onClick={this.handleSignUp}
@@ -442,6 +498,20 @@ class RegisterPage extends Component {
 										type="button"
 									>
 										Sign Up
+									</button>
+									<button
+										style={{
+											background: "#1977cc",
+											marginTop: "-70px",
+											marginLeft: "50%",
+											width: "50%",
+										}}
+										onClick={this.handleRequestForAgent}
+										className="btn btn-primary btn-xl"
+										id="sendMessageButton"
+										type="button"
+									>
+										Send request for agent
 									</button>
 								</div>
 							</form>

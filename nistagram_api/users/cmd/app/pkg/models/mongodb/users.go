@@ -82,8 +82,16 @@ func (m *UserModel) Delete(id string) (*mongo.DeleteResult, error) {
 
 func (m *UserModel) Update(user models.User) (*mongo.UpdateResult, error) {
 
-	return m.C.UpdateOne(context.TODO(),bson.M{"_id":user.Id},bson.D{{"$set",bson.M{"biography":user.Biography,"profileInformation.name":user.ProfileInformation.Name,
-		"profileInformation.lastName":user.ProfileInformation.LastName, "profileInformation.username":user.ProfileInformation.Username,"profileInformation.email":user.ProfileInformation.Email,
-		"profileInformation.phoneNumber":user.ProfileInformation.PhoneNumber,"profileInformation.dateOfBirth":user.ProfileInformation.DateOfBirth,
-		"webSite":user.Website,"private":user.Private,"profileInformation.gender":user.ProfileInformation.Gender}}})
+	return m.C.UpdateOne(context.TODO(),bson.M{"_id":user.Id},bson.D{{"$set",bson.M{"biography":user.Biography,
+		"profileInformation.name":user.ProfileInformation.Name,
+		"profileInformation.lastName":user.ProfileInformation.LastName,
+		"profileInformation.username":user.ProfileInformation.Username,
+		"profileInformation.email":user.ProfileInformation.Email,
+		"profileInformation.phoneNumber":user.ProfileInformation.PhoneNumber,
+		"profileInformation.dateOfBirth":user.ProfileInformation.DateOfBirth,
+		"webSite":user.Website,"private":user.Private,
+		"profileInformation.gender":user.ProfileInformation.Gender,
+		"verified" : user.Verified,
+		"category" : user.Category,
+		"approvedAgent" : user.ApprovedAgent}}})
 }

@@ -85,15 +85,55 @@ func (app *application) deleteAlbumFeed(w http.ResponseWriter, r *http.Request) 
 	// Get id from incoming url
 	vars := mux.Vars(r)
 	id := vars["id"]
+	reportId := vars["reportId"]
+	albumIdPrimitive, _ := primitive.ObjectIDFromHex(id)
 
 	// Delete booking by id
 	deleteResult, err := app.albumFeeds.Delete(id)
+	_, err2 := app.reports.Delete(reportId)
+
 	if err != nil {
 		app.serverError(w, err)
+	}
+	if err2 != nil {
+		app.serverError(w, err)
+	}
+	allCollections, _ := app.collectionAlbums.All()
+	for _, collection := range allCollections {
+		for _, album := range collection.Albums {
+			if album.Id.Hex()==albumIdPrimitive.Hex() {
+				updateThisCollection(collection,album.Id,app)
+			}
+		}
 	}
 
 	app.infoLog.Printf("Have been eliminated %d albumFeeds(s)", deleteResult.DeletedCount)
 }
+
+func updateThisCollection(collection models.CollectionAlbum, id primitive.ObjectID, app *application) {
+	var collectionUpdate = models.CollectionAlbum{
+		Id: collection.Id,
+		User:collection.User,
+		Name : collection.Name,
+		Albums: getPostsAfterRemovingAlbumFeed(collection.Albums,id),
+	}
+
+	insertResult, _ := app.collectionAlbums.Update(collectionUpdate)
+	app.infoLog.Printf("Have been eliminated %d albumFeeds(s)", insertResult.UpsertedID)
+
+}
+
+func getPostsAfterRemovingAlbumFeed(albums []models.AlbumFeed, id primitive.ObjectID) []models.AlbumFeed {
+	newalbums := []models.AlbumFeed{}
+	for _, album := range albums {
+		if album.Id.Hex()!=id.Hex() {
+			newalbums=append(newalbums,album)
+		}
+	}
+	return newalbums
+}
+
+
 
 func (app *application) getUsersFeedAlbums(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)

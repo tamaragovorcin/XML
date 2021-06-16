@@ -17,7 +17,6 @@ func (app *application) routes() *mux.Router {
 	r.HandleFunc("/{id}", app.findFeedPostByID).Methods("GET")
 	r.HandleFunc("/api/feedAlbum/{userId}", app.insertAlbumFeed).Methods("POST")
 	r.HandleFunc("/api/feed/{userIdd}", app.insertFeedPost).Methods("POST")
-	r.HandleFunc("/{id}", app.deleteFeedPost).Methods("DELETE")
 
 	r.HandleFunc("/post/", app.getAllPosts).Methods("GET")
 	r.HandleFunc("/post/{id}", app.findPostByID).Methods("GET")
@@ -32,7 +31,6 @@ func (app *application) routes() *mux.Router {
 
 	r.HandleFunc("/albumFeed/", app.getAllAlbumFeeds).Methods("GET")
 	r.HandleFunc("/albumFeed/", app.insertAlbumFeed).Methods("POST")
-	r.HandleFunc("/albumFeed/{id}", app.deleteAlbumFeed).Methods("DELETE")
 	r.HandleFunc("/api/feedAlbum/usersAlbums/{userIdd}", app.getUsersFeedAlbums).Methods("GET")
 	r.HandleFunc("/api/albumFeed/homePage/{userId}", app.getAlbumsForHomePage).Methods("GET")
 
@@ -81,5 +79,17 @@ func (app *application) routes() *mux.Router {
 
 	r.HandleFunc("/api/video/{userId}/{feedId}", app.saveVideo).Methods("POST")
 	r.HandleFunc("/api/feed/file/{feedId}", app.GetFileByPostId).Methods("GET")
+
+	r.HandleFunc("/report", app.reportFeedPost).Methods("POST")
+	r.HandleFunc("/feed/reports", app.getAllFeedReports).Methods("GET")
+	r.HandleFunc("/albumFeed/reports", app.getAllAlbumReports).Methods("GET")
+	r.HandleFunc("/report/remove/{id}", app.deleteReport).Methods("DELETE")
+	r.HandleFunc("/feed/remove/{id}/{reportId}", app.deleteFeedPost).Methods("DELETE")
+
+	r.HandleFunc("/albumFeed/remove/{id}/{reportId}", app.deleteAlbumFeed).Methods("DELETE")
+
+	r.HandleFunc("/removeUserId/{id}", app.removeEverythingFromUser).Methods("DELETE")
+
+
 	return r
 }

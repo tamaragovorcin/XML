@@ -2,7 +2,6 @@ package models
 
 import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
-	"go.mongodb.org/mongo-driver/x/mongo/driver/uuid"
 )
 //ENUMS
 type Gender int
@@ -25,15 +24,15 @@ const (
 // User is used to represent user profile data
 type ProfileInformation struct {
 	Id       primitive.ObjectID `bson:"_id,omitempty"`
-	Name     string             `bson:"name,omitempty"`
-	LastName string             `bson:"lastName,omitempty"`
-	Email string                `validate:"required,email" bson:"email,omitempty"`
-	Username string             `bson:"username,omitempty"`
-	Password string             `bson:"password,omitempty"`
-	Roles []Role                `bson:"roles,omitempty"`
-	PhoneNumber string          `bson:"phoneNumber,omitempty"`
-	Gender string               `bson:"gender,omitempty"`
-	DateOfBirth string          `bson:"dateOfBirth,omitempty"`
+	Name     string             `bson:"name"`
+	LastName string             `bson:"lastName"`
+	Email string                `validate:"required,email" bson:"email"`
+	Username string             `bson:"username"`
+	Password string             `bson:"password"`
+	Roles []Role                `bson:"roles"`
+	PhoneNumber string          `bson:"phoneNumber"`
+	Gender string               `bson:"gender"`
+	DateOfBirth string          `bson:"dateOfBirth"`
 }
 
 
@@ -43,22 +42,28 @@ type Role struct {
 
 }
 type Agent struct {
-	Id  uuid.UUID `bson:"_id,omitempty"`
-	User uuid.UUID `bson:"user,omitempty"`
-	Website string `bson:"website,omitempty"`
-	ApprovedAgent bool `bson:"approvedAgent"`
-}
-
-type User struct {
-	Id                 primitive.ObjectID `bson:"_id,omitempty"`
+	Id  primitive.ObjectID  `bson:"_id,omitempty"`
 	ProfileInformation ProfileInformation `bson:"profileInformation,omitempty"`
 	Private            bool               `bson:"private"`
 	Website            string             `bson:"webSite"`
 	Biography          string             `bson:"biography"`
 	Verified           bool               `bson:"verified"`
 	Category           Category           `bson:"category"`
-	LikedPosts         []uuid.UUID        `bson:"likedPosts"`
-	DislikedPosts      []uuid.UUID        `bson:"disliked"`
+	ApprovedAgent bool `bson:"approvedAgent"`
+}
+
+type User struct {
+	Id                 primitive.ObjectID `bson:"_id,omitempty"`
+	ProfileInformation ProfileInformation `bson:"profileInformation"`
+	Private            bool               `bson:"private"`
+	Website            string             `bson:"webSite"`
+	Biography          string             `bson:"biography"`
+	Verified           bool               `bson:"verified"`
+
+	ApprovedAgent string `bson:"approvedAgent"`
+
+	Category           string           `bson:"category"`
+
 }
 
 type Verification struct {
@@ -102,4 +107,10 @@ type Settings struct {
 	Muted []primitive.ObjectID `bson:"muted"`
 	Blocked []primitive.ObjectID `bson:"blocked"`
 	CloseFriends []primitive.ObjectID  `bson:"closeFriends"`
+}
+type Image struct {
+	Id  primitive.ObjectID `bson:"_id,omitempty"`
+	Media string `bson:"media"`
+	UserId primitive.ObjectID `bson:"userId"`
+	VerificationId primitive.ObjectID `bson:"verificationId"`
 }

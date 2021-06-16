@@ -15,6 +15,7 @@ import ModalDialog from "../components/ModalDialog";
 import StoriesModal from "../components/Posts/StoriesModal.jsx";
 //import $ from 'jquery';
 import { BASE_URL } from "../constants.js";
+import { confirmAlert } from 'react-confirm-alert';
 class HomePage extends React.Component {
 
 
@@ -589,6 +590,47 @@ class HomePage extends React.Component {
 			console.log(err);
 		});
 	}
+	handleReportPost = (postId,type) => {
+		let id = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length - 1)
+
+		confirmAlert({
+            message: 'Are you sure to report this post?',
+            buttons: [
+              {
+                label: 'Yes',
+                onClick: () => {
+                   
+					let report = {
+                        PostId: postId,
+						UserId : id,
+						Type : type
+                    };
+                    Axios.post(BASE_URL + "/api/feedPosts/report", report
+						).then((res) =>{
+							this.setState({
+								textSuccessfulModal: "You have successfully reported this post.",
+								openModal: true 
+							})
+							
+						}).catch((err) => {
+							this.setState({ 
+								textSuccessfulModal: "It is not possible to report this post.",
+								openModal: true
+							});
+
+						});
+					}
+				  },
+				  {
+					label: 'No',
+					onClick: () => {
+						
+					}
+              }
+            ]
+        });
+	}
+
 	render() {
 	
 		return (
@@ -655,7 +697,7 @@ class HomePage extends React.Component {
 								handleOpenAddPostToCollectionModal={this.handleOpenAddPostToCollectionModal}
 								handleOpenAddAlbumToCollectionAlbumModal = {this.handleOpenAddAlbumToCollectionAlbumModal}
 								userIsLoggedIn = {this.state.userIsLoggedIn}
-
+								handleReportPost = {this.handleReportPost}
 							/>
 						</div>
 

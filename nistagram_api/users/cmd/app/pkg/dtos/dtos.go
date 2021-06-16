@@ -21,7 +21,19 @@ type UserRequest struct {
 	Biography string
 	Website string
 }
-
+type AgentRequest struct {
+	Name  string
+	LastName string
+	Email string
+	Username string
+	Password string
+	PhoneNumber string
+	Gender string
+	DateOfBirth string
+	Private bool
+	Biography string
+	Website string
+}
 type CloseFriendsDTO struct {
 	IdLogged string
 	IdClose string
@@ -88,11 +100,12 @@ type NotificationContentDTO struct {
 	Posted string
 }
 type RequestDTO struct {
-	Id          primitive.ObjectID
-	Name  string `bson:"name,omitempty"`
-	LastName string `bson:"lastName,omitempty"`
-	ContentType string
+	Id  primitive.ObjectID
+	Name  string
+	LastName string
 	Category string
+	Media []byte
+	UserId primitive.ObjectID
 }
 type VerificationReactionDTO struct {
 	RequestId primitive.ObjectID
@@ -101,5 +114,8 @@ type VerificationReactionDTO struct {
 
 type BlockedUserDTO struct {
 	Username string
-	Id primitive.ObjectID
+	Id       primitive.ObjectID
+}
+type AgentsReactionDTO struct {
+	UserId primitive.ObjectID
 }

@@ -152,6 +152,10 @@ class FollowerProfilePage extends React.Component {
 		this.handleGetCollectionAlbums(s[5])
 		this.handleGetHighlightAlbums(s[5])
 
+		console.log("789451")
+		console.log(this.state.followingThisUser)
+		console.log(this.state.ableToFollowThisUser)
+		console.log(this.state.sentFollowRequest)
 
 	}
 	handleOpenNotificationModal= ()=>{
@@ -776,9 +780,9 @@ class FollowerProfilePage extends React.Component {
 														<div hidden={!this.state.mutedThisUser}>
 															<button  className="btn btn-outline-primary mt-1" onClick={() => this.handleUnMute()} type="button"><i className="icofont-subscribe mr-1"></i>Unmute</button>
 														</div>
-														</td>
+										</td>
 														<td>
-														<div>
+															<div>
 															<button  className="btn btn-outline-primary mt-1" onClick={() => this.handleBlock()} type="button"><i className="icofont-subscribe mr-1"></i>Block</button>
 														</div>
 														</td>

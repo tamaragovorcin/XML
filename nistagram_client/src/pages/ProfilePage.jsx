@@ -212,21 +212,29 @@ class ProfilePage extends React.Component {
 			body: formData
 
 		};
-		/*Axios.post( BASE_URL + " /api/feedPosts/api/image/"+userId+"/"+feedId,formData)
-		.then((res) => {
-			console.log("USPEO")
-		})
-		.catch((err) => {
-			console.log(err);
-		});*/
-		// Axios.post(BASE_URL +"/api/feedPosts/api/image/"+userId+"/"+feedId,formData)
-		// 	.then((res) => {
-		// 		console.log(res)
-		// 		})
-		// 	.catch((err) => {
-		// 		console.log(err);
-		// 	});
-		 fetch(BASE_URL + "/api/feedPosts/api/image/"+userId+"/"+feedId, options);
+
+	
+		fetch( BASE_URL + "/api/feedPosts/api/image/"+userId+"/"+feedId, options);
+	}
+	testVerification(pic,userId, requestId) {
+		this.setState({
+			fileUploadOngoing: true
+		});
+
+		const fileInput = document.querySelector("#fileInput");
+		const formData = new FormData();
+
+		formData.append("file", pic);
+		formData.append("test", "StringValueTest");
+
+		const options = {
+			method: "POST",
+			body: formData
+
+		};
+
+	
+		fetch( BASE_URL + "/api/users/api/image/"+userId+"/"+requestId, options);
 	}
 	testProfileImage(pic,userId) {
 		
@@ -600,14 +608,13 @@ class ProfilePage extends React.Component {
 		
 	}
 
-	handleSendRequestVerification = ()=> {
-		alert(this.state.category)
+	handleSendRequestVerification = (name,surname,category)=> {
 		let id = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length-1)
 			const verificationDTO = {
 				Id : id,
-				Name: this.state.name,
-				LastName: this.state.lastName,
-				Category : this.state.category
+				Name: name,
+				LastName: surname,
+				Category : category
 				
 			};
 			this.sendRequestForVerification(verificationDTO);
@@ -877,9 +884,8 @@ class ProfilePage extends React.Component {
 
 
 	sendRequestForVerification(verificationDTO) {
-		let id = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length-1)
 				
-		Axios.post(BASE_URL + "/api/users/api/verificationRequest/", verificationDTO)
+		Axios.post(BASE_URL + "/api/users/api/verificationRequest", verificationDTO)
 			.then((res) => {
 				if (res.status === 409) {
 					this.setState({
@@ -893,23 +899,20 @@ class ProfilePage extends React.Component {
 					this.setState({ openModal: true });
 					this.setState({ redirect: true });
 				}
-				let feedId = res.data;
+				let requestId = res.data;
 				
 				let userid = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length-1)
 			
 				this.state.pictures.forEach((pic) => {
-					this.test(pic, userid, feedId);
+					this.testVerification(pic, userid, requestId);
 				});
-				if(this.state.selectedFile != ""){
-				this.testVideo(this.state.selectedFile, userid, feedId)
-				}
+				
 				this.setState({ selectedFile : ""});
 				this.setState({ pictures: [] });
 				this.setState({ showVerifyModal: false, });
 				this.setState({ showVideoModal: false, });
 				this.setState({ openModal: true });
 				this.setState({ textSuccessfulModal: "You successfully sent request." });
-				this.handleGetPhotos(id)
 
 			})
 			.catch((err) => {
@@ -1743,17 +1746,8 @@ class ProfilePage extends React.Component {
 						show={this.state.showVerifyModal}
 						onCloseModal={this.handleVerifyModalClose}
 						header="Verify your profile"
-						hiddenMultiple = {this.state.hiddenMultiple}
-						hiddenOne = {this.state.hiddenOne}
-						noPicture = {this.state.noPicture}
 						onDrop = {this.onDrop}
-
-						addressInput = {this.addressInput}
-						onYmapsLoad = {this.onYmapsLoad}
-						handleCategoryChange = {this.handleCategoryChange}
 						handleSendRequestVerification = {this.handleSendRequestVerification}
-
-
 					/>
 					<AddVideoPostModal
 						show={this.state.showVideoModal}

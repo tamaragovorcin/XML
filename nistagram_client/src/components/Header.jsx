@@ -3,13 +3,13 @@ import { Link } from "react-router-dom";
 import { CgProfile } from 'react-icons/cg';
 import Axios from "axios";
 import { FiSettings, FiSend } from 'react-icons/fi';
-import { VscHome } from 'react-icons/vsc';
+import { VscHome, VscRequestChanges } from 'react-icons/vsc';
 import { FaRegQuestionCircle, FaSearch } from 'react-icons/fa';
-
+import {MdReportProblem} from 'react-icons/md';
 import { GiThreeFriends } from 'react-icons/gi';
-import { AiFillLike } from 'react-icons/ai';
 import {IoMdNotificationsOutline} from 'react-icons/io'
 import {HiOutlineUserAdd} from 'react-icons/hi'
+import { AiOutlineHeart,AiFillLike,AiFillDislike } from 'react-icons/ai';
 import { BASE_URL } from "../constants.js";
 import Select from 'react-select';
 
@@ -49,7 +49,6 @@ class Header extends React.Component {
 
 	componentDidMount() {
 		if(this.hasRole("*")) {
-			console.log("ovde sam")
 			let help = []
 			let id = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length-1)
 
@@ -138,47 +137,43 @@ class Header extends React.Component {
 							<li  hidden={!this.hasRole("USER")}>
 								<Link to="/notifications"><IoMdNotificationsOutline/></Link>
 							</li>
-							<li  hidden={!this.hasRole("USER")}>
+							<li  hidden={!this.hasRole("ADMIN")}>
 								<Link to="/verifyRequest"><FaRegQuestionCircle /></Link>
 							</li>
-
+							<li  hidden={!this.hasRole("ADMIN")}>
+								<Link to="/reportedPosts"><MdReportProblem /></Link>
+							</li>
+							<li  hidden={!this.hasRole("ADMIN")}>
+								<Link to="/agentsR"><VscRequestChanges /></Link>
+							</li>
 							<li className="drop-down" hidden={!this.hasRole("USER")}>
 								<a href="#"><CgProfile /></a>
 								<ul>
 
 									<li >
 										<Link to="/profilePage" ><CgProfile /> Profile</Link>
-
 									</li>
 									
 									<li>
-
-
 										<Link to="/editProfile"><FiSettings /> Settings </Link>
-
-
 									</li>
 
 									<li>
-
-
 										<Link to="/closeFriends"><GiThreeFriends /> Close friends </Link>
-
-
 									</li>
 									<li>
-										<Link to="/likedAndDisliked"><AiFillLike /> Liked and disliked photos </Link>
+										<Link to="/likedPosts"><AiFillLike /> Liked posts </Link>
 									</li>
 									<li>
-
-
+										<Link to="/dislikedPosts"><AiFillDislike /> Disliked posts </Link>
+									</li>
+									<li>
 										<Link to="/login"> Log out </Link>
-
-
 									</li>
 
 								</ul>
 							</li>
+							
 							<li className="drop-down" hidden={!this.hasRole("ADMIN")}>
 								<a href="#"><CgProfile /></a>
 								<ul>
@@ -189,17 +184,11 @@ class Header extends React.Component {
 									</li>
 									
 									<li>
-
 										<Link to="/editProfile"><FiSettings /> Settings </Link>
-
 									</li>
-
+								
 									<li>
-
-
 										<Link to="/login"> Log out </Link>
-
-
 									</li>
 
 								</ul>
