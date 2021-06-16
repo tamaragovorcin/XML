@@ -108,6 +108,14 @@ render(){
                                         </tbody>
                                     </table>
                             </div>
+                            <ModalDialog
+                    show={this.state.openModal}
+					onCloseModal={this.handleModalClose}
+					header="Successful"
+					text={this.state.textSuccessfulModal}
+                />
+
+                
                         </div>
         
         </React.Fragment>
