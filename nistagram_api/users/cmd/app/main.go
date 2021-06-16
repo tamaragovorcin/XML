@@ -24,6 +24,8 @@ type application struct {
 	profileImage *mongodb.ProfileImageModel
 	notification   *mongodb.NotificationModel
 	settings  *mongodb.SettingsModel
+	images   *mongodb.ImageModel
+
 }
 
 func main() {
@@ -98,6 +100,12 @@ func main() {
 		},
 		settings: &mongodb.SettingsModel{
 			C: client.Database(*mongoDatabse).Collection("settings"),
+		},
+		agents: &mongodb.AgentModel{
+			C: client.Database(*mongoDatabse).Collection("agents"),
+		},
+		images: &mongodb.ImageModel{
+			C: client.Database(*mongoDatabse).Collection("images"),
 		},
 	}
 

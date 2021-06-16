@@ -7,7 +7,7 @@ import { VscHome } from 'react-icons/vsc';
 import { FaRegQuestionCircle, FaSearch } from 'react-icons/fa';
 import {MdReportProblem} from 'react-icons/md';
 import { GiThreeFriends } from 'react-icons/gi';
-import { AiOutlineHeart,AiFillLike } from 'react-icons/ai';
+import { AiOutlineHeart,AiFillLike,AiFillDislike } from 'react-icons/ai';
 import { BASE_URL } from "../constants.js";
 import Select from 'react-select';
 
@@ -132,7 +132,7 @@ class Header extends React.Component {
 							<li  hidden={!this.hasRole("USER")}>
 								<Link to="/followRequest"><AiOutlineHeart /></Link>
 							</li>
-							<li  hidden={!this.hasRole("USER")}>
+							<li  hidden={!this.hasRole("ADMIN")}>
 								<Link to="/verifyRequest"><FaRegQuestionCircle /></Link>
 							</li>
 							<li  hidden={!this.hasRole("ADMIN")}>
@@ -154,7 +154,10 @@ class Header extends React.Component {
 										<Link to="/closeFriends"><GiThreeFriends /> Close friends </Link>
 									</li>
 									<li>
-										<Link to="/likedAndDisliked"><AiFillLike /> Liked and disliked photos </Link>
+										<Link to="/likedPosts"><AiFillLike /> Liked posts </Link>
+									</li>
+									<li>
+										<Link to="/dislikedPosts"><AiFillDislike /> Disliked posts </Link>
 									</li>
 									<li>
 										<Link to="/login"> Log out </Link>

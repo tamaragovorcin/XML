@@ -8,51 +8,26 @@ import {CgFeed} from "react-icons/cg"
 import { BASE_URL_USER } from "../constants.js";
 import Axios from "axios";
 
-const mapState = {
-	center: [44, 21],
-	zoom: 8,
-	controls: [],
-};
+
 class VerifyModal extends Component {
    
     state = {
         name: "",
-		lastName : "",
-		
-
+		surname : "",
+		category : ""
     }
 	handleCategoryChange(event) {
+		console.log(event.target.value)
+		this.setState({ category: event.target.value });
+	}
+	handleNameChange = (event) => {
+		this.setState({ name: event.target.value });
+	};
 
-alert(event)	}
-
+	handleSurnameChange = (event) => {
+		this.setState({ surname: event.target.value });
+	};
     componentDidMount() {
-
-		let id = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length-1)
-		Axios.get(BASE_URL_USER + "/api/" + id)
-				.then((res) => {
-					if (res.status === 401) {
-						this.setState({ errorHeader: "Bad credentials!", errorMessage: "Wrong username or password.", hiddenErrorAlert: false });
-					} else if (res.status === 500) {
-						this.setState({ errorHeader: "Internal server error!", errorMessage: "Server error.", hiddenErrorAlert: false });
-					} else {
-						this.setState({
-							id: res.data.Id,
-							username : res.data.ProfileInformation.Username,
-							name: res.data.ProfileInformation.Name,
-							lastName : res.data.ProfileInformation.LastName,
-							email : res.data.ProfileInformation.Email,
-							phoneNumber : res.data.ProfileInformation.PhoneNumber,
-							gender : res.data.ProfileInformation.Gender,
-							dateOfBirth  : res.data.ProfileInformation.DateOfBirth,
-							webSite : res.data.WebSite,
-							biography : res.data.Biography,
-							private : res.data.Private
-						});
-					}
-				})
-				.catch ((err) => {
-			console.log(err);
-		});
 
 	}
 	render() {
@@ -75,32 +50,49 @@ alert(event)	}
 						<ImageUploader
 											withIcon={false}
 											buttonText='Add identitly document'
-											//	onChange={this.props.onDrop}
+											onChange={this.props.onDrop}
 											imgExtension={['.jpg', '.gif', '.png', '.gif']}
 											withPreview={true}
 						/>
 					<div className="row section-design"  style={{ border:"1 solid black", }}>
 						<div className="col-lg-8 mx-auto">
-								<div className="control-group">
+						<div className="control-group">
+									<div className="form-group controls mb-0 pb-2" style={{ color: "#6c757d", opacity: 1 }}>
+										<label>First name:</label>
+										<input
+											placeholder="Name"
+											class="form-control"
+											type="text"
+											id="name"
+											onChange={this.handleNameChange}
+											value={this.state.name}
+										/>
+									</div>
 									
-                                            <td>
-												<label ><b>First name:</b>{this.state.name}</label>
-											</td>
-					
 								</div>
-								
 								<div className="control-group">
+									<div className="form-group controls mb-0 pb-2" style={{ color: "#6c757d", opacity: 1 }}>
+										<label>Surname:</label>
+										<input
+											placeholder="Surname"
+											class="form-control"
+											type="text"
+											id="surname"
+											onChange={this.handleSurnameChange}
+											value={this.state.surname}
+										/>
+									</div>
 									
-                                             <td>
-												<label ><b>Surname:</b>{this.state.lastName}</label>
-											</td>
 								</div>
                                 
 								<div className="control-group">
 								<div style={{ color: "#6c757d", opacity: 1 }}>
-									<p><input type="radio" checked value="Male" name="gender" onChange={(e) => this.handleCategoryChange(e)} /> Male</p>
-									<p><input type="radio" value="Female" name="gender" onChange={(e) => this.handleCategoryChange(e)} /> Female</p>
-									<p><input type="radio" value="Other" name="gender" onChange={(e) => this.handleCategoryChange(e)} /> Other </p>
+									<p><input type="radio"  value="INFLUENCER" name="category" onChange={(e) => this.handleCategoryChange(e)} />Influencer</p>
+									<p><input type="radio" value="SPORTS" name="category" onChange={(e) => this.handleCategoryChange(e)} /> Sports</p>
+									<p><input type="radio" value="NEW_MEDIA" name="category" onChange={(e) => this.handleCategoryChange(e)} /> New media </p>
+									<p><input type="radio" value="BUSINESS" name="category" onChange={(e) => this.handleCategoryChange(e)} />Business</p>
+									<p><input type="radio" value="BRAND" name="category" onChange={(e) => this.handleCategoryChange(e)} /> Brand</p>
+									<p><input type="radio" value="ORGANIZATION" name="category" onChange={(e) => this.handleCategoryChange(e)} /> Organization </p>
 								</div>
 								</div>
 								
@@ -111,7 +103,12 @@ alert(event)	}
                         
 							<div>
 						
-								<button style={{ width: "10rem", margin : "1rem",background:"#42DA61" }}  onClick={this.props.handleSendRequestVerification} className="btn btn-outline-secondary btn-sm">Send verify request<br/> <CgFeed/> </button>
+								<button 
+									style={{ width: "10rem", margin : "1rem",background:"#42DA61" }} 
+									 onClick={() => this.props.handleSendRequestVerification(this.state.name,this.state.surname,this.state.category)}
+									 className="btn btn-outline-secondary btn-sm">
+									 Send verify request<br/> 
+									 <CgFeed/> </button>
 								
 							</div>
 					
