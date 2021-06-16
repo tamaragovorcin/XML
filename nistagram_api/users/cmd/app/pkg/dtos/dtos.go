@@ -85,11 +85,12 @@ type MuteDTO struct {
 	Object string
 }
 type RequestDTO struct {
-	Id          primitive.ObjectID
-	Name  string `bson:"name,omitempty"`
-	LastName string `bson:"lastName,omitempty"`
-	ContentType string
+	Id  primitive.ObjectID
+	Name  string
+	LastName string
 	Category string
+	Media []byte
+	UserId primitive.ObjectID
 }
 type VerificationReactionDTO struct {
 	RequestId primitive.ObjectID
