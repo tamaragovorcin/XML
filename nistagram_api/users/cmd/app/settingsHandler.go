@@ -552,3 +552,68 @@ func removeUserFromMutedList(settings models.Settings, id primitive.ObjectID) []
 	}
 	return listNew
 }
+
+func removeFromMuted(id primitive.ObjectID, app *application) {
+	allSettings,_ := app.settings.GetAll()
+	for _,usersSettings := range allSettings {
+		for _,mute := range usersSettings.Muted {
+			if mute.Hex()==id.Hex() {
+				newMutedList :=removeUserFromMutedList(usersSettings,id)
+				var settingsUpdate = models.Settings{
+					Id : usersSettings.Id,
+					User : usersSettings.User,
+					AllowTags : usersSettings.AllowTags,
+					AcceptMessages : usersSettings.AcceptMessages,
+					Muted: newMutedList,
+					Blocked: usersSettings.Blocked,
+					CloseFriends : usersSettings.CloseFriends,
+				}
+				_, _ = app.settings.Update(settingsUpdate)
+			}
+		}
+	}
+}
+
+
+
+func removeFromBlocked(id primitive.ObjectID, app *application) {
+	allSettings,_ := app.settings.GetAll()
+	for _,usersSettings := range allSettings {
+		for _,mute := range usersSettings.Blocked {
+			if mute.Hex()==id.Hex() {
+					newBlockedList :=removeUserFromBlockList(usersSettings,id)
+				var settingsUpdate = models.Settings{
+					Id : usersSettings.Id,
+					User : usersSettings.User,
+					AllowTags : usersSettings.AllowTags,
+					AcceptMessages : usersSettings.AcceptMessages,
+					Muted: usersSettings.Muted,
+					Blocked: newBlockedList,
+					CloseFriends : usersSettings.CloseFriends,
+				}
+				_, _ = app.settings.Update(settingsUpdate)
+			}
+		}
+	}
+}
+
+func removeFromCloseFriends(id primitive.ObjectID, app *application) {
+	allSettings,_ := app.settings.GetAll()
+	for _,usersSettings := range allSettings {
+		for _,mute := range usersSettings.CloseFriends {
+			if mute.Hex()==id.Hex() {
+				newCloseFriendsList :=removeCloseFriends(usersSettings,id)
+				var settingsUpdate = models.Settings{
+					Id : usersSettings.Id,
+					User : usersSettings.User,
+					AllowTags : usersSettings.AllowTags,
+					AcceptMessages : usersSettings.AcceptMessages,
+					Muted: usersSettings.Muted,
+					Blocked: usersSettings.Blocked,
+					CloseFriends : newCloseFriendsList,
+				}
+				_, _ = app.settings.Update(settingsUpdate)
+			}
+		}
+	}
+}

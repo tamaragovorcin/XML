@@ -4,6 +4,7 @@ import {Tabs, Tab} from 'react-bootstrap';
 import { FiHeart } from "react-icons/fi";
 import {FaHeartBroken,FaRegCommentDots} from "react-icons/fa"
 import {BsBookmark} from "react-icons/bs"
+import {MdReportProblem} from "react-icons/md"
 import "react-responsive-carousel/lib/styles/carousel.min.css"; // requires a loader
 import { Carousel } from 'react-responsive-carousel';
 
@@ -91,6 +92,9 @@ render(){
                         <td>
                               <button onClick={() =>  this.props.handleOpenAddPostToCollectionModal(post.Id)} style={{ marginBottom: "1rem", height:"40px" }} className="btn btn-outline-secondary btn-sm"><label ><BsBookmark/></label></button>
                         </td>
+                        <td>
+                              <button onClick={() =>  this.props.handleReportPost(post.Id,"post")} style={{ marginBottom: "1rem", height:"40px" }} className="btn btn-outline-secondary btn-sm"><label ><MdReportProblem/></label></button>
+                        </td>
                     </tr>
                     <tr  style={{ width: "100%" }} hidden={!this.props.userIsLoggedIn}>
                         <td>
@@ -175,7 +179,9 @@ render(){
                         <td>
                             <button onClick={() =>  this.props.handleOpenAddAlbumToCollectionAlbumModal(post.Id)} style={{ marginBottom: "1rem", height:"40px" }} className="btn btn-outline-secondary btn-sm"><label ><BsBookmark/></label></button>
                         </td>
-                       
+                        <td>
+                              <button onClick={() =>  this.props.handleReportPost(post.Id, "album")} style={{ marginBottom: "1rem", height:"40px" }} className="btn btn-outline-secondary btn-sm"><label ><MdReportProblem/></label></button>
+                        </td>
                     </tr>
                     <tr  style={{ width: "100%" }}>
                         <td>
