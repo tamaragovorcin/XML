@@ -219,7 +219,14 @@ class ProfilePage extends React.Component {
 		.catch((err) => {
 			console.log(err);
 		});*/
-		fetch( BASE_URL + " /api/feedPosts/api/image/"+userId+"/"+feedId, options);
+		// Axios.post(BASE_URL +"/api/feedPosts/api/image/"+userId+"/"+feedId,formData)
+		// 	.then((res) => {
+		// 		console.log(res)
+		// 		})
+		// 	.catch((err) => {
+		// 		console.log(err);
+		// 	});
+		 fetch(BASE_URL + "/api/feedPosts/api/image/"+userId+"/"+feedId, options);
 	}
 	testProfileImage(pic,userId) {
 		
@@ -592,8 +599,9 @@ class ProfilePage extends React.Component {
 		
 		
 	}
+
 	handleSendRequestVerification = ()=> {
-	
+		alert(this.state.category)
 		let id = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length-1)
 			const verificationDTO = {
 				Id : id,
@@ -602,7 +610,6 @@ class ProfilePage extends React.Component {
 				Category : this.state.category
 				
 			};
-			alert(this.state.name);
 			this.sendRequestForVerification(verificationDTO);
 
 		
@@ -872,7 +879,7 @@ class ProfilePage extends React.Component {
 	sendRequestForVerification(verificationDTO) {
 		let id = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length-1)
 				
-		Axios.post(BASE_URL + "/api/users/api/verification/", verificationDTO)
+		Axios.post(BASE_URL + "/api/users/api/verificationRequest/", verificationDTO)
 			.then((res) => {
 				if (res.status === 409) {
 					this.setState({
@@ -1589,6 +1596,10 @@ class ProfilePage extends React.Component {
 												<button onClick={this.handleVideoPostModalOpen} className="btn btn-outline-secondary btn-sm" style={{ marginBottom: "1rem" }}>Add video post</button>
 
 											</td>
+											<td>
+												<button onClick={this.handleVerifyModalOpen} className="btn btn-outline-secondary btn-sm" style={{ marginBottom: "1rem" }}>Send verification request</button>
+
+											</td>
 										</div>
 										
 										<div>
@@ -1739,7 +1750,7 @@ class ProfilePage extends React.Component {
 
 						addressInput = {this.addressInput}
 						onYmapsLoad = {this.onYmapsLoad}
-						
+						handleCategoryChange = {this.handleCategoryChange}
 						handleSendRequestVerification = {this.handleSendRequestVerification}
 
 

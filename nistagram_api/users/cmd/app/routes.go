@@ -36,7 +36,6 @@ func (app *application) routes() *mux.Router {
 
 	r.HandleFunc("/verification/", app.getAllVerifications).Methods("GET")
 	r.HandleFunc("/verification/{id}", app.findVerificationByID).Methods("GET")
-	r.HandleFunc("/verification/", app.insertVerification).Methods("POST")
 	r.HandleFunc("/verification/{id}", app.deleteVerification).Methods("DELETE")
 
 	r.HandleFunc("/api/role/", app.getAllRoles).Methods("GET")
@@ -69,7 +68,8 @@ func (app *application) routes() *mux.Router {
 	r.HandleFunc("/api/checkIfBlocked/{subjectId}/{objectId}", app.checkIfUserIsBlocked).Methods("GET")
 	r.HandleFunc("/api/user/allowTags/{userId}", app.checkIfUserAllowsTags).Methods("GET")
 
-	//r.HandleFunc("api/allVerificationRequest/", app.getAllRequestVerification).Methods("GET")
+	r.HandleFunc("/api/verificationRequest", app.getAllRequestVerification).Methods("GET")
+	r.HandleFunc("/api/verificationRequest/", app.insertVerification).Methods("POST")
 
 	return r
 }
