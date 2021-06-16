@@ -13,10 +13,11 @@ import PharmacyProfilePage from './pages/FollowerProfilePage';
 import Search from './pages/Search';
 import CloseFriends from './pages/CloseFriends';
 import FollowRequest from './pages/FollowRequest';
-import Settings from './pages/Settings';
+import Settings from './pages/PrivacySettings';
+import NotificationSettings from './pages/NotificationSettings'
+import Notifications from './pages/Notifications'
 import LikedPosts from './pages/LikedPosts';
 import DislikedPosts from './pages/DislikedPosts';
-
 import VerifyRequest from './pages/VerifyRequest';
 import ReportedPosts from './pages/ReportedPosts';
 import AgentsRequests from './pages/AgentsRequests';
@@ -40,9 +41,12 @@ function App() {
 				<Link exact to="/closeFriends" path="/closeFriends" component={CloseFriends} />
 				<Link exact to="/followRequest" path="/followRequest" component={FollowRequest} />
 				<Link exact to="/settings" path="/settings" component={Settings} />
+				<Link exact to="/notificationSettings" path="/notificationSettings" component={NotificationSettings} />
+				<Link exact to="/verifyRequest" path="/verifyRequest" component={VerifyRequest} />
+				<Link exact to="/notifications" path="/notifications" component={Notifications} />
+
 				<Link exact to="/likedPosts" path="/likedPosts" component={LikedPosts} />
 				<Link exact to="/dislikedPosts" path="/dislikedPosts" component={DislikedPosts} />
-
 				<Link exact to="/verifyRequest" path="/verifyRequest" component={VerifyRequest} />
 				<Link exact to="/reportedPosts" path="/reportedPosts" component={ReportedPosts} />
 				<Link exact to="/agentsR" path="/agentsR" component={AgentsRequests} />

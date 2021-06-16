@@ -7,6 +7,8 @@ import { VscHome, VscRequestChanges } from 'react-icons/vsc';
 import { FaRegQuestionCircle, FaSearch } from 'react-icons/fa';
 import {MdReportProblem} from 'react-icons/md';
 import { GiThreeFriends } from 'react-icons/gi';
+import {IoMdNotificationsOutline} from 'react-icons/io'
+import {HiOutlineUserAdd} from 'react-icons/hi'
 import { AiOutlineHeart,AiFillLike,AiFillDislike } from 'react-icons/ai';
 import { BASE_URL } from "../constants.js";
 import Select from 'react-select';
@@ -130,7 +132,10 @@ class Header extends React.Component {
 								<Link to="/messages"><FiSend /></Link>
 							</li>
 							<li  hidden={!this.hasRole("USER")}>
-								<Link to="/followRequest"><AiOutlineHeart /></Link>
+								<Link to="/followRequest"><HiOutlineUserAdd /></Link>
+							</li>
+							<li  hidden={!this.hasRole("USER")}>
+								<Link to="/notifications"><IoMdNotificationsOutline/></Link>
 							</li>
 							<li  hidden={!this.hasRole("ADMIN")}>
 								<Link to="/verifyRequest"><FaRegQuestionCircle /></Link>

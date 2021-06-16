@@ -83,13 +83,22 @@ type ProfileImage struct {
 type Notifications struct {
 	Id       primitive.ObjectID `bson:"_id,omitempty"`
 	User     primitive.ObjectID `bson:"user"`
-	NotificationsProfiles []primitive.ObjectID `bson:"notificationsProfiles"`
-	NotificationsMessages []primitive.ObjectID `bson:"notificationsMessages"`
-	NotificationsPosts []primitive.ObjectID `bson:"notificationsPosts"`
-	NotificationsStories []primitive.ObjectID `bson:"notificationsStories"`
-	NotificationsComments []primitive.ObjectID `bson:"notificationsComments"`
+	NotificationsMessages bool `bson:"notificationsMessages"`
+	NotificationsComments bool `bson:"notificationsComments"`
 }
-
+type NotificationForUser struct {
+	Id       primitive.ObjectID `bson:"_id,omitempty"`
+	Subject     primitive.ObjectID `bson:"subject"`
+	Object     primitive.ObjectID `bson:"object"`
+	Posts bool `bson:"posts"`
+	Stories bool `bson:"stories"`
+}
+type NotificationContent struct {
+	Id       primitive.ObjectID `bson:"_id,omitempty"`
+	Subject     primitive.ObjectID `bson:"subject"`
+	Object primitive.ObjectID `bson:"object"`
+	Posted string `bson:"posted"`
+}
 type Settings struct {
 	Id       primitive.ObjectID `bson:"_id,omitempty"`
 	User     primitive.ObjectID `bson:"user"`

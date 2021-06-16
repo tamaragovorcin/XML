@@ -13,7 +13,8 @@ class SidebarSettings extends Component{
                     <div class="sidenav shadow p-3 bg-white rounded">
 					<Link to="/editProfile">Edit profile</Link>
 					<Link to="/passwordChange">Change password</Link>
-                    <Link to="/settings">Notification settings</Link>
+                    <Link to="/settings">Privacy settings</Link>
+					<Link to="/notificationSettings">Notification settings</Link>
                     </div>
 				</div>
 				

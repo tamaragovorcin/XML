@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"storyPosts/pkg/dtos"
 	"time"
@@ -65,7 +66,8 @@ func (app *application) insertAlbumStory(w http.ResponseWriter, req *http.Reques
 	if err != nil {
 		app.serverError(w, err)
 	}
-
+	resp, err := http.Get("http://localhost:80/api/users/api/sendNotificationPost/"+"Album Story Post"+"/"+userId)
+	fmt.Println(resp)
 	app.infoLog.Printf("New content have been created, id=%s", insertResult.InsertedID)
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)

@@ -102,6 +102,8 @@ func (app *application) insertFeedPost(w http.ResponseWriter, req *http.Request)
 	}
 
 	app.infoLog.Printf("New content have been created, id=%s", insertResult.InsertedID)
+	resp, err := http.Get("http://localhost:80/api/users/api/sendNotificationPost/"+"Feed Post"+"/"+userId)
+	fmt.Println(resp)
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 
@@ -811,6 +813,8 @@ func (app *application) commentTheFeedPost(w http.ResponseWriter, r *http.Reques
 	if err != nil {
 		app.serverError(w, err)
 	}
+	resp, err := http.Get("http://localhost:80/api/users/api/sendNotificationComment/"+m.UserId.Hex()+"/"+post.User.Hex()+"/"+m.Content)
+	fmt.Println(resp)
 	app.infoLog.Printf("New user have been created, id=%s", insertResult.UpsertedID)
 }
 

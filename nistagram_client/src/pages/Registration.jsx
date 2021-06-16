@@ -168,7 +168,7 @@ class RegisterPage extends Component {
 					} else {
 						this.setState({ openModal: true });
 					}
-					const user1Id = {id: res.data}
+					const user1Id = {id: res.data}				
 					Axios.post(BASE_URL + "/api/userInteraction/api/createUser", user1Id)
 					.then((res) => {
 							console.log(res.data)
@@ -176,6 +176,13 @@ class RegisterPage extends Component {
 					.catch ((err) => {
 				console.log(err);
 			});
+			Axios.get(BASE_URL + "/api/users/api/addSettings/"+res.data )
+					.then((res2) => {
+						console.log(res2.data)
+					})
+					.catch((err) => {
+						console.log(err);
+					});
 				})
 				.catch((err) => {
 					if (err.response.status === 409) {
@@ -190,6 +197,7 @@ class RegisterPage extends Component {
 
 				});
 		}
+		
 
 
 	};
