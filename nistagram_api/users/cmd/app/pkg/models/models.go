@@ -24,15 +24,15 @@ const (
 // User is used to represent user profile data
 type ProfileInformation struct {
 	Id       primitive.ObjectID `bson:"_id,omitempty"`
-	Name     string             `bson:"name,omitempty"`
-	LastName string             `bson:"lastName,omitempty"`
-	Email string                `validate:"required,email" bson:"email,omitempty"`
-	Username string             `bson:"username,omitempty"`
-	Password string             `bson:"password,omitempty"`
-	Roles []Role                `bson:"roles,omitempty"`
-	PhoneNumber string          `bson:"phoneNumber,omitempty"`
-	Gender string               `bson:"gender,omitempty"`
-	DateOfBirth string          `bson:"dateOfBirth,omitempty"`
+	Name     string             `bson:"name"`
+	LastName string             `bson:"lastName"`
+	Email string                `validate:"required,email" bson:"email"`
+	Username string             `bson:"username"`
+	Password string             `bson:"password"`
+	Roles []Role                `bson:"roles"`
+	PhoneNumber string          `bson:"phoneNumber"`
+	Gender string               `bson:"gender"`
+	DateOfBirth string          `bson:"dateOfBirth"`
 }
 
 
@@ -54,12 +54,12 @@ type Agent struct {
 
 type User struct {
 	Id                 primitive.ObjectID `bson:"_id,omitempty"`
-	ProfileInformation ProfileInformation `bson:"profileInformation,omitempty"`
+	ProfileInformation ProfileInformation `bson:"profileInformation"`
 	Private            bool               `bson:"private"`
 	Website            string             `bson:"webSite"`
 	Biography          string             `bson:"biography"`
 	Verified           bool               `bson:"verified"`
-	Category           Category           `bson:"category"`
+	Category           string           `bson:"category"`
 }
 
 type Verification struct {
