@@ -74,7 +74,37 @@ func (app *application) findBlockedUsers(w http.ResponseWriter, r *http.Request)
 		us, _ := app.users.FindByID(user)
 		listOfUsers = append(listOfUsers, *us)
 	}
-	b, err := json.Marshal(listOfUsers)
+	response := []dtos2.BlockedUserDTO{}
+	for _,blocked := range  listOfUsers{
+			response = 	append(response,blockedToResponse(blocked))
+	}
+	b, err := json.Marshal(response)
+	if err != nil {
+		app.serverError(w, err)
+	}
+
+	app.infoLog.Println("Have been found a user")
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	w.Write(b)
+}
+func blockedToResponse(user models.User) dtos2.BlockedUserDTO {
+	return dtos2.BlockedUserDTO{
+		Id: user.Id,
+		Username: user.ProfileInformation.Username,
+	}
+}
+func (app *application) addSettings(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	vars := mux.Vars(r)
+	userId := vars["userId"]
+	allSettings,_ := app.settings.GetAll()
+	allNotifications,_ := app.notification.GetAll()
+	settings := getUsersSettings(app,allSettings,userId)
+	notifications := getUsersNotifications(app, allNotifications, userId)
+	fmt.Println(notifications)
+	b, err := json.Marshal(settings)
 	if err != nil {
 		app.serverError(w, err)
 	}
@@ -344,6 +374,17 @@ func getUsersSettings(app *application,settings []models.Settings, logged string
 		}
 	}
 	usersSettings := insertSettingsForUser(app,logged)
+	return usersSettings
+}
+func getUsersNotifications(app *application,notifications []models.Notifications, logged string) models.Notifications {
+	for _, settingsItem := range notifications {
+		user :=settingsItem.User
+		settinsUser:= user.Hex()
+		if settinsUser==logged {
+			return settingsItem
+		}
+	}
+	usersSettings := insertNotificationsForUser(app,logged)
 	return usersSettings
 }
 

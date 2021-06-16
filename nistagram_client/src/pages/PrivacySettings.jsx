@@ -10,7 +10,7 @@ import SidebarSettings from "../components/SidebarSettings"
 
 
 
-class Settings extends Component {
+class PrivacySettings extends Component {
 	state = {
 		id: "",
         private : false,
@@ -254,4 +254,4 @@ class Settings extends Component {
 	}
 }
 
-export default Settings;
+export default PrivacySettings;

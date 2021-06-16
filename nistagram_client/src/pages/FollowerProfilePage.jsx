@@ -8,6 +8,7 @@ import Axios from "axios";
 import ModalDialog from "../components/ModalDialog";
 import WriteCommentModal from "../components/Posts/WriteCommentModal"
 import LikesModal from "../components/Posts/LikesModal"
+import NotificationModal from "../components/NotificationModal"
 import DislikesModal from "../components/Posts/DislikesModal"
 import CommentsModal from "../components/Posts/CommentsModal"
 import AddPostToCollection from "../components/Posts/AddPostToCollection";
@@ -16,6 +17,8 @@ import { Lock } from "@material-ui/icons";
 import { Icon } from "@material-ui/core";
 import { BASE_URL } from "../constants.js";
 import { isCompositeComponentWithType } from "react-dom/test-utils";
+import {IoMdNotificationsOutline} from 'react-icons/io'
+
 class FollowerProfilePage extends React.Component {
 	
 
@@ -80,7 +83,10 @@ class FollowerProfilePage extends React.Component {
 		myCollectionAlbums : [],
 		myCollections : [],
 		userIsLoggedIn : false,
-		blockedUser : false
+		blockedUser : false,
+		showNotificationModal : false,
+		postsNotification : false,
+		storiesNotification : false
 	}
 	hasRole = (reqRole) => {
 		let roles = JSON.parse(localStorage.getItem("keyRole"));
@@ -147,6 +153,20 @@ class FollowerProfilePage extends React.Component {
 		this.handleGetHighlightAlbums(s[5])
 
 
+	}
+	handleOpenNotificationModal= ()=>{
+		this.setState({showNotificationModal : true});
+	}
+	handleNotifications = ()=>{
+		let loggedId = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length-1)
+		const dto = {Subject: loggedId, Object: this.state.userId, Posts : this.state.postsNotification, Stories : this.state.storiesNotification};
+		Axios.post(BASE_URL + "/api/users/api/turnOnNotifications", dto)
+		.then((res2) => {
+			alert("success")	
+		})
+		.catch((err) => {
+			console.log(err);
+		});
 	}
 	handleSetAllowPagePreview = (id)=> {
 		if(!this.hasRole("*")) {
@@ -313,7 +333,26 @@ class FollowerProfilePage extends React.Component {
 	handleWriteCommentModalClose = ()=>{
 		this.setState({showWriteCommentModal : false});
 	}
-	
+	handleNotificationModalClose = ()=>{
+		this.setState({showNotificationModal : false});
+	}
+
+	handlePostsNotificationChange=() =>{
+		if(this.state.postsNotification === true) {
+			this.setState({ postsNotification: false });
+		}
+		if(this.state.postsNotification=== false) {
+			this.setState({ postsNotification: true });
+		}
+	}
+    handleStoriesNotificationChange=()=> {
+		if(this.state.storiesNotification=== true) {
+			this.setState({ storiesNotification: false });
+		}
+		if(this.state.storiesNotification=== false) {
+			this.setState({ storiesNotification: true });
+		}
+	}
 	handleLike = (postId)=>{
 		let id = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length-1)
 
@@ -717,21 +756,35 @@ class FollowerProfilePage extends React.Component {
 														<div hidden={!this.state.followingThisUser}>
 															<button  className="btn btn-outline-success mt-1"  type="button"><i className="icofont-subscribe mr-1"></i>Following</button>
 														</div>
+														</td>
+														<td>
 														<div hidden={!this.state.ableToFollowThisUser}>
 															<button  className="btn btn-outline-primary mt-1" onClick={() => this.handleFollow()} type="button"><i className="icofont-subscribe mr-1"></i>Follow</button>
 														</div>
+														</td>
+														<td>
 														<div hidden={!this.state.sentFollowRequest}>
 															<button  className="btn btn-outline-warning mt-1"  type="button"><i className="icofont-subscribe mr-1"></i>Sent request</button>
 														</div>
+														</td>
+														<td>
 														<div hidden={!this.state.followingThisUser || this.state.mutedThisUser}>
 															<button  className="btn btn-outline-primary mt-1" onClick={() => this.handleMute()} type="button"><i className="icofont-subscribe mr-1"></i>Mute</button>
 														</div>
+														</td>
+														<td>
 														<div hidden={!this.state.mutedThisUser}>
 															<button  className="btn btn-outline-primary mt-1" onClick={() => this.handleUnMute()} type="button"><i className="icofont-subscribe mr-1"></i>Unmute</button>
 														</div>
+														</td>
+														<td>
 														<div>
 															<button  className="btn btn-outline-primary mt-1" onClick={() => this.handleBlock()} type="button"><i className="icofont-subscribe mr-1"></i>Block</button>
 														</div>
+														</td>
+													<td  hidden={!this.state.followingThisUser}>
+													<button  className="btn btn-outline-primary mt-1" onClick={() => this.handleOpenNotificationModal()} type="button"><i className="icofont-subscribe mr-1"></i><IoMdNotificationsOutline/></button>
+
 													</td>
 
 												</div>
@@ -848,6 +901,16 @@ class FollowerProfilePage extends React.Component {
 						onCloseModal={this.handleCommentsModalClose}
 						header="Comments"
 						peopleComments = {this.state.peopleComments}
+                    />
+					  <NotificationModal
+                        show={this.state.showNotificationModal}
+						onCloseModal={this.handleNotificationModalClose}
+						header="Notification properties"
+						postsNotification = {this.state.postsNotification}
+						storiesNotification = {this.state.storiesNotification}
+						handleStoriesNotificationChange = {this.handleStoriesNotificationChange}
+						handlePostsNotificationChange = {this.handlePostsNotificationChange}
+						handleNotifications = {this.handleNotifications}
                     />
 					<WriteCommentModal
                         show={this.state.showWriteCommentModal}

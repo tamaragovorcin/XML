@@ -13,7 +13,9 @@ import PharmacyProfilePage from './pages/FollowerProfilePage';
 import Search from './pages/Search';
 import CloseFriends from './pages/CloseFriends';
 import FollowRequest from './pages/FollowRequest';
-import Settings from './pages/Settings';
+import Settings from './pages/PrivacySettings';
+import NotificationSettings from './pages/NotificationSettings'
+import Notifications from './pages/Notifications'
 import LikedAndDislikedPosts from './pages/LikedAndDislikedPosts';
 import VerifyRequest from './pages/VerifyRequest';
 
@@ -38,8 +40,11 @@ function App() {
 				<Link exact to="/closeFriends" path="/closeFriends" component={CloseFriends} />
 				<Link exact to="/followRequest" path="/followRequest" component={FollowRequest} />
 				<Link exact to="/settings" path="/settings" component={Settings} />
+				<Link exact to="/notificationSettings" path="/notificationSettings" component={NotificationSettings} />
 				<Link exact to="/likedAndDisliked" path="/likedAndDisliked" component={LikedAndDislikedPosts} />
 				<Link exact to="/verifyRequest" path="/verifyRequest" component={VerifyRequest} />
+				<Link exact to="/notifications" path="/notifications" component={Notifications} />
+
 
 			</Switch>
 	</Router>

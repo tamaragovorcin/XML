@@ -72,6 +72,21 @@ type MuteDTO struct {
 	Subject string
 	Object string
 }
+type NotificationDTO struct {
+	Subject string
+	Object string
+	Posts bool
+	Stories bool
+}
+type NotificationSettingsDTO struct {
+	User string
+	Messages bool
+	Comments bool
+}
+type NotificationContentDTO struct {
+	Username string
+	Posted string
+}
 type RequestDTO struct {
 	Id          primitive.ObjectID
 	Name  string `bson:"name,omitempty"`
@@ -82,4 +97,9 @@ type RequestDTO struct {
 type VerificationReactionDTO struct {
 	RequestId primitive.ObjectID
 	UserId primitive.ObjectID
+}
+
+type BlockedUserDTO struct {
+	Username string
+	Id primitive.ObjectID
 }

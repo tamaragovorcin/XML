@@ -52,7 +52,6 @@ func (app *application) routes() *mux.Router {
 	r.HandleFunc("/api/user/profileImage/{userId}", app.getUsersProfileImage).Methods("GET")
 
 	r.HandleFunc("/notification/", app.getAllNotification).Methods("GET")
-	r.HandleFunc("/notification/{id}", app.findByIDNotification).Methods("GET")
 	r.HandleFunc("/notification/", app.insertNotification).Methods("POST")
 	r.HandleFunc("/notification/{id}", app.deleteNotification).Methods("DELETE")
 
@@ -70,6 +69,14 @@ func (app *application) routes() *mux.Router {
 
 	r.HandleFunc("/api/verificationRequest", app.getAllRequestVerification).Methods("GET")
 	r.HandleFunc("/api/verificationRequest/", app.insertVerification).Methods("POST")
+
+ 	r.HandleFunc("/api/turnOnNotifications", app.turnOnNotificationsForUser).Methods("POST")
+	r.HandleFunc("/api/addSettings/{userId}", app.addSettings).Methods("GET")
+	r.HandleFunc("/api/updateNotifications", app.updateNotifications).Methods("POST")
+	r.HandleFunc("/api/sendNotificationPost/{postType}/{userId}", app.sendNotificationPost).Methods("GET")
+	r.HandleFunc("/api/sendNotificationComment/{writer}/{user}/{content}", app.sendNotificationComment).Methods("GET")
+	r.HandleFunc("/api/getPostNotifications/{userId}", app.getPostNotifications).Methods("GET")
+	r.HandleFunc("/api/getCommentNotification/{userId}", app.getCommentNotifications).Methods("GET")
 
 	return r
 }

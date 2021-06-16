@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"feedPosts/pkg/dtos"
 	"feedPosts/pkg/models"
+	"fmt"
 	"github.com/gorilla/mux"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"image"
@@ -70,7 +71,8 @@ func (app *application) insertAlbumFeed(w http.ResponseWriter, req *http.Request
 	if err != nil {
 		app.serverError(w, err)
 	}
-
+	resp, err := http.Get("http://localhost:80/api/users/api/sendNotificationPost/"+"Album Feed Post"+"/"+userId)
+	fmt.Println(resp)
 	app.infoLog.Printf("New content have been created, id=%s", insertResult.InsertedID)
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
@@ -357,6 +359,8 @@ func (app *application) commentTheFeedAlbum(w http.ResponseWriter, r *http.Reque
 	if err != nil {
 		app.serverError(w, err)
 	}
+	resp, err := http.Get("http://localhost:80/api/users/api/sendNotificationComment/"+m.UserId.Hex()+"/"+post.User.Hex()+"/"+m.Content)
+	fmt.Println(resp)
 	app.infoLog.Printf("New user have been created, id=%s", insertResult.UpsertedID)
 }
 

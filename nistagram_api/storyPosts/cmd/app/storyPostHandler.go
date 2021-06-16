@@ -75,7 +75,8 @@ func (app *application) insertStoryPost(w http.ResponseWriter, req *http.Request
 	if err != nil {
 		app.serverError(w, err)
 	}
-
+	resp, err := http.Get("http://localhost:80/api/users/api/sendNotificationPost/"+"Story Post"+"/"+userId)
+	fmt.Println(resp)
 	app.infoLog.Printf("New content have been created, id=%s", insertResult.InsertedID)
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
