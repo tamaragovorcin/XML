@@ -21,7 +21,19 @@ type UserRequest struct {
 	Biography string
 	Website string
 }
-
+type AgentRequest struct {
+	Name  string
+	LastName string
+	Email string
+	Username string
+	Password string
+	PhoneNumber string
+	Gender string
+	DateOfBirth string
+	Private bool
+	Biography string
+	Website string
+}
 type CloseFriendsDTO struct {
 	IdLogged string
 	IdClose string
