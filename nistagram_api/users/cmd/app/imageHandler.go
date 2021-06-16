@@ -8,6 +8,7 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"strconv"
 	"strings"
 	"users/pkg/models"
 )
@@ -144,3 +145,44 @@ func (app *application) deleteImageVerification(w http.ResponseWriter, r *http.R
 	app.infoLog.Printf("Have been eliminated %d image(s)", deleteResult.DeletedCount)
 }
 
+func(app *application) getVerificationFile(w http.ResponseWriter, r *http.Request){
+	vars := mux.Vars(r)
+	requestId := vars["requestId"]
+	requestIdPrimitive, _ := primitive.ObjectIDFromHex(requestId)
+
+	allImages,_ := app.images.All()
+	images, err := findImageByVerificationId(allImages,requestIdPrimitive)
+
+	file, err:=os.Open(images.Media)
+	if err!=nil{
+		http.Error(w,"file not found",404)
+		return
+	}
+
+
+	FileHeader:=make([]byte,512)
+	file.Read(FileHeader)
+	ContentType:= http.DetectContentType(FileHeader)
+	FileStat,_:= file.Stat()
+	FileSize:= strconv.FormatInt(FileStat.Size(),10)
+	w.Header().Set("Content-Disposition", "attachment; filename="+images.Media)
+	w.Header().Set("Content-Type", ContentType)
+	w.Header().Set("Content-Length", FileSize)
+
+	file.Seek(0,0)
+	io.Copy(w,file)
+	return
+
+
+
+}
+func findImageByVerificationId(images []models.Image, idRequest primitive.ObjectID) (models.Image, error) {
+	imageFeedPost := models.Image{}
+
+	for _, image := range images {
+		if	image.VerificationId==idRequest {
+			imageFeedPost = image
+		}
+	}
+	return imageFeedPost, nil
+}
