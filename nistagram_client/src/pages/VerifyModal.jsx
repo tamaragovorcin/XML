@@ -18,6 +18,7 @@ class VerifyModal extends Component {
     state = {
         name: "",
 		lastName : "",
+		
 
     }
 	handleCategoryChange(event) {
@@ -55,7 +56,7 @@ alert(event)	}
 
 	}
 	render() {
-	
+		
 		return (
 			<Modal
 				show={this.props.show}

@@ -43,9 +43,15 @@ type Role struct {
 
 }
 type Agent struct {
-	Id  uuid.UUID `bson:"_id,omitempty"`
-	User uuid.UUID `bson:"user,omitempty"`
-	Website string `bson:"website,omitempty"`
+	Id  primitive.ObjectID  `bson:"_id,omitempty"`
+	ProfileInformation ProfileInformation `bson:"profileInformation,omitempty"`
+	Private            bool               `bson:"private"`
+	Website            string             `bson:"webSite"`
+	Biography          string             `bson:"biography"`
+	Verified           bool               `bson:"verified"`
+	Category           Category           `bson:"category"`
+	LikedPosts         []uuid.UUID        `bson:"likedPosts"`
+	DislikedPosts      []uuid.UUID        `bson:"disliked"`
 	ApprovedAgent bool `bson:"approvedAgent"`
 }
 
