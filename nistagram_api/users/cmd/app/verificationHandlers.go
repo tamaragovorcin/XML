@@ -132,24 +132,23 @@ func (app *application) refreshVerification(w http.ResponseWriter, r *http.Reque
 	}
 	app.infoLog.Printf("New user have been created, id=%s", insertResult.UpsertedID)
 }
-/*
+
 func (app *application) getAllRequestVerification(w http.ResponseWriter, r *http.Request) {
-	//vars := mux.Vars(r)
-	//userId := vars["userIdd"]
-	//userIdPrimitive, _ := primitive.ObjectIDFromHex(userId)
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	fmt.Println("**********************")
+	fmt.Println("LALALALLAL")
 	allRequests, err  :=app.verifications.GetAll()
-	//usersFeedPosts,err :=findFeedPostsByUserId(allPosts,userIdPrimitive)
+	fmt.Println(app.verifications.GetAll())
 	if err != nil {
 		app.serverError(w, err)
 	}
 	feedPostResponse := []dtos.RequestDTO{}
 	for _, request := range allRequests {
-
 		if err != nil {
 			app.serverError(w, err)
 		}
-		contentType := app.GetFileTypeByPostId(request.Id)
-		feedPostResponse = append(feedPostResponse, toResponse(request,contentType))
+		fmt.Println(request.User)
+		feedPostResponse = append(feedPostResponse, verificationRequestToResponse(request))
 
 	}
 
@@ -162,8 +161,16 @@ func (app *application) getAllRequestVerification(w http.ResponseWriter, r *http
 	w.WriteHeader(http.StatusOK)
 	w.Write(imagesMarshaled)
 }
+func verificationRequestToResponse(collection models.Verification) dtos.RequestDTO {
+	return dtos.RequestDTO{
+		Id: collection.Id,
+		Name: collection.Name,
+		LastName: collection.LastName,
+		Category: collection.Category,
+	}
+}
 func(app *application) GetFileTypeByPostId(feedId primitive.ObjectID) string {
-	resp, err := http.Get("http://localhost:4006/api/user/closeFriends/")
+	/*resp, err := http.Get("http://localhost:4006/api/user/closeFriends/")
 	allImages,_ := app.images.All()
 	images, _ := findImageByPostId(allImages,feedId)
 
@@ -173,9 +180,7 @@ func(app *application) GetFileTypeByPostId(feedId primitive.ObjectID) string {
 	file.Read(FileHeader)
 	ContentType:= http.DetectContentType(FileHeader)
 
-	return ContentType
-
+	return ContentType*/
+return ""
 
 }
-
-*/

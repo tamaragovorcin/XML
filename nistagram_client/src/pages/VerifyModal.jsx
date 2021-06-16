@@ -18,12 +18,11 @@ class VerifyModal extends Component {
     state = {
         name: "",
 		lastName : "",
-		category : ""
-    }
-	handleGenderChange(event) {
 
-		this.setState({ category: event.target.value });
-	}
+    }
+	handleCategoryChange(event) {
+
+alert(event)	}
 
     componentDidMount() {
 
@@ -98,14 +97,9 @@ class VerifyModal extends Component {
                                 
 								<div className="control-group">
 								<div style={{ color: "#6c757d", opacity: 1 }}>
-									<p><input type="radio" checked value="influencer" name="category" onChange={(e) => this.handleGenderChange(e)} />Influencer</p>
-									<p><input type="radio" value="sports" name="category" onChange={(e) => this.handleGenderChange(e)} />Sports</p>
-									<p><input type="radio" value="business" name="category" onChange={(e) => this.handleGenderChange(e)} /> Business </p>
-									<p><input type="radio" value="brand" name="category" onChange={(e) => this.handleGenderChange(e)} /> Brand </p>
-									<p><input type="radio" value="new/media" name="category" onChange={(e) => this.handleGenderChange(e)} /> New/media </p>
-									
-
-								
+									<p><input type="radio" checked value="Male" name="gender" onChange={(e) => this.handleCategoryChange(e)} /> Male</p>
+									<p><input type="radio" value="Female" name="gender" onChange={(e) => this.handleCategoryChange(e)} /> Female</p>
+									<p><input type="radio" value="Other" name="gender" onChange={(e) => this.handleCategoryChange(e)} /> Other </p>
 								</div>
 								</div>
 								
