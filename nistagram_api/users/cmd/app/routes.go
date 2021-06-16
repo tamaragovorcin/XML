@@ -43,7 +43,7 @@ func (app *application) routes() *mux.Router {
 
 	r.HandleFunc("/agent/", app.getAllAgents).Methods("GET")
 	r.HandleFunc("/agent/{id}", app.findAgentByID).Methods("GET")
-	r.HandleFunc("/agent/", app.insertAgent).Methods("POST")
+	r.HandleFunc("/agent", app.insertAgent).Methods("POST")
 	r.HandleFunc("/agent/{id}", app.deleteAgent).Methods("DELETE")
 
 	r.HandleFunc("/api/user/profileImage/{userId}", app.saveImage).Methods("POST")
@@ -70,7 +70,8 @@ func (app *application) routes() *mux.Router {
 
 	//r.HandleFunc("api/allVerificationRequest/", app.getAllRequestVerification).Methods("GET")
 	r.HandleFunc("/api/verificationRequest", app.getAllRequestVerification).Methods("GET")
-	r.HandleFunc("/api/verificationRequest/", app.insertVerification).Methods("POST")
+	r.HandleFunc("/api/verificationRequest", app.insertVerification).Methods("POST")
+	r.HandleFunc("/api/image/{userIdd}/{verificationId}", app.saveImageVerification).Methods("POST")
 
 	return r
 }

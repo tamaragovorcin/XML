@@ -2,7 +2,6 @@ package models
 
 import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
-	"go.mongodb.org/mongo-driver/x/mongo/driver/uuid"
 )
 //ENUMS
 type Gender int
@@ -50,8 +49,6 @@ type Agent struct {
 	Biography          string             `bson:"biography"`
 	Verified           bool               `bson:"verified"`
 	Category           Category           `bson:"category"`
-	LikedPosts         []uuid.UUID        `bson:"likedPosts"`
-	DislikedPosts      []uuid.UUID        `bson:"disliked"`
 	ApprovedAgent bool `bson:"approvedAgent"`
 }
 
@@ -63,8 +60,6 @@ type User struct {
 	Biography          string             `bson:"biography"`
 	Verified           bool               `bson:"verified"`
 	Category           Category           `bson:"category"`
-	LikedPosts         []uuid.UUID        `bson:"likedPosts"`
-	DislikedPosts      []uuid.UUID        `bson:"disliked"`
 }
 
 type Verification struct {
@@ -99,4 +94,10 @@ type Settings struct {
 	Muted []primitive.ObjectID `bson:"muted"`
 	Blocked []primitive.ObjectID `bson:"blocked"`
 	CloseFriends []primitive.ObjectID  `bson:"closeFriends"`
+}
+type Image struct {
+	Id  primitive.ObjectID `bson:"_id,omitempty"`
+	Media string `bson:"media"`
+	UserId primitive.ObjectID `bson:"userId"`
+	VerificationId primitive.ObjectID `bson:"verificationId"`
 }

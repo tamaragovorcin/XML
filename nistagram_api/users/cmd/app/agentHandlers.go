@@ -122,7 +122,7 @@ func (app *application) insertAgent(w http.ResponseWriter, r *http.Request) {
 			Email:       m.Email,
 			Username:    m.Username,
 			Password:    hashAndSalt,
-			Roles:       []models.Role{{Name: "USER"}},
+			Roles:       []models.Role{{Name: "AGENT"}},
 			PhoneNumber: m.PhoneNumber,
 			Gender:      m.Gender, //models.Gender(m.Gender),
 			DateOfBirth: m.DateOfBirth,

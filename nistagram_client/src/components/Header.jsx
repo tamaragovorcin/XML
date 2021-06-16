@@ -132,7 +132,7 @@ class Header extends React.Component {
 							<li  hidden={!this.hasRole("USER")}>
 								<Link to="/followRequest"><AiOutlineHeart /></Link>
 							</li>
-							<li  hidden={!this.hasRole("USER")}>
+							<li  hidden={!this.hasRole("ADMIN")}>
 								<Link to="/verifyRequest"><FaRegQuestionCircle /></Link>
 							</li>
 							<li  hidden={!this.hasRole("ADMIN")}>
