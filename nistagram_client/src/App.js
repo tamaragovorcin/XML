@@ -19,8 +19,7 @@ import DislikedPosts from './pages/DislikedPosts';
 
 import VerifyRequest from './pages/VerifyRequest';
 import ReportedPosts from './pages/ReportedPosts';
-
-
+import AgentsRequests from './pages/AgentsRequests';
 
 function App() {
   return (
@@ -46,7 +45,7 @@ function App() {
 
 				<Link exact to="/verifyRequest" path="/verifyRequest" component={VerifyRequest} />
 				<Link exact to="/reportedPosts" path="/reportedPosts" component={ReportedPosts} />
-
+				<Link exact to="/agentsR" path="/agentsR" component={AgentsRequests} />
 			</Switch>
 	</Router>
   );

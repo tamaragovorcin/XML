@@ -60,6 +60,7 @@ type User struct {
 	Biography          string             `bson:"biography"`
 	Verified           bool               `bson:"verified"`
 	Category           Category           `bson:"category"`
+	ApprovedAgent string `bson:"approvedAgent"`
 }
 
 type Verification struct {
