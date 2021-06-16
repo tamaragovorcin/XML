@@ -92,5 +92,6 @@ func (m *UserModel) Update(user models.User) (*mongo.UpdateResult, error) {
 		"webSite":user.Website,"private":user.Private,
 		"profileInformation.gender":user.ProfileInformation.Gender,
 		"verified" : user.Verified,
-		"category" : user.Category}}})
+		"category" : user.Category,
+		"approvedAgent" : user.ApprovedAgent}}})
 }
