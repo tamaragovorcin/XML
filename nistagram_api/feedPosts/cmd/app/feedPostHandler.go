@@ -648,7 +648,6 @@ func findFeedPostsForHomePage(posts []models.FeedPost, idPrimitive primitive.Obj
 			feedPostUser = append(feedPostUser, feedPost)
 		}
 	}
-	//dodati uslov za pracenje!!!!!!!!!!!
 	return feedPostUser, nil
 }
 func toResponseHomePage(feedPost models.FeedPost, image2 string, username string) dtos.FeedPostInfoDTO1 {
@@ -868,4 +867,109 @@ func (app *application) getcommentsFeedPost(w http.ResponseWriter, r *http.Reque
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	w.Write(usernamesMarshaled)
+}
+
+func (app *application) getLikedPhotos(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	userId := vars["userId"]
+	userIdPrimitive, _ := primitive.ObjectIDFromHex(userId)
+
+	allImages,_ := app.images.All()
+	allPosts, _ :=app.feedPosts.All()
+	postsForHomePage,err :=findLikedFeedPostsByUser(allPosts,userIdPrimitive)
+	if err != nil {
+		app.serverError(w, err)
+	}
+	feedPostResponse := []dtos.FeedPostInfoDTO1{}
+	for _, feedPost := range postsForHomePage {
+		if iAmFollowingThisUser(userId,feedPost.Post.User.Hex()) {
+			if !iBlockedThisUser(userId, feedPost.Post.User.Hex()) {
+
+					images, err := findImageByPostId(allImages, feedPost.Id)
+					if err != nil {
+						app.serverError(w, err)
+					}
+					userUsername := getUserUsername(feedPost.Post.User)
+					feedPostResponse = append(feedPostResponse, toResponseHomePage(feedPost, images.Media, userUsername))
+				}
+			}
+		}
+
+
+	imagesMarshaled, err := json.Marshal(feedPostResponse)
+	if err != nil {
+		app.serverError(w, err)
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	w.Write(imagesMarshaled)
+}
+
+
+func (app *application) getDislikedPhotos(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	userId := vars["userId"]
+	userIdPrimitive, _ := primitive.ObjectIDFromHex(userId)
+
+	allImages,_ := app.images.All()
+	allPosts, _ :=app.feedPosts.All()
+	postsForHomePage,err :=findDisLikedFeedPostsByUser(allPosts,userIdPrimitive)
+	if err != nil {
+		app.serverError(w, err)
+	}
+	feedPostResponse := []dtos.FeedPostInfoDTO1{}
+	for _, feedPost := range postsForHomePage {
+		if iAmFollowingThisUser(userId,feedPost.Post.User.Hex()) {
+			if !iBlockedThisUser(userId, feedPost.Post.User.Hex()) {
+
+					images, err := findImageByPostId(allImages, feedPost.Id)
+					if err != nil {
+						app.serverError(w, err)
+					}
+					userUsername := getUserUsername(feedPost.Post.User)
+					feedPostResponse = append(feedPostResponse, toResponseHomePage(feedPost, images.Media, userUsername))
+				}
+			}
+	}
+
+
+	imagesMarshaled, err := json.Marshal(feedPostResponse)
+	if err != nil {
+		app.serverError(w, err)
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	w.Write(imagesMarshaled)
+}
+func findLikedFeedPostsByUser(posts []models.FeedPost, idPrimitive primitive.ObjectID) ([]models.FeedPost, error){
+	feedPostUser := []models.FeedPost{}
+
+	for _, feedPost := range posts {
+
+		if	userLikedThePhoto(feedPost.Likes,idPrimitive) {
+			feedPostUser = append(feedPostUser, feedPost)
+		}
+	}
+	return feedPostUser, nil
+}
+
+func userLikedThePhoto(ids []primitive.ObjectID, idPrimitive primitive.ObjectID) bool {
+	for _, id := range ids {
+		if id.Hex()==idPrimitive.Hex() {
+			return true
+		}
+	}
+	return false
+
+}
+func findDisLikedFeedPostsByUser(posts []models.FeedPost, idPrimitive primitive.ObjectID) ([]models.FeedPost, error){
+	feedPostUser := []models.FeedPost{}
+
+	for _, feedPost := range posts {
+
+		if	userLikedThePhoto(feedPost.Dislikes,idPrimitive) {
+			feedPostUser = append(feedPostUser, feedPost)
+		}
+	}
+	return feedPostUser, nil
 }

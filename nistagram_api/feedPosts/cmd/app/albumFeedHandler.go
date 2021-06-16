@@ -606,4 +606,84 @@ func findFeedAlbumsByHashTags(posts []models.AlbumFeed, hashtags []string) ([]mo
 	return feedPostsHashTags, nil
 }
 
+func (app *application) getLikedAlbums(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	userId := vars["userId"]
+	userIdPrimitive, _ := primitive.ObjectIDFromHex(userId)
+	allImages, _ := app.images.All()
+	allAlbums, _ := app.albumFeeds.All()
+	feedAlbumsForHomePage, err := findLikedAlbumsByUser(allAlbums, userIdPrimitive)
+	if err != nil {
+		app.serverError(w, err)
+	}
 
+	feedAlbumResponse := []dtos.FeedAlbumInfoDTO{}
+	for _, album := range feedAlbumsForHomePage {
+		if iAmFollowingThisUser(userId,album.Post.User.Hex()) {
+			if !iBlockedThisUser(userId, album.Post.User.Hex()) {
+
+					images, err := findAlbumByPostId(allImages, album.Id)
+					if err != nil {
+						app.serverError(w, err)
+					}
+					userUsername := getUserUsername(album.Post.User)
+					feedAlbumResponse = append(feedAlbumResponse, toResponseAlbumHomePage(album, images, userUsername))
+				}
+			}
+
+	}
+
+	imagesMarshaled, err := json.Marshal(feedAlbumResponse)
+	if err != nil {
+		app.serverError(w, err)
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	w.Write(imagesMarshaled)
+}
+func (app *application) getDislikedAlbums(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	userId := vars["userId"]
+	userIdPrimitive, _ := primitive.ObjectIDFromHex(userId)
+	allImages, _ := app.images.All()
+	allAlbums, _ := app.albumFeeds.All()
+	feedAlbumsForHomePage, err := findLikedAlbumsByUser(allAlbums, userIdPrimitive)
+	if err != nil {
+		app.serverError(w, err)
+	}
+
+	feedAlbumResponse := []dtos.FeedAlbumInfoDTO{}
+	for _, album := range feedAlbumsForHomePage {
+		if iAmFollowingThisUser(userId,album.Post.User.Hex()) {
+			if !iBlockedThisUser(userId, album.Post.User.Hex()) {
+
+					images, err := findAlbumByPostId(allImages, album.Id)
+					if err != nil {
+						app.serverError(w, err)
+					}
+					userUsername := getUserUsername(album.Post.User)
+					feedAlbumResponse = append(feedAlbumResponse, toResponseAlbumHomePage(album, images, userUsername))
+				}
+			}
+
+	}
+
+	imagesMarshaled, err := json.Marshal(feedAlbumResponse)
+	if err != nil {
+		app.serverError(w, err)
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	w.Write(imagesMarshaled)
+}
+func findLikedAlbumsByUser(posts []models.AlbumFeed, idPrimitive primitive.ObjectID) ([]models.AlbumFeed, error){
+	feedPostUser := []models.AlbumFeed{}
+
+	for _, feedPost := range posts {
+
+		if	userLikedThePhoto(feedPost.Likes,idPrimitive) {
+			feedPostUser = append(feedPostUser, feedPost)
+		}
+	}
+	return feedPostUser, nil
+}

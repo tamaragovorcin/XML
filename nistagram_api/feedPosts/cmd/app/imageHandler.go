@@ -63,6 +63,7 @@ func (app *application) findImageByID(w http.ResponseWriter, r *http.Request) {
 	w.Write(b)
 }
 func (app *application) saveImage(w http.ResponseWriter, r *http.Request)  {
+	fmt.Println("TU SAM")
 
 	vars := mux.Vars(r)
 	userId := vars["userIdd"]
@@ -80,7 +81,8 @@ func (app *application) saveImage(w http.ResponseWriter, r *http.Request)  {
 	}
 
 	defer file.Close()
-	var path = "/var/lib/feedposts/data/"+hander.Filename
+	//var path = "/var/lib/feedposts/data/"+hander.Filename
+	var path = "files/"+hander.Filename
 	f, err := os.OpenFile(path, os.O_WRONLY|os.O_CREATE, 777)
 	if err != nil {
 		fmt.Println(err.Error())
