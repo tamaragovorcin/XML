@@ -88,6 +88,8 @@ func (app *application) routes() *mux.Router {
 
 	r.HandleFunc("/albumFeed/remove/{id}/{reportId}", app.deleteAlbumFeed).Methods("DELETE")
 
+	r.HandleFunc("/removeUserId/{id}", app.removeEverythingFromUser).Methods("DELETE")
+
 
 	return r
 }

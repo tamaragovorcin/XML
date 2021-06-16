@@ -473,14 +473,19 @@ func (app *application) deleteUser(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	vars := mux.Vars(r)
 	id := vars["id"]
+	intId, err := primitive.ObjectIDFromHex(id)
 
 	deleteResult, err := app.users.Delete(id)
 	if err != nil {
 		app.serverError(w, err)
 	}
+	removeFromCloseFriends(intId,app)
+	removeFromBlocked(intId,app)
+	removeFromMuted(intId,app)
 
 	app.infoLog.Printf("Have been eliminated %d users(s)", deleteResult.DeletedCount)
 }
+
 func (app *application) updateUser(w http.ResponseWriter, r *http.Request) {
 
 		var m dtos.UserUpdateRequest

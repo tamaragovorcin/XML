@@ -65,13 +65,20 @@ class ReportedPosts extends React.Component {
             this.setState({ openModal: true });
 			this.setState({ textSuccessfulModal: "You have successfully removed user "+username });
             Axios.delete(BASE_URL + "/api/feedPosts/report/remove/"+reportId)
-            .then((res) => {
-                this.handleGetReporteddAlbums()
-                this.handleGetReportedPosts()
-            })
-            .catch((err) => {
-                console.log(err);
-            });
+                .then((res) => {
+                    
+                    Axios.delete(BASE_URL + "/api/feedPosts/removeUserId/"+userId)
+                    .then((res) => {
+                        this.handleGetReporteddAlbums()
+                        this.handleGetReportedPosts()
+                    })
+                    .catch((err) => {
+                        console.log(err);
+                    });
+                })
+                .catch((err) => {
+                    console.log(err);
+                });
         })
         .catch((err) => {
             console.log(err);

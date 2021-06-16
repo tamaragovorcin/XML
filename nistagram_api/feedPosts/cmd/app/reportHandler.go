@@ -158,3 +158,24 @@ func (app *application) deleteReport(w http.ResponseWriter, r *http.Request) {
 
 	app.infoLog.Printf("Have been eliminated %d content(s)", deleteResult.DeletedCount)
 }
+func (app *application) removeEverythingFromUser(writer http.ResponseWriter, request *http.Request) {
+	vars := mux.Vars(request)
+	id := vars["id"]
+	//userIdPrimitive, _ := primitive.ObjectIDFromHex(id)
+	app.infoLog.Printf(id)
+
+	/*removeFromFeedPosts(userIdPrimitive,app)
+	removeFromFeedAlbums(userIdPrimitive,app)
+	removeFromStories(userIdPrimitive,app)
+
+	removeFromCollection(userIdPrimitive,app)
+	removeFromCollectionAlbum(userIdPrimitive,app)
+
+	removeFromHighlights(userIdPrimitive,app)
+	removeFromHighlightsAlbum(userIdPrimitive,app)
+
+	removeFromLikes(userIdPrimitive,app)
+	removeFromDislikes(userIdPrimitive,app)
+	removeFromComments(userIdPrimitive,app)
+*/
+}
