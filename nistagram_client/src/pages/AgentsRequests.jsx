@@ -114,6 +114,8 @@ render(){
 					header="Successful"
 					text={this.state.textSuccessfulModal}
                 />
+
+                
                         </div>
         
         </React.Fragment>
