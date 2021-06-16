@@ -59,7 +59,11 @@ type User struct {
 	Website            string             `bson:"webSite"`
 	Biography          string             `bson:"biography"`
 	Verified           bool               `bson:"verified"`
+
+	ApprovedAgent string `bson:"approvedAgent"`
+
 	Category           string           `bson:"category"`
+
 }
 
 type Verification struct {

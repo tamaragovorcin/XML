@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { CgProfile } from 'react-icons/cg';
 import Axios from "axios";
 import { FiSettings, FiSend } from 'react-icons/fi';
-import { VscHome } from 'react-icons/vsc';
+import { VscHome, VscRequestChanges } from 'react-icons/vsc';
 import { FaRegQuestionCircle, FaSearch } from 'react-icons/fa';
 import {MdReportProblem} from 'react-icons/md';
 import { GiThreeFriends } from 'react-icons/gi';
@@ -137,6 +137,9 @@ class Header extends React.Component {
 							</li>
 							<li  hidden={!this.hasRole("ADMIN")}>
 								<Link to="/reportedPosts"><MdReportProblem /></Link>
+							</li>
+							<li  hidden={!this.hasRole("ADMIN")}>
+								<Link to="/agentsR"><VscRequestChanges /></Link>
 							</li>
 							<li className="drop-down" hidden={!this.hasRole("USER")}>
 								<a href="#"><CgProfile /></a>

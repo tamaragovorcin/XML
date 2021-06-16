@@ -96,3 +96,7 @@ type VerificationReactionDTO struct {
 	RequestId primitive.ObjectID
 	UserId primitive.ObjectID
 }
+type AgentsReactionDTO struct {
+
+	UserId primitive.ObjectID
+}
