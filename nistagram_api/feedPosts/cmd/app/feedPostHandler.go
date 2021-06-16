@@ -132,14 +132,49 @@ func (app *application) deleteFeedPost(w http.ResponseWriter, r *http.Request) {
 	// Get id from incoming url
 	vars := mux.Vars(r)
 	id := vars["id"]
-
+	reportId := vars["reportId"]
 	// Delete booking by id
+	postIdPrimitive, _ := primitive.ObjectIDFromHex(id)
+
 	deleteResult, err := app.feedPosts.Delete(id)
+	_, err2 := app.reports.Delete(reportId)
+
 	if err != nil {
 		app.serverError(w, err)
 	}
-
+	if err2 != nil {
+		app.serverError(w, err)
+	}
+	allCollections, _ := app.collections.All()
+	for _, collection := range allCollections {
+		for _, post := range collection.Posts {
+			if post.Id.Hex()==postIdPrimitive.Hex() {
+				updateThisCollectionPost(collection,post.Id,app)
+			}
+		}
+	}
 	app.infoLog.Printf("Have been eliminated %d content(s)", deleteResult.DeletedCount)
+}
+
+func updateThisCollectionPost(collection models.Collection, id primitive.ObjectID, app *application) {
+	var collectionUpdate = models.Collection{
+		Id: collection.Id,
+		User:collection.User,
+		Name : collection.Name,
+		Posts: getPostsAfterRemovingFeedPost(collection.Posts,id),
+	}
+
+	insertResult, _ := app.collections.Update(collectionUpdate)
+	app.infoLog.Printf("Have been eliminated %d albumFeeds(s)", insertResult.UpsertedID)
+}
+func getPostsAfterRemovingFeedPost(posts []models.FeedPost, id primitive.ObjectID) []models.FeedPost {
+	newPosts := []models.FeedPost{}
+	for _, post := range posts {
+		if post.Id.Hex()!=id.Hex() {
+			newPosts=append(newPosts,post)
+		}
+	}
+	return newPosts
 }
 func (app *application) getUsersFeedPosts(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)

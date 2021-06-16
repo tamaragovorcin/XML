@@ -95,13 +95,13 @@ func generateToken(user *models.User) (string, error) {
 
 func (app *application) getAllUsers(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Access-Control-Allow-Origin", "*")
-	chats, err := app.users.GetAll()
+	users, err := app.users.GetAll()
 
 	if err != nil {
 		app.serverError(w, err)
 	}
-
-	b, err := json.Marshal(chats)
+	usersAll := getUsersWithoutAdmin(users)
+	b, err := json.Marshal(usersAll)
 	if err != nil {
 		app.serverError(w, err)
 	}
@@ -111,6 +111,16 @@ func (app *application) getAllUsers(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	w.Write(b)
+}
+
+func getUsersWithoutAdmin(users []models.User) interface{} {
+	usersList :=[]models.User{}
+	for _, oneUser := range users {
+		if oneUser.ProfileInformation.Roles[0].Name!="ADMIN" {
+			usersList = append(usersList, oneUser)
+		}
+	}
+	return usersList
 }
 
 func (app *application) getAllUsersWithoutLogged(w http.ResponseWriter, r *http.Request) {
@@ -126,7 +136,9 @@ func (app *application) getAllUsersWithoutLogged(w http.ResponseWriter, r *http.
 	for _, oneUser := range users {
 
 		if oneUser.Id.Hex()!=user {
-			userWithoutLogged = append(userWithoutLogged,oneUser)
+			if oneUser.ProfileInformation.Roles[0].Name!="ADMIN" {
+				userWithoutLogged = append(userWithoutLogged, oneUser)
+			}
 		}
 	}
 

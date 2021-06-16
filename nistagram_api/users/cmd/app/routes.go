@@ -67,7 +67,7 @@ func (app *application) routes() *mux.Router {
 	r.HandleFunc("/api/checkIfBlocked/{subjectId}/{objectId}", app.checkIfUserIsBlocked).Methods("GET")
 	r.HandleFunc("/api/user/allowTags/{userId}", app.checkIfUserAllowsTags).Methods("GET")
 
-	r.HandleFunc("/user/remove/{id}", app.deleteUser).Methods("DELETE")
+	r.HandleFunc("/remove/{id}", app.deleteUser).Methods("DELETE")
 
 	//r.HandleFunc("api/allVerificationRequest/", app.getAllRequestVerification).Methods("GET")
 

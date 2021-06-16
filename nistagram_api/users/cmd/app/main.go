@@ -114,7 +114,7 @@ func setHeaders(h http.Handler) http.Handler {
 		//anyone can make a CORS request (not recommended in production)
 		w.Header().Set("Access-Control-Allow-Origin", "*")
 		//only allow GET, POST, and OPTIONS
-		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
+		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, OPTIONS, DELETE")
 		//Since I was building a REST API that returned JSON, I set the content type to JSON here.
 		w.Header().Set("Content-Type", "application/json")
 		//Allow requests to have the following headers

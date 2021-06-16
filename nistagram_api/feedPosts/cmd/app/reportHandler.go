@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"feedPosts/pkg/dtos"
 	"feedPosts/pkg/models"
+	"fmt"
 	"github.com/gorilla/mux"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"image"
@@ -21,7 +22,7 @@ func (app *application) getAllFeedReports(w http.ResponseWriter, r *http.Request
 
 	feedPostResponse := []dtos.FeedPostInfoReportDTO{}
 	for _, report := range allReports {
-		if report.Type=="feed" {
+		if report.Type=="post" {
 			feedPost, err := app.feedPosts.FindByID(report.Post)
 
 			images, err := findImageByPostId(allImages, feedPost.Id)
@@ -149,8 +150,8 @@ func (app *application) reportFeedPost(w http.ResponseWriter, req *http.Request)
 func (app *application) deleteReport(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	id := vars["id"]
-
-	deleteResult, err := app.feedPosts.Delete(id)
+	fmt.Println(id)
+	deleteResult, err := app.reports.Delete(id)
 	if err != nil {
 		app.serverError(w, err)
 	}

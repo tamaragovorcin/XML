@@ -24,7 +24,7 @@ class ReportedPosts extends React.Component {
     handleModalClose = () => {
 		this.setState({ openModal: false });
 	};
-    handleGetReportedPosts = (id) => {
+    handleGetReportedPosts = () => {
         Axios.get(BASE_URL + "/api/feedPosts/feed/reports")
             .then((res) => {
                 this.setState({ posts: res.data });
@@ -35,7 +35,7 @@ class ReportedPosts extends React.Component {
         
             
     }
-    handleGetReporteddAlbums = (id) => {
+    handleGetReporteddAlbums = () => {
         Axios.get(BASE_URL + "/api/feedPosts/albumFeed/reports")
             .then((res) => {
                 this.setState({ albums: res.data });
@@ -51,39 +51,53 @@ class ReportedPosts extends React.Component {
         .then((res) => {
             this.setState({ openModal: true });
 			this.setState({ textSuccessfulModal: "You have successfully removed this report" });
+            this.handleGetReporteddAlbums()
+            this.handleGetReportedPosts()
         })
         .catch((err) => {
             console.log(err);
         });
     }
-    removeUser = (userId,username) => {
+    removeUser = (userId,username,reportId) => {
        
         Axios.delete(BASE_URL + "/api/users/remove/"+userId)
         .then((res) => {
             this.setState({ openModal: true });
 			this.setState({ textSuccessfulModal: "You have successfully removed user "+username });
+            Axios.delete(BASE_URL + "/api/feedPosts/report/remove/"+reportId)
+            .then((res) => {
+                this.handleGetReporteddAlbums()
+                this.handleGetReportedPosts()
+            })
+            .catch((err) => {
+                console.log(err);
+            });
         })
         .catch((err) => {
             console.log(err);
         });
     }
-    removePost = (postId) => {
+    removePost = (postId,reportId) => {
       
-        Axios.delete(BASE_URL + "/api/feedPosts/feed/remove/"+postId)
+        Axios.delete(BASE_URL + "/api/feedPosts/feed/remove/"+postId+"/"+reportId)
         .then((res) => {
             this.setState({ openModal: true });
 			this.setState({ textSuccessfulModal: "You have successfully removed this feed post" });
+            this.handleGetReporteddAlbums()
+            this.handleGetReportedPosts()
         })
         .catch((err) => {
             console.log(err);
         });
     }
-    removeAlbum = (postId) => {
+    removeAlbum = (postId,reportId) => {
       
-        Axios.delete(BASE_URL + "/api/feedPosts/albumFeed/remove/"+postId)
+        Axios.delete(BASE_URL + "/api/feedPosts/albumFeed/remove/"+postId+"/"+reportId)
         .then((res) => {
             this.setState({ openModal: true });
 			this.setState({ textSuccessfulModal: "You have successfully removed this album" });
+            this.handleGetReporteddAlbums()
+            this.handleGetReportedPosts()
         })
         .catch((err) => {
             console.log(err);
@@ -148,13 +162,18 @@ render(){
                                     
                             </tr>
                             <tr>
-                                <button onClick={() =>  this.ignoreReport(post.ReportId)} className="btn btn-outline-secondary btn-sm"><label >Ignore</label></button>
-                            </tr>
-                            <tr>
-                                <button onClick={() =>  this.removePost(post.Id)} className="btn btn-outline-secondary btn-sm"><label >Remove post</label></button>
-                            </tr>
-                            <tr>
-                                <button onClick={() =>  this.removeUser(post.UserId,post.Username)} className="btn btn-outline-secondary btn-sm"><label >Remove user</label></button>
+                                <td>
+                                    <button onClick={() =>  this.ignoreReport(post.ReportId)} className="btn btn-outline-secondary btn-sm"><label >Ignore</label></button>
+                                </td>
+
+                                <td>
+                                    <button onClick={() =>  this.removePost(post.Id, post.ReportId)} className="btn btn-outline-secondary btn-sm"><label >Remove post</label></button>
+                                </td>
+
+                                <td>
+                                    <button onClick={() =>  this.removeUser(post.UserId,post.Username,post.ReportId)} className="btn btn-outline-secondary btn-sm"><label >Remove user</label></button>
+                                </td>
+
                             </tr>
                         </tr>
                       ))}
@@ -210,14 +229,16 @@ render(){
                                 </td>
                                     
                              </tr>
-                             <tr>
-                                <button onClick={() =>  this.ignoreReport(post.ReportId)} className="btn btn-outline-secondary btn-sm"><label >Ignore</label></button>
-                            </tr>
                             <tr>
-                                <button onClick={() =>  this.removeAlbum(post.Id)} className="btn btn-outline-secondary btn-sm"><label >Remove album</label></button>
-                            </tr>
-                            <tr>
-                                <button onClick={() =>  this.removeUser(post.UserId,post.Username)} className="btn btn-outline-secondary btn-sm"><label >Remove user</label></button>
+                                <td>
+                                    <button onClick={() =>  this.ignoreReport(post.ReportId)} className="btn btn-outline-secondary btn-sm"><label >Ignore</label></button>
+                                 </td>
+                                <td>
+                                     <button onClick={() =>  this.removeAlbum(post.Id,post.ReportId)} className="btn btn-outline-secondary btn-sm"><label >Remove album</label></button>
+                                 </td>
+                                <td>
+                                    <button onClick={() =>  this.removeUser(post.UserId,post.Username,post.ReportId)} className="btn btn-outline-secondary btn-sm"><label >Remove user</label></button>
+                                 </td>
                             </tr>
                             <br/>
                             <br/>

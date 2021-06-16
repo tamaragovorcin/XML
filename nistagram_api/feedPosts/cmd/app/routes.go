@@ -80,13 +80,13 @@ func (app *application) routes() *mux.Router {
 	r.HandleFunc("/api/video/{userId}/{feedId}", app.saveVideo).Methods("POST")
 	r.HandleFunc("/api/feed/file/{feedId}", app.GetFileByPostId).Methods("GET")
 
-	r.HandleFunc("/api/feedPosts/report", app.reportFeedPost).Methods("POST")
+	r.HandleFunc("/report", app.reportFeedPost).Methods("POST")
 	r.HandleFunc("/feed/reports", app.getAllFeedReports).Methods("GET")
 	r.HandleFunc("/albumFeed/reports", app.getAllAlbumReports).Methods("GET")
 	r.HandleFunc("/report/remove/{id}", app.deleteReport).Methods("DELETE")
-	r.HandleFunc("/feed/remove/{id}", app.deleteFeedPost).Methods("DELETE")
+	r.HandleFunc("/feed/remove/{id}/{reportId}", app.deleteFeedPost).Methods("DELETE")
 
-	r.HandleFunc("/albumFeed/remove/{id}", app.deleteAlbumFeed).Methods("DELETE")
+	r.HandleFunc("/albumFeed/remove/{id}/{reportId}", app.deleteAlbumFeed).Methods("DELETE")
 
 
 	return r
