@@ -72,6 +72,7 @@ func (app *application) routes() *mux.Router {
 	r.HandleFunc("/verificationRequest/accept/", app.acceptVerificationRequest).Methods("POST")
 
 	r.HandleFunc("/agents/accept/", app.acceptAgentsRequest).Methods("POST")
+	r.HandleFunc("/agent/byAdmin/", app.insertAgentByAdmin).Methods("POST")
 
  	r.HandleFunc("/api/turnOnNotifications", app.turnOnNotificationsForUser).Methods("POST")
 	r.HandleFunc("/api/addSettings/{userId}", app.addSettings).Methods("GET")
@@ -80,6 +81,7 @@ func (app *application) routes() *mux.Router {
 	r.HandleFunc("/api/sendNotificationComment/{writer}/{user}/{content}", app.sendNotificationComment).Methods("GET")
 	r.HandleFunc("/api/getPostNotifications/{userId}", app.getPostNotifications).Methods("GET")
 	r.HandleFunc("/api/getCommentNotification/{userId}", app.getCommentNotifications).Methods("GET")
+
 
 	return r
 }

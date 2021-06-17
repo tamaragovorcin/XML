@@ -41,7 +41,7 @@ class AgentRequests extends React.Component {
                     this.setState({ openModal: true });
                     this.setState({ textSuccessfulModal: "You have successfully accepted agent request." });
         
-                    this.getVerificationRequests()
+                    this.handleGetRequestAgents()
                 })
                 .catch ((err) => {
             console.log(err);
@@ -63,7 +63,9 @@ class AgentRequests extends React.Component {
     
         });
     }
- 
+    handleModalClose = () => {
+		this.setState({ openModal: false });
+	};
 
 render(){
     return (
@@ -74,7 +76,7 @@ render(){
                 <div className="container">
                         <div className="container" style={{ marginTop: "10rem", marginRight: "10rem" }}>
                             <h3>
-                                Follow requests
+                                Registration requests from agents
                             </h3>
                             <table className="table" style={{ width: "100%" }}>
                                         <tbody>

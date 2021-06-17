@@ -161,21 +161,261 @@ func (app *application) deleteReport(w http.ResponseWriter, r *http.Request) {
 func (app *application) removeEverythingFromUser(writer http.ResponseWriter, request *http.Request) {
 	vars := mux.Vars(request)
 	id := vars["id"]
-	//userIdPrimitive, _ := primitive.ObjectIDFromHex(id)
+	userIdPrimitive, _ := primitive.ObjectIDFromHex(id)
 	app.infoLog.Printf(id)
 
-	/*removeFromFeedPosts(userIdPrimitive,app)
+	removeFromFeedPosts(userIdPrimitive,app)
 	removeFromFeedAlbums(userIdPrimitive,app)
-	removeFromStories(userIdPrimitive,app)
 
 	removeFromCollection(userIdPrimitive,app)
 	removeFromCollectionAlbum(userIdPrimitive,app)
 
-	removeFromHighlights(userIdPrimitive,app)
-	removeFromHighlightsAlbum(userIdPrimitive,app)
-
 	removeFromLikes(userIdPrimitive,app)
 	removeFromDislikes(userIdPrimitive,app)
 	removeFromComments(userIdPrimitive,app)
-*/
+
+	removeFromLikesAlbum(userIdPrimitive,app)
+	removeFromDislikesAlbum(userIdPrimitive,app)
+	removeFromCommentsAlbum(userIdPrimitive,app)
+
+}
+
+func removeFromCommentsAlbum(idPrimitive primitive.ObjectID, app *application) {
+	allPosts,_ := app.albumFeeds.All()
+	for _,post := range allPosts {
+		for _,comment := range post.Comments {
+			if comment.Writer.Hex()==idPrimitive.Hex() {
+				newCommentsList :=removeComment(post.Comments,comment.Writer)
+				var postFeed = models.Post{
+					User : post.Post.User,
+					DateTime : post.Post.DateTime,
+					Tagged : post.Post.Tagged,
+					Description: post.Post.Description,
+					Hashtags: post.Post.Hashtags,
+					Location : post.Post.Location,
+					Blocked : post.Post.Blocked,
+				}
+				var feedPostUpdate = models.AlbumFeed{
+					Id: post.Id,
+					Dislikes:post.Dislikes,
+					Comments : newCommentsList,
+					Post : postFeed,
+					Likes: post.Likes,
+				}
+
+				_, _ = app.albumFeeds.Update(feedPostUpdate)
+			}
+		}
+	}
+}
+
+func removeFromDislikesAlbum(idPrimitive primitive.ObjectID, app *application) {
+	allPosts,_ := app.albumFeeds.All()
+	for _,post := range allPosts {
+		for _,id := range post.Dislikes {
+			if id.Hex()==idPrimitive.Hex() {
+				newDisLikesList :=removeDislike(post.Dislikes,id)
+				var postFeed = models.Post{
+					User : post.Post.User,
+					DateTime : post.Post.DateTime,
+					Tagged : post.Post.Tagged,
+					Description: post.Post.Description,
+					Hashtags: post.Post.Hashtags,
+					Location : post.Post.Location,
+					Blocked : post.Post.Blocked,
+				}
+				var feedPostUpdate = models.AlbumFeed{
+					Id: post.Id,
+					Dislikes:newDisLikesList,
+					Comments : post.Comments,
+					Post : postFeed,
+					Likes: post.Likes,
+				}
+
+				_, _ = app.albumFeeds.Update(feedPostUpdate)
+			}
+		}
+	}
+}
+
+func removeFromLikesAlbum(idPrimitive primitive.ObjectID, app *application) {
+	allPosts,_ := app.albumFeeds.All()
+	for _,post := range allPosts {
+		for _,id := range post.Likes {
+			if id.Hex()==idPrimitive.Hex() {
+				newLikesList :=removeLike(post.Likes,id)
+				var postFeed = models.Post{
+					User : post.Post.User,
+					DateTime : post.Post.DateTime,
+					Tagged : post.Post.Tagged,
+					Description: post.Post.Description,
+					Hashtags: post.Post.Hashtags,
+					Location : post.Post.Location,
+					Blocked : post.Post.Blocked,
+				}
+				var feedPostUpdate = models.AlbumFeed{
+					Id: post.Id,
+					Dislikes:post.Dislikes,
+					Comments : post.Comments,
+					Post : postFeed,
+					Likes: newLikesList,
+				}
+
+				_, _ = app.albumFeeds.Update(feedPostUpdate)
+			}
+		}
+	}
+}
+
+func removeFromComments(idPrimitive primitive.ObjectID, app *application) {
+	allPosts,_ := app.feedPosts.All()
+	for _,post := range allPosts {
+		for _,comment := range post.Comments {
+			if comment.Writer.Hex()==idPrimitive.Hex() {
+				newCommentsList :=removeComment(post.Comments,comment.Writer)
+				var postFeed = models.Post{
+					User : post.Post.User,
+					DateTime : post.Post.DateTime,
+					Tagged : post.Post.Tagged,
+					Description: post.Post.Description,
+					Hashtags: post.Post.Hashtags,
+					Location : post.Post.Location,
+					Blocked : post.Post.Blocked,
+				}
+				var feedPostUpdate = models.FeedPost{
+					Id: post.Id,
+					Dislikes:post.Dislikes,
+					Comments : newCommentsList,
+					Post : postFeed,
+					Likes: post.Likes,
+				}
+
+				_, _ = app.feedPosts.Update(feedPostUpdate)
+			}
+		}
+	}
+}
+
+func removeComment(comments []models.Comment, writer primitive.ObjectID) (ids []models.Comment) {
+	listNew :=[]models.Comment{}
+	for _, comment := range comments{
+		if comment.Writer.Hex()!=writer.Hex() {
+			listNew = append(listNew, comment)
+		}
+	}
+	return listNew
+}
+
+func removeFromDislikes(idPrimitive primitive.ObjectID, app *application) {
+	allPosts,_ := app.feedPosts.All()
+	for _,post := range allPosts {
+		for _,id := range post.Dislikes {
+			if id.Hex()==idPrimitive.Hex() {
+				newDisLikesList :=removeDislike(post.Dislikes,id)
+				var postFeed = models.Post{
+					User : post.Post.User,
+					DateTime : post.Post.DateTime,
+					Tagged : post.Post.Tagged,
+					Description: post.Post.Description,
+					Hashtags: post.Post.Hashtags,
+					Location : post.Post.Location,
+					Blocked : post.Post.Blocked,
+				}
+				var feedPostUpdate = models.FeedPost{
+					Id: post.Id,
+					Dislikes:newDisLikesList,
+					Comments : post.Comments,
+					Post : postFeed,
+					Likes: post.Likes,
+				}
+
+				_, _ = app.feedPosts.Update(feedPostUpdate)
+			}
+		}
+	}
+}
+
+func removeDislike(dislikes []primitive.ObjectID, id primitive.ObjectID) (ids []primitive.ObjectID) {
+	listNew :=[]primitive.ObjectID{}
+	for _, dislike := range dislikes {
+		if dislike.Hex()!=id.Hex() {
+			listNew = append(listNew, dislike)
+		}
+	}
+	return listNew
+}
+
+func removeFromLikes(idPrimitive primitive.ObjectID, app *application) {
+	allPosts,_ := app.feedPosts.All()
+	for _,post := range allPosts {
+		for _,id := range post.Likes {
+			if id.Hex()==idPrimitive.Hex() {
+				newLikesList :=removeLike(post.Likes,id)
+				var postFeed = models.Post{
+					User : post.Post.User,
+					DateTime : post.Post.DateTime,
+					Tagged : post.Post.Tagged,
+					Description: post.Post.Description,
+					Hashtags: post.Post.Hashtags,
+					Location : post.Post.Location,
+					Blocked : post.Post.Blocked,
+				}
+				var feedPostUpdate = models.FeedPost{
+					Id: post.Id,
+					Dislikes:post.Dislikes,
+					Comments : post.Comments,
+					Post : postFeed,
+					Likes: newLikesList,
+				}
+
+				_, _ = app.feedPosts.Update(feedPostUpdate)
+			}
+		}
+	}
+}
+
+func removeLike(likes []primitive.ObjectID, id primitive.ObjectID) (ids []primitive.ObjectID) {
+	listNew :=[]primitive.ObjectID{}
+	for _, like := range likes {
+		if like.Hex()!=id.Hex() {
+			listNew = append(listNew, like)
+		}
+	}
+	return listNew
+}
+
+func removeFromCollectionAlbum(idPrimitive primitive.ObjectID, app *application) {
+	allPosts,_ := app.collectionAlbums.All()
+	for _,post := range allPosts {
+		if post.User.Hex()==idPrimitive.Hex() {
+			_, _ = app.collectionAlbums.Delete(post.Id.Hex())
+		}
+	}
+}
+
+func removeFromCollection(idPrimitive primitive.ObjectID, app *application) {
+	allPosts,_ := app.collections.All()
+	for _,post := range allPosts {
+		if post.User.Hex()==idPrimitive.Hex() {
+			_, _ = app.collections.Delete(post.Id.Hex())
+		}
+	}
+}
+
+func removeFromFeedAlbums(idPrimitive primitive.ObjectID, app *application) {
+	allPosts,_ := app.albumFeeds.All()
+	for _,post := range allPosts {
+		if post.Post.User.Hex()==idPrimitive.Hex() {
+			_, _ = app.albumFeeds.Delete(post.Id.Hex())
+		}
+	}
+}
+
+func removeFromFeedPosts(idPrimitive primitive.ObjectID, app *application) {
+	allPosts,_ := app.feedPosts.All()
+	for _,post := range allPosts {
+		if post.Post.User.Hex()==idPrimitive.Hex() {
+			_, _ = app.feedPosts.Delete(post.Id.Hex())
+		}
+	}
 }

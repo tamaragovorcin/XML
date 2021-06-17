@@ -47,6 +47,7 @@ func routes() *mux.Router {
 
 
 	r.HandleFunc("/api/createUser", CreateUser(driver, configuration.Database)).Methods("POST")
+	r.HandleFunc("/removeUser", RemoveUser(driver, configuration.Database)).Methods("POST")
 
 
 	return r
@@ -905,4 +906,43 @@ func getUserUsername(user string) string {
 	sb = sb[1:]
 	sb = sb[:len(sb)-1]
 	return sb
+}
+
+func RemoveUser(driver neo4j.Driver, database string) func(w http.ResponseWriter,r *http.Request) {
+	return func(w http.ResponseWriter, req *http.Request) {
+		var m User
+		err := json.NewDecoder(req.Body).Decode(&m)
+		if err != nil {
+			fmt.Println("Error")
+		}
+		session := driver.NewSession(neo4j.SessionConfig{
+			AccessMode:   neo4j.AccessModeWrite,
+			DatabaseName: database,
+		})
+		defer unsafeClose(session)
+
+		voteResult, err := session.WriteTransaction(func(tx neo4j.Transaction) (interface{}, error) {
+			result, err := tx.Run(
+				"DELETE (:User{id:$uId})",
+				map[string]interface{}{
+					"uId": m.Id,
+				})
+			if err != nil {
+				return nil, err
+			}
+			var summary, _ = result.Consume()
+			var voteResult VoteResult
+			voteResult.Updates = summary.Counters().PropertiesSet()
+
+			return voteResult, nil
+		})
+		if err != nil {
+			log.Println("error voting for movie:", err)
+			return
+		}
+		err = json.NewEncoder(w).Encode(voteResult)
+		if err != nil {
+			log.Println("error writing volte result response:", err)
+		}
+	}
 }
