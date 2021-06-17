@@ -63,7 +63,6 @@ func (app *application) findImageByID(w http.ResponseWriter, r *http.Request) {
 	w.Write(b)
 }
 func (app *application) saveImage(w http.ResponseWriter, r *http.Request)  {
-	fmt.Println("TU SAM")
 
 	vars := mux.Vars(r)
 	userId := vars["userIdd"]

@@ -33,5 +33,7 @@ func (app *application) routes() *mux.Router {
 	r.HandleFunc("/partnership/", app.insertPartnership).Methods("POST")
 	r.HandleFunc("/partnership/{id}", app.deletePartnership).Methods("DELETE")
 
+	r.HandleFunc("/api/image/{userIdd}/{campaignId}", app.saveImage).Methods("POST")
+
 	return r
 }

@@ -296,6 +296,27 @@ class ProfilePage extends React.Component {
 	
 		fetch( BASE_URL + "/api/feedPosts/api/image/"+userId+"/"+feedId, options);
 	}
+	testCampaign(pic,userId, campaignId) {
+		this.setState({
+			fileUploadOngoing: true
+		});
+
+		const fileInput = document.querySelector("#fileInput");
+		const formData = new FormData();
+
+		formData.append("file", pic);
+		formData.append("test", "StringValueTest");
+
+		const options = {
+			method: "POST",
+			body: formData
+
+		};
+
+	
+		fetch( BASE_URL + "/api/campaign/api/image/"+userId+"/"+campaignId, options);
+	}
+	
 	testVerification(pic,userId, requestId) {
 		this.setState({
 			fileUploadOngoing: true
@@ -590,7 +611,38 @@ class ProfilePage extends React.Component {
 	}
 	
 	handleAddOneTimeCampaign =(date,time,targetGroup)=>{
-		this.setState({ showOneTimeCampaignModal: false, showCampaignModal : false });
+
+		let id = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length-1)
+
+		const campaignDTO = {
+
+		}
+		Axios.post(BASE_URL + "/api/campaign/oneTimeCampaign/", campaignDTO)
+			.then((res) => {
+				this.setState({ showOneTimeCampaignModal: false, showCampaignModal : false });
+				this.setState({ openModal: true });
+				this.setState({ textSuccessfulModal: "Campaign is successfully created." });
+				
+				let campaignId = res.data;
+			
+				let userid = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length-1)
+				let pics = [];
+
+				this.state.pictures.forEach((p) => {
+					pics.push(p.name);
+				}); 
+				this.state.pictures.forEach((pic) => {
+					this.testCampaign(pic, userid, campaignId);
+				});
+				/*if(this.state.selectedFile != ""){
+				this.testStory(this.state.selectedFile, userid, campaignId)
+				}*/
+				this.setState({selectedFile : ""});
+				this.setState({ pictures: [] });
+			})
+			.catch((err) => {
+				console.log(err);
+			});
 
 	}
 	handleAddMultipleTimeCampaign =(startDate,endDate,numberOfRepetitions,targetGroup) =>{
