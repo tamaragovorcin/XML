@@ -4,12 +4,10 @@ import TopBar from "../components/TopBar";
 import Axios from "axios";
 import { Redirect } from "react-router-dom";
 import HeadingAlert from "../components/HeadingAlert";
-
 import ModalDialog from "../components/ModalDialog";
-import { constants } from "../constants.js";
-import { BASE_URL_USER_INTERACTION } from "../constants.js";
+
 import { BASE_URL } from "../constants.js";
-class RegisterPage extends Component {
+class RegisterNewAgent extends Component {
 	state = {
 		errorHeader: "",
 		errorMessage: "",
@@ -39,7 +37,7 @@ class RegisterPage extends Component {
 		usernameNotValid: "none",
 		selectedDate: "",
 		private : false,
-		textSuccessfulModal : ""
+        textSuccessfulModal: ""
 
 	};
 
@@ -138,7 +136,8 @@ class RegisterPage extends Component {
 	};
 
 
-	handleSignUp = () => {
+	
+	handleRegisterAgent = () => {
 
 		let userDTO = {
 			Email: this.state.email,
@@ -155,72 +154,7 @@ class RegisterPage extends Component {
 		};
 
 		if (this.validateForm(userDTO)) {
-			Axios.post(BASE_URL + "/api/users/api/", userDTO)
-				.then((res) => {
-
-					if (res.status === 409) {
-						this.setState({
-							errorHeader: "Resource conflict!",
-							errorMessage: "Email already exist.",
-							hiddenErrorAlert: false,
-						});
-					} else if (res.status === 500) {
-						this.setState({ errorHeader: "Internal server error!", errorMessage: "Server error.", hiddenErrorAlert: false });
-					} else {
-						this.setState({ textSuccessfulModal: "You have successfully registred" });
-						this.setState({ openModal: true });
-					}
-					const user1Id = {id: res.data}				
-					Axios.post(BASE_URL + "/api/userInteraction/api/createUser", user1Id)
-					.then((res) => {
-							console.log(res.data)
-					})
-					.catch ((err) => {
-				console.log(err);
-			});
-			Axios.get(BASE_URL + "/api/users/api/addSettings/"+res.data )
-					.then((res2) => {
-						console.log(res2.data)
-					})
-					.catch((err) => {
-						console.log(err);
-					});
-				})
-				.catch((err) => {
-					if (err.response.status === 409) {
-						this.setState({
-							errorHeader: "Email taken",
-							errorMessage: "Email already exist.",
-							hiddenErrorAlert: false,
-						});
-					}
-					else if (err.response.status === 500) {
-						this.setState({ errorHeader: "Username taken", errorMessage: "User with this username already exists", hiddenErrorAlert: false });}
-
-				});
-		}
-		
-
-
-	};
-	handleRequestForAgent = () => {
-
-		let userDTO = {
-			Email: this.state.email,
-			Username: this.state.username,
-			Name: this.state.name,
-			LastName: this.state.surname,
-			PhoneNumber: this.state.phoneNumber,
-			Gender: this.state.gender,
-			DateOfBirth: this.state.selectedDate,
-			Password: this.state.password,
-			Biography: this.state.biography,
-			Private: this.state.private,
-			Website : this.state.website
-		};
-
-		if (this.validateForm(userDTO)) {
-			Axios.post(BASE_URL + "/api/users/agent", userDTO)
+			Axios.post(BASE_URL + "/api/users/agent/byAdmin/", userDTO)
 				.then((res) => {
 
 					if (res.status === 409) {
@@ -233,7 +167,7 @@ class RegisterPage extends Component {
 						this.setState({ errorHeader: "Internal server error!", errorMessage: "Server error.", hiddenErrorAlert: false });
 					} else {
 						this.setState({ openModal: true });
-						this.setState({ textSuccessfulModal: "You have successfully sent request for registration" });
+                        this.setState({ textSuccessfulModal: "You have successfully registred admin" });
 
 					}
 					const user1Id = {id: res.data}
@@ -285,7 +219,6 @@ class RegisterPage extends Component {
 	}
 
 	render() {
-		if (this.state.redirect) return <Redirect push to="/login" />;
 
 		return (
 			<React.Fragment>
@@ -300,7 +233,7 @@ class RegisterPage extends Component {
 						handleCloseAlert={this.handleCloseAlert}
 					/>
 					<h5 className=" text-center  mb-0 text-uppercase" style={{ marginTop: "2rem" }}>
-						Registration
+						Agent registration
 					</h5>
 
 					<div className="row section-design" style={{ border: "1 solid black" }}>
@@ -488,36 +421,24 @@ class RegisterPage extends Component {
 									</div>
 								</div>
 
-								<div className="form-group">
+                                <div className="form-group">
 									<button
 										style={{
 											background: "#1977cc",
 											marginTop: "15px",
-											marginLeft: "20%",
+											marginLeft: "40%",
 											width: "20%",
 										}}
-										onClick={this.handleSignUp}
+										onClick={this.handleRegisterAgent}
 										className="btn btn-primary btn-xl"
 										id="sendMessageButton"
 										type="button"
 									>
-										Sign Up
-									</button>
-									<button
-										style={{
-											background: "#1977cc",
-											marginTop: "-70px",
-											marginLeft: "50%",
-											width: "50%",
-										}}
-										onClick={this.handleRequestForAgent}
-										className="btn btn-primary btn-xl"
-										id="sendMessageButton"
-										type="button"
-									>
-										Send request for agent
+										Register agent
 									</button>
 								</div>
+                              
+
 							</form>
 						</div>
 					</div>
@@ -533,4 +454,4 @@ class RegisterPage extends Component {
 	}
 }
 
-export default RegisterPage;
+export default RegisterNewAgent;

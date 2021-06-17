@@ -38,6 +38,8 @@ class Login extends Component {
 						this.setState({ errorHeader: "Bad credentials!", errorMessage: "Wrong username or password.", hiddenErrorAlert: false });
 					} else if (res.status === 500) {
 						this.setState({ errorHeader: "Internal server error!", errorMessage: "Server error.", hiddenErrorAlert: false });
+					}else if (res.status === 406) {
+							this.setState({ errorHeader: "Fornbidden!", errorMessage: "Agent request is not approved.", hiddenErrorAlert: false });
 					} else {
 						localStorage.setItem("keyToken", res.data.AccessToken);
 						localStorage.setItem("keyRole", JSON.stringify(res.data.Roles));

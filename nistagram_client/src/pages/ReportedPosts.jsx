@@ -69,8 +69,23 @@ class ReportedPosts extends React.Component {
                     
                     Axios.delete(BASE_URL + "/api/feedPosts/removeUserId/"+userId)
                     .then((res) => {
-                        this.handleGetReporteddAlbums()
-                        this.handleGetReportedPosts()
+                        Axios.delete(BASE_URL + "/api/storyPosts/removeUserId/"+userId)
+                            .then((res) => {
+                                const userDTO = { Id: userId};
+
+                                Axios.post(BASE_URL + "/api/userInteraction/removeUser",userDTO)
+                                    .then((res) => {
+                                        this.handleGetReporteddAlbums()
+                                        this.handleGetReportedPosts()
+                                    })
+                                    .catch((err) => {
+                                        console.log(err);
+                                    });
+                              
+                            })
+                            .catch((err) => {
+                                console.log(err);
+                            });
                     })
                     .catch((err) => {
                         console.log(err);

@@ -42,5 +42,7 @@ func (app *application) routes() *mux.Router {
 	r.HandleFunc("/api/highlight/addStoryAlbum/", app.insetStoryAlbumInHighlight).Methods("POST")
 
 	r.HandleFunc("/api/story/file/{storyId}", app.GetFileByPostId).Methods("GET")
+	r.HandleFunc("/removeUserId/{id}", app.removeEverythingFromUser).Methods("DELETE")
+
 	return r
 }

@@ -10,6 +10,9 @@ import { GiThreeFriends } from 'react-icons/gi';
 import {IoMdNotificationsOutline} from 'react-icons/io'
 import {HiOutlineUserAdd} from 'react-icons/hi'
 import { AiOutlineHeart,AiFillLike,AiFillDislike } from 'react-icons/ai';
+import {BsPersonPlusFill} from 'react-icons/bs'
+
+
 import { BASE_URL } from "../constants.js";
 import Select from 'react-select';
 
@@ -146,7 +149,10 @@ class Header extends React.Component {
 							<li  hidden={!this.hasRole("ADMIN")}>
 								<Link to="/agentsR"><VscRequestChanges /></Link>
 							</li>
-							<li className="drop-down">
+							<li  hidden={!this.hasRole("ADMIN")}>
+								<Link to="/registerNewAgent"><BsPersonPlusFill /></Link>
+							</li>
+							<li className="drop-down" hidden={!this.hasRole("USER")}>
 								<a href="#"><CgProfile /></a>
 								<ul>
 
