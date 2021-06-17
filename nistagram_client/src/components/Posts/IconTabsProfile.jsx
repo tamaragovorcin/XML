@@ -36,7 +36,7 @@ render(){
                   
                   <table className="table">
                   <tbody>
-                        {this.props.postsForCollection.map((post) => (
+                        {this.props.photos.map((post) => (
                             
                             <tr id={post.Id} key={post.Id}>
                             

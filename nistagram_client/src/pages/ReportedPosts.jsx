@@ -69,7 +69,6 @@ class ReportedPosts extends React.Component {
                     
                     Axios.delete(BASE_URL + "/api/feedPosts/removeUserId/"+userId)
                     .then((res) => {
-
                         Axios.delete(BASE_URL + "/api/storyPosts/removeUserId/"+userId)
                             .then((res) => {
                                 const userDTO = { Id: userId};

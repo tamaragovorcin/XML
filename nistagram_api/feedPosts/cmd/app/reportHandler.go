@@ -170,6 +170,9 @@ func (app *application) removeEverythingFromUser(writer http.ResponseWriter, req
 	removeFromCollection(userIdPrimitive,app)
 	removeFromCollectionAlbum(userIdPrimitive,app)
 
+	removeFromOthersUsersCollection(userIdPrimitive,app)
+	removeFromOthersUsersCollectionAlbum(userIdPrimitive,app)
+
 	removeFromLikes(userIdPrimitive,app)
 	removeFromDislikes(userIdPrimitive,app)
 	removeFromComments(userIdPrimitive,app)
@@ -178,6 +181,66 @@ func (app *application) removeEverythingFromUser(writer http.ResponseWriter, req
 	removeFromDislikesAlbum(userIdPrimitive,app)
 	removeFromCommentsAlbum(userIdPrimitive,app)
 
+}
+
+func removeFromOthersUsersCollectionAlbum(idPrimitive primitive.ObjectID, app *application) {
+	allPosts,_ := app.collectionAlbums.All()
+	for _,post := range allPosts {
+		for _,singlePost := range post.Albums {
+
+			if singlePost.Post.User.Hex()==idPrimitive.Hex() {
+				newListAlbums :=removeAlbumFromCollection(post.Albums,singlePost.Id)
+				var collectionUpdate = models.CollectionAlbum{
+					Id: post.Id,
+					User:post.User,
+					Name : post.Name,
+					Albums: newListAlbums,
+				}
+				_,_= app.collectionAlbums.Update(collectionUpdate)
+
+			}
+		}
+	}
+}
+
+func removeAlbumFromCollection(albums []models.AlbumFeed, id primitive.ObjectID) []models.AlbumFeed {
+	listNew :=[]models.AlbumFeed{}
+	for _, album := range albums{
+		if album.Id.Hex()!=id.Hex() {
+			listNew = append(listNew, album)
+		}
+	}
+	return listNew
+}
+
+func removeFromOthersUsersCollection(idPrimitive primitive.ObjectID, app *application) {
+	allPosts,_ := app.collections.All()
+	for _,post := range allPosts {
+		for _,singlePost := range post.Posts {
+
+			if singlePost.Post.User.Hex()==idPrimitive.Hex() {
+				newListPosts :=removePostFromCollection(post.Posts,singlePost.Id)
+				var collectionUpdate = models.Collection{
+					Id: post.Id,
+					User:post.User,
+					Name : post.Name,
+					Posts: newListPosts,
+				}
+				_,_= app.collections.Update(collectionUpdate)
+
+			}
+		}
+	}
+}
+
+func removePostFromCollection(posts []models.FeedPost, id primitive.ObjectID) []models.FeedPost {
+	listNew :=[]models.FeedPost{}
+	for _, album := range posts{
+		if album.Id.Hex()!=id.Hex() {
+			listNew = append(listNew, album)
+		}
+	}
+	return listNew
 }
 
 func removeFromCommentsAlbum(idPrimitive primitive.ObjectID, app *application) {
