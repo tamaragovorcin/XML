@@ -146,7 +146,7 @@ class Header extends React.Component {
 							<li  hidden={!this.hasRole("ADMIN")}>
 								<Link to="/agentsR"><VscRequestChanges /></Link>
 							</li>
-							<li className="drop-down" hidden={!this.hasRole("USER")}>
+							<li className="drop-down">
 								<a href="#"><CgProfile /></a>
 								<ul>
 

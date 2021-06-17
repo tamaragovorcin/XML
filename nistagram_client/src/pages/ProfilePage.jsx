@@ -12,25 +12,27 @@ import ModalDialog from "../components/ModalDialog";
 import AddPostModal from "../components/Posts/AddPostModal";
 import AddVideoPostModal from "../components/Posts/AddVideoPostModal";
 import WriteCommentModal from "../components/Posts/WriteCommentModal"
-import { BASE_URL_USER } from "../constants.js";
 import AddHighlightModal from "../components/Posts/AddHighlightModal";
 import AddStoryToHighlightModal from "../components/Posts/AddStoryToHighlightModal";
 import IconTabsProfile from "../components/Posts/IconTabsProfile"
 import AddCollectionModal  from "../components/Posts/AddCollectionModal";
 import AddPostToCollection from "../components/Posts/AddPostToCollection";
-import { BASE_URL_USER_INTERACTION } from "../constants.js";
 import WriteCommentAlbumModal from "../components/Posts/WriteCommentAlbumModal"
 import AddTagsModal from "../components/Posts/AddTagsModal";
-import ConvertVideo from "react-convert-image";
 import AddStoryAlbumToHighlightModal from "../components/Posts/AddStoryAlbumToHighlightModal";
 import { BASE_URL } from "../constants.js";
 import VerifyModal from "../pages/VerifyModal";
+import AddCampaignModal from "../components/AddCampaignModal";
+import OneTimeCampaignModal from "../components/OneTimeCampaignModal";
+import MultipleTimeCampaignModal from "../components/MultipleTimeCampaignModal";
+
 
 class ProfilePage extends React.Component {
 	constructor(props) {
 		super(props);
 
 		this.onDrop = this.onDrop.bind(this);
+		this.onDropCampaign = this.onDropCampaign.bind(this);
 		this.addressInput = React.createRef();
 		this.handleAddProfileImage = this.handleAddProfileImage.bind(this);
 
@@ -113,7 +115,11 @@ class ProfilePage extends React.Component {
 		postsForCollectionAlbum : [],
 		showAddAlbumToCollectionAlbum : false,
 		followingsThatAllowTags : [],
-		category : ""
+		category : "",
+		showCampaignModal : false,
+		link : "",
+		showOneTimeCampaignModal : false,
+		showMultipleTimeCampaignModal : false
 		
 	}
 	
@@ -125,6 +131,37 @@ class ProfilePage extends React.Component {
 			},
 		});
 	};
+	
+	onDrop1(picture) {
+
+		this.setState({
+			pictures: [],
+		});
+		this.setState({
+			pictures: this.state.pictures.concat(picture),
+		});
+
+		let pomoc = picture.length;
+		if(pomoc===0) {
+			this.setState({
+				noPicture: true,
+			});
+			this.setState({
+				showImageModal: false,
+			});
+		}
+		else {
+			this.setState({
+				noPicture: false,
+			});
+			this.setState({
+				showImageModal: true,
+			});
+			
+		}
+
+
+	}
 	onDrop(picture) {
 
 		this.setState({
@@ -167,6 +204,37 @@ class ProfilePage extends React.Component {
 					hiddenMultiple: false,
 				});
 			}
+		}
+		
+
+
+	}
+	onDropCampaign(picture) {
+
+		this.setState({
+			pictures: [],
+		});
+		this.setState({
+			pictures: this.state.pictures.concat(picture),
+		});
+
+		let pomoc = picture.length;
+		if(pomoc===0) {
+			this.setState({
+				noPicture: true,
+			});
+			this.setState({
+				showImageModal: false,
+			});
+		}
+		else {
+			this.setState({
+				noPicture: false,
+			});
+			this.setState({
+			});
+			
+			
 		}
 		
 
@@ -409,6 +477,9 @@ class ProfilePage extends React.Component {
 	handleDescriptionChange = (event) => {
 		this.setState({ description: event.target.value });
 	};
+	handleLinkChange = (event) => {
+		this.setState({ link: event.target.value });
+	};
 	handleHashtagsChange = (event)=> {
 		this.setState({hashtags : event.target.value });
 	}
@@ -434,6 +505,24 @@ class ProfilePage extends React.Component {
 		this.setState({ showVerifyModal: true });
 		this.setState({pictures: []})
 	};
+	handleAddCampaignModal = ()=>{
+		this.setState({ showCampaignModal: true });
+	}
+	handleAddCampaignModalClose = ()=>{
+		this.setState({ showCampaignModal: false });
+	}
+	handleOneTimeCampaignModalOpen = ()=>{
+		this.setState({ showOneTimeCampaignModal: true });
+	}
+	handleOneTimeCampaignModalClose = ()=>{
+		this.setState({ showOneTimeCampaignModal: false });
+	}
+	handleMultipleTimeCampaignModalOpen = ()=>{
+		this.setState({ showMultipleTimeCampaignModal: true });
+	}
+	handleMultipleTimeCampaignModalClose = ()=>{
+		this.setState({ showMultipleTimeCampaignModal: false });
+	}
 	handleVerifyModalClose = () => {
 		this.setState({ showVerifyModal: false });
 	}
@@ -479,7 +568,24 @@ class ProfilePage extends React.Component {
 		this.getFollowing()
 		this.setState({ showTagsModal: true });
 	}
+	handleAddOneTimeCampaignModal =()=>{
+		this.setState({ showOneTimeCampaignModal: true });
+
+	}
+	handleAddMultipleTimeCampaignModal =() =>{
+		this.setState({ showMultipleTimeCampaignModal: true });
+
+	}
 	
+	handleAddOneTimeCampaign =(date,time,targetGroup)=>{
+		this.setState({ showOneTimeCampaignModal: false, showCampaignModal : false });
+
+	}
+	handleAddMultipleTimeCampaign =(startDate,endDate,numberOfRepetitions,targetGroup) =>{
+
+		this.setState({ showMultipleTimeCampaignModal: false, showCampaignModal : false });
+
+	}
 	handleAddStoryPostCloseFriends =()=>{
 		if (this.state.addressInput === "") {
 			const storyPostDTO = {
@@ -1603,6 +1709,10 @@ class ProfilePage extends React.Component {
 												<button onClick={this.handleVerifyModalOpen} className="btn btn-outline-secondary btn-sm" style={{ marginBottom: "1rem" }}>Send verification request</button>
 
 											</td>
+											<td>
+												<button onClick={this.handleAddCampaignModal} className="btn btn-outline-secondary btn-sm" style={{ marginBottom: "1rem" }}>Publish campaign</button>
+
+											</td>
 										</div>
 										
 										<div>
@@ -1717,7 +1827,38 @@ class ProfilePage extends React.Component {
 						header="Successful"
 						text={this.state.textSuccessfulModal}
 					/>
-				
+					<AddCampaignModal
+						show={this.state.showCampaignModal}
+						onCloseModal={this.handleAddCampaignModalClose}
+						header="New campaign"
+						hiddenMultiple = {this.state.hiddenMultiple}
+						hiddenOne = {this.state.hiddenOne}
+						noPicture = {this.state.noPicture}
+						onDrop = {this.onDropCampaign}
+
+					
+						handleAddOneTimeCampaign = {this.handleAddOneTimeCampaignModal}
+						handleAddMultipleTimeCampaign = {this.handleAddMultipleTimeCampaignModal}
+						handleLinkChange = {this.handleLinkChange}
+						handleDescriptionChange = {this.handleDescriptionChange}
+
+					/>
+					<OneTimeCampaignModal
+						show={this.state.showOneTimeCampaignModal}
+						onCloseModal={this.handleOneTimeCampaignModalClose}
+						header="New one time campaign"
+
+					
+						handleAddOneTimeCampaign = {this.handleAddOneTimeCampaign}
+					/>
+					<MultipleTimeCampaignModal
+						show={this.state.showMultipleTimeCampaignModal}
+						onCloseModal={this.handleMultipleTimeCampaignModalClose}
+						header="New multiple time campaign"
+
+					
+						handleAddMultipleTimeCampaign = {this.handleAddMultipleTimeCampaign}
+					/>
 					<AddPostModal
 						show={this.state.showImageModal}
 						onCloseModal={this.handlePostModalClose}
