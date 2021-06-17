@@ -167,7 +167,7 @@ class RegisterNewAgent extends Component {
 						this.setState({ errorHeader: "Internal server error!", errorMessage: "Server error.", hiddenErrorAlert: false });
 					} else {
 						this.setState({ openModal: true });
-                        this.setState({ textSuccessfulModal: "You have successfully registred admin" });
+                        this.setState({ textSuccessfulModal: "You have successfully registred agent" });
 
 					}
 					const user1Id = {id: res.data}

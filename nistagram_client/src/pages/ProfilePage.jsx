@@ -122,7 +122,19 @@ class ProfilePage extends React.Component {
 		showMultipleTimeCampaignModal : false
 		
 	}
+	hasRole = (reqRole) => {
+		let roles = JSON.parse(localStorage.getItem("keyRole"));
+		if (roles === null) return false;
+
+		if (reqRole === "*") return true;
+
 	
+		if (roles.trim() === reqRole.trim()) 
+		{
+			return true;
+		}
+		return false;
+	};
 	onYmapsLoad = (ymaps) => {
 		this.ymaps = ymaps;
 		new this.ymaps.SuggestView(this.addressInput.current, {
@@ -1709,7 +1721,7 @@ class ProfilePage extends React.Component {
 												<button onClick={this.handleVerifyModalOpen} className="btn btn-outline-secondary btn-sm" style={{ marginBottom: "1rem" }}>Send verification request</button>
 
 											</td>
-											<td>
+											<td hidden={!this.hasRole("AGENT")}>
 												<button onClick={this.handleAddCampaignModal} className="btn btn-outline-secondary btn-sm" style={{ marginBottom: "1rem" }}>Publish campaign</button>
 
 											</td>

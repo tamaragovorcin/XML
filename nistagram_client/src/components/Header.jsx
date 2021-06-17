@@ -131,13 +131,13 @@ class Header extends React.Component {
 							<li  >
 								<Link to="/seacrh"><FaSearch /></Link>
 							</li>
-							<li  hidden={!this.hasRole("USER")}>
+							<li  hidden={!this.hasRole("USER") && !this.hasRole("AGENT")}>
 								<Link to="/messages"><FiSend /></Link>
 							</li>
-							<li  hidden={!this.hasRole("USER")}>
+							<li  hidden={!this.hasRole("USER") && !this.hasRole("AGENT")}>
 								<Link to="/followRequest"><HiOutlineUserAdd /></Link>
 							</li>
-							<li  hidden={!this.hasRole("USER")}>
+							<li  hidden={!this.hasRole("USER") && !this.hasRole("AGENT")}>
 								<Link to="/notifications"><IoMdNotificationsOutline/></Link>
 							</li>
 							<li  hidden={!this.hasRole("ADMIN")}>
@@ -152,7 +152,7 @@ class Header extends React.Component {
 							<li  hidden={!this.hasRole("ADMIN")}>
 								<Link to="/registerNewAgent"><BsPersonPlusFill /></Link>
 							</li>
-							<li className="drop-down" hidden={!this.hasRole("USER")}>
+							<li className="drop-down" hidden={!this.hasRole("USER") && !this.hasRole("AGENT")}>
 								<a href="#"><CgProfile /></a>
 								<ul>
 
