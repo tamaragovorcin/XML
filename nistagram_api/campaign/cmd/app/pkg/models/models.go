@@ -24,8 +24,8 @@ type Campaign struct {
 type MultipleTimeCampaign struct {
 	Id primitive.ObjectID `bson:"_id,omitempty"`
 	Campaign Campaign `bson:"campaign"`
-	StartTime time.Time `bson:"startTime"`
-	EndTime time.Time `bson:"endTime"`
+	StartTime string `bson:"startTime"`
+	EndTime string `bson:"endTime"`
 	DesiredNumber int `bson:"desiredNumber"`
 	ModifiedTime time.Time `bson:"modifiedTime"`
 	TimesShown int `bson:"timesShown"`
@@ -34,8 +34,8 @@ type MultipleTimeCampaign struct {
 type OneTimeCampaign struct {
 	Id primitive.ObjectID `bson:"_id,omitempty"`
 	Campaign Campaign `bson:"campaign"`
-	Time time.Time `bson:"time"`
-	Date time.Time `bson:"date"`
+	Time string `bson:"time"`
+	Date string `bson:"date"`
 }
 
 type Statistic struct {
