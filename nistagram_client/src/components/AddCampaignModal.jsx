@@ -71,8 +71,15 @@ class AddCampaignModal extends Component {
 									</div>
 								</div>
 								</div>
-
+								
+								<div className="control-group">
+									<button style={{ width: "10rem", margin : "1rem" }}  onClick={this.props.handleAddInfluencersModal} className="btn btn-outline-secondary btn-sm">Add influencers<br/> <CgFeed/> </button>		
+								</div>
+								<div className="control-group">
+									<button style={{ width: "10rem", margin : "1rem" }}  onClick={this.props.handleDefineTargetGroupModal} className="btn btn-outline-secondary btn-sm">Define target group<br/> <CgFeed/> </button>		
+								</div>
 						</div>
+						
 						<div className="form-group text-center">
                         						
 								<button style={{ width: "10rem", margin : "1rem", background:"#37FF33" }} onClick={this.props.handleAddOneTimeCampaign} className="btn btn-outline-primary btn-sm">Add as one time campaign<GiThreeFriends/> </button>

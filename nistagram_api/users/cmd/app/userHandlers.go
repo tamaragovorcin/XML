@@ -295,6 +295,36 @@ func (app *application) findUserUsername(w http.ResponseWriter, r *http.Request)
 	w.WriteHeader(http.StatusOK)
 	w.Write(b)
 }
+
+
+func (app *application) findUserUsernameIfInfluencer(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	vars := mux.Vars(r)
+	userId := vars["userId"]
+	intVar, err := primitive.ObjectIDFromHex(userId)
+	m, err := app.users.FindByID(intVar)
+	if err != nil {
+		if err.Error() == "ErrNoDocuments" {
+			app.infoLog.Println("User not found")
+			return
+		}
+		app.serverError(w, err)
+	}
+	forMarshal := ""
+	if m.Category=="INFLUENCER" {
+		forMarshal = m.ProfileInformation.Username
+	} else {
+		forMarshal = "not"
+	}
+	b, err := json.Marshal(forMarshal)
+	if err != nil {
+		app.serverError(w, err)
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	w.Write(b)
+}
 func (app *application) findUserPrivacy(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Access-Control-Allow-Origin", "*")

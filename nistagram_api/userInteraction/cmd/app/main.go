@@ -44,7 +44,7 @@ func routes() *mux.Router {
 	r.HandleFunc("/api/user/followingCloseFriends", ReturnUsersCloseFriends(driver, configuration.Database)).Methods("POST")
 	r.HandleFunc("/api/deleteFollow", ReturnUsersCloseFriends(driver, configuration.Database)).Methods("POST")
 	r.HandleFunc("/api/user/following/tagged", ReturnUsersFollowingsThatAllowTags(driver, configuration.Database)).Methods("POST")
-
+	r.HandleFunc("/api/user/following/category", ReturnUsersFollowingsInfluencers(driver, configuration.Database)).Methods("POST")
 
 	r.HandleFunc("/api/createUser", CreateUser(driver, configuration.Database)).Methods("POST")
 	r.HandleFunc("/removeUser", RemoveUser(driver, configuration.Database)).Methods("POST")
@@ -543,9 +543,58 @@ func ReturnUsersFollowings(driver neo4j.Driver, database string) func(http.Respo
 		}
 	}
 }
+func ReturnUsersFollowingsInfluencers(driver neo4j.Driver, database string) func(http.ResponseWriter, *http.Request) {
+	return func(w http.ResponseWriter, req *http.Request) {
+		var m User
+		err := json.NewDecoder(req.Body).Decode(&m)
+		if err != nil {
+			fmt.Println("Error")
+		}
+		session := driver.NewSession(neo4j.SessionConfig{
+			AccessMode:   neo4j.AccessModeRead,
+			DatabaseName: database,
+		})
+		defer unsafeClose(session)
+
+		movieResults, err := session.ReadTransaction(func(tx neo4j.Transaction) (interface{}, error) {
+			records, err := tx.Run(
+				`MATCH (following:User)<-[f:FOLLOW]-(follower:User) WHERE follower.id = $followerId return following.id as id`,
+				map[string]interface{}{ "followerId": m.Id})
+			if err != nil {
+				return nil, err
+			}
+			var users  []followUserStructDTO
+			for records.Next() {
+				record := records.Record()
+				id, _ := record.Get("id")
+				username:=getUserUsernameIfInfluencer(id.(string))
+				if username!="not" {
+					var dto = followUserStructDTO{
+						Id : id.(string),
+						Username: username,
+					}
+					users = append(users,  dto)
+				}
+
+			}
+
+			if users==nil {
+				return []followUserStructDTO{},nil
+			}
+			return users,nil
+		})
+		if err != nil {
+			log.Println("error querying search:", err)
+			return
+		}
+		err = json.NewEncoder(w).Encode(movieResults)
+		if err != nil {
+			log.Println("error writing search response:", err)
+		}
+	}
+}
 func ReturnUsersFollowingsThatAllowTags(driver neo4j.Driver, database string) func(http.ResponseWriter, *http.Request) {
 	return func(w http.ResponseWriter, req *http.Request) {
-	fmt.Println("lalalaalalall")
 		var m User
 		err := json.NewDecoder(req.Body).Decode(&m)
 		if err != nil {
@@ -610,6 +659,7 @@ func ReturnUsersFollowingsThatAllowTags(driver neo4j.Driver, database string) fu
 		}
 	}
 }
+
 
 func ReturnUsersFollowers(driver neo4j.Driver, database string) func(http.ResponseWriter, *http.Request) {
 	return func(w http.ResponseWriter, req *http.Request) {
@@ -908,6 +958,23 @@ func getUserUsername(user string) string {
 	return sb
 }
 
+
+func getUserUsernameIfInfluencer(user string) string {
+
+	resp, err := http.Get("http://localhost:80/api/users/api/user/username/category/"+user)
+	if err != nil {
+		log.Fatalln(err)
+	}
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		log.Fatalln(err)
+	}
+	sb := string(body)
+
+	sb = sb[1:]
+	sb = sb[:len(sb)-1]
+	return sb
+}
 func RemoveUser(driver neo4j.Driver, database string) func(w http.ResponseWriter,r *http.Request) {
 	return func(w http.ResponseWriter, req *http.Request) {
 		var m User

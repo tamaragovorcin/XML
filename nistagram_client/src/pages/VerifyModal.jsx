@@ -17,7 +17,6 @@ class VerifyModal extends Component {
 		category : ""
     }
 	handleCategoryChange(event) {
-		console.log(event.target.value)
 		this.setState({ category: event.target.value });
 	}
 	handleNameChange = (event) => {

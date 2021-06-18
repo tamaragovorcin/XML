@@ -21,6 +21,7 @@ func (app *application) routes() *mux.Router {
 	r.HandleFunc("/api/user/privacy/{userId}", app.findUserPrivacy).Methods("GET")
 	r.HandleFunc("/api/user/username/{userId}", app.findUserUsername).Methods("GET")
 	r.HandleFunc("/api/user/closeFriends/{userId}", app.findUserCloseFriends).Methods("GET")
+	r.HandleFunc("/api/user/username/category/{userId}", app.findUserUsernameIfInfluencer).Methods("GET")
 
 	r.HandleFunc("/api/user/addToCloseFriends/", app.addUserToCloseFriends).Methods("POST")
 	r.HandleFunc("/api/user/removeFromCloseFriends/", app.removeUserFromCloseFriends).Methods("POST")

@@ -25,7 +25,8 @@ import VerifyModal from "../pages/VerifyModal";
 import AddCampaignModal from "../components/AddCampaignModal";
 import OneTimeCampaignModal from "../components/OneTimeCampaignModal";
 import MultipleTimeCampaignModal from "../components/MultipleTimeCampaignModal";
-
+import AddInfluencerModal from "../components/AddInfluencerModal";
+import TargetGroupModal from "../components/TargetGroupModal";
 
 class ProfilePage extends React.Component {
 	constructor(props) {
@@ -44,7 +45,6 @@ class ProfilePage extends React.Component {
 		lastName : "",
 		email: "",
 		phoneNumber: "",
-		gender : "Female",
 		dateOfBirth : "",
 		webSite : "",
 		biography : "",
@@ -119,7 +119,14 @@ class ProfilePage extends React.Component {
 		showCampaignModal : false,
 		link : "",
 		showOneTimeCampaignModal : false,
-		showMultipleTimeCampaignModal : false
+		showMultipleTimeCampaignModal : false,
+		showInfluencersModal : false,
+		influencers : [],
+		choosenInfluencers : [],
+		showTargetGroupModal : false,
+		selectedGender : "MALE",
+        selectedDateOne : "",
+        selectedDateTwo : ""
 		
 	}
 	hasRole = (reqRole) => {
@@ -393,7 +400,6 @@ class ProfilePage extends React.Component {
 							lastName : res.data.ProfileInformation.LastName,
 							email : res.data.ProfileInformation.Email,
 							phoneNumber : res.data.ProfileInformation.PhoneNumber,
-							gender : res.data.ProfileInformation.Gender,
 							dateOfBirth  : res.data.ProfileInformation.DateOfBirth,
 							webSite : res.data.WebSite,
 							biography : res.data.Biography,
@@ -597,9 +603,38 @@ class ProfilePage extends React.Component {
 				console.log(err)
 			});
     }
+	
+	getInfluencers = ()=> {
+		let help = []
+
+        let id = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length-1);
+        const dto = {id: id}
+        Axios.post(BASE_URL + "/api/userInteraction/api/user/following/category", dto)
+			.then((res) => {
+
+				res.data.forEach((user) => {
+					let optionDTO = { id: user.Id, label: user.Username, value: user.Id }
+					help.push(optionDTO)
+				});
+				
+
+				this.setState({ influencers: help });
+			})
+			.catch((err) => {
+				console.log(err)
+			});
+    }
 	handleAddTagsModal = ()=> {
 		this.getFollowing()
 		this.setState({ showTagsModal: true });
+	}
+	handleAddInfluencersModal = ()=> {
+		this.getInfluencers()
+		this.setState({ showInfluencersModal: true });
+	}
+	
+	handleDefineTargetGroupModal = ()=> {
+		this.setState({ showTargetGroupModal: true });
 	}
 	handleAddOneTimeCampaignModal =()=>{
 		this.setState({ showOneTimeCampaignModal: true });
@@ -609,13 +644,80 @@ class ProfilePage extends React.Component {
 		this.setState({ showMultipleTimeCampaignModal: true });
 
 	}
-	
-	handleAddOneTimeCampaign =(date,time,targetGroup)=>{
+	getTargetGroup = ()=> {
+		if (this.state.addressInput === "") {
+			const dto = {
+				Gender : this.state.selectedGender,
+				DateOne : this.state.selectedDateOne,
+				DateTwo : this.state.selectedDateTwo,
+				Location : this.state.addressLocation,
+			}
+			return dto;
 
-		let id = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length-1)
+		}
+		else {
+			let street;
+			let city;
+			let country;
+			let latitude;
+			let longitude;
+			this.ymaps
+				.geocode(this.addressInput.current.value, {
+					results: 1,
+				})
+				.then(function (res) {
+					if (typeof res.geoObjects.get(0) === "undefined")  {this.setState({ foundLocation:false});}
+					else {
+						var firstGeoObject = res.geoObjects.get(0),
+							coords = firstGeoObject.geometry.getCoordinates();
+						latitude = coords[0];
+						longitude = coords[1];
+						country = firstGeoObject.getCountry();
+						street = firstGeoObject.getThoroughfare();
+						city = firstGeoObject.getLocalities().join(", ");
+					}
+				}).then((res) => {
+					var locationDTO = {
+						street : street,
+						country : country,
+						town : city,
+						latitude : latitude,
+						longitude : longitude
+					}
+					const dto = {
+						Gender : this.state.selectedGender,
+						DateOne : this.state.selectedDateOne,
+						DateTwo : this.state.selectedDateTwo,
+						Location : locationDTO
+					}
+					return dto;
+				
+				});
+				
 
+		}
+		
+	}
+	getpartnershipsRequests = ()=> {
+		var choosenInfluencersHelp = []
+		this.state.choosenInfluencers.forEach((user) => {
+			choosenInfluencersHelp.push(user.id)
+		});
+		return choosenInfluencersHelp
+	}
+	handleAddOneTimeCampaign =(date,time)=>{
+
+        let id = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length-1);
+		let targetGroup = this.getTargetGroup();
+		let partnershipsRequestsList = this.getpartnershipsRequests();
 		const campaignDTO = {
-
+			User : id,
+			TargetGroupDTO : targetGroup,
+			Link : this.state.link,
+			Date : date,
+			Time : time,
+			Description : this.state.description,
+			PartnershipsRequests : partnershipsRequestsList
 		}
 		Axios.post(BASE_URL + "/api/campaign/oneTimeCampaign/", campaignDTO)
 			.then((res) => {
@@ -1718,7 +1820,38 @@ class ProfilePage extends React.Component {
 		const newList2 = this.state.followingUsers.filter((item) => item.Id !== event.value);
 		this.setState({ followingUsers: newList2 });		
 	};
+	
+	handleInfluencersModalClose = () =>{
+		this.setState({ showInfluencersModal: false });
 
+	}
+	handleTargetGroupModalClose = () =>{
+		console.log(this.state.selectedDateOne)
+		console.log(this.state.selectedDateTwo)
+		console.log(this.state.selectedGender)
+
+		this.setState({ showTargetGroupModal: false });
+
+	}
+	handleChangeInfluencers = (event) => {
+	
+		let optionDTO = { id: event.value, label: event.label, value: event.value }
+		let helpDto = this.state.choosenInfluencers.concat(optionDTO)
+		
+		this.setState({ choosenInfluencers: helpDto });
+
+		const newList2 = this.state.influencers.filter((item) => item.Id !== event.value);
+		this.setState({ influencers: newList2 });		
+	};
+	handleGenderChange=(event) =>{
+        this.setState({  selectedGender: event.target.value });
+    }
+    handleDateOneChange = (event) => {
+		this.setState({ selectedDateOne: event.target.value });
+	};
+    handleDateTwoChange = (event) => {
+		this.setState({ selectedDateTwo: event.target.value });
+	};
 	render() {
 		return (
 			<React.Fragment>
@@ -1905,6 +2038,8 @@ class ProfilePage extends React.Component {
 						handleAddMultipleTimeCampaign = {this.handleAddMultipleTimeCampaignModal}
 						handleLinkChange = {this.handleLinkChange}
 						handleDescriptionChange = {this.handleDescriptionChange}
+						handleAddInfluencersModal = {this.handleAddInfluencersModal}
+						handleDefineTargetGroupModal = {this.handleDefineTargetGroupModal}
 
 					/>
 					<OneTimeCampaignModal
@@ -1912,7 +2047,6 @@ class ProfilePage extends React.Component {
 						onCloseModal={this.handleOneTimeCampaignModalClose}
 						header="New one time campaign"
 
-					
 						handleAddOneTimeCampaign = {this.handleAddOneTimeCampaign}
 					/>
 					<MultipleTimeCampaignModal
@@ -2058,8 +2192,33 @@ class ProfilePage extends React.Component {
 						  header="Add tags"
 						  followingUsers = {this.state.followingsThatAllowTags}
 						  taggedOnPost = {this.state.taggedOnPost}
-						  tagUserOnPost={this.tagUserOnPost}
 						  handleChangeTags = {this.handleChangeTags}
+					  />
+					   <AddInfluencerModal
+                          
+					  
+						  show={this.state.showInfluencersModal}
+						  onCloseModal={this.handleInfluencersModalClose}
+						  header="Hire influencers"
+						  influencers = {this.state.influencers}
+						  choosenInfluencers = {this.state.choosenInfluencers}
+						  handleChangeInfluencers = {this.handleChangeInfluencers}
+					  />
+					   <TargetGroupModal
+                          
+					  
+						  show={this.state.showTargetGroupModal}
+						  onCloseModal={this.handleTargetGroupModalClose}
+						  header="Define target group"
+						  addressInput = {this.addressInput}
+						  onYmapsLoad = {this.onYmapsLoad}
+						  handleGenderChange = {this.handleGenderChange}
+						  selectedGender = {this.state.selectedGender}
+						  handleDateOneChange = {this.handleDateOneChange}
+						  handleDateTwoChange = {this.handleDateTwoChange}
+						  selectedDateOne = {this.state.selectedDateOne}
+						  selectedDateTwo = {this.state.selectedDateTwo}
+
 					  />
                     </div>
 
