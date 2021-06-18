@@ -25,6 +25,7 @@ import VerifyModal from "../pages/VerifyModal";
 import AddCampaignModal from "../components/AddCampaignModal";
 import OneTimeCampaignModal from "../components/OneTimeCampaignModal";
 import MultipleTimeCampaignModal from "../components/MultipleTimeCampaignModal";
+import AddInfluencerModal from "../components/AddInfluencerModal";
 
 
 class ProfilePage extends React.Component {
@@ -119,7 +120,10 @@ class ProfilePage extends React.Component {
 		showCampaignModal : false,
 		link : "",
 		showOneTimeCampaignModal : false,
-		showMultipleTimeCampaignModal : false
+		showMultipleTimeCampaignModal : false,
+		showInfluencersModal : false,
+		influencers : [],
+		choosenInfluencers : []
 		
 	}
 	hasRole = (reqRole) => {
@@ -597,10 +601,36 @@ class ProfilePage extends React.Component {
 				console.log(err)
 			});
     }
+	
+	getInfluencers = ()=> {
+		let help = []
+
+        let id = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length-1);
+        const dto = {id: id}
+        Axios.post(BASE_URL + "/api/userInteraction/api/user/following/category", dto)
+			.then((res) => {
+
+				res.data.forEach((user) => {
+					let optionDTO = { id: user.Id, label: user.Username, value: user.Id }
+					help.push(optionDTO)
+				});
+				
+
+				this.setState({ influencers: help });
+			})
+			.catch((err) => {
+				console.log(err)
+			});
+    }
 	handleAddTagsModal = ()=> {
 		this.getFollowing()
 		this.setState({ showTagsModal: true });
 	}
+	handleAddInfluencersModal = ()=> {
+		this.getInfluencers()
+		this.setState({ showInfluencersModal: true });
+	}
+	
 	handleAddOneTimeCampaignModal =()=>{
 		this.setState({ showOneTimeCampaignModal: true });
 
@@ -1718,7 +1748,21 @@ class ProfilePage extends React.Component {
 		const newList2 = this.state.followingUsers.filter((item) => item.Id !== event.value);
 		this.setState({ followingUsers: newList2 });		
 	};
+	
+	handleInfluencersModalClose = () =>{
+		this.setState({ showInfluencersModal: false });
 
+	}
+	handleChangeInfluencers = (event) => {
+	
+		let optionDTO = { id: event.value, label: event.label, value: event.value }
+		let helpDto = this.state.choosenInfluencers.concat(optionDTO)
+		
+		this.setState({ choosenInfluencers: helpDto });
+
+		const newList2 = this.state.influencers.filter((item) => item.Id !== event.value);
+		this.setState({ influencers: newList2 });		
+	};
 	render() {
 		return (
 			<React.Fragment>
@@ -1905,6 +1949,7 @@ class ProfilePage extends React.Component {
 						handleAddMultipleTimeCampaign = {this.handleAddMultipleTimeCampaignModal}
 						handleLinkChange = {this.handleLinkChange}
 						handleDescriptionChange = {this.handleDescriptionChange}
+						handleAddInfluencersModal = {this.handleAddInfluencersModal}
 
 					/>
 					<OneTimeCampaignModal
@@ -2058,8 +2103,17 @@ class ProfilePage extends React.Component {
 						  header="Add tags"
 						  followingUsers = {this.state.followingsThatAllowTags}
 						  taggedOnPost = {this.state.taggedOnPost}
-						  tagUserOnPost={this.tagUserOnPost}
 						  handleChangeTags = {this.handleChangeTags}
+					  />
+					   <AddInfluencerModal
+                          
+					  
+						  show={this.state.showInfluencersModal}
+						  onCloseModal={this.handleInfluencersModalClose}
+						  header="Hire influencers"
+						  influencers = {this.state.influencers}
+						  choosenInfluencers = {this.state.choosenInfluencers}
+						  handleChangeInfluencers = {this.handleChangeInfluencers}
 					  />
                     </div>
 
