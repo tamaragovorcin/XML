@@ -645,6 +645,7 @@ class ProfilePage extends React.Component {
 
 	}
 	getTargetGroup = ()=> {
+		console.log(this.addressInput)
 		if (this.state.addressInput === "") {
 			const dto = {
 				Gender : this.state.selectedGender,
@@ -656,7 +657,7 @@ class ProfilePage extends React.Component {
 
 		}
 		else {
-			let street;
+			/*let street;
 			let city;
 			let country;
 			let latitude;
@@ -683,19 +684,19 @@ class ProfilePage extends React.Component {
 						town : city,
 						latitude : latitude,
 						longitude : longitude
-					}
+					}*/
 					const dto = {
 						Gender : this.state.selectedGender,
 						DateOne : this.state.selectedDateOne,
 						DateTwo : this.state.selectedDateTwo,
-						Location : locationDTO
+						Location : this.state.addressLocation
 					}
 					return dto;
 				
-				});
+				//});
 				
 
-		}
+				}
 		
 	}
 	getpartnershipsRequests = ()=> {
