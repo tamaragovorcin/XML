@@ -72,14 +72,15 @@ func (app *application) insertOneTimeCampaign(w http.ResponseWriter, req *http.R
 	var campaign = models.Campaign{
 		User : userIdPrimitive,
 		TargetGroup : dto.TargetGroup,
-		Statistic  :[]primitive.ObjectID{},
+		Statistic  :[]models.Statistic{},
 		Link : dto.Link,
-		FeedPosts :[]primitive.ObjectID{},
-		StoryPosts :[]primitive.ObjectID{},
+		Description :dto.Description,
+		Partnerships :getPartnerships(dto.PartnershipsRequests),
 	}
 	var oneTimeCampaign = models.OneTimeCampaign{
 		Campaign:   campaign,
 		Time: dto.Time,
+		Date : dto.Date,
 	}
 
 	insertResult, err := app.oneTimeCampaign.Insert(oneTimeCampaign)
@@ -93,6 +94,19 @@ func (app *application) insertOneTimeCampaign(w http.ResponseWriter, req *http.R
 
 	idMarshaled, err := json.Marshal(insertResult.InsertedID)
 	w.Write(idMarshaled)
+}
+
+func getPartnerships(requests []string) []models.Partnership {
+	partnerships := []models.Partnership{}
+	for _, request := range requests {
+		primitiveRequest, _ := primitive.ObjectIDFromHex(request)
+		var partnership = models.Partnership{
+			Influencer : primitiveRequest,
+			Approved: false,
+		}
+		partnerships = append(partnerships, partnership)
+	}
+	return partnerships
 }
 
 func (app *application) deleteOneTimeCampaign(w http.ResponseWriter, r *http.Request) {

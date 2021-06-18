@@ -2,18 +2,23 @@ package models
 
 import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
-	"go.mongodb.org/mongo-driver/x/mongo/driver/uuid"
 	"time"
 )
-
+type TargetGroup struct {
+	Gender string
+	DateOne string
+	DateTwo string
+	Location  Location
+}
 type Campaign struct {
 	Id primitive.ObjectID `bson:"_id,omitempty"`
 	User primitive.ObjectID `bson:"user"`
-	TargetGroup []string `bson:"targetGroup"`
-	Statistic []primitive.ObjectID `bson:"statistics"`
+	TargetGroup TargetGroup `bson:"targetGroup"`
+	Statistic []Statistic `bson:"statistics"`
 	Link string `bson:"link"`
-	FeedPosts []primitive.ObjectID `bson:"feedPosts"`
-	StoryPosts []primitive.ObjectID `bson:"storyPosts"`
+	Description string `bson:"description"`
+	Partnerships []Partnership `bson:"partnerships"`
+
 }
 
 type MultipleTimeCampaign struct {
@@ -30,10 +35,11 @@ type OneTimeCampaign struct {
 	Id primitive.ObjectID `bson:"_id,omitempty"`
 	Campaign Campaign `bson:"campaign"`
 	Time time.Time `bson:"time"`
+	Date time.Time `bson:"date"`
 }
 
 type Statistic struct {
-	Id uuid.UUID `bson:"_id,omitempty"`
+	Id primitive.ObjectID `bson:"_id,omitempty"`
 	Influencer primitive.ObjectID `bson:"influencer"`
 	NumberOfClicks int  `bson:"numberOfClicks"`
 	FeedPost primitive.ObjectID  `bson:"feedPost"`
@@ -42,7 +48,6 @@ type Statistic struct {
 
 type Partnership struct {
 	ID primitive.ObjectID `bson:"_id,omitempty"`
-	Agent primitive.ObjectID `bson:"agent"`
 	Influencer  primitive.ObjectID `bson:"influencer"`
 	Approved bool `bson:"approved"`
 }
@@ -58,4 +63,13 @@ type Video struct {
 	Media string `bson:"media"`
 	UserId primitive.ObjectID `bson:"userId"`
 	CampaignId primitive.ObjectID `bson:"campaignId"`
+}
+
+type Location struct {
+	Id primitive.ObjectID `bson:"_id,omitempty"`
+	Country string `bson:"country"`
+	Town string `bson:"town"`
+	Street string `bson:"street"`
+	Number int `bson:"number"`
+	PostalCode int `bson:"postalCode"`
 }

@@ -644,13 +644,80 @@ class ProfilePage extends React.Component {
 		this.setState({ showMultipleTimeCampaignModal: true });
 
 	}
-	
-	handleAddOneTimeCampaign =(date,time,targetGroup)=>{
+	getTargetGroup = ()=> {
+		if (this.state.addressInput === "") {
+			const dto = {
+				Gender : this.state.selectedGender,
+				DateOne : this.state.selectedDateOne,
+				DateTwo : this.state.selectedDateTwo,
+				Location : this.state.addressLocation,
+			}
+			return dto;
 
-		let id = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length-1)
+		}
+		else {
+			let street;
+			let city;
+			let country;
+			let latitude;
+			let longitude;
+			this.ymaps
+				.geocode(this.addressInput.current.value, {
+					results: 1,
+				})
+				.then(function (res) {
+					if (typeof res.geoObjects.get(0) === "undefined")  {this.setState({ foundLocation:false});}
+					else {
+						var firstGeoObject = res.geoObjects.get(0),
+							coords = firstGeoObject.geometry.getCoordinates();
+						latitude = coords[0];
+						longitude = coords[1];
+						country = firstGeoObject.getCountry();
+						street = firstGeoObject.getThoroughfare();
+						city = firstGeoObject.getLocalities().join(", ");
+					}
+				}).then((res) => {
+					var locationDTO = {
+						street : street,
+						country : country,
+						town : city,
+						latitude : latitude,
+						longitude : longitude
+					}
+					const dto = {
+						Gender : this.state.selectedGender,
+						DateOne : this.state.selectedDateOne,
+						DateTwo : this.state.selectedDateTwo,
+						Location : locationDTO
+					}
+					return dto;
+				
+				});
+				
 
+		}
+		
+	}
+	getpartnershipsRequests = ()=> {
+		var choosenInfluencersHelp = []
+		this.state.choosenInfluencers.forEach((user) => {
+			choosenInfluencersHelp.push(user.id)
+		});
+		return choosenInfluencersHelp
+	}
+	handleAddOneTimeCampaign =(date,time)=>{
+
+        let id = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length-1);
+		let targetGroup = this.getTargetGroup();
+		let partnershipsRequestsList = this.getpartnershipsRequests();
 		const campaignDTO = {
-
+			User : id,
+			TargetGroupDTO : targetGroup,
+			Link : this.state.link,
+			Date : date,
+			Time : time,
+			Description : this.state.description,
+			PartnershipsRequests : partnershipsRequestsList
 		}
 		Axios.post(BASE_URL + "/api/campaign/oneTimeCampaign/", campaignDTO)
 			.then((res) => {
@@ -1980,7 +2047,6 @@ class ProfilePage extends React.Component {
 						onCloseModal={this.handleOneTimeCampaignModalClose}
 						header="New one time campaign"
 
-					
 						handleAddOneTimeCampaign = {this.handleAddOneTimeCampaign}
 					/>
 					<MultipleTimeCampaignModal

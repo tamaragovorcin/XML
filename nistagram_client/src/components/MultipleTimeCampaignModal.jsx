@@ -77,20 +77,10 @@ class MultipleTimeCampaignModal extends Component {
 										value={this.state.campaignNumberOfRepetition}
 									/>
 								</div>
-                                <label>Enter words separated with comma(,) that represent target group:</label>
-								<div className="form-group controls mb-0 pb-2" style={{ color: "#6c757d", opacity: 1 }}>
-									<input
-										placeholder="ex: novisad,makeup,beauty"
-										className="form-control"
-										id="comment"
-										type="text"
-										onChange={this.handleCampaignTargetGroupChange}
-										value={this.state.campaignTargetGroup}
-									/>
-								</div>
+                              
                                 <Button
 									style={{ background: "#1977cc", marginTop: "15px", marginLeft: "40%", width: "20%" }}
-									onClick={() => this.props.handleAddMultipleTimeCampaign(this.state.campaignStartDate,this.state.campaignEndDate,this.state.campaignNumberOfRepetition,this.state.campaignTargetGroup)}
+									onClick={() => this.props.handleAddMultipleTimeCampaign(this.state.campaignStartDate,this.state.campaignEndDate,this.state.campaignNumberOfRepetition)}
 									className="btn btn-primary btn-md"
 									id="sendMessageButton"
 									type="button"
