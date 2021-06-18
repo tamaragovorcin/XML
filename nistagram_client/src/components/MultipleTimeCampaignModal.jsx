@@ -6,11 +6,10 @@ class MultipleTimeCampaignModal extends Component {
 		campaignStartDate: "",
         campaignEndDate : "",
         campaignNumberOfRepetition : 0,
-        campaignTargetGroup : ""
 	};
    
     handleCampaignStartDateChange = (event) =>{
-        this.setState({ campaignDate: event.target.value });
+        this.setState({ campaignStartDate: event.target.value });
 
     }
     handleCampaignEndDateChange = (event) =>{
@@ -21,10 +20,7 @@ class MultipleTimeCampaignModal extends Component {
         this.setState({ campaignNumberOfRepetition: event.target.value });
 
     }
-    handleCampaignTargetGroupChange = (event) =>{
-        this.setState({ campaignTargetGroup: event.target.value });
-
-    }
+   
 
 	render() {
 		return (

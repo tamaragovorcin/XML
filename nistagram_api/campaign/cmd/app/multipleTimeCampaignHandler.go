@@ -1,11 +1,15 @@
 package main
 
 import (
+	"campaigns/pkg/dtos"
 	"encoding/json"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"net/http"
+	"strconv"
+	"time"
 
-	"github.com/gorilla/mux"
 	"campaigns/pkg/models"
+	"github.com/gorilla/mux"
 )
 
 func (app *application) getAllMultipleTimeCampaign(w http.ResponseWriter, r *http.Request) {
@@ -59,22 +63,45 @@ func (app *application) findByIDMultipleTimeCampaign(w http.ResponseWriter, r *h
 	w.Write(b)
 }
 
-func (app *application) insertMultipleTimeCampaign(w http.ResponseWriter, r *http.Request) {
-	// Define movie model
-	var m models.MultipleTimeCampaign
-	// Get request information
-	err := json.NewDecoder(r.Body).Decode(&m)
+func (app *application) insertMultipleTimeCampaign(w http.ResponseWriter, req *http.Request) {
+	var dto dtos.MultipleTimeCampaignDTO
+
+	err := json.NewDecoder(req.Body).Decode(&dto)
+	if err != nil {
+		app.serverError(w, err)
+	}
+	userIdPrimitive, _ := primitive.ObjectIDFromHex(dto.User)
+
+
+	var campaign = models.Campaign{
+		User : userIdPrimitive,
+		TargetGroup : dto.TargetGroup,
+		Statistic  :[]models.Statistic{},
+		Link : dto.Link,
+		Description :dto.Description,
+		Partnerships :getPartnerships(dto.PartnershipsRequests),
+	}
+	number,_ :=strconv.Atoi(dto.DesiredNumber)
+	var multipleTimeCampaign = models.MultipleTimeCampaign{
+		Campaign:   campaign,
+		StartTime: dto.StartTime,
+		EndTime : dto.EndTime,
+		DesiredNumber: number,
+		ModifiedTime: time.Now(),
+
+	}
+
+	insertResult, err := app.multipleTimeCampaign.Insert(multipleTimeCampaign)
 	if err != nil {
 		app.serverError(w, err)
 	}
 
-	// Insert new movie
-	insertResult, err := app.multipleTimeCampaign.Insert(m)
-	if err != nil {
-		app.serverError(w, err)
-	}
+	app.infoLog.Printf("New content have been created, id=%s", insertResult.InsertedID)
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
 
-	app.infoLog.Printf("New movie have been created, id=%s", insertResult.InsertedID)
+	idMarshaled, err := json.Marshal(insertResult.InsertedID)
+	w.Write(idMarshaled)
 }
 
 func (app *application) deleteMultipleTimeCampaign(w http.ResponseWriter, r *http.Request) {
