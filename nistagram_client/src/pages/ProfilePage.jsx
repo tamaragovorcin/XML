@@ -26,7 +26,7 @@ import AddCampaignModal from "../components/AddCampaignModal";
 import OneTimeCampaignModal from "../components/OneTimeCampaignModal";
 import MultipleTimeCampaignModal from "../components/MultipleTimeCampaignModal";
 import AddInfluencerModal from "../components/AddInfluencerModal";
-
+import TargetGroupModal from "../components/TargetGroupModal";
 
 class ProfilePage extends React.Component {
 	constructor(props) {
@@ -45,7 +45,6 @@ class ProfilePage extends React.Component {
 		lastName : "",
 		email: "",
 		phoneNumber: "",
-		gender : "Female",
 		dateOfBirth : "",
 		webSite : "",
 		biography : "",
@@ -123,7 +122,11 @@ class ProfilePage extends React.Component {
 		showMultipleTimeCampaignModal : false,
 		showInfluencersModal : false,
 		influencers : [],
-		choosenInfluencers : []
+		choosenInfluencers : [],
+		showTargetGroupModal : false,
+		selectedGender : "MALE",
+        selectedDateOne : "",
+        selectedDateTwo : ""
 		
 	}
 	hasRole = (reqRole) => {
@@ -397,7 +400,6 @@ class ProfilePage extends React.Component {
 							lastName : res.data.ProfileInformation.LastName,
 							email : res.data.ProfileInformation.Email,
 							phoneNumber : res.data.ProfileInformation.PhoneNumber,
-							gender : res.data.ProfileInformation.Gender,
 							dateOfBirth  : res.data.ProfileInformation.DateOfBirth,
 							webSite : res.data.WebSite,
 							biography : res.data.Biography,
@@ -631,6 +633,9 @@ class ProfilePage extends React.Component {
 		this.setState({ showInfluencersModal: true });
 	}
 	
+	handleDefineTargetGroupModal = ()=> {
+		this.setState({ showTargetGroupModal: true });
+	}
 	handleAddOneTimeCampaignModal =()=>{
 		this.setState({ showOneTimeCampaignModal: true });
 
@@ -1753,6 +1758,14 @@ class ProfilePage extends React.Component {
 		this.setState({ showInfluencersModal: false });
 
 	}
+	handleTargetGroupModalClose = () =>{
+		console.log(this.state.selectedDateOne)
+		console.log(this.state.selectedDateTwo)
+		console.log(this.state.selectedGender)
+
+		this.setState({ showTargetGroupModal: false });
+
+	}
 	handleChangeInfluencers = (event) => {
 	
 		let optionDTO = { id: event.value, label: event.label, value: event.value }
@@ -1762,6 +1775,15 @@ class ProfilePage extends React.Component {
 
 		const newList2 = this.state.influencers.filter((item) => item.Id !== event.value);
 		this.setState({ influencers: newList2 });		
+	};
+	handleGenderChange=(event) =>{
+        this.setState({  selectedGender: event.target.value });
+    }
+    handleDateOneChange = (event) => {
+		this.setState({ selectedDateOne: event.target.value });
+	};
+    handleDateTwoChange = (event) => {
+		this.setState({ selectedDateTwo: event.target.value });
 	};
 	render() {
 		return (
@@ -1950,6 +1972,7 @@ class ProfilePage extends React.Component {
 						handleLinkChange = {this.handleLinkChange}
 						handleDescriptionChange = {this.handleDescriptionChange}
 						handleAddInfluencersModal = {this.handleAddInfluencersModal}
+						handleDefineTargetGroupModal = {this.handleDefineTargetGroupModal}
 
 					/>
 					<OneTimeCampaignModal
@@ -2114,6 +2137,22 @@ class ProfilePage extends React.Component {
 						  influencers = {this.state.influencers}
 						  choosenInfluencers = {this.state.choosenInfluencers}
 						  handleChangeInfluencers = {this.handleChangeInfluencers}
+					  />
+					   <TargetGroupModal
+                          
+					  
+						  show={this.state.showTargetGroupModal}
+						  onCloseModal={this.handleTargetGroupModalClose}
+						  header="Define target group"
+						  addressInput = {this.addressInput}
+						  onYmapsLoad = {this.onYmapsLoad}
+						  handleGenderChange = {this.handleGenderChange}
+						  selectedGender = {this.state.selectedGender}
+						  handleDateOneChange = {this.handleDateOneChange}
+						  handleDateTwoChange = {this.handleDateTwoChange}
+						  selectedDateOne = {this.state.selectedDateOne}
+						  selectedDateTwo = {this.state.selectedDateTwo}
+
 					  />
                     </div>
 

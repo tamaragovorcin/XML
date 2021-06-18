@@ -298,7 +298,6 @@ func (app *application) findUserUsername(w http.ResponseWriter, r *http.Request)
 
 
 func (app *application) findUserUsernameIfInfluencer(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("POGODIO OVDE 78789789789787897987987897")
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	vars := mux.Vars(r)
 	userId := vars["userId"]
@@ -312,13 +311,9 @@ func (app *application) findUserUsernameIfInfluencer(w http.ResponseWriter, r *h
 		app.serverError(w, err)
 	}
 	forMarshal := ""
-	fmt.Println(m.ProfileInformation.Username)
 	if m.Category=="INFLUENCER" {
-		fmt.Println("YES")
 		forMarshal = m.ProfileInformation.Username
 	} else {
-		fmt.Println("NO")
-
 		forMarshal = "not"
 	}
 	b, err := json.Marshal(forMarshal)

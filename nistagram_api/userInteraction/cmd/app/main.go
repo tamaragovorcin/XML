@@ -960,7 +960,6 @@ func getUserUsername(user string) string {
 
 
 func getUserUsernameIfInfluencer(user string) string {
-	fmt.Println("POGODIO OVDE 1111111111111111111111111111111111111111")
 
 	resp, err := http.Get("http://localhost:80/api/users/api/user/username/category/"+user)
 	if err != nil {
@@ -971,7 +970,6 @@ func getUserUsernameIfInfluencer(user string) string {
 		log.Fatalln(err)
 	}
 	sb := string(body)
-	fmt.Println("blaaaaaaaa            " + sb)
 
 	sb = sb[1:]
 	sb = sb[:len(sb)-1]
