@@ -1,8 +1,6 @@
 import React from "react";
 import Header from "../components/Header";
 import TopBar from "../components/TopBar";
-import { BASE_URL_FEED, BASE_URL_STORY } from "../constants.js";
-import playerLogo from "../static/me.jpg";
 import LikesModal from "../components/Posts/LikesModal"
 import DislikesModal from "../components/Posts/DislikesModal"
 import CommentsModal from "../components/Posts/CommentsModal"
@@ -13,7 +11,6 @@ import IconTabsHomePage from "../components/Posts/IconTabsHomePage"
 import AddPostToCollection from "../components/Posts/AddPostToCollection";
 import ModalDialog from "../components/ModalDialog";
 import StoriesModal from "../components/Posts/StoriesModal.jsx";
-//import $ from 'jquery';
 import { BASE_URL } from "../constants.js";
 import { confirmAlert } from 'react-confirm-alert';
 class HomePage extends React.Component {
@@ -61,7 +58,8 @@ class HomePage extends React.Component {
 		userIsLoggedIn : true,
 		stoori: [],
 		stt: "",
-
+		oneTimeCampaigns : [],
+        multipleCampaigns : [],
 	}
 
 
@@ -69,13 +67,14 @@ class HomePage extends React.Component {
 
 	hasRole = (reqRole) => {
 		let roles = JSON.parse(localStorage.getItem("keyRole"));
-
 		if (roles === null) return false;
 
 		if (reqRole === "*") return true;
 
-		for (let role of roles) {
-			if (role === reqRole) return true;
+	
+		if (roles.trim() === reqRole.trim()) 
+		{
+			return true;
 		}
 		return false;
 	};
@@ -272,7 +271,6 @@ class HomePage extends React.Component {
 		this.setState({ showWriteCommentModal: false });
 	}
 	onClickImage = (e, stor) => {
-		console.log(stor)
 		this.setState({ stoori: [] });
 		this.setState({ stt: stor });
 		this.setState({ stoori: stor });
@@ -423,12 +421,31 @@ class HomePage extends React.Component {
 
 			this.handleGetPhotos(id)
 			this.handleGetAlbums(id)
+			this.handeleGetMultipleCampaigns(id)
+			this.handeleGetOneTimeCampaigns(id)
 		} else {
 			this.setState({ userIsLogged: false });
 		}
 
 	}
-
+	handeleGetMultipleCampaigns = (id)=> {
+		Axios.get(BASE_URL + "/api/campaign/multipleHomePage/"+id)
+		.then((res) => {
+			this.setState({ multipleCampaigns: res.data });
+		})
+		.catch((err) => {
+			console.log(err);
+		});	
+	}
+	handeleGetOneTimeCampaigns = (id)=> {
+		Axios.get(BASE_URL + "/api/campaign/oneTimeHomePage/"+id)
+			.then((res) => {
+				this.setState({ oneTimeCampaigns: res.data });
+			})
+			.catch((err) => {
+				console.log(err);
+			});	
+	}
 	handleAddAllDataCollection = (id) => {
 		Axios.post(BASE_URL + "/api/feedPosts/api/collection/allData/" + id)
 			.then((res) => {
@@ -698,6 +715,9 @@ class HomePage extends React.Component {
 								handleOpenAddAlbumToCollectionAlbumModal = {this.handleOpenAddAlbumToCollectionAlbumModal}
 								userIsLoggedIn = {this.state.userIsLoggedIn}
 								handleReportPost = {this.handleReportPost}
+
+								oneTimeCampaigns = {this.state.oneTimeCampaigns}
+								multipleCampaigns = {this.state.multipleCampaigns}
 							/>
 						</div>
 

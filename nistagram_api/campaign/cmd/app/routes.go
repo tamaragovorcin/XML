@@ -8,11 +8,6 @@ func (app *application) routes() *mux.Router {
 	// Register handler functions.
 	r := mux.NewRouter()
 
-	r.HandleFunc("/", app.getAllCampaign).Methods("GET")
-	r.HandleFunc("/{id}", app.findByIDCampaign).Methods("GET")
-	r.HandleFunc("/", app.insertCampaign).Methods("POST")
-	r.HandleFunc("/{id}", app.deleteCampaign).Methods("DELETE")
-
 	r.HandleFunc("/multipleTimeCampaign/", app.getAllMultipleTimeCampaign).Methods("GET")
 	r.HandleFunc("/multipleTimeCampaign/{id}", app.findByIDMultipleTimeCampaign).Methods("GET")
 	r.HandleFunc("/multipleTimeCampaign/", app.insertMultipleTimeCampaign).Methods("POST")
@@ -50,5 +45,8 @@ func (app *application) routes() *mux.Router {
 
 	r.HandleFunc("/promoteMultiple/{userId}", app.getInfluecnersMultipleCampaigns).Methods("GET")
 	r.HandleFunc("/promoteOneTime/{userId}", app.getInfluencersOneTimeCampaigns).Methods("GET")
+
+	r.HandleFunc("/multipleHomePage/{userId}", app.getMultipleHomePage).Methods("GET")
+	r.HandleFunc("/oneTimeHomePage/{userId}", app.getOneTimeHomePage).Methods("GET")
 	return r
 }

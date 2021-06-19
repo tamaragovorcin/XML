@@ -18,11 +18,6 @@ func (app *application) routes() *mux.Router {
 	r.HandleFunc("/api/feedAlbum/{userId}", app.insertAlbumFeed).Methods("POST")
 	r.HandleFunc("/api/feed/{userIdd}", app.insertFeedPost).Methods("POST")
 
-	r.HandleFunc("/post/", app.getAllPosts).Methods("GET")
-	r.HandleFunc("/post/{id}", app.findPostByID).Methods("GET")
-	r.HandleFunc("/post/", app.insertPost).Methods("POST")
-	r.HandleFunc("/post/{id}", app.deletePost).Methods("DELETE")
-
 	r.HandleFunc("/location/", app.getAllLocations).Methods("GET")
 	r.HandleFunc("/location/{id}", app.findLocationByID).Methods("GET")
 	r.HandleFunc("/location/", app.insertLocation).Methods("POST")
@@ -64,7 +59,6 @@ func (app *application) routes() *mux.Router {
 	r.HandleFunc("/feed/liked/{userId}", app.getLikedPhotos).Methods("GET")
 	r.HandleFunc("/feed/disliked/{userId}", app.getDislikedPhotos).Methods("GET")
 
-
 	r.HandleFunc("/api/collection/allData/{userId}", app.insertAllDataCollection).Methods("POST")
 	r.HandleFunc("/collection/", app.getAllCollections).Methods("GET")
 	r.HandleFunc("/api/collection/{userId}", app.insertCollection).Methods("POST")
@@ -89,6 +83,7 @@ func (app *application) routes() *mux.Router {
 	r.HandleFunc("/albumFeed/remove/{id}/{reportId}", app.deleteAlbumFeed).Methods("DELETE")
 
 	r.HandleFunc("/removeUserId/{id}", app.removeEverythingFromUser).Methods("DELETE")
+	r.HandleFunc("/locationOk/{userId}/{country}/{city}/{street}", app.findIfLocationIsOk).Methods("GET")
 
 
 	return r
