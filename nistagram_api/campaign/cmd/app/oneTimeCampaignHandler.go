@@ -4,8 +4,8 @@ import (
 	"campaigns/pkg/dtos"
 	"campaigns/pkg/models"
 	"encoding/json"
-	"fmt"
 	"github.com/gorilla/mux"
+	"fmt"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"net/http"
 )
@@ -105,11 +105,7 @@ func (app *application) insertOneTimeCampaign(w http.ResponseWriter, req *http.R
 		app.serverError(w, err)
 	}
 	userIdPrimitive, _ := primitive.ObjectIDFromHex(dto.User)
-	fmt.Println(dto.User)
-	fmt.Println(dto.Link)
-	fmt.Println(dto.Description)
-	fmt.Println(dto.PartnershipsRequests)
-	fmt.Println(dto.TargetGroup.Gender)
+
 
 	var campaign = models.Campaign{
 		User : userIdPrimitive,

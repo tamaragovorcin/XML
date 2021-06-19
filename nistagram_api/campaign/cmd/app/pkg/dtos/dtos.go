@@ -27,7 +27,7 @@ type MultipleTimeCampaignDTO struct {
 	Link string
 	StartTime string
 	EndTime string
-	DesiredNumber int
+	DesiredNumber string
 	PartnershipsRequests []string
 	Description string
 }

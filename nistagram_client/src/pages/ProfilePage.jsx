@@ -35,6 +35,8 @@ class ProfilePage extends React.Component {
 		this.onDrop = this.onDrop.bind(this);
 		this.onDropCampaign = this.onDropCampaign.bind(this);
 		this.addressInput = React.createRef();
+		this.addressInputCampaign = React.createRef();
+
 		this.handleAddProfileImage = this.handleAddProfileImage.bind(this);
 
 	}
@@ -133,6 +135,7 @@ class ProfilePage extends React.Component {
 		campaignLink : "",
 		campaignDescription : "",
 		campaignId : ""
+		targetGroup : {}
 		
 	}
 	hasRole = (reqRole) => {
@@ -155,6 +158,8 @@ class ProfilePage extends React.Component {
 				suggest: (request, options) => this.ymaps.suggest(request),
 			},
 		});
+		
+		
 	};
 	
 	onDrop1(picture) {
@@ -231,8 +236,6 @@ class ProfilePage extends React.Component {
 			}
 		}
 		
-
-
 	}
 	onDropCampaign(picture) {
 
@@ -262,7 +265,6 @@ class ProfilePage extends React.Component {
 			
 		}
 		
-
 
 	}
 	handleAddProfileImage(picture) {
@@ -662,61 +664,7 @@ class ProfilePage extends React.Component {
 		this.setState({ showMultipleTimeCampaignModal: true });
 
 	}
-	getTargetGroup = ()=> {
-		console.log(this.addressInput)
-		if (this.state.addressInput === "") {
-			const dto = {
-				Gender : this.state.selectedGender,
-				DateOne : this.state.selectedDateOne,
-				DateTwo : this.state.selectedDateTwo,
-				Location : this.state.addressLocation,
-			}
-			return dto;
-
-		}
-		else {
-			/*let street;
-			let city;
-			let country;
-			let latitude;
-			let longitude;
-			this.ymaps
-				.geocode(this.addressInput.current.value, {
-					results: 1,
-				})
-				.then(function (res) {
-					if (typeof res.geoObjects.get(0) === "undefined")  {this.setState({ foundLocation:false});}
-					else {
-						var firstGeoObject = res.geoObjects.get(0),
-							coords = firstGeoObject.geometry.getCoordinates();
-						latitude = coords[0];
-						longitude = coords[1];
-						country = firstGeoObject.getCountry();
-						street = firstGeoObject.getThoroughfare();
-						city = firstGeoObject.getLocalities().join(", ");
-					}
-				}).then((res) => {
-					var locationDTO = {
-						street : street,
-						country : country,
-						town : city,
-						latitude : latitude,
-						longitude : longitude
-					}*/
-					const dto = {
-						Gender : this.state.selectedGender,
-						DateOne : this.state.selectedDateOne,
-						DateTwo : this.state.selectedDateTwo,
-						Location : this.state.addressLocation
-					}
-					return dto;
-				
-				//});
-				
-
-				}
-		
-	}
+	
 	getpartnershipsRequests = ()=> {
 		var choosenInfluencersHelp = []
 		this.state.choosenInfluencers.forEach((user) => {
@@ -727,11 +675,10 @@ class ProfilePage extends React.Component {
 	handleAddOneTimeCampaign =(date,time)=>{
 
         let id = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length-1);
-		let targetGroup = this.getTargetGroup();
 		let partnershipsRequestsList = this.getpartnershipsRequests();
 		const campaignDTO = {
 			User : id,
-			TargetGroupDTO : targetGroup,
+			TargetGroup : this.state.targetGroup,
 			Link : this.state.link,
 			Date : date,
 			Time : time,
@@ -766,8 +713,46 @@ class ProfilePage extends React.Component {
 			});
 
 	}
-	handleAddMultipleTimeCampaign =(startDate,endDate,numberOfRepetitions,targetGroup) =>{
+	handleAddMultipleTimeCampaign =(startDate,endDate,numberOfRepetitions) =>{
 
+		let id = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length-1);
+		let partnershipsRequestsList = this.getpartnershipsRequests();
+		const campaignDTO = {
+			User : id,
+			TargetGroup : this.state.targetGroup,
+			Link : this.state.link,
+			StartTime : startDate,
+			EndTime : endDate,
+			Description : this.state.description,
+			PartnershipsRequests : partnershipsRequestsList,
+			DesiredNumber : numberOfRepetitions
+		}
+		Axios.post(BASE_URL + "/api/campaign/multipleTimeCampaign/", campaignDTO)
+			.then((res) => {
+				this.setState({ showOneTimeCampaignModal: false, showCampaignModal : false });
+				this.setState({ openModal: true });
+				this.setState({ textSuccessfulModal: "Campaign is successfully created." });
+				
+				let campaignId = res.data;
+			
+				let userid = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length-1)
+				let pics = [];
+
+				this.state.pictures.forEach((p) => {
+					pics.push(p.name);
+				}); 
+				this.state.pictures.forEach((pic) => {
+					this.testCampaign(pic, userid, campaignId);
+				});
+				/*if(this.state.selectedFile != ""){
+				this.testStory(this.state.selectedFile, userid, campaignId)
+				}*/
+				this.setState({selectedFile : ""});
+				this.setState({ pictures: [] });
+			})
+			.catch((err) => {
+				console.log(err);
+			});
 		this.setState({ showMultipleTimeCampaignModal: false, showCampaignModal : false });
 
 	}
@@ -1885,9 +1870,60 @@ class ProfilePage extends React.Component {
 
 	}
 	handleTargetGroupModalClose = () =>{
-		console.log(this.state.selectedDateOne)
-		console.log(this.state.selectedDateTwo)
-		console.log(this.state.selectedGender)
+		console.log(this.addressInput)
+		if (this.state.addressInput === "") {
+			const dto = {
+				Gender : this.state.selectedGender,
+				DateOne : this.state.selectedDateOne,
+				DateTwo : this.state.selectedDateTwo,
+				Location : this.state.addressLocation,
+			}
+			this.setState({ targetGroup: dto });
+
+			return dto;
+
+		}
+		else {
+			let street;
+			let city;
+			let country;
+			let latitude;
+			let longitude;
+			this.ymaps
+				.geocode(this.addressInput.current.value, {
+					results: 1,
+				})
+				.then(function (res) {
+					if (typeof res.geoObjects.get(0) === "undefined")  {this.setState({ foundLocation:false});}
+					else {
+						var firstGeoObject = res.geoObjects.get(0),
+							coords = firstGeoObject.geometry.getCoordinates();
+						latitude = coords[0];
+						longitude = coords[1];
+						country = firstGeoObject.getCountry();
+						street = firstGeoObject.getThoroughfare();
+						city = firstGeoObject.getLocalities().join(", ");
+					}
+				}).then((res) => {
+					var locationDTO = {
+						street : street,
+						country : country,
+						town : city,
+						latitude : latitude,
+						longitude : longitude
+					}
+					const dto = {
+						Gender : this.state.selectedGender,
+						DateOne : this.state.selectedDateOne,
+						DateTwo : this.state.selectedDateTwo,
+						Location : locationDTO
+					}
+					this.setState({ targetGroup: dto });				
+				});
+				
+
+				}
+
 
 		this.setState({ showTargetGroupModal: false });
 
