@@ -1,16 +1,10 @@
 import React, { Component } from "react";
 import { Button, Modal } from "react-bootstrap";
 import ImageUploader from 'react-images-upload';
-import { YMaps, Map } from "react-yandex-maps";
 import {GiThreeFriends} from "react-icons/gi"
-import {MdPublic} from "react-icons/md"
 import {CgFeed} from "react-icons/cg"
 
-const mapState = {
-	center: [44, 21],
-	zoom: 8,
-	controls: [],
-};
+
 class AddCampaignModal extends Component {
    
 
@@ -70,16 +64,16 @@ class AddCampaignModal extends Component {
 										/>
 									</div>
 								</div>
-								</div>
 								
-								<div className="control-group">
-									<button style={{ width: "10rem", margin : "1rem" }}  onClick={this.props.handleAddInfluencersModal} className="btn btn-outline-secondary btn-sm">Add influencers<br/> <CgFeed/> </button>		
-								</div>
-								<div className="control-group">
-									<button style={{ width: "10rem", margin : "1rem" }}  onClick={this.props.handleDefineTargetGroupModal} className="btn btn-outline-secondary btn-sm">Define target group<br/> <CgFeed/> </button>		
-								</div>
+								
+							</div>
 						</div>
-						
+						<div className="form-group text-center" hidden={this.props.noPicture}>
+
+									<button style={{ width: "10rem", margin : "1rem" }}  onClick={this.props.handleAddInfluencersModal} className="btn btn-outline-secondary btn-sm">Add influencers<br/> <CgFeed/> </button>		
+									<button style={{ width: "10rem", margin : "1rem" }}  onClick={this.props.handleDefineTargetGroupModal} className="btn btn-outline-secondary btn-sm">Define target group<br/> <CgFeed/> </button>		
+						</div>
+					</div>
 						<div className="form-group text-center">
                         						
 								<button style={{ width: "10rem", margin : "1rem", background:"#37FF33" }} onClick={this.props.handleAddOneTimeCampaign} className="btn btn-outline-primary btn-sm">Add as one time campaign<GiThreeFriends/> </button>
@@ -89,7 +83,6 @@ class AddCampaignModal extends Component {
 						</div>
 					</div>
 
-				</div>
 				</Modal.Body>
 				<Modal.Footer>
 					<Button onClick={this.props.onCloseModal}>Close</Button>

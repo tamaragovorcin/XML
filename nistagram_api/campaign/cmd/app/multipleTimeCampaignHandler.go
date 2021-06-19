@@ -117,3 +117,174 @@ func (app *application) deleteMultipleTimeCampaign(w http.ResponseWriter, r *htt
 
 	app.infoLog.Printf("Have been eliminated %d movie(s)", deleteResult.DeletedCount)
 }
+func (app *application) getPartnershipRequestsMultiple(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	userId := vars["userId"]
+	userIdPrimitive, _ := primitive.ObjectIDFromHex(userId)
+	allPosts, _ :=app.multipleTimeCampaign.All()
+	usersCampaigns,err :=findPartnershipRequestsByUserIdMultiple(allPosts,userIdPrimitive)
+	if err != nil {
+		app.serverError(w, err)
+	}
+	campaignResponse := []dtos.CampaignMultipleDTO{}
+	for _, campaign := range usersCampaigns {
+
+		if err != nil {
+			app.serverError(w, err)
+		}
+		contentType := app.GetFileTypeByPostId(campaign.Id)
+		campaignResponse = append(campaignResponse, campaignToResponseInfluencerMultiple(campaign,contentType))
+
+	}
+
+	imagesMarshaled, err := json.Marshal(campaignResponse)
+
+	if err != nil {
+		app.serverError(w, err)
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	w.Write(imagesMarshaled)
+}
+func (app *application) getInfluecnersMultipleCampaigns(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	userId := vars["userId"]
+	userIdPrimitive, _ := primitive.ObjectIDFromHex(userId)
+	allPosts, _ :=app.multipleTimeCampaign.All()
+	usersCampaigns,err :=findPartnershipsByUserIdMultiple(allPosts,userIdPrimitive)
+	if err != nil {
+		app.serverError(w, err)
+	}
+	campaignResponse := []dtos.CampaignMultipleDTO{}
+	for _, campaign := range usersCampaigns {
+
+		if err != nil {
+			app.serverError(w, err)
+		}
+		contentType := app.GetFileTypeByPostId(campaign.Id)
+		campaignResponse = append(campaignResponse, campaignToResponseInfluencerMultiple(campaign,contentType))
+
+	}
+
+	imagesMarshaled, err := json.Marshal(campaignResponse)
+
+	if err != nil {
+		app.serverError(w, err)
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	w.Write(imagesMarshaled)
+}
+
+func campaignToResponseInfluencerMultiple(campaing models.MultipleTimeCampaign, contentType string) dtos.CampaignMultipleDTO {
+	username :=getUserUsername(campaing.Campaign.User)
+	return dtos.CampaignMultipleDTO{
+		Id: campaing.Id.Hex(),
+		User: campaing.Campaign.User.Hex(),
+		Description: campaing.Campaign.Description,
+		StartTime: campaing.StartTime,
+		EndTime: campaing.EndTime,
+		DesiredNumber: strconv.Itoa(campaing.DesiredNumber),
+		Link: campaing.Campaign.Link,
+		ContentType: contentType,
+		AgentUsername: username,
+	}
+}
+func (app *application) acceptPartnershipRequestMultiple(w http.ResponseWriter, req *http.Request) {
+	var dto dtos.PartnershipDTO
+
+	err := json.NewDecoder(req.Body).Decode(&dto)
+	if err != nil {
+		app.serverError(w, err)
+	}
+	campaign, err := app.multipleTimeCampaign.FindByID(dto.CampaignId.Hex())
+	partensrhipsUpdated := handleUpdatedPartnerships(campaign.Campaign.Partnerships,dto.UserId)
+	var campaignOne = models.Campaign{
+		User : campaign.Campaign.User,
+		TargetGroup : campaign.Campaign.TargetGroup,
+		Statistic  : campaign.Campaign.Statistic,
+		Link : campaign.Campaign.Link,
+		Description :campaign.Campaign.Description,
+		Partnerships: partensrhipsUpdated,
+	}
+	var oneTimeCampaign = models.MultipleTimeCampaign{
+		Id: campaign.Id,
+		Campaign:   campaignOne,
+		StartTime: campaign.StartTime,
+		EndTime : campaign.EndTime,
+		DesiredNumber: campaign.DesiredNumber,
+	}
+
+
+	insertResult, err := app.multipleTimeCampaign.Update(oneTimeCampaign)
+	if err != nil {
+		app.serverError(w, err)
+	}
+
+	app.infoLog.Printf("New content have been created, id=%s", insertResult.UpsertedID)
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+
+	idMarshaled, err := json.Marshal(insertResult.UpsertedID)
+	w.Write(idMarshaled)
+}
+func (app *application) deletePartnershipRequestMultiple(w http.ResponseWriter, req *http.Request) {
+	var dto dtos.PartnershipDTO
+
+	err := json.NewDecoder(req.Body).Decode(&dto)
+	if err != nil {
+		app.serverError(w, err)
+	}
+	campaign, err := app.multipleTimeCampaign.FindByID(dto.CampaignId.Hex())
+	partensrhipsUpdated := handleDeletePartnerships(campaign.Campaign.Partnerships,dto.UserId)
+	var campaignOne = models.Campaign{
+		User : campaign.Campaign.User,
+		TargetGroup : campaign.Campaign.TargetGroup,
+		Statistic  : campaign.Campaign.Statistic,
+		Link : campaign.Campaign.Link,
+		Description :campaign.Campaign.Description,
+		Partnerships: partensrhipsUpdated,
+	}
+
+
+	var oneTimeCampaign = models.MultipleTimeCampaign{
+		Id: campaign.Id,
+		Campaign:   campaignOne,
+		StartTime: campaign.StartTime,
+		EndTime : campaign.EndTime,
+		DesiredNumber: campaign.DesiredNumber,
+	}
+	insertResult, err := app.multipleTimeCampaign.Update(oneTimeCampaign)
+	if err != nil {
+		app.serverError(w, err)
+	}
+
+	app.infoLog.Printf("New content have been created, id=%s", insertResult.UpsertedID)
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+
+	idMarshaled, err := json.Marshal(insertResult.UpsertedID)
+	w.Write(idMarshaled)
+}
+
+func findPartnershipRequestsByUserIdMultiple(posts []models.MultipleTimeCampaign, idPrimitive primitive.ObjectID) ([]models.MultipleTimeCampaign, error) {
+	campaignsUser := []models.MultipleTimeCampaign{}
+
+	for _, campaign := range posts {
+		if	userInPartnershipRequests(campaign.Campaign.Partnerships,idPrimitive) {
+			campaignsUser = append(campaignsUser, campaign)
+		}
+	}
+	return campaignsUser, nil
+}
+
+func findPartnershipsByUserIdMultiple(posts []models.MultipleTimeCampaign, idPrimitive primitive.ObjectID) ([]models.MultipleTimeCampaign, error) {
+	campaignsUser := []models.MultipleTimeCampaign{}
+
+	for _, campaign := range posts {
+		if	userInPartnership(campaign.Campaign.Partnerships,idPrimitive) {
+			campaignsUser = append(campaignsUser, campaign)
+		}
+	}
+	return campaignsUser, nil
+}

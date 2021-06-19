@@ -1,7 +1,6 @@
 import React from "react";
 import Header from "../components/Header";
 import TopBar from "../components/TopBar";
-import { Link } from "react-router-dom";
 import playerLogo from "../static/coach.png";
 import IconTabsFollowerProfile from "../components/Posts/IconTabsFollowerProfile"
 import Axios from "axios";
@@ -16,7 +15,6 @@ import WriteCommentAlbumModal from "../components/Posts/WriteCommentAlbumModal"
 import { Lock } from "@material-ui/icons";
 import { Icon } from "@material-ui/core";
 import { BASE_URL } from "../constants.js";
-import { isCompositeComponentWithType } from "react-dom/test-utils";
 import {IoMdNotificationsOutline} from 'react-icons/io'
 
 class FollowerProfilePage extends React.Component {
@@ -87,17 +85,22 @@ class FollowerProfilePage extends React.Component {
 		blockedUser : false,
 		showNotificationModal : false,
 		postsNotification : false,
-		storiesNotification : false
+		storiesNotification : false,
+		isAgent : false,
+		isInfluencer : false,
+		oneTimeCampaignsInfluencer : [],
+        multipleCampaignsInfluencer : [],
 	}
 	hasRole = (reqRole) => {
 		let roles = JSON.parse(localStorage.getItem("keyRole"));
-
 		if (roles === null) return false;
 
 		if (reqRole === "*") return true;
 
-		for (let role of roles) {
-			if (role === reqRole) return true;
+	
+		if (roles.trim() === reqRole.trim()) 
+		{
+			return true;
 		}
 		return false;
 	};
@@ -146,6 +149,7 @@ class FollowerProfilePage extends React.Component {
 			.catch((err) => {
 				console.log(err);
 			});
+
 		this.handleGetHighlights(s[5])
 		this.handleGetFeedPosts(s[5])
 		this.handleGetAlbums(s[5])
@@ -153,11 +157,48 @@ class FollowerProfilePage extends React.Component {
 		this.handleGetCollectionAlbums(s[5])
 		this.handleGetHighlightAlbums(s[5])
 		this.handeleGetCampaigns(s[5])
+		this.handeleGetMultipleCampaignsInfluencer(s[5])
+		this.handeleGetOneTimeCampaignsInfluencer(s[5])
+		this.handleGetCategoryUser(s[5])
 
-		console.log("789451")
-		console.log(this.state.followingThisUser)
-		console.log(this.state.ableToFollowThisUser)
-		console.log(this.state.sentFollowRequest)
+
+	}
+	handeleGetMultipleCampaignsInfluencer = (id)=> {
+		Axios.get(BASE_URL + "/api/campaign/promoteMultiple/"+id)
+		.then((res) => {
+			this.setState({ multipleCampaignsInfluencer: res.data });
+		})
+		.catch((err) => {
+			console.log(err);
+		});	
+	}
+	handeleGetOneTimeCampaignsInfluencer = (id)=> {
+		Axios.get(BASE_URL + "/api/campaign/promoteOneTime/"+id)
+			.then((res) => {
+				this.setState({ oneTimeCampaignsInfluencer: res.data });
+			})
+			.catch((err) => {
+				console.log(err);
+			});	
+	}
+	handleGetCategoryUser = (id)=> {
+
+		var role = this.hasRole("AGENT")
+		this.setState({isAgent : role});
+
+		Axios.get(BASE_URL + "/api/users/api/user/username/category/"+id)
+				.then((res) => {
+					
+					if (res.data.trim()!=="not") {
+						this.setState({ isInfluencer: true });
+
+						return true;
+					}
+					return false;
+				})
+				.catch((err) => {
+					console.log(err);
+				});
 
 	}
 	handleOpenNotificationModal= ()=>{
@@ -863,6 +904,13 @@ class FollowerProfilePage extends React.Component {
 								storiesForHightlihtAlbum= {this.state.storiesForHightlihtAlbum}
 								hiddenStoriesForHighlightalbum = {this.state.hiddenStoriesForHighlightAlbum}
 								userIsLoggedIn = {this.state.userIsLoggedIn}
+
+								isAgent = {this.state.isAgent}
+								isInfluencer = {this.state.isInfluencer}
+
+								oneTimeCampaignsInfluencer = {this.state.oneTimeCampaignsInfluencer}
+								multipleCampaignsInfluencer = {this.state.multipleCampaignsInfluencer}
+
 						/>
 						</div>
 

@@ -2,6 +2,7 @@ package dtos
 
 import (
 	"campaigns/pkg/models"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type OneTimeCampaignDTO struct {
@@ -41,4 +42,23 @@ type CampaignDTO struct {
 	Time string
 	Description string
 	ContentType string
+	AgentUsername string
+}
+
+type CampaignMultipleDTO struct {
+	Id string
+	User string
+	TargetGroup models.TargetGroup
+	Link string
+	StartTime string
+	EndTime string
+	DesiredNumber string
+	Description string
+	ContentType string
+	AgentUsername string
+}
+
+type PartnershipDTO struct {
+	CampaignId primitive.ObjectID
+	UserId primitive.ObjectID
 }
