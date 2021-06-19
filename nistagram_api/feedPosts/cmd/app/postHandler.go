@@ -2,90 +2,79 @@ package main
 
 import (
 	"encoding/json"
-	"feedPosts/pkg/models"
 	"github.com/gorilla/mux"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"net/http"
 )
 
-func (app *application) getAllPosts(w http.ResponseWriter, r *http.Request) {
-	// Get all bookings stored
-	bookings, err := app.posts.All()
-	if err != nil {
-		app.serverError(w, err)
-	}
 
-	// Convert booking list into json encoding
-	b, err := json.Marshal(bookings)
-	if err != nil {
-		app.serverError(w, err)
-	}
+func (app *application) findIfLocationIsOk(w http.ResponseWriter, r *http.Request) {
 
-	app.infoLog.Println("Contents have been listed")
-
-	// Send response back
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	w.Write(b)
-}
-
-func (app *application) findPostByID(w http.ResponseWriter, r *http.Request) {
-	// Get id from incoming url
+	w.Header().Set("Access-Control-Allow-Origin", "*")
 	vars := mux.Vars(r)
-	id := vars["id"]
+	userId := vars["userId"]
+	country := vars["country"]
+	city := vars["city"]
+	street := vars["street"]
 
-	// Find booking by id
-	m, err := app.posts.FindByID(id)
+	idUserPrimitive, err := primitive.ObjectIDFromHex(userId)
 	if err != nil {
 		if err.Error() == "ErrNoDocuments" {
-			app.infoLog.Println("Booking not found")
+			app.infoLog.Println("User not found")
 			return
 		}
-		// Any other error will send an internal server error
 		app.serverError(w, err)
 	}
-
-	// Convert booking to json encoding
-	b, err := json.Marshal(m)
+	writing := ""
+	if doesUserHavePostsWithThisAddress(idUserPrimitive,country,city,street,app){
+		writing="locationOk"
+	}else {
+		writing = "notOk"
+	}
+	b, err := json.Marshal(writing)
 	if err != nil {
 		app.serverError(w, err)
 	}
 
-	app.infoLog.Println("Have been found a booking")
+	app.infoLog.Println("Have been found a user")
 
-	// Send response back
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	w.Write(b)
 }
 
-func (app *application) insertPost(w http.ResponseWriter, r *http.Request) {
-	// Define booking model
-	var m models.Post
-	// Get request information
-	err := json.NewDecoder(r.Body).Decode(&m)
-	if err != nil {
-		app.serverError(w, err)
+func doesUserHavePostsWithThisAddress(userPrimitive primitive.ObjectID, country string, city string, street string, app *application) bool {
+	allFeedPosts, _ := app.feedPosts.All()
+	allAlbums, _ := app.albumFeeds.All()
+
+	usersFeedPosts, _ := findFeedPostsByUserId(allFeedPosts, userPrimitive)
+	usersAlbums, _ := findFeedAlbumsByUserId(allAlbums, userPrimitive)
+
+	for _, feedPost := range usersFeedPosts {
+		if	feedPost.Post.Location.Country==country {
+			if city=="n" {
+				return true
+			} else if feedPost.Post.Location.Town==city {
+				if street== "n" {
+					return true
+				} else if feedPost.Post.Location.Street==street {
+					return true
+				}
+			}
+		}
 	}
-
-	// Insert new booking
-	insertResult, err := app.posts.Insert(m)
-	if err != nil {
-		app.serverError(w, err)
+	for _, feedPost := range usersAlbums {
+		if	feedPost.Post.Location.Country==country {
+			if city=="n" {
+				return true
+			} else if feedPost.Post.Location.Town==city {
+				if street== "n" {
+					return true
+				} else if feedPost.Post.Location.Street==street {
+					return true
+				}
+			}
+		}
 	}
-
-	app.infoLog.Printf("New content have been created, id=%s", insertResult.InsertedID)
-}
-
-func (app *application) deletePost(w http.ResponseWriter, r *http.Request) {
-	// Get id from incoming url
-	vars := mux.Vars(r)
-	id := vars["id"]
-
-	// Delete booking by id
-	deleteResult, err := app.posts.Delete(id)
-	if err != nil {
-		app.serverError(w, err)
-	}
-
-	app.infoLog.Printf("Have been eliminated %d content(s)", deleteResult.DeletedCount)
+	return false
 }

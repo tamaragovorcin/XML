@@ -515,7 +515,7 @@ func (app *application) getPhototsForHomePage(w http.ResponseWriter, r *http.Req
 	feedPostResponse := []dtos.FeedPostInfoDTO1{}
 	for _, feedPost := range postsForHomePage {
 		if iAmFollowingThisUser(userId,feedPost.Post.User.Hex()) {
-			if (!iBlockedThisUser(userId, feedPost.Post.User.Hex())) {
+			if !iBlockedThisUser(userId, feedPost.Post.User.Hex()) {
 				if (!iMutedThisUser(userId, feedPost.Post.User.Hex())) {
 
 					images, err := findImageByPostId(allImages, feedPost.Id)

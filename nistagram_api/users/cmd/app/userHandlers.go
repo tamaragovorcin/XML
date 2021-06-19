@@ -357,6 +357,92 @@ func (app *application) findUserPrivacy(w http.ResponseWriter, r *http.Request) 
 	w.Write(b)
 }
 
+func (app *application) findIfGenderIsOk(w http.ResponseWriter, r *http.Request) {
+
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	vars := mux.Vars(r)
+	userId := vars["userId"]
+	gender := vars["gender"]
+
+	intVar, err := primitive.ObjectIDFromHex(userId)
+	m, err := app.users.FindByID(intVar)
+	if err != nil {
+		if err.Error() == "ErrNoDocuments" {
+			app.infoLog.Println("User not found")
+			return
+		}
+		app.serverError(w, err)
+	}
+	writing := ""
+	if strings.ToLower(m.ProfileInformation.Gender)== strings.ToLower(gender){
+		writing="sameGender"
+	}else {
+		writing = "notSame"
+	}
+	b, err := json.Marshal(writing)
+	if err != nil {
+		app.serverError(w, err)
+	}
+
+	app.infoLog.Println("Have been found a user")
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	w.Write(b)
+}
+func (app *application) findIfDateOfBirthIsOk(w http.ResponseWriter, r *http.Request) {
+
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	vars := mux.Vars(r)
+	userId := vars["userId"]
+	dateOne := vars["dateOne"]
+	dateTwo := vars["dateTwo"]
+
+	intVar, err := primitive.ObjectIDFromHex(userId)
+	m, err := app.users.FindByID(intVar)
+	if err != nil {
+		if err.Error() == "ErrNoDocuments" {
+			app.infoLog.Println("User not found")
+			return
+		}
+		app.serverError(w, err)
+	}
+	writing := ""
+	if dateOfBirthBetweenTwoDates(m.ProfileInformation.DateOfBirth, dateOne,dateTwo){
+		writing="dateOfBirthOk"
+	}else {
+		writing = "notOk"
+	}
+	b, err := json.Marshal(writing)
+	if err != nil {
+		app.serverError(w, err)
+	}
+
+	app.infoLog.Println("Have been found a user")
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	w.Write(b)
+}
+
+func dateOfBirthBetweenTwoDates(birth string, one string, two string) bool {
+	layout := "2006-01-02T15:04:05.000Z"
+	stringBirth := birth+"T11:45:26.371Z"
+	stringDateOne := one+"T11:45:26.371Z"
+	stringDateTwo := two+"T11:45:26.371Z"
+
+	timeBirth, err := time.Parse(layout, stringBirth)
+	timeDateOne, err := time.Parse(layout, stringDateOne)
+	timeDateTwo, err := time.Parse(layout, stringDateTwo)
+
+	if err != nil {
+		fmt.Println(err)
+	}
+	if timeBirth.After(timeDateOne) && timeBirth.Before(timeDateTwo) {
+		return true
+	}
+	return false
+}
 func HashAndSaltPasswordIfStrong(password string) (string, error) {
 
 

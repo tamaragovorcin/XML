@@ -376,3 +376,49 @@ func handleDeletePartnerships(partnerships []models.Partnership, id primitive.Ob
 	}
 	return updated
 }
+
+func (app *application) getOneTimeHomePage(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	userId := vars["userId"]
+	userIdPrimitive, _ := primitive.ObjectIDFromHex(userId)
+	allPosts, _ :=app.oneTimeCampaign.All()
+	campaigns,err :=findNotMyOneTimeCampaigns(allPosts,userIdPrimitive)
+	if err != nil {
+		app.serverError(w, err)
+	}
+	campaignResponse := []dtos.CampaignDTO{}
+	for _, campaign := range campaigns {
+
+		if isGenderOk(userId,campaign.Campaign.TargetGroup.Gender) {
+			if isDateOfBirthOk(userId,campaign.Campaign.TargetGroup.DateOne,campaign.Campaign.TargetGroup.DateTwo) {
+				if isLocationOk(userId,campaign.Campaign.TargetGroup.Location) {
+					contentType := app.GetFileTypeByPostId(campaign.Id)
+					campaignResponse = append(campaignResponse, campaignToResponseInfluencer(campaign,contentType))
+				}
+			}
+		}
+
+
+	}
+
+	imagesMarshaled, err := json.Marshal(campaignResponse)
+
+	if err != nil {
+		app.serverError(w, err)
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	w.Write(imagesMarshaled)
+}
+
+func findNotMyOneTimeCampaigns(oneTimeCampaigns []models.OneTimeCampaign, idPrimitive primitive.ObjectID) ([]models.OneTimeCampaign, error) {
+	campaigns := []models.OneTimeCampaign{}
+
+	for _, oneCampaign := range oneTimeCampaigns {
+
+		if	oneCampaign.Campaign.User.Hex()!=idPrimitive.Hex() {
+			campaigns = append(campaigns, oneCampaign)
+		}
+	}
+	return campaigns, nil
+}
