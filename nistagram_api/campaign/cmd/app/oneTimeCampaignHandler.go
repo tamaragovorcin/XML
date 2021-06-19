@@ -60,7 +60,43 @@ func (app *application) findByIDOneTimeCampaign(w http.ResponseWriter, r *http.R
 	w.WriteHeader(http.StatusOK)
 	w.Write(b)
 }
+func (app *application) updateOneTimeCampaign(w http.ResponseWriter, req *http.Request) {
+	var dto dtos.OneTimeCampaignUpdateDTO
 
+	err := json.NewDecoder(req.Body).Decode(&dto)
+	if err != nil {
+		app.serverError(w, err)
+	}
+	fmt.Println(dto.Link)
+	fmt.Println(dto.Description)
+	fmt.Println(dto.Id)
+
+	var campaign = models.Campaign{
+		Link : dto.Link,
+		Description :dto.Description,
+	}
+	IdPrimitive, _ := primitive.ObjectIDFromHex(dto.Id)
+
+	var oneTimeCampaign = models.OneTimeCampaign{
+		Id : IdPrimitive,
+		Campaign:   campaign,
+		Time: dto.Time,
+		Date : dto.Date,
+
+	}
+
+	insertResult, err := app.oneTimeCampaign.Update(oneTimeCampaign)
+	if err != nil {
+		app.serverError(w, err)
+	}
+
+	app.infoLog.Printf("New content have been created, id=%s", insertResult.UpsertedID)
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+
+	idMarshaled, err := json.Marshal(insertResult.UpsertedID)
+	w.Write(idMarshaled)
+}
 func (app *application) insertOneTimeCampaign(w http.ResponseWriter, req *http.Request) {
 	var dto dtos.OneTimeCampaignDTO
 

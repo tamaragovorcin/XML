@@ -1,11 +1,16 @@
 package main
 
 import (
-	"encoding/json"
-	"net/http"
-
-	"github.com/gorilla/mux"
+	"campaigns/pkg/dtos"
 	"campaigns/pkg/models"
+	"encoding/json"
+	"fmt"
+	"github.com/gorilla/mux"
+	"go.mongodb.org/mongo-driver/bson/primitive"
+	"io"
+	"net/http"
+	"os"
+	"strconv"
 )
 
 func (app *application) getAllCampaign(w http.ResponseWriter, r *http.Request) {
@@ -29,6 +34,113 @@ func (app *application) getAllCampaign(w http.ResponseWriter, r *http.Request) {
 	w.Write(b)
 }
 
+func findCampaignByUserId(posts []models.OneTimeCampaign, idPrimitive primitive.ObjectID) ([]models.OneTimeCampaign, error){
+	campaignsUser := []models.OneTimeCampaign{}
+
+	for _, campaign := range posts {
+		if	campaign.Campaign.User==idPrimitive {
+			campaignsUser = append(campaignsUser, campaign)
+		}
+	}
+	return campaignsUser, nil
+}
+func(app *application) GetFileTypeByPostId(feedId primitive.ObjectID) string {
+	allImages,_ := app.images.All()
+	images, _ := findImageByCampaignId(allImages,feedId)
+
+	file, _:=os.Open(images.Media)
+
+	FileHeader:=make([]byte,512)
+	file.Read(FileHeader)
+	ContentType:= http.DetectContentType(FileHeader)
+
+	return ContentType
+
+
+}
+func findImageByCampaignId(images []models.Image, idFeedPost primitive.ObjectID) (models.Image, error) {
+	imageFeedPost := models.Image{}
+
+	for _, image := range images {
+		if	image.CampaignId==idFeedPost {
+			imageFeedPost = image
+		}
+	}
+	return imageFeedPost, nil
+}
+func (app *application) getUsersCampaigns(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	userId := vars["userId"]
+	fmt.Println(userId)
+	userIdPrimitive, _ := primitive.ObjectIDFromHex(userId)
+	allPosts, _ :=app.oneTimeCampaign.All()
+	usersCampaigns,err :=findCampaignByUserId(allPosts,userIdPrimitive)
+	if err != nil {
+		app.serverError(w, err)
+	}
+	campaignResponse := []dtos.CampaignDTO{}
+	for _, campaign := range usersCampaigns {
+
+		if err != nil {
+			app.serverError(w, err)
+		}
+		contentType := app.GetFileTypeByPostId(campaign.Id)
+		campaignResponse = append(campaignResponse, campaignToResponse(campaign,contentType))
+
+	}
+
+	imagesMarshaled, err := json.Marshal(campaignResponse)
+
+	if err != nil {
+		app.serverError(w, err)
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	w.Write(imagesMarshaled)
+}
+func(app *application) GetFileByCampaignId(w http.ResponseWriter, r *http.Request){
+	fmt.Println("")
+	vars := mux.Vars(r)
+	feedId := vars["campaignId"]
+	feedIdPrim, _ := primitive.ObjectIDFromHex(feedId)
+
+	allImages,_ := app.images.All()
+	images, err := findImageByCampaignId(allImages,feedIdPrim)
+
+	file, err:=os.Open(images.Media)
+	if err!=nil{
+		http.Error(w,"file not found",404)
+		return
+	}
+
+
+	FileHeader:=make([]byte,512)
+	file.Read(FileHeader)
+	ContentType:= http.DetectContentType(FileHeader)
+	FileStat,_:= file.Stat()
+	FileSize:= strconv.FormatInt(FileStat.Size(),10)
+	w.Header().Set("Content-Disposition", "attachment; filename="+images.Media)
+	w.Header().Set("Content-Type", ContentType)
+	w.Header().Set("Content-Length", FileSize)
+
+	file.Seek(0,0)
+	io.Copy(w,file)
+	return
+
+
+
+}
+func campaignToResponse(campaing models.OneTimeCampaign, contentType string) dtos.CampaignDTO {
+	return dtos.CampaignDTO{
+		Id: campaing.Id.Hex(),
+		User: campaing.Campaign.User.Hex(),
+		Description: campaing.Campaign.Description,
+		Time: campaing.Time,
+		Date: campaing.Date,
+		Link: campaing.Campaign.Link,
+		ContentType: contentType,
+	}
+}
 func (app *application) findByIDCampaign(w http.ResponseWriter, r *http.Request) {
 	// Get id from incoming url
 	vars := mux.Vars(r)

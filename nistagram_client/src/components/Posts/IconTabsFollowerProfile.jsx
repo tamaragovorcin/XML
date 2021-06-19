@@ -385,6 +385,75 @@ render(){
                     </div>
                 </div>
             </Tab>
+            <Tab eventKey={5} title="Campaigns" >
+            <div className="d-flex align-items-top">
+                <div className="container-fluid">
+                  
+                  <table className="table">
+                  <tbody>
+                        {this.props.campaigns.map((post) => (
+                            
+                            <tr id={post.Id} key={post.Id}>
+                            
+                            <tr  style={{ width: "100%"}}>
+                                <td colSpan="3">
+                                {post.ContentType === "image/jpeg" ? (
+                                    <img
+                                    className="img-fluid"
+                                    src={"http://localhost:80/api/campaign/api/file/"+post.Id}
+                                    width="100%"
+                                    alt="description"
+                                  /> ) : (
+                                <video width="100%"  controls autoPlay loop muted>
+                                  <source src={"http://localhost:80/api/campaign/api/file/"+post.Id} type ="video/mp4"></source>
+                                </video>)}
+                                </td>
+                            </tr>
+                            <tr>
+                                <td colSpan="3">
+                                  <label>Link to webasite/article: &nbsp;</label><a href={post.Link}>{post.Link}</a>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td colSpan="3">
+                                <label>Description: &nbsp;</label>{post.Description}
+                                </td>
+                            </tr>
+                            <tr>
+                                <td colSpan="3">
+                                <label>Date and time of publishing: &nbsp;</label>{post.Date},&nbsp; {post.Time}
+                                </td>
+                            </tr>
+                            <tr>
+                            <td colSpan="3">
+                            <label>Target group: &nbsp;</label>{post.TargetGroup.Gender},&nbsp; {post.TargetGroup.DateOne},&nbsp; {post.TargetGroup.DateTwo},&nbsp; {post.TargetGroup.Location.Town},&nbsp; 
+
+                            </td>
+                            
+                          </tr>
+                          {/* <tr  style={{ width: "100%" }}> */}
+                            {/* <td>
+                              <button onClick={() =>  this.props.handleLikesModalOpen(post.Id)} className="btn btn-outline-secondary btn-sm" style={{ marginBottom: "1rem" , marginLeft:"4rem"}}><label>likes</label></button>
+                            </td>
+                            <td>
+                            <button onClick={() =>  this.props.handleDislikesModalOpen(post.Id)} className="btn btn-outline-secondary btn-sm" style={{ marginBottom: "1rem",marginLeft:"4rem" }}><label > dislikes</label></button>
+                            </td>
+                            <td>
+                              <button onClick={() =>  this.props.handleCommentsModalOpen(post.Id)} className="btn btn-outline-secondary btn-sm" style={{ marginBottom: "1rem",marginLeft:"4rem" }}><label >Comments</label></button>
+                            </td> */}
+                          {/* </tr> */}
+                            <br/>
+                            <br/>
+                            <br/>
+                            </tr>
+                            
+                        ))}
+
+                        </tbody>
+                  </table>
+                </div>
+              </div>
+            </Tab>
         </Tabs>
     );
 

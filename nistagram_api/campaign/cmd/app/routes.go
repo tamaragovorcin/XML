@@ -34,6 +34,10 @@ func (app *application) routes() *mux.Router {
 	r.HandleFunc("/partnership/{id}", app.deletePartnership).Methods("DELETE")
 
 	r.HandleFunc("/api/image/{userIdd}/{campaignId}", app.saveImage).Methods("POST")
+	r.HandleFunc("/api/getUsersCampaigns/{userId}", app.getUsersCampaigns).Methods("GET")
+	r.HandleFunc("/api/file/{campaignId}", app.GetFileByCampaignId).Methods("GET")
+	r.HandleFunc("/api/campaign/update", app.updateOneTimeCampaign).Methods("POST")
+	r.HandleFunc("/api/campaign/delete/{id}", app.deleteOneTimeCampaign).Methods("GET")
 
 	return r
 }

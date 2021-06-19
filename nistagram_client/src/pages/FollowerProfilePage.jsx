@@ -36,6 +36,7 @@ class FollowerProfilePage extends React.Component {
 		numberOfFollowers : "",
 		numberOfFollowings : "",
 		photos : [],
+		campaigns : [],
 		albums : [],
 		highlights : [],
 		peopleLikes: [],
@@ -151,6 +152,7 @@ class FollowerProfilePage extends React.Component {
 		this.handleSetAllowPagePreview(s[5])
 		this.handleGetCollectionAlbums(s[5])
 		this.handleGetHighlightAlbums(s[5])
+		this.handeleGetCampaigns(s[5])
 
 		console.log("789451")
 		console.log(this.state.followingThisUser)
@@ -533,6 +535,17 @@ class FollowerProfilePage extends React.Component {
 				console.log(err);
 			});
 	}
+	handeleGetCampaigns = (id) => {
+		Axios.get(BASE_URL + "/api/campaign/api/getUsersCampaigns/"+id)
+			.then((res) => {
+				this.setState({ campaigns: res.data });
+			})
+			.catch((err) => {
+				console.log(err);
+			});
+		
+			
+	}
 	handleGetAlbums = (id) => {
 		Axios.get(BASE_URL + "/api/feedPosts/api/feedAlbum/usersAlbums/"+id)
 			.then((res) => {
@@ -814,6 +827,7 @@ class FollowerProfilePage extends React.Component {
 						<div hidden={!this.state.allowPagePreview}>
 							<IconTabsFollowerProfile
 								photos = {this.state.photos}
+								campaigns = {this.state.campaigns}
 								handleLike = {this.handleLike}
 								handleDislike = {this.handleDislike}
 								handleWriteCommentModal = {this.handleWriteCommentModal}						
