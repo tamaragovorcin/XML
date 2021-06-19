@@ -134,7 +134,7 @@ class ProfilePage extends React.Component {
 		campaignDate : "",
 		campaignLink : "",
 		campaignDescription : "",
-		campaignId : ""
+		campaignId : "",
 		targetGroup : {}
 		
 	}
