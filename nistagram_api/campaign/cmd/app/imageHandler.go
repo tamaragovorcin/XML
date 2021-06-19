@@ -12,7 +12,6 @@ import (
 )
 
 func (app *application) saveImage(w http.ResponseWriter, r *http.Request)  {
-
 	vars := mux.Vars(r)
 	userId := vars["userIdd"]
 	campaignId := vars["campaignId"]

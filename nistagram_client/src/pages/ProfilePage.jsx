@@ -57,6 +57,7 @@ class ProfilePage extends React.Component {
 		numberFollowers: 0,
 		highlihts: [],
 		photos: [],
+		campaigns : [],
 		pictures: [],
 		videos : [],
 		video : "",
@@ -129,6 +130,11 @@ class ProfilePage extends React.Component {
 		selectedGender : "MALE",
         selectedDateOne : "",
         selectedDateTwo : "",
+		campaignTime : "",
+		campaignDate : "",
+		campaignLink : "",
+		campaignDescription : "",
+		campaignId : "",
 		targetGroup : {}
 		
 	}
@@ -422,6 +428,7 @@ class ProfilePage extends React.Component {
 		this.handleGetHighlightAlbums(id)
 		this.handleGetCollectionAlbums(id)
 		this.getFollowingThatCanBeTagged()
+		this.handeleGetCampaigns(id)
 
 	}
 	handleGetStories = (id)=> {
@@ -483,7 +490,17 @@ class ProfilePage extends React.Component {
 		
 			
 	}
-
+	handeleGetCampaigns = (id) => {
+		Axios.get(BASE_URL + "/api/campaign/api/getUsersCampaigns/"+id)
+			.then((res) => {
+				this.setState({ campaigns: res.data });
+			})
+			.catch((err) => {
+				console.log(err);
+			});
+		
+			
+	}
 	handleGetVideos = (id)=>{
 		Axios.get(BASE_URL + "/api/feedPosts/api/feed/usersVideos/" + id)
 			.then((res) => {
@@ -514,6 +531,7 @@ class ProfilePage extends React.Component {
 				console.log(err);
 			});
 	}
+	
 
 	handleDescriptionChange = (event) => {
 		this.setState({ description: event.target.value });
@@ -1663,7 +1681,47 @@ class ProfilePage extends React.Component {
 			console.log(err);
 		});
 	}
-	
+	handleDeleteCampaign =(id)=>{
+		
+		Axios.get(BASE_URL + "/api/campaign/api/campaign/delete/"+ id, {
+		}).then((res) => {
+			
+			this.setState({ textSuccessfulModal: "You have successfully deleted campaign." });
+			this.setState({ openModal: true });
+			this.setState({ showWriteCommentModal: false });
+
+
+		})
+		.catch((err) => {
+			console.log(err);
+		});
+		let user = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length-1)
+
+		this.handeleGetCampaigns(user)
+	}
+	handleChangeCampaign = (id)=>{
+		let dto = {
+			Id : id,
+			Link : this.state.campaignLink,
+			Desctiption : this.state.campaignDescription,
+			Time : this.state.campaignTime,
+			Date : this.state.campaignDate
+		}
+		Axios.post(BASE_URL + "/api/campaign/api/campaign/update", dto, {
+		}).then((res) => {
+			
+			this.setState({ textSuccessfulModal: "You have successfully updated campaign." });
+			this.setState({ openModal: true });
+			this.setState({ showWriteCommentModal: false });
+
+
+		})
+		.catch((err) => {
+			console.log(err);
+		});
+		let user = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length-1)
+		this.handeleGetCampaigns(user)
+	}
 	handleAddComment =(comment) => {
 		let id = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length-1)
 
@@ -1967,6 +2025,7 @@ class ProfilePage extends React.Component {
 				<div>
 					<IconTabsProfile
 						photos = {this.state.photos}
+						campaigns = {this.state.campaigns}
 						videos = {this.state.videos}
 						urlVideo = {this.state.urlVideo}
 						handleLike = {this.handleLike}
@@ -2017,6 +2076,9 @@ class ProfilePage extends React.Component {
 						hiddenPostsForCollectionAlbums= {this.state.hiddenPostsForCollectionAlbums}
 						postsForCollectionAlbum = {this.state.postsForCollectionAlbum}
 						handleOpenAddAlbumToCollectionAlbumModal = {this.handleOpenAddAlbumToCollectionAlbumModal}
+
+						handleChangeCampaign = {this.handleChangeCampaign}
+						handleDeleteCampaign = {this.handleDeleteCampaign}
 					/>
 				</div>
 				

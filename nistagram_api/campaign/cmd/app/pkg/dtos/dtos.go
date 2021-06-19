@@ -13,6 +13,13 @@ type OneTimeCampaignDTO struct {
 	PartnershipsRequests []string
 	Description string
 }
+type OneTimeCampaignUpdateDTO struct {
+	Id string
+	Link string
+	Date string
+	Time string
+	Description string
+}
 
 type MultipleTimeCampaignDTO struct {
 	User string
@@ -25,3 +32,13 @@ type MultipleTimeCampaignDTO struct {
 	Description string
 }
 
+type CampaignDTO struct {
+	Id string
+	User string
+	TargetGroup models.TargetGroup
+	Link string
+	Date string
+	Time string
+	Description string
+	ContentType string
+}

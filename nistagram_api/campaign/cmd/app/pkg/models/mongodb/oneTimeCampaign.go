@@ -68,3 +68,11 @@ func (m *OneTimeCampaignModel) Delete(id string) (*mongo.DeleteResult, error) {
 	}
 	return m.C.DeleteOne(context.TODO(), bson.M{"_id": p})
 }
+func (m *OneTimeCampaignModel) Update(user models.OneTimeCampaign) (*mongo.UpdateResult, error) {
+
+	return m.C.UpdateOne(context.TODO(),bson.M{"_id":user.Id},bson.D{{"$set",bson.M{"campaign.link":user.Campaign.Link,
+		"campaign.description":user.Campaign.Description,
+		"date":user.Date,
+		"time":user.Time,
+		}}})
+}
