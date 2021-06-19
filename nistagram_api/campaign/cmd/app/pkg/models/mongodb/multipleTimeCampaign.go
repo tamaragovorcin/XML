@@ -69,3 +69,21 @@ func (m *MultipleTimeCampaignModel) Delete(id string) (*mongo.DeleteResult, erro
 	}
 	return m.C.DeleteOne(context.TODO(), bson.M{"_id": p})
 }
+
+func (m *MultipleTimeCampaignModel) Update(campaign models.MultipleTimeCampaign) (*mongo.UpdateResult, error) {
+
+	return m.C.UpdateOne(context.TODO(),bson.M{"_id":campaign.Id},bson.D{{"$set",bson.M{
+		"campaign.link":campaign.Campaign.Link,
+		"campaign.description":campaign.Campaign.Description,
+		"campaign.user":campaign.Campaign.User,
+		"campaign.targetGroup":campaign.Campaign.TargetGroup,
+		"campaign.statistics":campaign.Campaign.Statistic,
+		"campaign.partnerships":campaign.Campaign.Partnerships,
+		"startTime":campaign.StartTime,
+		"EndTime":campaign.EndTime,
+		"desiredNumber":campaign.DesiredNumber,
+		"modifiedTime":campaign.ModifiedTime,
+		"timesShown":campaign.TimesShown,
+
+	}}})
+}
