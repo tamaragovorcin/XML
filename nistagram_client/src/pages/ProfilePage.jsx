@@ -17,6 +17,7 @@ import AddStoryToHighlightModal from "../components/Posts/AddStoryToHighlightMod
 import IconTabsProfile from "../components/Posts/IconTabsProfile"
 import AddCollectionModal  from "../components/Posts/AddCollectionModal";
 import AddPostToCollection from "../components/Posts/AddPostToCollection";
+import EditCampaignModal from "../components/EditCampaignModal"
 import WriteCommentAlbumModal from "../components/Posts/WriteCommentAlbumModal"
 import AddTagsModal from "../components/Posts/AddTagsModal";
 import AddStoryAlbumToHighlightModal from "../components/Posts/AddStoryAlbumToHighlightModal";
@@ -135,7 +136,8 @@ class ProfilePage extends React.Component {
 		campaignLink : "",
 		campaignDescription : "",
 		campaignId : "",
-		targetGroup : {}
+		targetGroup : {},
+		showEditCampaignModal : false
 		
 	}
 	hasRole = (reqRole) => {
@@ -1699,13 +1701,49 @@ class ProfilePage extends React.Component {
 
 		this.handeleGetCampaigns(user)
 	}
-	handleChangeCampaign = (id)=>{
+	handleCampaignDateChange = (event) =>{
+        this.setState({ campaignDate: event.target.value });
+        
+    }
+        handleCampaignTimeChange = (event) =>{
+        this.setState({ campaignTime: event.target.value });
+        
+        };
+        handleCampaignDescriptionChange = (event) => {
+        this.setState({ campaignDescription: event.target.value });
+      };
+      handleCampaignLinkChange = (event) => {
+        this.setState({ campaignLink: event.target.value });
+      };
+   
+	handleEditCampaignModal = (id) =>{
+		Axios.get(BASE_URL + "/api/campaign/api/campaign/id/"+id)
+			.then((res) => {
+                this.setState({
+                campaignDate : res.data.Date,
+                campaignLink : res.data.Campaign.Link,
+                campaignDescription : res.data.Campaign.Description,
+                campaignTime : res.data.Time,
+				campaignForEdit : res.data.Id
+            });
+			alert(this.state.campaignForEdit)
+			})
+			.catch((err) => {
+				console.log(err)
+			});
+		this.setState({ showEditCampaignModal: true });
+		
+	}
+	handleEditCampaignModalClose = () =>{
+		this.setState({ showEditCampaignModal: false });
+	}
+	handleChangeCampaign = (id,date,time,link,des)=>{
 		let dto = {
 			Id : id,
-			Link : this.state.campaignLink,
-			Desctiption : this.state.campaignDescription,
-			Time : this.state.campaignTime,
-			Date : this.state.campaignDate
+			Link : link,
+			Desctiption : des,
+			Time : time,
+			Date : date,
 		}
 		Axios.post(BASE_URL + "/api/campaign/api/campaign/update", dto, {
 		}).then((res) => {
@@ -1713,6 +1751,8 @@ class ProfilePage extends React.Component {
 			this.setState({ textSuccessfulModal: "You have successfully updated campaign." });
 			this.setState({ openModal: true });
 			this.setState({ showWriteCommentModal: false });
+			this.setState({ showEditCampaignModal: false });
+
 
 
 		})
@@ -2079,6 +2119,7 @@ class ProfilePage extends React.Component {
 
 						handleChangeCampaign = {this.handleChangeCampaign}
 						handleDeleteCampaign = {this.handleDeleteCampaign}
+						handleEditCampaignModal = {this.handleEditCampaignModal}
 					/>
 				</div>
 				
@@ -2140,6 +2181,22 @@ class ProfilePage extends React.Component {
 						handleAddInfluencersModal = {this.handleAddInfluencersModal}
 						handleDefineTargetGroupModal = {this.handleDefineTargetGroupModal}
 
+					/>
+					<EditCampaignModal
+						show={this.state.showEditCampaignModal}
+						onCloseModal={this.handleEditCampaignModalClose}
+						header="Edit campaign data"
+
+						campaignForEdit = {this.state.campaignForEdit}
+						campaignDate = {this.state.campaignDate}
+						handleCampaignDateChange = {this.handleCampaignDateChange}
+						campaignTime= {this.state.campaignTime}
+						handleCampaignTimeChange = {this.handleCampaignTimeChange}
+						campaignLink = {this.state.campaignLink}
+						handleCampaignLinkChange = {this.handleCampaignLinkChange}
+						campaignDescription = {this.state.campaignDescription}
+						handleCampaignDescriptionChange = {this.handleCampaignDescriptionChange}
+						handleChangeCampaign = {this.handleChangeCampaign}
 					/>
 					<OneTimeCampaignModal
 						show={this.state.showOneTimeCampaignModal}
