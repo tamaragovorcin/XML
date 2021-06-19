@@ -4,9 +4,10 @@ import (
 	"campaigns/pkg/dtos"
 	"campaigns/pkg/models"
 	"encoding/json"
-	"fmt"
 	"github.com/gorilla/mux"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	"io/ioutil"
+	"log"
 	"net/http"
 )
 
@@ -67,9 +68,7 @@ func (app *application) updateOneTimeCampaign(w http.ResponseWriter, req *http.R
 	if err != nil {
 		app.serverError(w, err)
 	}
-	fmt.Println(dto.Link)
-	fmt.Println(dto.Description)
-	fmt.Println(dto.Id)
+
 
 	var campaign = models.Campaign{
 		Link : dto.Link,
@@ -160,4 +159,220 @@ func (app *application) deleteOneTimeCampaign(w http.ResponseWriter, r *http.Req
 	}
 
 	app.infoLog.Printf("Have been eliminated %d movie(s)", deleteResult.DeletedCount)
+}
+
+func (app *application) getPartnershipRequestsOneTime(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	userId := vars["userId"]
+	userIdPrimitive, _ := primitive.ObjectIDFromHex(userId)
+	allPosts, _ :=app.oneTimeCampaign.All()
+	usersCampaigns,err :=findPartnershipRequestsByUserIdOneTime(allPosts,userIdPrimitive)
+	if err != nil {
+		app.serverError(w, err)
+	}
+	campaignResponse := []dtos.CampaignDTO{}
+	for _, campaign := range usersCampaigns {
+
+		if err != nil {
+			app.serverError(w, err)
+		}
+		contentType := app.GetFileTypeByPostId(campaign.Id)
+		campaignResponse = append(campaignResponse, campaignToResponseInfluencer(campaign,contentType))
+
+	}
+
+	imagesMarshaled, err := json.Marshal(campaignResponse)
+
+	if err != nil {
+		app.serverError(w, err)
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	w.Write(imagesMarshaled)
+}
+
+
+func (app *application) getInfluencersOneTimeCampaigns(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	userId := vars["userId"]
+	userIdPrimitive, _ := primitive.ObjectIDFromHex(userId)
+	allPosts, _ :=app.oneTimeCampaign.All()
+	usersCampaigns,err :=findPartnershipByUserIdOneTime(allPosts,userIdPrimitive)
+	if err != nil {
+		app.serverError(w, err)
+	}
+	campaignResponse := []dtos.CampaignDTO{}
+	for _, campaign := range usersCampaigns {
+
+		if err != nil {
+			app.serverError(w, err)
+		}
+		contentType := app.GetFileTypeByPostId(campaign.Id)
+		campaignResponse = append(campaignResponse, campaignToResponseInfluencer(campaign,contentType))
+
+	}
+
+	imagesMarshaled, err := json.Marshal(campaignResponse)
+
+	if err != nil {
+		app.serverError(w, err)
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	w.Write(imagesMarshaled)
+}
+func campaignToResponseInfluencer(campaing models.OneTimeCampaign, contentType string) dtos.CampaignDTO {
+	username :=getUserUsername(campaing.Campaign.User)
+	return dtos.CampaignDTO{
+		Id: campaing.Id.Hex(),
+		User: campaing.Campaign.User.Hex(),
+		Description: campaing.Campaign.Description,
+		Time: campaing.Time,
+		Date: campaing.Date,
+		Link: campaing.Campaign.Link,
+		ContentType: contentType,
+		AgentUsername: username,
+	}
+}
+func getUserUsername(user primitive.ObjectID) string {
+
+	stringObjectID := user.Hex()
+	resp, err := http.Get("http://localhost:80/api/users/api/user/username/"+stringObjectID)
+	if err != nil {
+		log.Fatalln(err)
+	}
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		log.Fatalln(err)
+	}
+	sb := string(body)
+	sb = sb[1:]
+	sb = sb[:len(sb)-1]
+	return sb
+}
+func findPartnershipRequestsByUserIdOneTime(posts []models.OneTimeCampaign, idPrimitive primitive.ObjectID) ([]models.OneTimeCampaign, error) {
+	campaignsUser := []models.OneTimeCampaign{}
+
+	for _, campaign := range posts {
+		if	userInPartnershipRequests(campaign.Campaign.Partnerships,idPrimitive) {
+			campaignsUser = append(campaignsUser, campaign)
+		}
+	}
+	return campaignsUser, nil
+}
+func findPartnershipByUserIdOneTime(posts []models.OneTimeCampaign, idPrimitive primitive.ObjectID) ([]models.OneTimeCampaign, error) {
+	campaignsUser := []models.OneTimeCampaign{}
+
+	for _, campaign := range posts {
+		if	userInPartnership(campaign.Campaign.Partnerships,idPrimitive) {
+			campaignsUser = append(campaignsUser, campaign)
+		}
+	}
+	return campaignsUser, nil
+}
+
+func (app *application) acceptPartnershipRequestOneTime(w http.ResponseWriter, req *http.Request) {
+	var dto dtos.PartnershipDTO
+
+	err := json.NewDecoder(req.Body).Decode(&dto)
+	if err != nil {
+		app.serverError(w, err)
+	}
+	campaign, err := app.oneTimeCampaign.FindByID(dto.CampaignId.Hex())
+	partensrhipsUpdated := handleUpdatedPartnerships(campaign.Campaign.Partnerships,dto.UserId)
+	var campaignOne = models.Campaign{
+		User : campaign.Campaign.User,
+		TargetGroup : campaign.Campaign.TargetGroup,
+		Statistic  : campaign.Campaign.Statistic,
+		Link : campaign.Campaign.Link,
+		Description :campaign.Campaign.Description,
+		Partnerships: partensrhipsUpdated,
+	}
+	var oneTimeCampaign = models.OneTimeCampaign{
+		Id: campaign.Id,
+		Campaign:   campaignOne,
+		Time: campaign.Time,
+		Date : campaign.Date,
+	}
+
+
+	insertResult, err := app.oneTimeCampaign.Update(oneTimeCampaign)
+	if err != nil {
+		app.serverError(w, err)
+	}
+
+	app.infoLog.Printf("New content have been created, id=%s", insertResult.UpsertedID)
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+
+	idMarshaled, err := json.Marshal(insertResult.UpsertedID)
+	w.Write(idMarshaled)
+}
+
+func handleUpdatedPartnerships(partnerships []models.Partnership, id primitive.ObjectID) []models.Partnership {
+	updated :=[]models.Partnership{}
+	for _, partnership := range partnerships {
+		if partnership.Influencer.Hex()==id.Hex() {
+			var partnershipOne = models.Partnership{
+				ID : partnership.ID,
+				Influencer: id,
+				Approved: true,
+			}
+			updated = append(updated,partnershipOne)
+
+		} else {
+			updated = append(updated,partnership)
+		}
+	}
+	return updated
+}
+
+func (app *application) deletePartnershipRequestOneTime(w http.ResponseWriter, req *http.Request) {
+	var dto dtos.PartnershipDTO
+
+	err := json.NewDecoder(req.Body).Decode(&dto)
+	if err != nil {
+		app.serverError(w, err)
+	}
+	campaign, err := app.oneTimeCampaign.FindByID(dto.CampaignId.Hex())
+	partensrhipsUpdated := handleDeletePartnerships(campaign.Campaign.Partnerships,dto.UserId)
+	var campaignOne = models.Campaign{
+		User : campaign.Campaign.User,
+		TargetGroup : campaign.Campaign.TargetGroup,
+		Statistic  : campaign.Campaign.Statistic,
+		Link : campaign.Campaign.Link,
+		Description :campaign.Campaign.Description,
+		Partnerships: partensrhipsUpdated,
+	}
+
+
+	var oneTimeCampaign = models.OneTimeCampaign{
+		Id: campaign.Id,
+		Campaign:   campaignOne,
+		Time: campaign.Time,
+		Date : campaign.Date,
+	}
+
+	insertResult, err := app.oneTimeCampaign.Update(oneTimeCampaign)
+	if err != nil {
+		app.serverError(w, err)
+	}
+
+	app.infoLog.Printf("New content have been created, id=%s", insertResult.UpsertedID)
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+
+	idMarshaled, err := json.Marshal(insertResult.UpsertedID)
+	w.Write(idMarshaled)
+}
+func handleDeletePartnerships(partnerships []models.Partnership, id primitive.ObjectID) []models.Partnership {
+	updated :=[]models.Partnership{}
+	for _, partnership := range partnerships {
+
+		if partnership.Influencer.Hex()!=id.Hex() {
+
+			updated = append(updated,partnership)
+		}
+	}
+	return updated
 }

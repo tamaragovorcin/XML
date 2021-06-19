@@ -4,7 +4,6 @@ import (
 	"campaigns/pkg/dtos"
 	"campaigns/pkg/models"
 	"encoding/json"
-	"fmt"
 	"github.com/gorilla/mux"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"io"
@@ -68,10 +67,33 @@ func findImageByCampaignId(images []models.Image, idFeedPost primitive.ObjectID)
 	}
 	return imageFeedPost, nil
 }
+
+
+func userInPartnershipRequests(partnerships []models.Partnership, idPrimitive primitive.ObjectID) bool {
+	for _, partnership := range partnerships {
+
+		if partnership.Influencer.Hex()==idPrimitive.Hex(){
+			if partnership.Approved==false {
+				return true
+			}
+		}
+	}
+	return false
+}
+func userInPartnership(partnerships []models.Partnership, idPrimitive primitive.ObjectID) bool {
+	for _, partnership := range partnerships {
+
+		if partnership.Influencer.Hex()==idPrimitive.Hex(){
+			if partnership.Approved==true {
+				return true
+			}
+		}
+	}
+	return false
+}
 func (app *application) getUsersCampaigns(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	userId := vars["userId"]
-	fmt.Println(userId)
 	userIdPrimitive, _ := primitive.ObjectIDFromHex(userId)
 	allPosts, _ :=app.oneTimeCampaign.All()
 	usersCampaigns,err :=findCampaignByUserId(allPosts,userIdPrimitive)
@@ -99,7 +121,6 @@ func (app *application) getUsersCampaigns(w http.ResponseWriter, r *http.Request
 	w.Write(imagesMarshaled)
 }
 func(app *application) GetFileByCampaignId(w http.ResponseWriter, r *http.Request){
-	fmt.Println("")
 	vars := mux.Vars(r)
 	feedId := vars["campaignId"]
 	feedIdPrim, _ := primitive.ObjectIDFromHex(feedId)

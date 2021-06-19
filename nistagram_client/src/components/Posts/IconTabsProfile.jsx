@@ -719,7 +719,7 @@ render(){
                 </div>
 				
             </Tab>
-            <Tab eventKey={9} title="Campaigns"  hidden={!this.hasRole("USER") && !this.hasRole("AGENT")}>
+            <Tab eventKey={9} title="Campaigns"  hidden={!this.props.isAgent}>
             <div className="d-flex align-items-top">
                 <div className="container-fluid">
                   
@@ -777,7 +777,8 @@ render(){
                             
 
                          
-                         
+                    
+                          
                             <br/>
                             <br/>
                             <br/>
@@ -790,7 +791,106 @@ render(){
                 </div>
               </div>
             </Tab>
-           
+            <Tab eventKey={10} title="Partnerships" hidden={!this.props.isInfluencer}>
+            <div className="d-flex align-items-top">
+                <div className="container-fluid">
+                  
+                <table className="table" style={{ width: "100%" }}>
+                                <tbody>
+                                        {this.props.oneTimeCampaignsInfluencer.map((post) => (
+                                            
+                                            <tr id={post.Id} key={post.Id}>
+                                             <tr>
+                                                <td colSpan="3">
+                                                <label>Agent: &nbsp;</label>{post.AgentUsername}
+                                                </td>
+                                            </tr>
+                                            <tr  style={{ width: "100%"}}>
+                                                <td colSpan="3">
+                                                {post.ContentType === "image/jpeg" ? (
+                                                    <img
+                                                    className="img-fluid"
+                                                    src={"http://localhost:80/api/campaign/api/file/"+post.Id}
+                                                    width="100%"
+                                                    alt="description"
+                                                /> ) : (
+                                                <video width="100%"  controls autoPlay loop muted>
+                                                <source src={"http://localhost:80/api/campaign/api/file/"+post.Id} type ="video/mp4"></source>
+                                                </video>)}
+                                                </td>
+                                            </tr>
+                                           
+                                            <tr>
+                                                <td colSpan="3">
+                                                <label>Link to webasite/article: &nbsp;</label><a href={post.Link}>{post.Link}</a>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td colSpan="3">
+                                                <label>Description: &nbsp;</label>{post.Description}
+                                                </td>
+                                            </tr>
+                                         
+                                    
+                                       
+                                            <br/>
+                                            <br/>
+                                            <br/>
+                                            </tr>
+                                            
+                                        ))}
+
+                                        </tbody>
+                                    </table>
+                                     <table className="table" style={{ width: "100%" }}>
+                                        <tbody>
+                                                {this.props.multipleCampaignsInfluencer.map((post) => (
+                                                    
+                                                    <tr id={post.Id} key={post.Id}>
+                                                    <tr>
+                                                        <td colSpan="3">
+                                                        <label>Agent: &nbsp;</label>{post.AgentUsername}
+                                                        </td>
+                                                    </tr>
+                                                    <tr  style={{ width: "100%"}}>
+                                                        <td colSpan="3">
+                                                        {post.ContentType === "image/jpeg" ? (
+                                                            <img
+                                                            className="img-fluid"
+                                                            src={"http://localhost:80/api/campaign/api/file/"+post.Id}
+                                                            width="100%"
+                                                            alt="description"
+                                                        /> ) : (
+                                                        <video width="100%"  controls autoPlay loop muted>
+                                                        <source src={"http://localhost:80/api/campaign/api/file/"+post.Id} type ="video/mp4"></source>
+                                                        </video>)}
+                                                        </td>
+                                                    </tr>
+                                                
+                                                    <tr>
+                                                        <td colSpan="3">
+                                                        <label>Link to webasite/article: &nbsp;</label><a href={post.Link}>{post.Link}</a>
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td colSpan="3">
+                                                        <label>Description: &nbsp;</label>{post.Description}
+                                                        </td>
+                                                    </tr>
+                                                
+                                            
+                                                    <br/>
+                                                    <br/>
+                                                    <br/>
+                                                    </tr>
+                                                    
+                                                ))}
+
+                                                </tbody>
+                                            </table>
+                </div>
+              </div>
+            </Tab>
         </Tabs>
     );
 

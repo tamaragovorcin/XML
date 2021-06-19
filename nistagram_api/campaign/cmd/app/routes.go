@@ -41,5 +41,16 @@ func (app *application) routes() *mux.Router {
 	r.HandleFunc("/api/campaign/id/{id}", app.findByIDOneTimeCampaign).Methods("GET")
 
 
+
+	r.HandleFunc("/partnershipRequests/{userId}", app.getPartnershipRequestsOneTime).Methods("GET")
+	r.HandleFunc("/acceptPartnership", app.acceptPartnershipRequestOneTime).Methods("POST")
+	r.HandleFunc("/deletePartnership", app.deletePartnershipRequestOneTime).Methods("POST")
+
+	r.HandleFunc("/partnershipRequestsMultiple/{userId}", app.getPartnershipRequestsMultiple).Methods("GET")
+	r.HandleFunc("/acceptPartnershipMultiple", app.acceptPartnershipRequestMultiple).Methods("POST")
+	r.HandleFunc("/deletePartnershipMultiple", app.deletePartnershipRequestMultiple).Methods("POST")
+
+	r.HandleFunc("/promoteMultiple/{userId}", app.getInfluecnersMultipleCampaigns).Methods("GET")
+	r.HandleFunc("/promoteOneTime/{userId}", app.getInfluencersOneTimeCampaigns).Methods("GET")
 	return r
 }

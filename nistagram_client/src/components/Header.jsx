@@ -11,7 +11,7 @@ import {IoMdNotificationsOutline} from 'react-icons/io'
 import {HiOutlineUserAdd} from 'react-icons/hi'
 import { AiOutlineHeart,AiFillLike,AiFillDislike } from 'react-icons/ai';
 import {BsPersonPlusFill} from 'react-icons/bs'
-
+import {SiCampaignmonitor} from 'react-icons/si'
 
 import { BASE_URL } from "../constants.js";
 import Select from 'react-select';
@@ -23,9 +23,11 @@ class Header extends React.Component {
 		options: [],
 		optionDTO: { value: "", label: "" },
 		userId: "",
+		isInfluencer : false
 	}
 
 	hasRole = (reqRole) => {
+		
 		let roles = JSON.parse(localStorage.getItem("keyRole"));
 		if (roles === null) return false;
 
@@ -38,7 +40,23 @@ class Header extends React.Component {
 		}
 		return false;
 	};
+	hasCategoryInfluencer = () => {
+		
+		let id = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length-1);
+		Axios.get(BASE_URL + "/api/users/api/user/username/category/"+id)
+			.then((res) => {
+				if (res.data.trim()!=="not") {
+					return true;
+				}
+				return false;
+			})
+			.catch((err) => {
+				console.log(err);
+			});
+		
+	};
 
+	
 	handleSearchChange = (event) => {
 		this.setState({ search: event.target.value });
 	};
@@ -72,6 +90,20 @@ class Header extends React.Component {
 				.catch((err) => {
 	
 					console.log(err)
+				});
+
+			Axios.get(BASE_URL + "/api/users/api/user/username/category/"+id)
+				.then((res) => {
+					
+					if (res.data.trim()!=="not") {
+						this.setState({ isInfluencer: true });
+
+						return true;
+					}
+					return false;
+				})
+				.catch((err) => {
+					console.log(err);
 				});
 		}
 		else {
@@ -139,6 +171,9 @@ class Header extends React.Component {
 							</li>
 							<li  hidden={!this.hasRole("USER") && !this.hasRole("AGENT")}>
 								<Link to="/notifications"><IoMdNotificationsOutline/></Link>
+							</li>
+							<li  hidden={!this.state.isInfluencer}>
+								<Link to="/partnershipRequests"><SiCampaignmonitor/></Link>
 							</li>
 							<li  hidden={!this.hasRole("ADMIN")}>
 								<Link to="/verifyRequest"><FaRegQuestionCircle /></Link>

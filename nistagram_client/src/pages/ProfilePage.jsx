@@ -137,7 +137,11 @@ class ProfilePage extends React.Component {
 		campaignDescription : "",
 		campaignId : "",
 		targetGroup : {},
-		showEditCampaignModal : false
+		showEditCampaignModal : false,
+		isAgent : false,
+		isInfluencer : false,
+		oneTimeCampaignsInfluencer : [],
+        multipleCampaignsInfluencer : [],
 		
 	}
 	hasRole = (reqRole) => {
@@ -431,6 +435,47 @@ class ProfilePage extends React.Component {
 		this.handleGetCollectionAlbums(id)
 		this.getFollowingThatCanBeTagged()
 		this.handeleGetCampaigns(id)
+		this.handeleGetMultipleCampaignsInfluencer(id)
+		this.handeleGetOneTimeCampaignsInfluencer(id)
+		this.handleGetCategoryUser(id)
+
+	}
+	handeleGetMultipleCampaignsInfluencer = (id)=> {
+		Axios.get(BASE_URL + "/api/campaign/promoteMultiple/"+id)
+		.then((res) => {
+			this.setState({ multipleCampaignsInfluencer: res.data });
+		})
+		.catch((err) => {
+			console.log(err);
+		});	
+	}
+	handeleGetOneTimeCampaignsInfluencer = (id)=> {
+		Axios.get(BASE_URL + "/api/campaign/promoteOneTime/"+id)
+			.then((res) => {
+				this.setState({ oneTimeCampaignsInfluencer: res.data });
+			})
+			.catch((err) => {
+				console.log(err);
+			});	
+	}
+	handleGetCategoryUser = (id)=> {
+
+		var role = this.hasRole("AGENT")
+		this.setState({isAgent : role});
+
+		Axios.get(BASE_URL + "/api/users/api/user/username/category/"+id)
+				.then((res) => {
+					
+					if (res.data.trim()!=="not") {
+						this.setState({ isInfluencer: true });
+
+						return true;
+					}
+					return false;
+				})
+				.catch((err) => {
+					console.log(err);
+				});
 
 	}
 	handleGetStories = (id)=> {
@@ -2117,9 +2162,14 @@ class ProfilePage extends React.Component {
 						postsForCollectionAlbum = {this.state.postsForCollectionAlbum}
 						handleOpenAddAlbumToCollectionAlbumModal = {this.handleOpenAddAlbumToCollectionAlbumModal}
 
-						handleChangeCampaign = {this.handleChangeCampaign}
 						handleDeleteCampaign = {this.handleDeleteCampaign}
 						handleEditCampaignModal = {this.handleEditCampaignModal}
+
+						isAgent = {this.state.isAgent}
+						isInfluencer = {this.state.isInfluencer}
+
+						oneTimeCampaignsInfluencer = {this.state.oneTimeCampaignsInfluencer}
+						multipleCampaignsInfluencer = {this.state.multipleCampaignsInfluencer}
 					/>
 				</div>
 				
