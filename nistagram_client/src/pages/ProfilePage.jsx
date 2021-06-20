@@ -24,6 +24,7 @@ import AddStoryAlbumToHighlightModal from "../components/Posts/AddStoryAlbumToHi
 import { BASE_URL } from "../constants.js";
 import VerifyModal from "../pages/VerifyModal";
 import AddCampaignModal from "../components/AddCampaignModal";
+import AddVideoCampaignModal from "../components/AddVideoCampaignModal";
 import OneTimeCampaignModal from "../components/OneTimeCampaignModal";
 import MultipleTimeCampaignModal from "../components/MultipleTimeCampaignModal";
 import AddInfluencerModal from "../components/AddInfluencerModal";
@@ -121,6 +122,7 @@ class ProfilePage extends React.Component {
 		followingsThatAllowTags : [],
 		category : "",
 		showCampaignModal : false,
+		showVideoCampaignModal : false,
 		link : "",
 		showOneTimeCampaignModal : false,
 		showMultipleTimeCampaignModal : false,
@@ -300,6 +302,19 @@ class ProfilePage extends React.Component {
 
 		};
 		fetch(BASE_URL + "/api/feedPosts/api/image/"+userId+"/"+feedId , options);
+	}
+	testVideoCampaign(pic,userId, campaignId) {
+		const formData = new FormData();
+
+		formData.append("file", pic);
+		formData.append("test", "StringValueTest");
+
+		const options = {
+			method: "POST",
+			body: formData
+
+		};
+		fetch(BASE_URL + "/api/campaign/api/image/"+userId+"/"+campaignId , options);
 	}
 	test(pic,userId, feedId) {
 		this.setState({
@@ -621,6 +636,16 @@ class ProfilePage extends React.Component {
 	handleAddCampaignModalClose = ()=>{
 		this.setState({ showCampaignModal: false });
 	}
+	handleAddVideoCampaignModal = ()=>{
+		this.setState({ showVideoCampaignModal: true });
+		this.setState({selectedFile: ""})
+
+	}
+	handleAddVideoCampaignModalClose = ()=>{
+		this.setState({ showVideoCampaignModal: false });
+		this.setState({selectedFile: ""})
+
+	}
 	handleOneTimeCampaignModalOpen = ()=>{
 		this.setState({ showOneTimeCampaignModal: true });
 	}
@@ -753,9 +778,10 @@ class ProfilePage extends React.Component {
 				this.state.pictures.forEach((pic) => {
 					this.testCampaign(pic, userid, campaignId);
 				});
-				/*if(this.state.selectedFile != ""){
-				this.testStory(this.state.selectedFile, userid, campaignId)
-				}*/
+				
+				if(this.state.selectedFile != ""){
+				this.testVideoCampaign(this.state.selectedFile, userid, campaignId)
+				}
 				this.setState({selectedFile : ""});
 				this.setState({ pictures: [] });
 			})
@@ -795,9 +821,9 @@ class ProfilePage extends React.Component {
 				this.state.pictures.forEach((pic) => {
 					this.testCampaign(pic, userid, campaignId);
 				});
-				/*if(this.state.selectedFile != ""){
-				this.testStory(this.state.selectedFile, userid, campaignId)
-				}*/
+				if(this.state.selectedFile != ""){
+				this.testVideoCampaign(this.state.selectedFile, userid, campaignId)
+				}
 				this.setState({selectedFile : ""});
 				this.setState({ pictures: [] });
 			})
@@ -1850,13 +1876,13 @@ class ProfilePage extends React.Component {
 			
 			this.setState({ textSuccessfulModal: "You have successfully updated campaign." });
 			this.setState({ openModal: true });
-			this.setState({ showWriteCommentModal: false });
 			this.setState({ showEditCampaignModal: false });
 
 
 
 		})
 		.catch((err) => {
+			
 			console.log(err);
 		});
 		this.handeleGetCampaigns(user)
@@ -1884,6 +1910,9 @@ class ProfilePage extends React.Component {
 
 		})
 		.catch((err) => {
+			this.setState({ textSuccessfulModal: "Campaign can not be updated. 24 hours have not yet passed since the last modification" });
+			this.setState({ openModal: true });
+			this.setState({ showEditCampaignModal: false });
 			console.log(err);
 		});
 		this.handeleGetCampaigns(user)
@@ -2168,7 +2197,11 @@ class ProfilePage extends React.Component {
 
 											</td>
 											<td hidden={!this.hasRole("AGENT")}>
-												<button onClick={this.handleAddCampaignModal} className="btn btn-outline-secondary btn-sm" style={{ marginBottom: "1rem" }}>Publish campaign</button>
+												<button onClick={this.handleAddCampaignModal} className="btn btn-outline-secondary btn-sm" style={{ marginBottom: "1rem" }}>Publish image campaign</button>
+
+											</td>
+											<td hidden={!this.hasRole("AGENT")}>
+												<button onClick={this.handleAddVideoCampaignModal} className="btn btn-outline-secondary btn-sm" style={{ marginBottom: "1rem" }}>Publish video campaign</button>
 
 											</td>
 										</div>
@@ -2303,6 +2336,27 @@ class ProfilePage extends React.Component {
 						hiddenOne = {this.state.hiddenOne}
 						noPicture = {this.state.noPicture}
 						onDrop = {this.onDropCampaign}
+
+					
+						handleAddOneTimeCampaign = {this.handleAddOneTimeCampaignModal}
+						handleAddMultipleTimeCampaign = {this.handleAddMultipleTimeCampaignModal}
+						handleLinkChange = {this.handleLinkChange}
+						handleDescriptionChange = {this.handleDescriptionChange}
+						handleAddInfluencersModal = {this.handleAddInfluencersModal}
+						handleDefineTargetGroupModal = {this.handleDefineTargetGroupModal}
+
+					/>
+					<AddVideoCampaignModal
+						show={this.state.showVideoCampaignModal}
+						onCloseModal={this.handleAddVideoCampaignModalClose}
+						header="New video campaign"
+						hiddenMultiple = {this.state.hiddenMultiple}
+						hiddenOne = {this.state.hiddenOne}
+						noPicture = {this.state.noPicture}
+						onDrop = {this.onDropCampaign}
+
+						handleSubmit = {this.handleSubmit}
+						onChangeHandler = {this.onChangeHandler}
 
 					
 						handleAddOneTimeCampaign = {this.handleAddOneTimeCampaignModal}
