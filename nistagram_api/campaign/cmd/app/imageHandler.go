@@ -11,7 +11,9 @@ import (
 	"strings"
 )
 
+
 func (app *application) saveImage(w http.ResponseWriter, r *http.Request)  {
+	fmt.Println("POGODIO UPIS SLIKE")
 	vars := mux.Vars(r)
 	userId := vars["userIdd"]
 	campaignId := vars["campaignId"]

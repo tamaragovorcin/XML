@@ -26,6 +26,16 @@ func findCampaignByUserId(posts []models.OneTimeCampaign, idPrimitive primitive.
 	}
 	return campaignsUser, nil
 }
+func findMultipleTimeCampaignByUserId(posts []models.MultipleTimeCampaign, idPrimitive primitive.ObjectID) ([]models.MultipleTimeCampaign, error){
+	campaignsUser := []models.MultipleTimeCampaign{}
+
+	for _, campaign := range posts {
+		if	campaign.Campaign.User==idPrimitive {
+			campaignsUser = append(campaignsUser, campaign)
+		}
+	}
+	return campaignsUser, nil
+}
 func(app *application) GetFileTypeByPostId(feedId primitive.ObjectID) string {
 	allImages,_ := app.images.All()
 	images, _ := findImageByCampaignId(allImages,feedId)
@@ -80,6 +90,8 @@ func (app *application) getUsersCampaigns(w http.ResponseWriter, r *http.Request
 	userIdPrimitive, _ := primitive.ObjectIDFromHex(userId)
 	allPosts, _ :=app.oneTimeCampaign.All()
 	usersCampaigns,err :=findCampaignByUserId(allPosts,userIdPrimitive)
+	allMultiple, _ :=app.multipleTimeCampaign.All()
+	usersMultipeCampaigns,_ :=findMultipleTimeCampaignByUserId(allMultiple,userIdPrimitive)
 	if err != nil {
 		app.serverError(w, err)
 	}
@@ -91,6 +103,15 @@ func (app *application) getUsersCampaigns(w http.ResponseWriter, r *http.Request
 		}
 		contentType := app.GetFileTypeByPostId(campaign.Id)
 		campaignResponse = append(campaignResponse, campaignToResponse(campaign,contentType))
+
+	}
+	for _, campaign := range usersMultipeCampaigns {
+
+		if err != nil {
+			app.serverError(w, err)
+		}
+		contentType := app.GetFileTypeByPostId(campaign.Id)
+		campaignResponse = append(campaignResponse, campaignMultipleToResponse(campaign,contentType))
 
 	}
 
@@ -140,6 +161,20 @@ func campaignToResponse(campaing models.OneTimeCampaign, contentType string) dto
 		Date: campaing.Date,
 		Link: campaing.Campaign.Link,
 		ContentType: contentType,
+		CampaignType:  "oneTime",
+	}
+}
+func campaignMultipleToResponse(campaing models.MultipleTimeCampaign, contentType string) dtos.CampaignDTO {
+	return dtos.CampaignDTO{
+		Id: campaing.Id.Hex(),
+		User: campaing.Campaign.User.Hex(),
+		Description: campaing.Campaign.Description,
+		StartTime: campaing.StartTime,
+		EndTime: campaing.EndTime,
+		Link: campaing.Campaign.Link,
+		ContentType: contentType,
+		CampaignType:  "multiple",
+		DesiredNumber:  campaing.DesiredNumber,
 	}
 }
 

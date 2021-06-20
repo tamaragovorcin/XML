@@ -15,28 +15,11 @@ class IconTabsProfile extends React.Component {
     super(props);
     this.state = {
         key: 1 | props.activeKey,
-        campaignTime : "",
-        campaignDate : "",
-        campaignLink : "",
-        campaignDescription : "",
-        campaignId : ""
+     
     }
     this.handleSelect = this.handleSelect.bind(this);
 }
-handleCampaignDateChange = (event) =>{
-  this.setState({ campaignDate: event.target.value });
-  
-  }
-  handleCampaignTimeChange = (event) =>{
-  this.setState({ campaignTime: event.target.value });
-  
-  }
-  handleCampaignDescriptionChange = (event) => {
-  this.setState({ campaignDescription: event.target.value });
-};
-handleCampaignLinkChange = (event) => {
-  this.setState({ campaignLink: event.target.value });
-};
+
 hasRole = (reqRole) => {
   let roles = JSON.parse(localStorage.getItem("keyRole"));
   if (roles === null) return false;
@@ -761,40 +744,37 @@ render(){
                                 </td>
                             </tr>
                             <tr>
+                            
+                            <td>
+                            <button onClick={() =>  this.props.handleDeleteCampaign(post.Id, post.CampaignType)} className="btn btn-danger btn-sm" style={{marginLeft:100}}> Delete campaign</button>
+                            </td>
+                            <td>
+                            <button onClick={() =>  this.props.handleEditCampaignModal(post.Id, post.CampaignType)} className="btn btn-info btn-sm"> Edit campaign</button>
+                            </td>
+                            </tr>
+                            <tr>
                                 <td colSpan="3">
                                   <label>Link to webasite/article: &nbsp;</label><a href={post.Link}>{post.Link}</a>
-                                  Change link: &nbsp;<input
-											type="text"
-											onChange={this.handleCampaignLinkChange}
-											value={post.Link}
-										/>
                                 </td>
                             </tr>
                             <tr>
                                 <td colSpan="3">
-                                <label>Description: &nbsp;</label><input
-											type="text"
-											onChange={this.handleCampaignDescriptionChange}
-											value={post.Description}
-										/>
+                                <label>Description: &nbsp;</label>{post.Description}
                                 </td>
                             </tr>
-                            <tr>
+                            <tr hidden={ post.CampaignType === "multiple"}>
                                 <td colSpan="3">
-                                <label>Date of publishing: &nbsp;</label><input
-											type="text"
-											onChange={this.handleCampaignDateChange}
-											value={post.Date}
-										/>
+                                <label>Date and time of publishing: &nbsp;</label>{post.Date},&nbsp; {post.Time}
                                 </td>
                             </tr>
-                            <tr>
+                            <tr hidden={ post.CampaignType === "oneTime"}>
                                 <td colSpan="3">
-                                <label>Time of publishing: &nbsp;</label><input
-											type="text"
-											onChange={this.handleCampaignTimeChange}
-											value={post.Time}
-										/>
+                                <label>Start and end date of campaign: &nbsp;</label>{post.StartTime} - &nbsp; {post.EndTime}
+                                </td>
+                            </tr>
+                            <tr hidden={ post.CampaignType === "oneTime"}>
+                                <td colSpan="3">
+                                <label>Desired number of publishing: &nbsp;</label>{post.DesiredNumber}
                                 </td>
                             </tr>
                             <tr>
@@ -804,14 +784,10 @@ render(){
                             </td>
                             
                           </tr>
-                          <tr>
-                            <td>
-                            <button onClick={() =>  this.props.handleChangeCampaign(post.Id)} className="btn btn-primary btn-sm" style={{ marginBottom: "1rem",marginLeft:"4rem",fontcolor:"white" }}><label > Save changes</label></button>
-                            </td>
-                            <td>
-                            <button onClick={() =>  this.props.handleDeleteCampaign(post.Id)} className="btn btn-secondary btn-sm" style={{ marginBottom: "1rem",marginLeft:"4rem", color:"white" }}><label > Delete campaign</label></button>
-                            </td>
-                            </tr>
+                            
+
+                         
+                    
                           
                             <br/>
                             <br/>

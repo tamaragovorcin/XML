@@ -83,7 +83,7 @@ func (m *MultipleTimeCampaignModel) Update(campaign models.MultipleTimeCampaign)
 		"campaign.dislikes":campaign.Campaign.Dislikes,
 		"campaign.comments":campaign.Campaign.Comments,
 		"startTime":campaign.StartTime,
-		"EndTime":campaign.EndTime,
+		"endTime":campaign.EndTime,
 		"desiredNumber":campaign.DesiredNumber,
 		"modifiedTime":campaign.ModifiedTime,
 		"timesShown":campaign.TimesShown,
