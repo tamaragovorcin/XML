@@ -4,6 +4,7 @@ import (
 	"campaigns/pkg/dtos"
 	"campaigns/pkg/models"
 	"encoding/json"
+	"fmt"
 	"github.com/gorilla/mux"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"io/ioutil"
@@ -68,9 +69,12 @@ func (app *application) updateOneTimeCampaign(w http.ResponseWriter, req *http.R
 	if err != nil {
 		app.serverError(w, err)
 	}
-
+	fmt.Println("User:")
+	fmt.Println(dto.User)
+	userPrimitive, _ := primitive.ObjectIDFromHex(dto.User)
 
 	var campaign = models.Campaign{
+		User : userPrimitive,
 		Link : dto.Link,
 		Description :dto.Description,
 	}
@@ -96,6 +100,7 @@ func (app *application) updateOneTimeCampaign(w http.ResponseWriter, req *http.R
 	idMarshaled, err := json.Marshal(insertResult.UpsertedID)
 	w.Write(idMarshaled)
 }
+
 func (app *application) insertOneTimeCampaign(w http.ResponseWriter, req *http.Request) {
 	var dto dtos.OneTimeCampaignDTO
 
