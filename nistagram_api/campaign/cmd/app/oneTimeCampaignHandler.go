@@ -642,8 +642,21 @@ func (app *application) getLikesOneTimeCampaign(w http.ResponseWriter, r *http.R
 		app.serverError(w, err)
 	}
 
+	likesDtos := getLikesDTOS(campaignLikes.Campaign.Likes )
+
+
+	usernamesMarshaled, err := json.Marshal(likesDtos)
+	if err != nil {
+		app.serverError(w, err)
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	w.Write(usernamesMarshaled)
+}
+
+func getLikesDTOS(likes []primitive.ObjectID) []dtos.LikeDTO {
 	likesDtos := []dtos.LikeDTO{}
-	for _, user := range campaignLikes.Campaign.Likes {
+	for _, user := range likes {
 
 		userUsername :=getUserUsername(user)
 		var like = dtos.LikeDTO{
@@ -653,14 +666,7 @@ func (app *application) getLikesOneTimeCampaign(w http.ResponseWriter, r *http.R
 		likesDtos = append(likesDtos, like)
 
 	}
-
-	usernamesMarshaled, err := json.Marshal(likesDtos)
-	if err != nil {
-		app.serverError(w, err)
-	}
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	w.Write(usernamesMarshaled)
+	return likesDtos
 }
 
 func (app *application) getDislikesOneTimeCampaign(w http.ResponseWriter, r *http.Request) {
@@ -674,17 +680,7 @@ func (app *application) getDislikesOneTimeCampaign(w http.ResponseWriter, r *htt
 		app.serverError(w, err)
 	}
 
-	likesDtos := []dtos.LikeDTO{}
-	for _, user := range campaignLikes.Campaign.Dislikes {
-
-		userUsername :=getUserUsername(user)
-		var like = dtos.LikeDTO{
-			Username: userUsername,
-		}
-
-		likesDtos = append(likesDtos, like)
-
-	}
+	likesDtos := getDislikesDTOS(campaignLikes.Campaign.Dislikes)
 
 	usernamesMarshaled, err := json.Marshal(likesDtos)
 	if err != nil {
@@ -693,6 +689,21 @@ func (app *application) getDislikesOneTimeCampaign(w http.ResponseWriter, r *htt
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	w.Write(usernamesMarshaled)
+}
+
+func getDislikesDTOS(likes []primitive.ObjectID) []dtos.LikeDTO {
+	likesDtos := []dtos.LikeDTO{}
+	for _, user := range likes {
+
+		userUsername := getUserUsername(user)
+		var like = dtos.LikeDTO{
+			Username: userUsername,
+		}
+
+		likesDtos = append(likesDtos, like)
+
+	}
+	return likesDtos
 }
 
 func (app *application) getCommentsOneTimeCampaign(w http.ResponseWriter, r *http.Request) {

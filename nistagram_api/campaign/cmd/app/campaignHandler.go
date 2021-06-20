@@ -162,8 +162,16 @@ func campaignToResponse(campaing models.OneTimeCampaign, contentType string) dto
 		Link: campaing.Campaign.Link,
 		ContentType: contentType,
 		CampaignType:  "oneTime",
+		NumberOfLikes : len(campaing.Campaign.Likes),
+		NumberOfDislikes : len(campaing.Campaign.Dislikes),
+		NumberOfComments : len(campaing.Campaign.Comments),
+		Likes : getLikesDTOS(campaing.Campaign.Likes),
+		Dislikes : getDislikesDTOS(campaing.Campaign.Dislikes),
+		Comments: getCommentDtos(campaing.Campaign.Comments),
 	}
+
 }
+
 func campaignMultipleToResponse(campaing models.MultipleTimeCampaign, contentType string) dtos.CampaignDTO {
 	return dtos.CampaignDTO{
 		Id: campaing.Id.Hex(),
@@ -175,6 +183,12 @@ func campaignMultipleToResponse(campaing models.MultipleTimeCampaign, contentTyp
 		ContentType: contentType,
 		CampaignType:  "multiple",
 		DesiredNumber:  campaing.DesiredNumber,
+		NumberOfLikes : len(campaing.Campaign.Likes),
+		NumberOfDislikes : len(campaing.Campaign.Dislikes),
+		NumberOfComments : len(campaing.Campaign.Comments),
+		Likes : getLikesDTOS(campaing.Campaign.Likes),
+		Dislikes : getDislikesDTOS(campaing.Campaign.Dislikes),
+		Comments: getCommentDtos(campaing.Campaign.Comments),
 	}
 }
 

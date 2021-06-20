@@ -59,6 +59,12 @@ type CampaignDTO struct {
 	CampaignType string
 	StartTime string
 	EndTime string
+	NumberOfLikes int
+	NumberOfDislikes int
+	NumberOfComments int
+	Likes []LikeDTO
+	Dislikes []LikeDTO
+	Comments []CommentDTO
 }
 
 type CampaignMultipleDTO struct {

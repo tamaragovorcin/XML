@@ -778,11 +778,29 @@ render(){
                                 </td>
                             </tr>
                             <tr>
-                            <td colSpan="3">
-                            <label>Target group: &nbsp;</label>{post.TargetGroup.Gender},&nbsp; {post.TargetGroup.DateOne},&nbsp; {post.TargetGroup.DateTwo},&nbsp; {post.TargetGroup.Location.Town},&nbsp; 
+                                <td>
+                                  <label>Number of likes &nbsp;</label>{post.NumberOfLikes}
 
-                            </td>
-                            
+                               </td>
+                               <td>
+                                   <label>Number of dislikes &nbsp;</label>{post.NumberOfDislikes}
+                               </td>
+                               <td>
+                                   <label>Number of comments &nbsp;</label>{post.NumberOfComments}
+                               </td>
+                            </tr>
+                            <tr  style={{ width: "100%" }}>
+                                <td>
+                                  <button onClick={() =>  this.props.handleLikesModalOpenCampaign(post.Likes)} className="btn btn-outline-secondary btn-sm" style={{ marginBottom: "1rem" , marginLeft:"4rem"}}><label>likes</label></button>
+                                </td>
+                                <td>
+                                <button onClick={() =>  this.props.handleDislikesModalOpenCampaign(post.Dislikes)} className="btn btn-outline-secondary btn-sm" style={{ marginBottom: "1rem",marginLeft:"4rem" }}><label > dislikes</label></button>
+                                </td>
+                                <td>
+                                  <button onClick={() =>  this.props.handleCommentsModalOpenCampaign(post.Comments)} className="btn btn-outline-secondary btn-sm" style={{ marginBottom: "1rem",marginLeft:"4rem" }}><label >Comments</label></button>
+                                </td>
+                            </tr>
+                            <tr>
                           </tr>
                             
 

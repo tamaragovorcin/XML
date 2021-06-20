@@ -2113,55 +2113,22 @@ class ProfilePage extends React.Component {
     handleDateTwoChange = (event) => {
 		this.setState({ selectedDateTwo: event.target.value });
 	};
-	handleLikesModalOpenCampaign = (postId,type) => {
-		var url = ""
-		if (type==="oneTime") {
-			url ="/api/campaign/oneTimeCampaign/likes/"
-		}
-		else {
-			url ="/api/campaign/multipleTimeCampaign/likes/"
-		}
-		Axios.get(BASE_URL + url + postId)
-			.then((res) => {
-				this.setState({ peopleLikes: res.data });
-			})
-			.catch((err) => {
-				console.log(err);
-			});
+	handleLikesModalOpenCampaign = (likes) => {
+		
+		this.setState({ peopleLikes: likes });
+			
 		this.setState({ showLikesModal: true });
 	}
-	handleDislikesModalOpenCampaign = (postId,type) => {
-		var url = ""
-		if (type==="oneTime") {
-			url ="/api/campaign/oneTimeCampaign/dislikes/"
-		}
-		else {
-			url ="/api/campaign/multipleTimeCampaign/dislikes/"
-		}
-		Axios.get(BASE_URL + url + postId)
-			.then((res) => {
-				this.setState({ peopleDislikes: res.data });
-			})
-			.catch((err) => {
-				console.log(err);
-			});
+	handleDislikesModalOpenCampaign = (dislikes) => {
+		
+		this.setState({ peopleDislikes: dislikes });
+		
 		this.setState({ showDislikesModal: true });
 	}
-	handleCommentsModalOpenCampaign = (postId,type) => {
-		var url = ""
-		if (type==="oneTime") {
-			url ="/api/campaign/oneTimeCampaign/comments/"
-		}
-		else {
-			url ="/api/campaign/multipleTimeCampaign/comments/"
-		}
-		Axios.get(BASE_URL + url + postId)
-			.then((res) => {
-				this.setState({ peopleComments: res.data });
-			})
-			.catch((err) => {
-				console.log(err);
-			});
+	handleCommentsModalOpenCampaign = (comments) => {
+		
+		this.setState({ peopleComments: comments });
+		
 		this.setState({ showCommentsModal: true });
 	}
 	render() {
