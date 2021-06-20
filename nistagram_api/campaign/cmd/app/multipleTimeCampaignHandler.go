@@ -3,6 +3,7 @@ package main
 import (
 	"campaigns/pkg/dtos"
 	"encoding/json"
+	"fmt"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"net/http"
 	"strconv"
