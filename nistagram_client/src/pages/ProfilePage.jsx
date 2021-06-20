@@ -142,6 +142,10 @@ class ProfilePage extends React.Component {
 		isInfluencer : false,
 		oneTimeCampaignsInfluencer : [],
         multipleCampaignsInfluencer : [],
+		campaignStartTime : "",
+		campaignEndTime : "",
+		campaignDesiredNumber : "",
+		campaignType : ""
 		
 	}
 	hasRole = (reqRole) => {
@@ -1728,15 +1732,15 @@ class ProfilePage extends React.Component {
 			console.log(err);
 		});
 	}
-	handleDeleteCampaign =(id)=>{
-		
+	handleDeleteCampaign =(id, type)=>{
+		if (type === "oneTime"){
 		Axios.get(BASE_URL + "/api/campaign/api/campaign/delete/"+ id, {
 		}).then((res) => {
 			
 			this.setState({ textSuccessfulModal: "You have successfully deleted campaign." });
 			this.setState({ openModal: true });
 			this.setState({ showWriteCommentModal: false });
-
+		
 
 		})
 		.catch((err) => {
@@ -1745,6 +1749,24 @@ class ProfilePage extends React.Component {
 		let user = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length-1)
 
 		this.handeleGetCampaigns(user)
+	}else if(type === "multiple"){
+		Axios.get(BASE_URL + "/api/campaign/api/campaign/delete/multiple/"+ id, {
+		}).then((res) => {
+			
+			this.setState({ textSuccessfulModal: "You have successfully deleted campaign." });
+			this.setState({ openModal: true });
+			this.setState({ showWriteCommentModal: false });
+		
+
+		})
+		.catch((err) => {
+			console.log(err);
+		});
+		let user = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length-1)
+
+		this.handeleGetCampaigns(user)
+	}
+		
 	}
 	handleCampaignDateChange = (event) =>{
         this.setState({ campaignDate: event.target.value });
@@ -1760,8 +1782,21 @@ class ProfilePage extends React.Component {
       handleCampaignLinkChange = (event) => {
         this.setState({ campaignLink: event.target.value });
       };
+	  handleCampaignStartTimeChange = (event) =>{
+        this.setState({ campaignStartTime: event.target.value });
+        
+        };
+        handleCampaignEndTimeChange = (event) => {
+        this.setState({ campaignEndTime: event.target.value });
+      };
+      handleCampaignDesiredNumberChange = (event) => {
+        this.setState({ campaignDesiredNumber: event.target.value });
+      };
    
-	handleEditCampaignModal = (id) =>{
+   
+	handleEditCampaignModal = (id, type) =>{
+		if( type === "oneTime"){
+			this.setState({ campaignType: type });
 		Axios.get(BASE_URL + "/api/campaign/api/campaign/id/"+id)
 			.then((res) => {
                 this.setState({
@@ -1771,24 +1806,44 @@ class ProfilePage extends React.Component {
                 campaignTime : res.data.Time,
 				campaignForEdit : res.data.Id
             });
-			alert(this.state.campaignForEdit)
 			})
 			.catch((err) => {
 				console.log(err)
 			});
 		this.setState({ showEditCampaignModal: true });
+		}else if(type ==="multiple"){
+			this.setState({campaignType : "multiple"})
+			Axios.get(BASE_URL + "/api/campaign/api/campaign/multiple/id/"+id)
+			.then((res) => {
+                this.setState({
+                campaignEndTime : res.data.EndTime,
+                campaignLink : res.data.Campaign.Link,
+                campaignDescription : res.data.Campaign.Description,
+                campaignStartTime : res.data.StartTime,
+				campaignForEdit : res.data.Id,
+				campaignDesiredNumber : res.data.DesiredNumber
+            });
+			})
+			.catch((err) => {
+				console.log(err)
+			});
+		this.setState({ showEditCampaignModal: true });
+		}
 		
 	}
 	handleEditCampaignModalClose = () =>{
 		this.setState({ showEditCampaignModal: false });
 	}
 	handleChangeCampaign = (id,date,time,link,des)=>{
+		let user = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length-1)
+
 		let dto = {
 			Id : id,
 			Link : link,
-			Desctiption : des,
+			Description : des,
 			Time : time,
 			Date : date,
+			User :  user
 		}
 		Axios.post(BASE_URL + "/api/campaign/api/campaign/update", dto, {
 		}).then((res) => {
@@ -1804,7 +1859,33 @@ class ProfilePage extends React.Component {
 		.catch((err) => {
 			console.log(err);
 		});
+		this.handeleGetCampaigns(user)
+	}
+	handleChangeMultipleCampaign = (id,start,end,number,link,des)=>{
 		let user = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length-1)
+		let dto = {
+			Id : id,
+			Link : link,
+			Description : des,
+			StartTime : start,
+			EndTime : end,
+			DesiredNumber : number,
+			User : user,
+		}
+		Axios.post(BASE_URL + "/api/campaign/api/campaign/multiple/update", dto, {
+		}).then((res) => {
+			
+			this.setState({ textSuccessfulModal: "You have successfully updated campaign." });
+			this.setState({ openModal: true });
+			this.setState({ showWriteCommentModal: false });
+			this.setState({ showEditCampaignModal: false });
+
+
+
+		})
+		.catch((err) => {
+			console.log(err);
+		});
 		this.handeleGetCampaigns(user)
 	}
 	handleAddComment =(comment) => {
@@ -2247,6 +2328,17 @@ class ProfilePage extends React.Component {
 						campaignDescription = {this.state.campaignDescription}
 						handleCampaignDescriptionChange = {this.handleCampaignDescriptionChange}
 						handleChangeCampaign = {this.handleChangeCampaign}
+						handleChangeMultipleCampaign = {this.handleChangeMultipleCampaign}
+						campaignType = {this.state.campaignType}
+						campaignDesiredNumber = {this.state.campaignDesiredNumber}
+						campaignStartTime = {this.state.campaignStartTime}
+						campaignEndTime = {this.state.campaignEndTime}
+						handleCampaignDesiredNumberChange = {this.handleCampaignDesiredNumberChange}
+						handleCampaignStartTimeChange = {this.handleCampaignStartTimeChange}
+						handleCampaignEndTimeChange = {this.handleCampaignEndTimeChange}
+
+
+
 					/>
 					<OneTimeCampaignModal
 						show={this.state.showOneTimeCampaignModal}

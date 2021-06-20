@@ -20,6 +20,17 @@ type OneTimeCampaignUpdateDTO struct {
 	Date string
 	Time string
 	Description string
+	User string
+}
+type MultipleTimeCampaignUpdateDTO struct {
+	Id string
+	Link string
+	Date string
+	StartTime string
+	EndTime string
+	DesiredNumber string
+	Description string
+	User string
 }
 
 type MultipleTimeCampaignDTO struct {
@@ -43,6 +54,11 @@ type CampaignDTO struct {
 	Description string
 	ContentType string
 	AgentUsername string
+	DesiredNumber int
+	CampaignType string
+	StartTime string
+	EndTime string
+
 }
 
 type CampaignMultipleDTO struct {

@@ -746,10 +746,10 @@ render(){
                             <tr>
                             
                             <td>
-                            <button onClick={() =>  this.props.handleDeleteCampaign(post.Id)} className="btn btn-danger btn-sm" style={{marginLeft:100}}> Delete campaign</button>
+                            <button onClick={() =>  this.props.handleDeleteCampaign(post.Id, post.CampaignType)} className="btn btn-danger btn-sm" style={{marginLeft:100}}> Delete campaign</button>
                             </td>
                             <td>
-                            <button onClick={() =>  this.props.handleEditCampaignModal(post.Id)} className="btn btn-info btn-sm"> Edit campaign</button>
+                            <button onClick={() =>  this.props.handleEditCampaignModal(post.Id, post.CampaignType)} className="btn btn-info btn-sm"> Edit campaign</button>
                             </td>
                             </tr>
                             <tr>
@@ -762,9 +762,19 @@ render(){
                                 <label>Description: &nbsp;</label>{post.Description}
                                 </td>
                             </tr>
-                            <tr>
+                            <tr hidden={ post.CampaignType === "multiple"}>
                                 <td colSpan="3">
                                 <label>Date and time of publishing: &nbsp;</label>{post.Date},&nbsp; {post.Time}
+                                </td>
+                            </tr>
+                            <tr hidden={ post.CampaignType === "oneTime"}>
+                                <td colSpan="3">
+                                <label>Start and end date of campaign: &nbsp;</label>{post.StartTime} - &nbsp; {post.EndTime}
+                                </td>
+                            </tr>
+                            <tr hidden={ post.CampaignType === "oneTime"}>
+                                <td colSpan="3">
+                                <label>Desired number of publishing: &nbsp;</label>{post.DesiredNumber}
                                 </td>
                             </tr>
                             <tr>

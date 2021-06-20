@@ -80,7 +80,7 @@ func (m *MultipleTimeCampaignModel) Update(campaign models.MultipleTimeCampaign)
 		"campaign.statistics":campaign.Campaign.Statistic,
 		"campaign.partnerships":campaign.Campaign.Partnerships,
 		"startTime":campaign.StartTime,
-		"EndTime":campaign.EndTime,
+		"endTime":campaign.EndTime,
 		"desiredNumber":campaign.DesiredNumber,
 		"modifiedTime":campaign.ModifiedTime,
 		"timesShown":campaign.TimesShown,

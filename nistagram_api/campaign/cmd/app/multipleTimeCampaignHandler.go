@@ -3,6 +3,7 @@ package main
 import (
 	"campaigns/pkg/dtos"
 	"encoding/json"
+	"fmt"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"net/http"
 	"strconv"
@@ -31,6 +32,43 @@ func (app *application) getAllMultipleTimeCampaign(w http.ResponseWriter, r *htt
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	w.Write(b)
+}
+func (app *application) updateMultipleTimeCampaign(w http.ResponseWriter, req *http.Request) {
+	var dto dtos.MultipleTimeCampaignUpdateDTO
+
+	err := json.NewDecoder(req.Body).Decode(&dto)
+	if err != nil {
+		app.serverError(w, err)
+	}
+	fmt.Println("User:")
+ 	fmt.Println(dto.User)
+	userPrimitive, _ := primitive.ObjectIDFromHex(dto.User)
+
+	var campaign = models.Campaign{
+		User : userPrimitive,
+		Link : dto.Link,
+		Description :dto.Description,
+	}
+	IdPrimitive, _ := primitive.ObjectIDFromHex(dto.Id)
+	var number,_ = strconv.Atoi(dto.DesiredNumber)
+	var oneTimeCampaign = models.MultipleTimeCampaign{
+		Id : IdPrimitive,
+		Campaign:   campaign,
+		StartTime: dto.StartTime,
+		EndTime : dto.EndTime,
+		DesiredNumber:   number,
+
+	}
+
+	insertResult, err := app.multipleTimeCampaign.Update(oneTimeCampaign)
+	if err != nil {
+		app.serverError(w, err)
+	}
+
+	app.infoLog.Printf("New content have been created, id=%s", insertResult.UpsertedID)
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+
 }
 
 func (app *application) findByIDMultipleTimeCampaign(w http.ResponseWriter, r *http.Request) {
