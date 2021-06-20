@@ -77,6 +77,9 @@ func (m *OneTimeCampaignModel) Update(user models.OneTimeCampaign) (*mongo.Updat
 		"campaign.targetGroup":user.Campaign.TargetGroup,
 		"campaign.statistics":user.Campaign.Statistic,
 		"campaign.partnerships":user.Campaign.Partnerships,
+		"campaign.likes":user.Campaign.Likes,
+		"campaign.dislikes":user.Campaign.Dislikes,
+		"campaign.comments":user.Campaign.Comments,
 		"date":user.Date,
 		"time":user.Time,
 		}}})

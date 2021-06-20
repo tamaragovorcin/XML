@@ -2142,6 +2142,24 @@ class ProfilePage extends React.Component {
     handleDateTwoChange = (event) => {
 		this.setState({ selectedDateTwo: event.target.value });
 	};
+	handleLikesModalOpenCampaign = (likes) => {
+		
+		this.setState({ peopleLikes: likes });
+			
+		this.setState({ showLikesModal: true });
+	}
+	handleDislikesModalOpenCampaign = (dislikes) => {
+		
+		this.setState({ peopleDislikes: dislikes });
+		
+		this.setState({ showDislikesModal: true });
+	}
+	handleCommentsModalOpenCampaign = (comments) => {
+		
+		this.setState({ peopleComments: comments });
+		
+		this.setState({ showCommentsModal: true });
+	}
 	render() {
 		return (
 			<React.Fragment>
@@ -2284,6 +2302,10 @@ class ProfilePage extends React.Component {
 
 						oneTimeCampaignsInfluencer = {this.state.oneTimeCampaignsInfluencer}
 						multipleCampaignsInfluencer = {this.state.multipleCampaignsInfluencer}
+
+						handleLikesModalOpenCampaign={this.handleLikesModalOpenCampaign}
+						handleDislikesModalOpenCampaign={this.handleDislikesModalOpenCampaign}
+						handleCommentsModalOpenCampaign={this.handleCommentsModalOpenCampaign}
 					/>
 				</div>
 				

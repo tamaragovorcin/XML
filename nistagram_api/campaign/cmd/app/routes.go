@@ -53,5 +53,31 @@ func (app *application) routes() *mux.Router {
 
 	r.HandleFunc("/multipleHomePage/{userId}", app.getMultipleHomePage).Methods("GET")
 	r.HandleFunc("/oneTimeHomePage/{userId}", app.getOneTimeHomePage).Methods("GET")
+
+	r.HandleFunc("/multipleHomePage/promote/{userId}", app.getMultipleHomePagePromote).Methods("GET")
+	r.HandleFunc("/oneTimeHomePage/promote/{userId}", app.getOneTimeHomePagePromote).Methods("GET")
+
+	r.HandleFunc("/oneTimeCampaign/like/", app.likeOneTimeCampaign).Methods("POST")
+	r.HandleFunc("/oneTimeCampaign/dislike/", app.dislikeOneTimeCampaign).Methods("POST")
+	r.HandleFunc("/oneTimeCampaign/comment/", app.commentOneTimeCampaign).Methods("POST")
+
+	r.HandleFunc("/multipleTimeCampaign/like/", app.likeMultipleCampaign).Methods("POST")
+	r.HandleFunc("/multipleTimeCampaign/dislike/", app.dislikeMultipleCampaign).Methods("POST")
+	r.HandleFunc("/multipleTimeCampaign/comment/", app.commentMultipleCampaign).Methods("POST")
+
+	r.HandleFunc("/oneTimeCampaign/likes/{campaignId}", app.getLikesOneTimeCampaign).Methods("GET")
+	r.HandleFunc("/oneTimeCampaign/dislikes/{campaignId}", app.getDislikesOneTimeCampaign).Methods("GET")
+	r.HandleFunc("/oneTimeCampaign/comments/{campaignId}", app.getCommentsOneTimeCampaign).Methods("GET")
+
+	r.HandleFunc("/multipleTimeCampaign/likes/{campaignId}", app.getLikesMultipleCampaign).Methods("GET")
+	r.HandleFunc("/multipleTimeCampaign/dislikes/{campaignId}", app.getDislikesMultipleCampaign).Methods("GET")
+	r.HandleFunc("/multipleTimeCampaign/comments/{campaignId}", app.getCommentsMultipleCampaign).Methods("GET")
+
+
+	r.HandleFunc("/multipleTimeCampaign/clickLink/", app.clickLinkMultipleCampaign).Methods("POST")
+	r.HandleFunc("/oneTimeCampaign/clickLink/", app.clickLinkOneTimeCampaign).Methods("POST")
+
+	r.HandleFunc("/bestPromoters/", app.getBestInfluencers).Methods("GET")
+
 	return r
 }

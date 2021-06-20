@@ -23,6 +23,7 @@ import ReportedPosts from './pages/ReportedPosts';
 import AgentsRequests from './pages/AgentsRequests';
 import RegisterNewAgent from './pages/RegisterNewAgent';
 import PartnershipRequests from './pages/PartnershipRequests';
+import BestInfluencers from './pages/BestInfluencers';
 function App() {
   return (
     <Router>
@@ -54,6 +55,7 @@ function App() {
 				<Link exact to="/registerNewAgent" path="/registerNewAgent" component={RegisterNewAgent} />
 
 				<Link exact to="/partnershipRequests" path="/partnershipRequests" component={PartnershipRequests} />
+				<Link exact to="/bestInfluencers" path="/bestInfluencers" component={BestInfluencers} />
 
 			</Switch>
 	</Router>
