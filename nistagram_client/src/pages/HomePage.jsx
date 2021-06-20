@@ -60,8 +60,12 @@ class HomePage extends React.Component {
 		stt: "",
 		oneTimeCampaigns : [],
         multipleCampaigns : [],
+		oneTimeCampaignsPromotion : [],
+        multipleCampaignsPromotion : [],
+		showWriteCommentModalCampaign : false,
+		typeOfCampaign : ""
 	}
-
+	
 
 
 
@@ -269,6 +273,13 @@ class HomePage extends React.Component {
 	}
 	handleWriteCommentModalClose = () => {
 		this.setState({ showWriteCommentModal: false });
+		this.setState({ showWriteCommentModalCampaign: false });
+	}
+	handleWriteCommentModalCampaign = (postId,type) => {
+		this.setState({ selectedPostId: postId });
+		this.setState({ typeOfCampaign: type });
+
+		this.setState({ showWriteCommentModalCampaign: true });
 	}
 	onClickImage = (e, stor) => {
 		this.setState({ stoori: [] });
@@ -423,6 +434,8 @@ class HomePage extends React.Component {
 			this.handleGetAlbums(id)
 			this.handeleGetMultipleCampaigns(id)
 			this.handeleGetOneTimeCampaigns(id)
+			this.handeleGetMultipleCampaignsPromotion(id)
+			this.handeleGetOneTimeCampaignsPromotion(id)
 		} else {
 			this.setState({ userIsLogged: false });
 		}
@@ -441,6 +454,24 @@ class HomePage extends React.Component {
 		Axios.get(BASE_URL + "/api/campaign/oneTimeHomePage/"+id)
 			.then((res) => {
 				this.setState({ oneTimeCampaigns: res.data });
+			})
+			.catch((err) => {
+				console.log(err);
+			});	
+	}
+	handeleGetMultipleCampaignsPromotion = (id)=> {
+		Axios.get(BASE_URL + "/api/campaign/multipleHomePage/promote/"+id)
+		.then((res) => {
+			this.setState({ multipleCampaignsPromotion: res.data });
+		})
+		.catch((err) => {
+			console.log(err);
+		});	
+	}
+	handeleGetOneTimeCampaignsPromotion = (id)=> {
+		Axios.get(BASE_URL + "/api/campaign/oneTimeHomePage/promote/"+id)
+			.then((res) => {
+				this.setState({ oneTimeCampaignsPromotion: res.data });
 			})
 			.catch((err) => {
 				console.log(err);
@@ -648,6 +679,161 @@ class HomePage extends React.Component {
         });
 	}
 
+	handleLikeCampaign = (postId, type) => {
+		let id = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length - 1)
+
+		let campaignReaction = {
+			CampaignId: postId,
+			UserId: id
+		}
+		var url = ""
+		if (type==="oneTime") {
+			url ="/api/campaign/oneTimeCampaign/like/"
+		}
+		else {
+			url ="/api/campaign/multipleTimeCampaign/like/"
+		}
+		Axios.post(BASE_URL + url, campaignReaction, {
+		}).then((res) => {
+
+			this.setState({ textSuccessfulModal: "You have successfully liked the campaign post." });
+			this.setState({ openModal: true });
+
+		})
+			.catch((err) => {
+				console.log(err);
+			});
+	}
+	handleDislikeCampaign = (postId, type) => {
+		let id = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length - 1)
+
+		let campaignReaction = {
+			CampaignId: postId,
+			UserId: id
+		}
+		var url = ""
+		if (type==="oneTime") {
+			url ="/api/campaign/oneTimeCampaign/dislike/"
+		}
+		else {
+			url ="/api/campaign/multipleTimeCampaign/dislike/"
+		}
+		Axios.post(BASE_URL + url, campaignReaction, {
+		}).then((res) => {
+
+			this.setState({ textSuccessfulModal: "You have successfully disliked the campaign post." });
+			this.setState({ openModal: true });
+
+		})
+			.catch((err) => {
+				console.log(err);
+			});
+	}
+	handleAddCommentCampaign = (comment) => {
+		let id = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length - 1)
+
+		let campaignReaction = {
+			CampaignId: this.state.selectedPostId,
+			UserId: id,
+			Content: comment
+
+		}
+	
+		var url = ""
+		if (this.state.typeOfCampaign==="oneTime") {
+			url ="/api/campaign/oneTimeCampaign/comment/"
+		}
+		else {
+			url ="/api/campaign/multipleTimeCampaign/comment/"
+		}
+		Axios.post(BASE_URL + url, campaignReaction, {
+		}).then((res) => {
+
+			this.setState({ textSuccessfulModal: "You have successfully commented the campaign post." });
+			this.setState({ openModal: true });
+			this.setState({ showWriteCommentModalCampaign: false });
+
+
+		})
+			.catch((err) => {
+				console.log(err);
+			});
+	}
+
+	handleLikesModalOpenCampaign = (postId,type) => {
+		var url = ""
+		if (type==="oneTime") {
+			url ="/api/campaign/oneTimeCampaign/likes/"
+		}
+		else {
+			url ="/api/campaign/multipleTimeCampaign/likes/"
+		}
+		Axios.get(BASE_URL + url + postId)
+			.then((res) => {
+				this.setState({ peopleLikes: res.data });
+			})
+			.catch((err) => {
+				console.log(err);
+			});
+		this.setState({ showLikesModal: true });
+	}
+	handleDislikesModalOpenCampaign = (postId,type) => {
+		var url = ""
+		if (type==="oneTime") {
+			url ="/api/campaign/oneTimeCampaign/dislikes/"
+		}
+		else {
+			url ="/api/campaign/multipleTimeCampaign/dislikes/"
+		}
+		Axios.get(BASE_URL + url + postId)
+			.then((res) => {
+				this.setState({ peopleDislikes: res.data });
+			})
+			.catch((err) => {
+				console.log(err);
+			});
+		this.setState({ showDislikesModal: true });
+	}
+	handleCommentsModalOpenCampaign = (postId,type) => {
+		var url = ""
+		if (type==="oneTime") {
+			url ="/api/campaign/oneTimeCampaign/comments/"
+		}
+		else {
+			url ="/api/campaign/multipleTimeCampaign/comments/"
+		}
+		Axios.get(BASE_URL + url + postId)
+			.then((res) => {
+				this.setState({ peopleComments: res.data });
+			})
+			.catch((err) => {
+				console.log(err);
+			});
+		this.setState({ showCommentsModal: true });
+	}
+
+	handleClickOnLink = (campaignId,type,userId,link)=> {
+
+		let linkReaction = {
+			CampaignId: campaignId,
+			UserId: userId,
+		}
+		var url = ""
+		if (type==="oneTime") {
+			url ="/api/campaign/oneTimeCampaign/clickLink/"
+		}
+		else {
+			url ="/api/campaign/multipleTimeCampaign/clickLink/"
+		}
+		Axios.post(BASE_URL + url, linkReaction, {
+		}).then((res) => {
+
+			window.open(link, '_blank');
+		})
+			.catch((err) => {
+				console.log(err);
+			});
+	}
 	render() {
 	
 		return (
@@ -718,6 +904,18 @@ class HomePage extends React.Component {
 
 								oneTimeCampaigns = {this.state.oneTimeCampaigns}
 								multipleCampaigns = {this.state.multipleCampaigns}
+								
+								oneTimeCampaignsPromotion = {this.state.oneTimeCampaignsPromotion}
+								multipleCampaignsPromotion = {this.state.multipleCampaignsPromotion}
+
+								handleLikeCampaign={this.handleLikeCampaign}
+								handleDislikeCampaign={this.handleDislikeCampaign}
+								handleWriteCommentModalCampaign={this.handleWriteCommentModalCampaign}
+								handleLikesModalOpenCampaign={this.handleLikesModalOpenCampaign}
+								handleDislikesModalOpenCampaign={this.handleDislikesModalOpenCampaign}
+								handleCommentsModalOpenCampaign={this.handleCommentsModalOpenCampaign}
+
+								handleClickOnLink = {this.handleClickOnLink}
 							/>
 						</div>
 
@@ -768,6 +966,12 @@ class HomePage extends React.Component {
 						onCloseModal={this.handleWriteCommentAlbumModalClose}
 						header="Leave your comment"
 						handleAddCommentAlbum={this.handleAddCommentAlbum}
+					/>
+					<WriteCommentModal
+						show={this.state.showWriteCommentModalCampaign}
+						onCloseModal={this.handleWriteCommentModalClose}
+						header="Leave your comment"
+						handleAddComment={this.handleAddCommentCampaign}
 					/>
 					<AddPostToCollection
 						show={this.state.showAddPostToCollection}

@@ -1858,3 +1858,11 @@ label{
   color: #2c4964;
 }
 
+.astext {
+  background:none;
+  border:none;
+  margin:0;
+  padding:0;
+  cursor: pointer;
+}
+

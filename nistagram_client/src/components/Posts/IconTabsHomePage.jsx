@@ -210,7 +210,7 @@ render(){
             <div className="d-flex align-items-top">
                 <div className="container-fluid">
                   
-                <table className="table" style={{ width: "100%" }}>
+                    <table className="table" style={{ width: "100%" }}>
                                 <tbody>
                                         {this.props.oneTimeCampaigns.map((post) => (
                                             
@@ -237,7 +237,7 @@ render(){
                                            
                                             <tr>
                                                 <td colSpan="3">
-                                                <label>Link to webasite/article: &nbsp;</label><a href={post.Link}>{post.Link}</a>
+                                                  <button class="astext" onClick={() =>  this.props.handleClickOnLink(post.Id,"oneTime",post.AgentId,post.Link)}>Link to webasite/article: {post.Link}</button>
                                                 </td>
                                             </tr>
                                             <tr>
@@ -245,7 +245,94 @@ render(){
                                                 <label>Description: &nbsp;</label>{post.Description}
                                                 </td>
                                             </tr>
-                                         
+                                            <tr  style={{ width: "100%" }}>
+                                                <td>
+                                                  <button onClick={() =>  this.props.handleLikeCampaign(post.Id,"oneTime")}  className="btn btn-outline-secondary btn-sm" style={{ marginBottom: "1rem", height:"40px",marginLeft:"6rem" }}><FiHeart/></button>
+                                                </td>
+                                                <td>
+                                                  <button onClick={() =>  this.props.handleDislikeCampaign(post.Id, "oneTime")}  className="btn btn-outline-secondary btn-sm" style={{ marginBottom: "1rem", height:"40px",marginLeft:"6rem" }}><FaHeartBroken/></button>
+                                                </td>
+                                                <td>
+                                                  <button onClick={() =>  this.props.handleWriteCommentModalCampaign(post.Id,"oneTime")}  className="btn btn-outline-secondary btn-sm" style={{ marginBottom: "1rem", height:"40px",marginLeft:"6rem" }}><FaRegCommentDots/></button>
+                                                </td>
+                                            </tr>
+                                            <tr  style={{ width: "100%" }}>
+                                                  <td>
+                                                    <button onClick={() =>  this.props.handleLikesModalOpenCampaign(post.Id,"oneTime")} className="btn btn-outline-secondary btn-sm" style={{ marginBottom: "1rem" , marginLeft:"4rem"}}><label>likes</label></button>
+                                                  </td>
+                                                  <td>
+                                                  <button onClick={() =>  this.props.handleDislikesModalOpenCampaign(post.Id,"oneTime")} className="btn btn-outline-secondary btn-sm" style={{ marginBottom: "1rem",marginLeft:"4rem" }}><label > dislikes</label></button>
+                                                  </td>
+                                                  <td>
+                                                    <button onClick={() =>  this.props.handleCommentsModalOpenCampaign(post.Id,"oneTime")} className="btn btn-outline-secondary btn-sm" style={{ marginBottom: "1rem",marginLeft:"4rem" }}><label >Comments</label></button>
+                                                  </td>
+                                              </tr>
+                                            <br/>
+                                            <br/>
+                                            <br/>
+                                            </tr>
+                                            
+                                        ))}
+
+                                        </tbody>
+                                </table>
+                                <table className="table" style={{ width: "100%" }}>
+                                  <tbody>
+                                        {this.props.oneTimeCampaignsPromotion.map((post) => (
+                                            
+                                            <tr id={post.Id} key={post.Id}>
+                                             <tr>
+                                                <td colSpan="3">
+                                                <label>Influencer: &nbsp;</label>{post.AgentUsername}
+                                                </td>
+                                            </tr>
+                                            <tr  style={{ width: "100%"}}>
+                                                <td colSpan="3">
+                                                {post.ContentType === "image/jpeg" ? (
+                                                    <img
+                                                    className="img-fluid"
+                                                    src={"http://localhost:80/api/campaign/api/file/"+post.Id}
+                                                    width="100%"
+                                                    alt="description"
+                                                /> ) : (
+                                                <video width="100%"  controls autoPlay loop muted>
+                                                <source src={"http://localhost:80/api/campaign/api/file/"+post.Id} type ="video/mp4"></source>
+                                                </video>)}
+                                                </td>
+                                            </tr>
+                                           
+                                            <tr>
+                                                <td colSpan="3">
+                                                   <button class="astext" onClick={() =>  this.props.handleClickOnLink(post.Id,"oneTime",post.AgentId,post.Link)}>Link to webasite/article: {post.Link}</button>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td colSpan="3">
+                                                <label>Description: &nbsp;</label>{post.Description}
+                                                </td>
+                                            </tr>
+                                            <tr  style={{ width: "100%" }}>
+                                                <td>
+                                                  <button onClick={() =>  this.props.handleLikeCampaign(post.Id,"oneTime")}  className="btn btn-outline-secondary btn-sm" style={{ marginBottom: "1rem", height:"40px",marginLeft:"6rem" }}><FiHeart/></button>
+                                                </td>
+                                                <td>
+                                                  <button onClick={() =>  this.props.handleDislikeCampaign(post.Id, "oneTime")}  className="btn btn-outline-secondary btn-sm" style={{ marginBottom: "1rem", height:"40px",marginLeft:"6rem" }}><FaHeartBroken/></button>
+                                                </td>
+                                                <td>
+                                                  <button onClick={() =>  this.props.handleWriteCommentModalCampaign(post.Id,"oneTime")}  className="btn btn-outline-secondary btn-sm" style={{ marginBottom: "1rem", height:"40px",marginLeft:"6rem" }}><FaRegCommentDots/></button>
+                                                </td>
+                                            </tr>
+                                            <tr  style={{ width: "100%" }}>
+                                                  <td>
+                                                    <button onClick={() =>  this.props.handleLikesModalOpenCampaign(post.Id,"oneTime")} className="btn btn-outline-secondary btn-sm" style={{ marginBottom: "1rem" , marginLeft:"4rem"}}><label>likes</label></button>
+                                                  </td>
+                                                  <td>
+                                                  <button onClick={() =>  this.props.handleDislikesModalOpenCampaign(post.Id,"oneTime")} className="btn btn-outline-secondary btn-sm" style={{ marginBottom: "1rem",marginLeft:"4rem" }}><label > dislikes</label></button>
+                                                  </td>
+                                                  <td>
+                                                    <button onClick={() =>  this.props.handleCommentsModalOpenCampaign(post.Id,"oneTime")} className="btn btn-outline-secondary btn-sm" style={{ marginBottom: "1rem",marginLeft:"4rem" }}><label >Comments</label></button>
+                                                  </td>
+                                              </tr>
                                     
                                        
                                             <br/>
@@ -284,7 +371,7 @@ render(){
                                                 
                                                     <tr>
                                                         <td colSpan="3">
-                                                        <label>Link to webasite/article: &nbsp;</label><a href={post.Link}>{post.Link}</a>
+                                                           <button class="astext" onClick={() =>  this.props.handleClickOnLink(post.Id,"multiple",post.AgentId,post.Link)}>Link to webasite/article: {post.Link}</button>
                                                         </td>
                                                     </tr>
                                                     <tr>
@@ -292,7 +379,96 @@ render(){
                                                         <label>Description: &nbsp;</label>{post.Description}
                                                         </td>
                                                     </tr>
+                                                    <tr  style={{ width: "100%" }}>
+                                                        <td>
+                                                          <button onClick={() =>  this.props.handleLikeCampaign(post.Id,"multiple")}  className="btn btn-outline-secondary btn-sm" style={{ marginBottom: "1rem", height:"40px",marginLeft:"6rem" }}><FiHeart/></button>
+                                                        </td>
+                                                        <td>
+                                                          <button onClick={() =>  this.props.handleDislikeCampaign(post.Id, "multiple")}  className="btn btn-outline-secondary btn-sm" style={{ marginBottom: "1rem", height:"40px",marginLeft:"6rem" }}><FaHeartBroken/></button>
+                                                        </td>
+                                                        <td>
+                                                          <button onClick={() =>  this.props.handleWriteCommentModalCampaign(post.Id,"multiple")}  className="btn btn-outline-secondary btn-sm" style={{ marginBottom: "1rem", height:"40px",marginLeft:"6rem" }}><FaRegCommentDots/></button>
+                                                        </td>
+                                                    </tr>
+                                                    <tr  style={{ width: "100%" }}>
+                                                          <td>
+                                                            <button onClick={() =>  this.props.handleLikesModalOpenCampaign(post.Id,"multiple")} className="btn btn-outline-secondary btn-sm" style={{ marginBottom: "1rem" , marginLeft:"4rem"}}><label>likes</label></button>
+                                                          </td>
+                                                          <td>
+                                                          <button onClick={() =>  this.props.handleDislikesModalOpenCampaign(post.Id,"multiple")} className="btn btn-outline-secondary btn-sm" style={{ marginBottom: "1rem",marginLeft:"4rem" }}><label > dislikes</label></button>
+                                                          </td>
+                                                          <td>
+                                                            <button onClick={() =>  this.props.handleCommentsModalOpenCampaign(post.Id,"multiple")} className="btn btn-outline-secondary btn-sm" style={{ marginBottom: "1rem",marginLeft:"4rem" }}><label >Comments</label></button>
+                                                          </td>
+                                                      </tr>
+                                            
+                                                    <br/>
+                                                    <br/>
+                                                    <br/>
+                                                    </tr>
+                                                    
+                                                ))}
+
+                                                </tbody>
+                                       </table>
+                                       <table className="table" style={{ width: "100%" }}>
+                                         <tbody>
+                                                {this.props.multipleCampaignsPromotion.map((post) => (
+                                                    
+                                                    <tr id={post.Id} key={post.Id}>
+                                                    <tr>
+                                                        <td colSpan="3">
+                                                        <label>Influencer: &nbsp;</label>{post.AgentUsername}
+                                                        </td>
+                                                    </tr>
+                                                    <tr  style={{ width: "100%"}}>
+                                                        <td colSpan="3">
+                                                        {post.ContentType === "image/jpeg" ? (
+                                                            <img
+                                                            className="img-fluid"
+                                                            src={"http://localhost:80/api/campaign/api/file/"+post.Id}
+                                                            width="100%"
+                                                            alt="description"
+                                                        /> ) : (
+                                                        <video width="100%"  controls autoPlay loop muted>
+                                                        <source src={"http://localhost:80/api/campaign/api/file/"+post.Id} type ="video/mp4"></source>
+                                                        </video>)}
+                                                        </td>
+                                                    </tr>
                                                 
+                                                    <tr>
+                                                        <td colSpan="3">
+                                                           <button class="astext" onClick={() =>  this.props.handleClickOnLink(post.Id,"multiple",post.AgentId,post.Link)}>Link to webasite/article: {post.Link}</button>
+
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td colSpan="3">
+                                                        <label>Description: &nbsp;</label>{post.Description}
+                                                        </td>
+                                                    </tr>
+                                                    <tr  style={{ width: "100%" }}>
+                                                        <td>
+                                                          <button onClick={() =>  this.props.handleLikeCampaign(post.Id,"multiple")}  className="btn btn-outline-secondary btn-sm" style={{ marginBottom: "1rem", height:"40px",marginLeft:"6rem" }}><FiHeart/></button>
+                                                        </td>
+                                                        <td>
+                                                          <button onClick={() =>  this.props.handleDislikeCampaign(post.Id, "multiple")}  className="btn btn-outline-secondary btn-sm" style={{ marginBottom: "1rem", height:"40px",marginLeft:"6rem" }}><FaHeartBroken/></button>
+                                                        </td>
+                                                        <td>
+                                                          <button onClick={() =>  this.props.handleWriteCommentModalCampaign(post.Id,"multiple")}  className="btn btn-outline-secondary btn-sm" style={{ marginBottom: "1rem", height:"40px",marginLeft:"6rem" }}><FaRegCommentDots/></button>
+                                                        </td>
+                                                    </tr>
+                                                    <tr  style={{ width: "100%" }}>
+                                                          <td>
+                                                            <button onClick={() =>  this.props.handleLikesModalOpenCampaign(post.Id,"multiple")} className="btn btn-outline-secondary btn-sm" style={{ marginBottom: "1rem" , marginLeft:"4rem"}}><label>likes</label></button>
+                                                          </td>
+                                                          <td>
+                                                          <button onClick={() =>  this.props.handleDislikesModalOpenCampaign(post.Id,"multiple")} className="btn btn-outline-secondary btn-sm" style={{ marginBottom: "1rem",marginLeft:"4rem" }}><label > dislikes</label></button>
+                                                          </td>
+                                                          <td>
+                                                            <button onClick={() =>  this.props.handleCommentsModalOpenCampaign(post.Id,"multiple")} className="btn btn-outline-secondary btn-sm" style={{ marginBottom: "1rem",marginLeft:"4rem" }}><label >Comments</label></button>
+                                                          </td>
+                                                      </tr>
                                             
                                                     <br/>
                                                     <br/>

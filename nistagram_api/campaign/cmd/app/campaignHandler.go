@@ -11,6 +11,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"sort"
 	"strconv"
 )
 
@@ -129,9 +130,6 @@ func(app *application) GetFileByCampaignId(w http.ResponseWriter, r *http.Reques
 	file.Seek(0,0)
 	io.Copy(w,file)
 	return
-
-
-
 }
 func campaignToResponse(campaing models.OneTimeCampaign, contentType string) dtos.CampaignDTO {
 	return dtos.CampaignDTO{
@@ -223,4 +221,82 @@ func isGenderOk(id string, gender string) bool {
 	}
 
 	return false
+}
+
+
+func(app *application) getBestInfluencers(w http.ResponseWriter, r *http.Request){
+
+
+	allStatistics :=getAllStatistics(app)
+	bestStatisticsDTOS := getAllInfluencersInStatisticsDTO(allStatistics)
+	sort.SliceStable(bestStatisticsDTOS, func(i, j int) bool {
+		return bestStatisticsDTOS[i].NumberOfPartnerships+ bestStatisticsDTOS[i].NumberOfClicks >
+			bestStatisticsDTOS[j].NumberOfPartnerships+ bestStatisticsDTOS[j].NumberOfClicks
+	})
+	usernamesMarshaled, err := json.Marshal(bestStatisticsDTOS)
+	if err != nil {
+		app.serverError(w, err)
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	w.Write(usernamesMarshaled)
+}
+
+func getAllInfluencersInStatisticsDTO(statistics []models.Statistic) []dtos.BestStatisticsDTO {
+	bestStatisticsDTO :=[]dtos.BestStatisticsDTO{}
+
+	for _, statisticOne := range statistics {
+		if userAlreadyHasDTO(statisticOne.Influencer, bestStatisticsDTO) {
+				updateUserBestStatistic(bestStatisticsDTO,statisticOne)
+
+		} else {
+			username :=getUserUsername(statisticOne.Influencer)
+
+			var dto = dtos.BestStatisticsDTO{
+				UserId: statisticOne.Influencer,
+				NumberOfClicks : statisticOne.NumberOfClicks,
+				NumberOfPartnerships: 1,
+				Username : username,
+			}
+			bestStatisticsDTO = append(bestStatisticsDTO, dto)
+		}
+
+	}
+
+	return bestStatisticsDTO
+}
+
+func updateUserBestStatistic(dto []dtos.BestStatisticsDTO, one models.Statistic) {
+	for _, statisticOne := range dto {
+		if statisticOne.UserId.Hex()==one.Influencer.Hex() {
+			statisticOne.NumberOfPartnerships+=1
+			statisticOne.NumberOfClicks+=one.NumberOfClicks
+		}
+	}
+}
+
+func userAlreadyHasDTO(id primitive.ObjectID, bestStatistics []dtos.BestStatisticsDTO) bool {
+	for _, statisticOne := range bestStatistics {
+		if statisticOne.UserId.Hex()==id.Hex() {
+			return true
+		}
+	}
+	return false
+}
+
+func getAllStatistics(app *application) []models.Statistic {
+	oneTimeCampaigns, _ := app.oneTimeCampaign.All()
+	multipleTimeCampaigns, _ := app.multipleTimeCampaign.All()
+	allStatistics :=[]models.Statistic{}
+	for _, campaign := range oneTimeCampaigns {
+		for _, statistic := range campaign.Campaign.Statistic {
+			allStatistics = append(allStatistics, statistic)
+		}
+	}
+	for _, campaign := range multipleTimeCampaigns {
+		for _, statistic := range campaign.Campaign.Statistic {
+			allStatistics = append(allStatistics, statistic)
+		}
+	}
+	return allStatistics
 }
