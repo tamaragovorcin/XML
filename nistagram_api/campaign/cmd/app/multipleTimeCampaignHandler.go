@@ -326,3 +326,46 @@ func findPartnershipsByUserIdMultiple(posts []models.MultipleTimeCampaign, idPri
 	}
 	return campaignsUser, nil
 }
+
+
+func (app *application) getMultipleHomePage(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	userId := vars["userId"]
+	userIdPrimitive, _ := primitive.ObjectIDFromHex(userId)
+	allPosts, _ :=app.multipleTimeCampaign.All()
+	campaigns,err :=findNotMyMultipleCampaigns(allPosts,userIdPrimitive)
+	if err != nil {
+		app.serverError(w, err)
+	}
+	campaignResponse := []dtos.CampaignMultipleDTO{}
+	for _, campaign := range campaigns {
+		if isGenderOk(userId,campaign.Campaign.TargetGroup.Gender) {
+			if isDateOfBirthOk(userId,campaign.Campaign.TargetGroup.DateOne,campaign.Campaign.TargetGroup.DateTwo) {
+				if isLocationOk(userId,campaign.Campaign.TargetGroup.Location) {
+					contentType := app.GetFileTypeByPostId(campaign.Id)
+					campaignResponse = append(campaignResponse, campaignToResponseInfluencerMultiple(campaign,contentType))
+				}
+			}
+		}
+	}
+
+	imagesMarshaled, err := json.Marshal(campaignResponse)
+
+	if err != nil {
+		app.serverError(w, err)
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	w.Write(imagesMarshaled)
+}
+func findNotMyMultipleCampaigns(oneTimeCampaigns []models.MultipleTimeCampaign, idPrimitive primitive.ObjectID) ([]models.MultipleTimeCampaign, error) {
+	campaigns := []models.MultipleTimeCampaign{}
+
+	for _, oneCampaign := range oneTimeCampaigns {
+
+		if	oneCampaign.Campaign.User.Hex()!=idPrimitive.Hex() {
+			campaigns = append(campaigns, oneCampaign)
+		}
+	}
+	return campaigns, nil
+}

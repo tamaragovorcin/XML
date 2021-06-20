@@ -7,31 +7,13 @@ import (
 	"github.com/gorilla/mux"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"io"
+	"io/ioutil"
+	"log"
 	"net/http"
 	"os"
 	"strconv"
 )
 
-func (app *application) getAllCampaign(w http.ResponseWriter, r *http.Request) {
-	// Get all movie stored
-	ad, err := app.campaign.All()
-	if err != nil {
-		app.serverError(w, err)
-	}
-
-	// Convert movie list into json encoding
-	b, err := json.Marshal(ad)
-	if err != nil {
-		app.serverError(w, err)
-	}
-
-	app.infoLog.Println("Movies have been listed")
-
-	// Send response back
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	w.Write(b)
-}
 
 func findCampaignByUserId(posts []models.OneTimeCampaign, idPrimitive primitive.ObjectID) ([]models.OneTimeCampaign, error){
 	campaignsUser := []models.OneTimeCampaign{}
@@ -197,64 +179,83 @@ func campaignMultipleToResponse(campaing models.MultipleTimeCampaign, contentTyp
 		DesiredNumber:  campaing.DesiredNumber,
 	}
 }
-func (app *application) findByIDCampaign(w http.ResponseWriter, r *http.Request) {
-	// Get id from incoming url
-	vars := mux.Vars(r)
-	id := vars["id"]
 
-	// Find movie by id
-	m, err := app.campaign.FindByID(id)
+
+func isLocationOk(id string, location models.Location) bool {
+	if location.Country=="" {
+		return true
+	}
+	country := location.Country
+	town :=location.Town
+	street :=location.Street
+
+	if country=="" {
+		country = "n"
+	}
+	if town=="" {
+		town = "n"
+	}
+	if street=="" {
+		street = "n"
+	}
+	resp, err := http.Get("http://localhost:80/api/feedPosts/locationOk/"+id+"/"+country+"/"+town+"/"+street)
 	if err != nil {
-		if err.Error() == "ErrNoDocuments" {
-			app.infoLog.Println("Movie not found")
-			return
-		}
-		// Any other error will send an internal server error
-		app.serverError(w, err)
+		log.Fatalln(err)
+	}
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		log.Fatalln(err)
+	}
+	sb := string(body)
+	sb = sb[1:]
+	sb = sb[:len(sb)-1]
+	if sb == "locationOk" {
+		return true
 	}
 
-	// Convert movie to json encoding
-	b, err := json.Marshal(m)
-	if err != nil {
-		app.serverError(w, err)
-	}
-
-	app.infoLog.Println("Have been found a movie")
-
-	// Send response back
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	w.Write(b)
+	return false
 }
 
-func (app *application) insertCampaign(w http.ResponseWriter, r *http.Request) {
-	// Define movie model
-	var m models.Campaign
-	// Get request information
-	err := json.NewDecoder(r.Body).Decode(&m)
+func isDateOfBirthOk(id string, one string, two string) bool {
+	if one=="" || two==""{
+		return true
+	}
+	resp, err := http.Get("http://localhost:80/api/users/api/user/dateOfBirthOk/"+id+"/"+one+"/"+two)
 	if err != nil {
-		app.serverError(w, err)
+		log.Fatalln(err)
+	}
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		log.Fatalln(err)
+	}
+	sb := string(body)
+	sb = sb[1:]
+	sb = sb[:len(sb)-1]
+	if sb == "dateOfBirthOk" {
+		return true
 	}
 
-	// Insert new movie
-	insertResult, err := app.campaign.Insert(m)
-	if err != nil {
-		app.serverError(w, err)
-	}
-
-	app.infoLog.Printf("New movie have been created, id=%s", insertResult.InsertedID)
+	return false
 }
 
-func (app *application) deleteCampaign(w http.ResponseWriter, r *http.Request) {
-	// Get id from incoming url
-	vars := mux.Vars(r)
-	id := vars["id"]
-
-	// Delete movie by id
-	deleteResult, err := app.campaign.Delete(id)
+func isGenderOk(id string, gender string) bool {
+	if gender=="" {
+		return true
+	}
+	resp, err := http.Get("http://localhost:80/api/users/api/user/genderOk/"+id+"/"+gender)
 	if err != nil {
-		app.serverError(w, err)
+		log.Fatalln(err)
+	}
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		log.Fatalln(err)
+	}
+	sb := string(body)
+	sb = sb[1:]
+	sb = sb[:len(sb)-1]
+	if sb == "sameGender" {
+		return true
 	}
 
-	app.infoLog.Printf("Have been eliminated %d movie(s)", deleteResult.DeletedCount)
+	return false
 }
