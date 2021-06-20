@@ -54,11 +54,11 @@ type CampaignDTO struct {
 	Description string
 	ContentType string
 	AgentUsername string
+	AgentId primitive.ObjectID
 	DesiredNumber int
 	CampaignType string
 	StartTime string
 	EndTime string
-
 }
 
 type CampaignMultipleDTO struct {
@@ -72,9 +72,32 @@ type CampaignMultipleDTO struct {
 	Description string
 	ContentType string
 	AgentUsername string
+	AgentId primitive.ObjectID
 }
 
 type PartnershipDTO struct {
 	CampaignId primitive.ObjectID
 	UserId primitive.ObjectID
+}
+
+type CampaignReactionDTO struct {
+	CampaignId primitive.ObjectID
+	UserId primitive.ObjectID
+	Content string
+}
+type LikeDTO struct {
+	Username string
+}
+
+type CommentDTO struct {
+	Content string
+	Writer string
+	DateTime string
+}
+
+type BestStatisticsDTO struct {
+	UserId primitive.ObjectID
+	NumberOfClicks int
+	NumberOfPartnerships int
+	Username string
 }

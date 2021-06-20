@@ -18,7 +18,9 @@ type Campaign struct {
 	Link string `bson:"link"`
 	Description string `bson:"description"`
 	Partnerships []Partnership `bson:"partnerships"`
-
+	Likes    []primitive.ObjectID `bson:"likes"`
+	Dislikes []primitive.ObjectID `bson:"dislikes"`
+	Comments []Comment `bson:"comments"`
 }
 
 type MultipleTimeCampaign struct {
@@ -42,8 +44,6 @@ type Statistic struct {
 	Id primitive.ObjectID `bson:"_id,omitempty"`
 	Influencer primitive.ObjectID `bson:"influencer"`
 	NumberOfClicks int  `bson:"numberOfClicks"`
-	FeedPost primitive.ObjectID  `bson:"feedPost"`
-	StoryPost primitive.ObjectID  `bson:"storyPost"`
 }
 
 type Partnership struct {
@@ -72,4 +72,10 @@ type Location struct {
 	Street string `bson:"street"`
 	Number int `bson:"number"`
 	PostalCode int `bson:"postalCode"`
+}
+type Comment struct {
+	Id primitive.ObjectID`bson:"_id,omitempty"`
+	Content string  `bson:"content"`
+	Writer primitive.ObjectID `bson:"writer"`
+	DateTime time.Time `bson:"dateTime"`
 }

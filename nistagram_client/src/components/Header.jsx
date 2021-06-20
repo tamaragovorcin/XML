@@ -6,13 +6,12 @@ import { FiSettings, FiSend } from 'react-icons/fi';
 import { VscHome, VscRequestChanges } from 'react-icons/vsc';
 import { FaRegQuestionCircle, FaSearch } from 'react-icons/fa';
 import {MdReportProblem} from 'react-icons/md';
-import { GiThreeFriends } from 'react-icons/gi';
+import { GiThreeFriends,GiPodiumWinner } from 'react-icons/gi';
 import {IoMdNotificationsOutline} from 'react-icons/io'
 import {HiOutlineUserAdd} from 'react-icons/hi'
 import { AiOutlineHeart,AiFillLike,AiFillDislike } from 'react-icons/ai';
 import {BsPersonPlusFill} from 'react-icons/bs'
 import {SiCampaignmonitor} from 'react-icons/si'
-
 import { BASE_URL } from "../constants.js";
 import Select from 'react-select';
 
@@ -187,6 +186,10 @@ class Header extends React.Component {
 							<li  hidden={!this.hasRole("ADMIN")}>
 								<Link to="/registerNewAgent"><BsPersonPlusFill /></Link>
 							</li>
+							<li  hidden={!this.hasRole("ADMIN") && !this.hasRole("AGENT") && !this.state.isInfluencer}>
+								<Link to="/bestInfluencers"><GiPodiumWinner /></Link>
+							</li>
+
 							<li className="drop-down" hidden={!this.hasRole("USER") && !this.hasRole("AGENT")}>
 								<a href="#"><CgProfile /></a>
 								<ul>

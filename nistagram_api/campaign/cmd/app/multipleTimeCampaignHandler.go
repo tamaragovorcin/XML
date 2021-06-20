@@ -226,6 +226,7 @@ func campaignToResponseInfluencerMultiple(campaing models.MultipleTimeCampaign, 
 		Link: campaing.Campaign.Link,
 		ContentType: contentType,
 		AgentUsername: username,
+		AgentId : campaing.Campaign.User,
 	}
 }
 func (app *application) acceptPartnershipRequestMultiple(w http.ResponseWriter, req *http.Request) {
@@ -244,6 +245,9 @@ func (app *application) acceptPartnershipRequestMultiple(w http.ResponseWriter, 
 		Link : campaign.Campaign.Link,
 		Description :campaign.Campaign.Description,
 		Partnerships: partensrhipsUpdated,
+		Likes : campaign.Campaign.Likes,
+		Dislikes: campaign.Campaign.Dislikes,
+		Comments: campaign.Campaign.Comments,
 	}
 	var oneTimeCampaign = models.MultipleTimeCampaign{
 		Id: campaign.Id,
@@ -282,6 +286,9 @@ func (app *application) deletePartnershipRequestMultiple(w http.ResponseWriter, 
 		Link : campaign.Campaign.Link,
 		Description :campaign.Campaign.Description,
 		Partnerships: partensrhipsUpdated,
+		Likes : campaign.Campaign.Likes,
+		Dislikes: campaign.Campaign.Dislikes,
+		Comments: campaign.Campaign.Comments,
 	}
 
 
@@ -339,11 +346,13 @@ func (app *application) getMultipleHomePage(w http.ResponseWriter, r *http.Reque
 	}
 	campaignResponse := []dtos.CampaignMultipleDTO{}
 	for _, campaign := range campaigns {
-		if isGenderOk(userId,campaign.Campaign.TargetGroup.Gender) {
-			if isDateOfBirthOk(userId,campaign.Campaign.TargetGroup.DateOne,campaign.Campaign.TargetGroup.DateTwo) {
-				if isLocationOk(userId,campaign.Campaign.TargetGroup.Location) {
-					contentType := app.GetFileTypeByPostId(campaign.Id)
-					campaignResponse = append(campaignResponse, campaignToResponseInfluencerMultiple(campaign,contentType))
+		if isTimeForExposureMultiple(campaign.StartTime, campaign.EndTime,campaign.DesiredNumber) {
+			if isGenderOk(userId, campaign.Campaign.TargetGroup.Gender) {
+				if isDateOfBirthOk(userId, campaign.Campaign.TargetGroup.DateOne, campaign.Campaign.TargetGroup.DateTwo) {
+					if isLocationOk(userId, campaign.Campaign.TargetGroup.Location) {
+						contentType := app.GetFileTypeByPostId(campaign.Id)
+						campaignResponse = append(campaignResponse, campaignToResponseInfluencerMultiple(campaign, contentType))
+					}
 				}
 			}
 		}
@@ -358,6 +367,81 @@ func (app *application) getMultipleHomePage(w http.ResponseWriter, r *http.Reque
 	w.WriteHeader(http.StatusOK)
 	w.Write(imagesMarshaled)
 }
+
+func isTimeForExposureMultiple(startTime string, endTime string, number int) bool {
+	stringDateOne := startTime+"T11:45:26.371Z"
+	stringDateTwo := endTime+"T11:45:26.371Z"
+	layout := "2006-01-02T15:04:05.000Z"
+
+	timeDateOne, err := time.Parse(layout, stringDateOne)
+	timeDateTwo, err := time.Parse(layout, stringDateTwo)
+	if err != nil {
+		fmt.Println(err)
+	}
+	timeNow :=time.Now().UTC().Add(2*time.Hour)
+
+	if timeDateOne.Before(timeNow) && timeDateTwo.After(timeNow) {
+		return true
+	}
+
+	return false
+}
+func (app *application) getMultipleHomePagePromote(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	userId := vars["userId"]
+	userIdPrimitive, _ := primitive.ObjectIDFromHex(userId)
+	allPosts, _ :=app.multipleTimeCampaign.All()
+	campaigns,err :=findNotMyMultipleCampaigns(allPosts,userIdPrimitive)
+	if err != nil {
+		app.serverError(w, err)
+	}
+	campaignResponse := []dtos.CampaignMultipleDTO{}
+	for _, campaign := range campaigns {
+		if isTimeForExposureMultiple(campaign.StartTime, campaign.EndTime,campaign.DesiredNumber) {
+
+			if campaignHasPartnerships(campaign.Campaign.Partnerships) {
+
+				if isGenderOk(userId, campaign.Campaign.TargetGroup.Gender) {
+					if isDateOfBirthOk(userId, campaign.Campaign.TargetGroup.DateOne, campaign.Campaign.TargetGroup.DateTwo) {
+						if isLocationOk(userId, campaign.Campaign.TargetGroup.Location) {
+							for _, partnership := range campaign.Campaign.Partnerships {
+								if partnership.Approved {
+									contentType := app.GetFileTypeByPostId(campaign.Id)
+									campaignResponse = append(campaignResponse, campaignToResponseInfluencerMultipleHomePage(campaign, contentType, partnership.Influencer))
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+
+	imagesMarshaled, err := json.Marshal(campaignResponse)
+
+	if err != nil {
+		app.serverError(w, err)
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	w.Write(imagesMarshaled)
+}
+
+func campaignToResponseInfluencerMultipleHomePage(campaing models.MultipleTimeCampaign, contentType string, influencer primitive.ObjectID) dtos.CampaignMultipleDTO {
+	username :=getUserUsername(influencer)
+	return dtos.CampaignMultipleDTO{
+		Id: campaing.Id.Hex(),
+		User: campaing.Campaign.User.Hex(),
+		Description: campaing.Campaign.Description,
+		StartTime: campaing.StartTime,
+		EndTime: campaing.EndTime,
+		DesiredNumber: strconv.Itoa(campaing.DesiredNumber),
+		Link: campaing.Campaign.Link,
+		ContentType: contentType,
+		AgentUsername: username,
+		AgentId : influencer,
+	}
+}
 func findNotMyMultipleCampaigns(oneTimeCampaigns []models.MultipleTimeCampaign, idPrimitive primitive.ObjectID) ([]models.MultipleTimeCampaign, error) {
 	campaigns := []models.MultipleTimeCampaign{}
 
@@ -368,4 +452,279 @@ func findNotMyMultipleCampaigns(oneTimeCampaigns []models.MultipleTimeCampaign, 
 		}
 	}
 	return campaigns, nil
+}
+
+func (app *application) likeMultipleCampaign(w http.ResponseWriter, r *http.Request) {
+
+	var m dtos.CampaignReactionDTO
+	err := json.NewDecoder(r.Body).Decode(&m)
+	if err != nil {
+		app.serverError(w, err)
+	}
+
+	campaign, err := app.multipleTimeCampaign.FindByID(m.CampaignId.Hex())
+	var campaignOne = models.Campaign{
+		User : campaign.Campaign.User,
+		TargetGroup : campaign.Campaign.TargetGroup,
+		Statistic  : campaign.Campaign.Statistic,
+		Link : campaign.Campaign.Link,
+		Description :campaign.Campaign.Description,
+		Partnerships: campaign.Campaign.Partnerships,
+		Likes : append(campaign.Campaign.Likes,m.UserId),
+		Dislikes: campaign.Campaign.Dislikes,
+		Comments: campaign.Campaign.Comments,
+	}
+
+
+	var oneTimeCampaign = models.MultipleTimeCampaign{
+		Id: campaign.Id,
+		Campaign:   campaignOne,
+		StartTime: campaign.StartTime,
+		EndTime : campaign.EndTime,
+		DesiredNumber: campaign.DesiredNumber,
+	}
+
+	insertResult, err := app.multipleTimeCampaign.Update(oneTimeCampaign)
+	if err != nil {
+		app.serverError(w, err)
+	}
+	app.infoLog.Printf("New user have been created, id=%s", insertResult.UpsertedID)
+}
+
+func (app *application) dislikeMultipleCampaign(w http.ResponseWriter, r *http.Request) {
+
+	var m dtos.CampaignReactionDTO
+	err := json.NewDecoder(r.Body).Decode(&m)
+	if err != nil {
+		app.serverError(w, err)
+	}
+
+	campaign, err := app.multipleTimeCampaign.FindByID(m.CampaignId.Hex())
+	var campaignOne = models.Campaign{
+		User : campaign.Campaign.User,
+		TargetGroup : campaign.Campaign.TargetGroup,
+		Statistic  : campaign.Campaign.Statistic,
+		Link : campaign.Campaign.Link,
+		Description :campaign.Campaign.Description,
+		Partnerships: campaign.Campaign.Partnerships,
+		Likes : campaign.Campaign.Likes,
+		Dislikes: append(campaign.Campaign.Dislikes,m.UserId),
+		Comments: campaign.Campaign.Comments,
+	}
+
+
+	var oneTimeCampaign = models.MultipleTimeCampaign{
+		Id: campaign.Id,
+		Campaign:   campaignOne,
+		StartTime: campaign.StartTime,
+		EndTime : campaign.EndTime,
+		DesiredNumber: campaign.DesiredNumber,
+	}
+
+	insertResult, err := app.multipleTimeCampaign.Update(oneTimeCampaign)
+	if err != nil {
+		app.serverError(w, err)
+	}
+	app.infoLog.Printf("New user have been created, id=%s", insertResult.UpsertedID)
+}
+func (app *application) commentMultipleCampaign(w http.ResponseWriter, r *http.Request) {
+
+	var m dtos.CampaignReactionDTO
+	err := json.NewDecoder(r.Body).Decode(&m)
+	if err != nil {
+		app.serverError(w, err)
+	}
+
+	campaign, err := app.multipleTimeCampaign.FindByID(m.CampaignId.Hex())
+	var comment = models.Comment{
+		DateTime : time.Now(),
+		Content : m.Content,
+		Writer: m.UserId,
+	}
+	var campaignOne = models.Campaign{
+		User : campaign.Campaign.User,
+		TargetGroup : campaign.Campaign.TargetGroup,
+		Statistic  : campaign.Campaign.Statistic,
+		Link : campaign.Campaign.Link,
+		Description :campaign.Campaign.Description,
+		Partnerships: campaign.Campaign.Partnerships,
+		Likes : campaign.Campaign.Likes,
+		Dislikes: campaign.Campaign.Dislikes,
+		Comments: append(campaign.Campaign.Comments,comment),
+	}
+
+
+	var oneTimeCampaign = models.MultipleTimeCampaign{
+		Id: campaign.Id,
+		Campaign:   campaignOne,
+		StartTime: campaign.StartTime,
+		EndTime : campaign.EndTime,
+		DesiredNumber: campaign.DesiredNumber,
+	}
+
+	insertResult, err := app.multipleTimeCampaign.Update(oneTimeCampaign)
+	if err != nil {
+		app.serverError(w, err)
+	}
+	app.infoLog.Printf("New user have been created, id=%s", insertResult.UpsertedID)
+}
+
+func (app *application) getLikesMultipleCampaign(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	campaignId := vars["campaignId"]
+
+
+	campaignLikes,err :=app.multipleTimeCampaign.FindByID(campaignId)
+
+	if err != nil {
+		app.serverError(w, err)
+	}
+
+	likesDtos := []dtos.LikeDTO{}
+	for _, user := range campaignLikes.Campaign.Likes {
+
+		userUsername :=getUserUsername(user)
+		var like = dtos.LikeDTO{
+			Username: userUsername,
+		}
+
+		likesDtos = append(likesDtos, like)
+
+	}
+
+	usernamesMarshaled, err := json.Marshal(likesDtos)
+	if err != nil {
+		app.serverError(w, err)
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	w.Write(usernamesMarshaled)
+}
+
+func (app *application) getDislikesMultipleCampaign(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	campaignId := vars["campaignId"]
+
+
+	campaignLikes,err :=app.multipleTimeCampaign.FindByID(campaignId)
+
+	if err != nil {
+		app.serverError(w, err)
+	}
+
+	likesDtos := []dtos.LikeDTO{}
+	for _, user := range campaignLikes.Campaign.Dislikes {
+
+		userUsername :=getUserUsername(user)
+		var like = dtos.LikeDTO{
+			Username: userUsername,
+		}
+
+		likesDtos = append(likesDtos, like)
+
+	}
+
+	usernamesMarshaled, err := json.Marshal(likesDtos)
+	if err != nil {
+		app.serverError(w, err)
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	w.Write(usernamesMarshaled)
+}
+
+func (app *application) getCommentsMultipleCampaign(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	campaignId := vars["campaignId"]
+
+
+	campaignComments,err :=app.multipleTimeCampaign.FindByID(campaignId)
+
+	if err != nil {
+		app.serverError(w, err)
+	}
+
+	commentsDtos :=getCommentDtos(campaignComments.Campaign.Comments)
+
+
+	usernamesMarshaled, err := json.Marshal(commentsDtos)
+	if err != nil {
+		app.serverError(w, err)
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	w.Write(usernamesMarshaled)
+}
+
+
+func (app *application) clickLinkMultipleCampaign(w http.ResponseWriter, r *http.Request) {
+
+	var m dtos.CampaignReactionDTO
+	err := json.NewDecoder(r.Body).Decode(&m)
+	if err != nil {
+		app.serverError(w, err)
+	}
+
+	campaign, err := app.multipleTimeCampaign.FindByID(m.CampaignId.Hex())
+
+	newStatistics :=newListStatistics(campaign.Campaign.Statistic,m)
+	var campaignOne = models.Campaign{
+		User : campaign.Campaign.User,
+		TargetGroup : campaign.Campaign.TargetGroup,
+		Statistic  :newStatistics,
+		Link : campaign.Campaign.Link,
+		Description :campaign.Campaign.Description,
+		Partnerships: campaign.Campaign.Partnerships,
+		Likes : campaign.Campaign.Likes,
+		Dislikes: campaign.Campaign.Dislikes,
+		Comments: campaign.Campaign.Comments,
+	}
+
+
+	var oneTimeCampaign = models.MultipleTimeCampaign{
+		Id: campaign.Id,
+		Campaign:   campaignOne,
+		StartTime: campaign.StartTime,
+		EndTime : campaign.EndTime,
+		DesiredNumber: campaign.DesiredNumber,
+	}
+
+	insertResult, err := app.multipleTimeCampaign.Update(oneTimeCampaign)
+	if err != nil {
+		app.serverError(w, err)
+	}
+	app.infoLog.Printf("New user have been created, id=%s", insertResult.UpsertedID)
+}
+
+func newListStatistics(statistics []models.Statistic, m dtos.CampaignReactionDTO)  []models.Statistic {
+	statisticsNewList := []models.Statistic{}
+	if statisticsForThisUserExists(statistics,m.UserId) {
+		for _, statisticOne := range statistics {
+			if statisticOne.Influencer.Hex()!=m.UserId.Hex() {
+				statisticsNewList = append(statisticsNewList,statisticOne)
+			} else {
+				statisticOne.NumberOfClicks+=1
+				statisticsNewList = append(statisticsNewList,statisticOne)
+			}
+		}
+		return statisticsNewList
+	} else {
+		var statisticOne = models.Statistic{
+			Influencer:     m.UserId,
+			NumberOfClicks: 1,
+		}
+		statisticsNewList = append(statistics, statisticOne)
+
+	}
+	return statisticsNewList
+}
+
+
+func statisticsForThisUserExists(statistics []models.Statistic, id primitive.ObjectID) bool {
+	for _, statisticOne := range statistics {
+		if statisticOne.Influencer.Hex()==id.Hex() {
+			return true
+		}
+	}
+	return false
 }
