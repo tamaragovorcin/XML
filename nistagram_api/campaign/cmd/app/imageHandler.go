@@ -13,6 +13,8 @@ import (
 
 
 func (app *application) saveImage(w http.ResponseWriter, r *http.Request)  {
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+
 	fmt.Println("POGODIO UPIS SLIKE")
 	vars := mux.Vars(r)
 	userId := vars["userIdd"]

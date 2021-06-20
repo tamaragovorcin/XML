@@ -63,7 +63,8 @@ func (app *application) findImageByID(w http.ResponseWriter, r *http.Request) {
 	w.Write(b)
 }
 func (app *application) saveImage(w http.ResponseWriter, r *http.Request)  {
-
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+fmt.Println("llllllllllllllllllllll")
 	vars := mux.Vars(r)
 	userId := vars["userIdd"]
 	feedId := vars["feedId"]

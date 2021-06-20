@@ -40,34 +40,49 @@ func (app *application) updateMultipleTimeCampaign(w http.ResponseWriter, req *h
 	if err != nil {
 		app.serverError(w, err)
 	}
-	fmt.Println("User:")
- 	fmt.Println(dto.User)
-	userPrimitive, _ := primitive.ObjectIDFromHex(dto.User)
 
-	var campaign = models.Campaign{
-		User : userPrimitive,
-		Link : dto.Link,
-		Description :dto.Description,
-	}
 	IdPrimitive, _ := primitive.ObjectIDFromHex(dto.Id)
-	var number,_ = strconv.Atoi(dto.DesiredNumber)
-	var oneTimeCampaign = models.MultipleTimeCampaign{
-		Id : IdPrimitive,
-		Campaign:   campaign,
-		StartTime: dto.StartTime,
-		EndTime : dto.EndTime,
-		DesiredNumber:   number,
+
+	allCampaigns, _ :=app.multipleTimeCampaign.All()
+	for _, camp := range allCampaigns {
+		if camp.Id ==  IdPrimitive{
+			if(camp.ModifiedTime.Add(24*time.Hour).Before(time.Now())){
+				userPrimitive, _ := primitive.ObjectIDFromHex(dto.User)
+				var number,_ = strconv.Atoi(dto.DesiredNumber)
+				var campaign = models.Campaign{
+					User : userPrimitive,
+					Link : dto.Link,
+					Description :dto.Description,
+				}
+				var oneTimeCampaign = models.MultipleTimeCampaign{
+					Id : IdPrimitive,
+					Campaign:   campaign,
+					StartTime: dto.StartTime,
+					EndTime : dto.EndTime,
+					DesiredNumber:   number,
+					ModifiedTime: time.Now(),
+
+				}
+
+				insertResult, err := app.multipleTimeCampaign.Update(oneTimeCampaign)
+				if err != nil {
+					app.serverError(w, err)
+				}
+				app.infoLog.Printf("New content have been created, id=%s", insertResult.UpsertedID)
+				w.Header().Set("Content-Type", "application/json")
+				w.WriteHeader(http.StatusOK)
+
+			}
+			app.infoLog.Printf("Campaign can not be modified, 24 hours have not elapsed since the last modification")
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusForbidden)
+		}
 
 	}
 
-	insertResult, err := app.multipleTimeCampaign.Update(oneTimeCampaign)
-	if err != nil {
-		app.serverError(w, err)
-	}
 
-	app.infoLog.Printf("New content have been created, id=%s", insertResult.UpsertedID)
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
+
+
 
 }
 
