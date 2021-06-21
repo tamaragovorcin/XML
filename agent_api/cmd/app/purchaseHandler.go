@@ -1,6 +1,7 @@
 package main
 
 import (
+	"AgentApp/pkg/dtos"
 	"AgentApp/pkg/models"
 	"encoding/json"
 	"github.com/gorilla/mux"
@@ -52,13 +53,19 @@ func (app *application) findPurchaseByID(w http.ResponseWriter, r *http.Request)
 }
 
 func (app *application) insertPurchase(w http.ResponseWriter, r *http.Request) {
-	var m models.Purchase
+	app.infoLog.Printf("New purchase have been luna,")
+	var m dtos.PurchaseDTO
 	err := json.NewDecoder(r.Body).Decode(&m)
 	if err != nil {
 		app.serverError(w, err)
 	}
-
-	insertResult, err := app.purchases.Insert(m)
+	app.infoLog.Printf("New purchase have been created,", m)
+	product := models.Purchase{
+		Products: m.Products,
+		Location: m.Location,
+		Buyer: m.Buyer,
+	}
+	insertResult, err := app.purchases.Insert(product)
 	if err != nil {
 		app.serverError(w, err)
 	}
