@@ -1,12 +1,12 @@
 package mongodb
 
 import (
+	"AgentApp/pkg/models"
 	"context"
 	"errors"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
-	"AgentApp/pkg/models"
 )
 
 // UserModel represent a mgo database session with a user model data.
@@ -34,17 +34,29 @@ func (m *UserModel) GetAll() ([]models.User, error) {
 }
 
 // FindByID will be used to find a new user registry by id
-func (m *UserModel) FindByID(id string) (*models.User, error) {
-	p, err := primitive.ObjectIDFromHex(id)
+func (m *UserModel) FindByID(id primitive.ObjectID) (*models.User, error) {
+
+	var user = models.User{}
+	err := m.C.FindOne(context.TODO(), bson.M{"_id": id}).Decode(&user)
 	if err != nil {
+		// Checks if the user was not found
+		if err == mongo.ErrNoDocuments {
+			return nil, errors.New("ErrNoDocuments")
+		}
 		return nil, err
 	}
 
-	// Find user by id
+	return &user, nil
+}
+
+func (m *UserModel)  FindByUsername(username string) (*models.User, error) {
+
 	var user = models.User{}
-	err = m.C.FindOne(context.TODO(), bson.M{"_id": p}).Decode(&user)
+	err := m.C.FindOne(context.TODO(), bson.M{"profileInformation.username": username}).Decode(&user)
+
 	if err != nil {
 		// Checks if the user was not found
+
 		if err == mongo.ErrNoDocuments {
 			return nil, errors.New("ErrNoDocuments")
 		}
