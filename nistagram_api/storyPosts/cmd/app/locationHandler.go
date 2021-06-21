@@ -2,9 +2,9 @@ package main
 
 import (
 	"encoding/json"
-	"storyPosts/pkg/models"
 	"github.com/gorilla/mux"
 	"net/http"
+	"storyPosts/pkg/models"
 )
 
 func (app *application) getAllLocations(w http.ResponseWriter, r *http.Request) {

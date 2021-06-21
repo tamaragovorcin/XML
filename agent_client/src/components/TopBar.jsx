@@ -17,6 +17,8 @@ class TopBar extends React.Component {
 		localStorage.removeItem("keyToken");
 		localStorage.removeItem("keyRole");
 		localStorage.removeItem("expireTime");
+
+		window.location.href = "/login"
 	};
 	render() {
 		return (
