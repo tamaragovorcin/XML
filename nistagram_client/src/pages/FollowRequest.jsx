@@ -262,7 +262,7 @@ class FollowRequest extends Component {
                                                     
                                                     <td >
                                                         <div style={{ marginTop: "1rem"}}>
-                                                            <b>Username: </b> {follower.ProfileInformation.Username}
+                                                            <b>Username: </b> {follower.Username}
                                                         </div>
                                                     </td>
                                                     <td>

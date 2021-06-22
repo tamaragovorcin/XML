@@ -37,7 +37,7 @@ func (app *application) getPostNotifications(w http.ResponseWriter, r *http.Requ
 	userId := vars["userId"]
 	intVar, err := primitive.ObjectIDFromHex(userId)
 	allNotifications,_ := app.notificationContent.GetAll()
-	var listNotifications []dtos2.NotificationContentDTO
+	listNotifications := []dtos2.NotificationContentDTO{}
 	for _, settingsItem := range allNotifications {
 		if settingsItem.Subject.Hex()==intVar.Hex() &&( settingsItem.Posted == "Feed Post" ||
 			settingsItem.Posted == "Album Feed Post" || settingsItem.Posted =="Story Post" || settingsItem.Posted =="Album Story Post"){
@@ -63,7 +63,7 @@ func (app *application) getCommentNotifications(w http.ResponseWriter, r *http.R
 	userId := vars["userId"]
 	intVar, err := primitive.ObjectIDFromHex(userId)
 	allNotifications,_ := app.notificationContent.GetAll()
-	var listNotifications []dtos2.NotificationContentDTO
+	listNotifications := []dtos2.NotificationContentDTO{}
 	for _, settingsItem := range allNotifications {
 		if settingsItem.Subject.Hex()==intVar.Hex() && settingsItem.Posted != "Feed Post" &&
 			settingsItem.Posted!= "Album Feed Post" && settingsItem.Posted!="Story Post" && settingsItem.Posted!="Album Story Post"{

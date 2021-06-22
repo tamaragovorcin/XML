@@ -715,8 +715,36 @@ class FollowerProfilePage extends React.Component {
 			Axios.post(BASE_URL + "/api/users/api/block/", dto)
 			.then((res) => {
 								
+
 				this.setState({ textSuccessfulModal: "You have successfully blocked this user." });
 				this.setState({ openModal: true });
+				var sentence = window.location.toString()
+
+		var s = []
+		s = sentence.split("/");
+		console.log(window.location.toString())
+
+
+		this.fetchData(s[5]);
+		Axios.get(BASE_URL + "/api/users/api/" + s[5])
+			.then((res) => {
+				this.setState({
+					id: res.data.Id,
+					username : res.data.ProfileInformation.Username,
+					name: res.data.ProfileInformation.Name,
+					lastName : res.data.ProfileInformation.LastName,
+					webSite : res.data.WebSite,
+					biography : res.data.Biography,
+					private : res.data.Private,
+					numberOfPosts : res.data.numberOfPosts,
+					numberOfFollowers : res.data.numberOfFollowers,
+					numberOfFollowings : res.data.numberOfFollowings
+				});
+
+			})
+			.catch((err) => {
+				console.log(err);
+			});
 
 			})
 			.catch ((err) => {
