@@ -140,31 +140,35 @@ class Ordered extends Component {
 					<table className="table table-hover" style={{ width: "100%", marginTop: "3rem" }}>
 						<tbody>
 							{this.state.products.map((p) => (
+								<div><label>Deliver to address: {p.Location.Country}, {p.Location.Street} </label>
+								
+									{p.Product.map((item) => (
 								<tr
 									id={p.id}
 									key={p.id}
 									style={{ cursor: "pointer" }}
 
 								>
+								
 									<td width="130em">
-										<img className="img-fluid" src={`data:image/jpg;base64,${p.Media[0]}`} width="70em" />
+										<img className="img-fluid" src={`data:image/jpg;base64,${item.Media[0]}`} width="70em" />
 									</td>
 									<td>
 										<div>
-											<b>Name: </b> {p.Product.Name}
+											<b>Name: </b> {item.Name}
 										</div>
 										<div>
-											<b>Price: </b> {p.Product.Price}
+											<b>Price: </b> {item.Price}
 										</div>
 
-										<div>
-											<b>Address: </b> {p.Product.Location}
-										</div>
 
 
 
 									</td>
+								
 								</tr>
+									))}
+									</div>
 							))}
 						</tbody>
 					</table>

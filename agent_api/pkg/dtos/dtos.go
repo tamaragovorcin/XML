@@ -73,6 +73,24 @@ type OrderFrontDTO struct {
 	Location  models.Location
 }
 
+type PurchaseResponseDTO struct {
+
+	Id          primitive.ObjectID
+	Product     []PurchDTO
+	User        primitive.ObjectID
+	Location  models.Location
+}
+
+type PurchDTO struct {
+	Id          primitive.ObjectID
+	Price string
+	Quantity    string
+	Name    string
+	Media       [][]byte
+	MediaOrig       []string
+}
+
+
 
 type PurchaseDTO struct {
 	Products       []models.CartFrontDTO

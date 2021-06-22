@@ -196,9 +196,14 @@ func (app *application) deleteImage(w http.ResponseWriter, r *http.Request) {
 		if(prod.Id == m.AlbumId){
 
 			for _, media := range prod.Media {
-				if(media == m.Image){
-					prod.Media = append(prod.Media[:1], prod.Media[2:]...)
+				if len(prod.Media)==1{
 
+					prod.Media = []string{}
+				}else {
+					if (media == m.Image) {
+						prod.Media = append(prod.Media[:1], prod.Media[2:]...)
+
+					}
 				}
 
 			}
@@ -254,6 +259,17 @@ func findMyCart(albums []models.Cart, idPrimitive primitive.ObjectID) ([]models.
 	return feedAlbumsUser, nil
 }
 
+func findMyPurchase(albums []models.Purchase, idPrimitive primitive.ObjectID) ([]models.Purchase, error){
+	feedAlbumsUser := []models.Purchase{}
+
+	for _, album := range albums {
+		if	album.Buyer.String()==idPrimitive.String() {
+			feedAlbumsUser = append(feedAlbumsUser, album)
+		}
+	}
+	return feedAlbumsUser, nil
+}
+
 func (app *application) getUsersFeedAlbums(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	userId := vars["userIdd"]
@@ -293,22 +309,25 @@ func toResponseAlbum(feedAlbum models.Product, imageList []string) dtos.ProductR
 
 
 
+	if(len(imageList) == 0){
 
-	for _, image2 := range imageList {
+	}else {
 
-		f, _ := os.Open("cmd/app/images/" + image2)
+		for _, image2 := range imageList {
 
-		defer f.Close()
-		image, _, _ := image.Decode(f)
-		buffer := new(bytes.Buffer)
+			f, _ := os.Open("cmd/app/images/" + image2)
 
-		if err := jpeg.Encode(buffer, image, nil); err != nil {
-			log.Println("unable to encode image.")
+			defer f.Close()
+			image, _, _ := image.Decode(f)
+			buffer := new(bytes.Buffer)
+
+			if err := jpeg.Encode(buffer, image, nil); err != nil {
+				log.Println("unable to encode image.")
+			}
+			imageBuffered := buffer.Bytes()
+			imagesBuffered = append(imagesBuffered, imageBuffered)
 		}
-		imageBuffered :=buffer.Bytes()
-		imagesBuffered= append(imagesBuffered, imageBuffered)
 	}
-
 
 	return dtos.ProductResponseDTO{
 		Id: feedAlbum.Id,
@@ -584,42 +603,23 @@ func (app *application) getOrder(w http.ResponseWriter, r *http.Request) {
 	userId := vars["userIdd"]
 	userIdPrimitive, _ := primitive.ObjectIDFromHex(userId)
 
-	cart, _ := app.cart.GetAll()
-	allProducts, _ := app.products.GetAll()
-	location := models.Location{}
 	purch, _ := app.purchases.GetAll()
-	usersFeedAlbums, err := findMyCart(cart, userIdPrimitive)
+	usersFeedAlbums, err := findMyPurchase(purch, userIdPrimitive)
 	if err != nil {
 		app.serverError(w, err)
 	}
 
-	feedAlbumResponse := []dtos.OrderFrontDTO{}
-	for _, p := range purch {
+	feedAlbumResponse := []dtos.PurchaseResponseDTO{}
 
-		if(p.Buyer == userIdPrimitive){
-			location = p.Location
-		}
-
-	}
 	for _, album := range usersFeedAlbums {
-		for _, product := range allProducts {
-			if(album.ChosenProducts == product.Id){
 
-				images:= product.Media
-				feedAlbumResponse = append(feedAlbumResponse, toResponseOrder(album, images, product, location))
-
-			}
-		}
-
-
-		if err != nil {
-			app.serverError(w, err)
-		}
+		log.Println("mjhjbkgkjhgk.")
+			feedAlbumResponse = append(feedAlbumResponse, toResponseOrder(album))
 
 
 
 	}
-
+	log.Println("blbbalbla" , feedAlbumResponse)
 	imagesMarshaled, err := json.Marshal(feedAlbumResponse)
 	if err != nil {
 		app.serverError(w, err)
@@ -631,43 +631,37 @@ func (app *application) getOrder(w http.ResponseWriter, r *http.Request) {
 
 
 
-func toResponseOrder(feedAlbum models.Cart, imageList []string, product models.Product, location models.Location) dtos.OrderFrontDTO {
+func toResponseOrder(purchase models.Purchase) dtos.PurchaseResponseDTO {
 	imagesBuffered := [][]byte{}
+	response := []dtos.PurchDTO{}
 
+		for _, prod := range purchase.Products {
+			images := prod.Product.MediaOrig
 
-	for _, image2 := range imageList {
+			for _, image2 := range images {
 
-		f, _ := os.Open("cmd/app/images/" + image2)
+				f, _ := os.Open("cmd/app/images/" + image2)
 
-		defer f.Close()
-		image, _, _ := image.Decode(f)
-		buffer := new(bytes.Buffer)
+				defer f.Close()
+				image, _, _ := image.Decode(f)
+				buffer := new(bytes.Buffer)
 
-		if err := jpeg.Encode(buffer, image, nil); err != nil {
-			log.Println("unable to encode image.")
+				if err := jpeg.Encode(buffer, image, nil); err != nil {
+					log.Println("unable to encode image.")
+				}
+				imageBuffered :=buffer.Bytes()
+				imagesBuffered= append(imagesBuffered, imageBuffered)
+			}
+
+			r := dtos.PurchDTO{Quantity: prod.Quantity, Price: prod.Product.Price, Name: prod.Product.Name, Media: imagesBuffered, MediaOrig: images,
+			}
+
+			response = append(response, r)
+
 		}
-		imageBuffered :=buffer.Bytes()
-		imagesBuffered= append(imagesBuffered, imageBuffered)
-	}
-
-	productt := dtos.ProductResponseDTO{
-
-		Price : product.Price,
-		Name    : product.Name,
-		MediaOrig: product.Media,
 
 
-	}
+		return dtos.PurchaseResponseDTO{Product: response, User: purchase.Buyer, Id: purchase.Id, Location: purchase.Location}
 
 
-	return dtos.OrderFrontDTO{
-		Id: feedAlbum.Id,
-		Media : imagesBuffered,
-		User  : feedAlbum.Buyer,
-		Quantity : feedAlbum.Quantity,
-		Product    : productt,
-		Location: location,
-
-
-	}
 }

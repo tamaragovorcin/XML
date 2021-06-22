@@ -8,6 +8,8 @@ import { BASE_URL_AGENT } from "../constants.js";
 import "react-responsive-carousel/lib/styles/carousel.min.css"; // requires a loader
 import { Carousel } from 'react-responsive-carousel';
 import { YMaps, Map } from "react-yandex-maps";
+
+import ModalDialog from "../components/ModalDialog";
 const mapState = {
 	center: [44, 21],
 	zoom: 8,
@@ -30,7 +32,10 @@ class Address extends Component {
 		super(props);
 		this.addressInput = React.createRef();
 	}
-
+	handleModalClose = ()=>{
+		this.setState({openModal: false})
+		window.location.reload();
+	}
 
     onYmapsLoad = (ymaps) => {
 		this.ymaps = ymaps;
@@ -119,8 +124,8 @@ class Address extends Component {
 								} else if (res.status === 500) {
 									this.setState({ errorHeader: "Internal server error!", errorMessage: "Server error.", hiddenErrorAlert: false });
 								} else {
-									alert("Success");
-
+									
+									this.setState({openModal : true})
 
 									Axios.get(BASE_URL_AGENT + "/api/removeCart/"+ id)
 									.then((res) => {
@@ -204,6 +209,12 @@ class Address extends Component {
 						</Button>
 					</div>
 				</Modal.Body>
+				<ModalDialog
+					show={this.state.openModal}
+					onCloseModal={this.handleModalClose}
+					header="Success"
+					text="You have successfully placed an order."
+				/>
 			</Modal>
 			
 		);
