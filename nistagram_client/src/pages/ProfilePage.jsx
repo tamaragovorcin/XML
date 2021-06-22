@@ -7,6 +7,7 @@ import LikesModal from "../components/Posts/LikesModal"
 import DislikesModal from "../components/Posts/DislikesModal"
 import CommentsModal from "../components/Posts/CommentsModal"
 import ImageUploader from 'react-images-upload';
+import playerLogo from "../static/coach.png";
 import Axios from "axios";
 import ModalDialog from "../components/ModalDialog";
 import AddPostModal from "../components/Posts/AddPostModal";
@@ -2177,19 +2178,12 @@ class ProfilePage extends React.Component {
 
 								<tr>
 									<td width="130em">
-										<img
-											className="img-fluid"
-											src={this.state.profilePhoto}
-											width="70em"
-											alt="description"
-										/>
-										<ImageUploader
-											withIcon={false}
-											buttonText='Add profile picture'
-											onChange={this.handleAddProfileImage}
-											imgExtension={['.jpg', '.gif', '.png', '.gif']}
-											withPreview={true}
-										/>
+									<img
+                                className="img-fluid"
+                                src={playerLogo}
+                                width="100%"
+                                alt="description"
+                              /> 
 									</td>
 
 									<td>

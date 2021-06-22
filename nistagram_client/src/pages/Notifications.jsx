@@ -86,6 +86,7 @@ class Notifications extends Component {
                                         ))}
                                       
                                     </tbody>
+    
                                 </table>
                         </div>
                     </div>

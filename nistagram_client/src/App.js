@@ -24,6 +24,9 @@ import AgentsRequests from './pages/AgentsRequests';
 import RegisterNewAgent from './pages/RegisterNewAgent';
 import PartnershipRequests from './pages/PartnershipRequests';
 import BestInfluencers from './pages/BestInfluencers';
+import ChatEnginePreview  from './chat/ChatEngine'
+
+import './App.css';
 function App() {
   return (
     <Router>
@@ -56,6 +59,7 @@ function App() {
 
 				<Link exact to="/partnershipRequests" path="/partnershipRequests" component={PartnershipRequests} />
 				<Link exact to="/bestInfluencers" path="/bestInfluencers" component={BestInfluencers} />
+				<Link exact to="/chatEngine" path="/chatEngine" component={ChatEnginePreview} />
 
 			</Switch>
 	</Router>
