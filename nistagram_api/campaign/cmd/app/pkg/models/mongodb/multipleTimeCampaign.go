@@ -87,6 +87,7 @@ func (m *MultipleTimeCampaignModel) Update(campaign models.MultipleTimeCampaign)
 		"desiredNumber":campaign.DesiredNumber,
 		"modifiedTime":campaign.ModifiedTime,
 		"timesShown":campaign.TimesShown,
+		"campaign.type" : campaign.Campaign.Type,
 
 	}}})
 }

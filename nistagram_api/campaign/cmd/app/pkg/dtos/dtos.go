@@ -13,6 +13,7 @@ type OneTimeCampaignDTO struct {
 	Time string
 	PartnershipsRequests []string
 	Description string
+	Type string
 }
 type OneTimeCampaignUpdateDTO struct {
 	Id string
@@ -42,6 +43,8 @@ type MultipleTimeCampaignDTO struct {
 	DesiredNumber string
 	PartnershipsRequests []string
 	Description string
+	Type string
+
 }
 
 type CampaignDTO struct {
@@ -65,6 +68,7 @@ type CampaignDTO struct {
 	Likes []LikeDTO
 	Dislikes []LikeDTO
 	Comments []CommentDTO
+
 }
 
 type CampaignMultipleDTO struct {
@@ -106,4 +110,29 @@ type BestStatisticsDTO struct {
 	NumberOfClicks int
 	NumberOfPartnerships int
 	Username string
+}
+type StoryPostInfoHomePageDTO struct {
+	Link string
+	Type string
+	UserId          primitive.ObjectID
+	UserUsername    string
+	CampaignId primitive.ObjectID
+	Stories    []StoryPostInfoDTO
+}
+
+type StoryPostInfoDTO struct {
+	Id          primitive.ObjectID
+	Media       []byte
+	Type 		string
+	ContentType string
+	Link string
+}
+
+type CampaignStoriesDTO struct{
+	CampaignId primitive.ObjectID
+	UserId          primitive.ObjectID
+	Media       []byte
+	Type 		string
+	ContentType string
+	Link string
 }

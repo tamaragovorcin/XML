@@ -748,7 +748,7 @@ class ProfilePage extends React.Component {
 		});
 		return choosenInfluencersHelp
 	}
-	handleAddOneTimeCampaign =(date,time)=>{
+	handleAddOneTimeCampaign =(date,time, type)=>{
 
         let id = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length-1);
 		let partnershipsRequestsList = this.getpartnershipsRequests();
@@ -759,7 +759,8 @@ class ProfilePage extends React.Component {
 			Date : date,
 			Time : time,
 			Description : this.state.description,
-			PartnershipsRequests : partnershipsRequestsList
+			PartnershipsRequests : partnershipsRequestsList,
+			Type : type
 		}
 		Axios.post(BASE_URL + "/api/campaign/oneTimeCampaign/", campaignDTO)
 			.then((res) => {
@@ -790,7 +791,7 @@ class ProfilePage extends React.Component {
 			});
 
 	}
-	handleAddMultipleTimeCampaign =(startDate,endDate,numberOfRepetitions) =>{
+	handleAddMultipleTimeCampaign =(startDate,endDate,numberOfRepetitions, type) =>{
 
 		let id = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length-1);
 		let partnershipsRequestsList = this.getpartnershipsRequests();
@@ -802,7 +803,8 @@ class ProfilePage extends React.Component {
 			EndTime : endDate,
 			Description : this.state.description,
 			PartnershipsRequests : partnershipsRequestsList,
-			DesiredNumber : numberOfRepetitions
+			DesiredNumber : numberOfRepetitions,
+			Type : type
 		}
 		Axios.post(BASE_URL + "/api/campaign/multipleTimeCampaign/", campaignDTO)
 			.then((res) => {
@@ -2039,7 +2041,7 @@ class ProfilePage extends React.Component {
             selectedFile: event.target.files[0],
             loaded: 0,
         });
-        console.log(event.target.files[0]);
+		
     };
 
     handleSubmit = (event) => {

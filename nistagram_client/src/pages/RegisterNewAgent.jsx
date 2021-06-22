@@ -449,6 +449,7 @@ class RegisterNewAgent extends Component {
 					header="Successful registration"
 					text={this.state.textSuccessfulModal}
 				/>
+				
 			</React.Fragment>
 		);
 	}

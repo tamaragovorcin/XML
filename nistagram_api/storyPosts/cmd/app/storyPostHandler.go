@@ -411,7 +411,7 @@ func (app *application) getStoriesForHomePage(w http.ResponseWriter, r *http.Req
 	allImages,_ := app.images.All()
 	allPosts, _ :=app.storyPosts.All()
 	storiesForHomePage,err :=findStoryPostsForHomePage(allPosts,userIdPrimitive)
-	app.infoLog.Println("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA", storiesForHomePage)
+	app.infoLog.Println("111")
 	if err != nil {
 		app.serverError(w, err)
 	}
@@ -419,9 +419,13 @@ func (app *application) getStoriesForHomePage(w http.ResponseWriter, r *http.Req
 	for _, storyPost := range storiesForHomePage {
 
 		if iAmFollowingThisUser(userId, storyPost.Post.User.Hex()) {
+			app.infoLog.Println("22")
+
 			if storyCanBeSeen(storyPost, userIdPrimitive) == true {
-				if (!iBlockedThisUser(userId, storyPost.Post.User.Hex())) {
-					if (!iMutedThisUser(userId, storyPost.Post.User.Hex())) {
+				app.infoLog.Println("333")
+
+				if !iBlockedThisUser(userId, storyPost.Post.User.Hex()) {
+					if !iMutedThisUser(userId, storyPost.Post.User.Hex()) {
 
 						images, err := findImageByPostId(allImages, storyPost.Id)
 						if err != nil {
@@ -605,6 +609,8 @@ func userIsMuted(user2 string, ids []string) bool { // svoj id
 }
 
 func storyCanBeSeen(post models.StoryPost, idPrimitive primitive.ObjectID) bool {
+
+
 	if post.OnlyCloseFriends==false {return true}
 	userId := post.Post.User
 

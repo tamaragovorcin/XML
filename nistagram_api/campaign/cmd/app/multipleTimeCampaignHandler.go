@@ -133,6 +133,7 @@ func (app *application) insertMultipleTimeCampaign(w http.ResponseWriter, req *h
 		Link : dto.Link,
 		Description :dto.Description,
 		Partnerships :getPartnerships(dto.PartnershipsRequests),
+		Type : dto.Type,
 	}
 	number,_ :=strconv.Atoi(dto.DesiredNumber)
 	var multipleTimeCampaign = models.MultipleTimeCampaign{
@@ -353,6 +354,7 @@ func findPartnershipsByUserIdMultiple(posts []models.MultipleTimeCampaign, idPri
 func (app *application) getMultipleHomePage(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	userId := vars["userId"]
+	typeString := vars["type"]
 	userIdPrimitive, _ := primitive.ObjectIDFromHex(userId)
 	allPosts, _ :=app.multipleTimeCampaign.All()
 	campaigns,err :=findNotMyMultipleCampaigns(allPosts,userIdPrimitive)
@@ -361,12 +363,14 @@ func (app *application) getMultipleHomePage(w http.ResponseWriter, r *http.Reque
 	}
 	campaignResponse := []dtos.CampaignMultipleDTO{}
 	for _, campaign := range campaigns {
-		if isTimeForExposureMultiple(campaign.StartTime, campaign.EndTime,campaign.DesiredNumber) {
-			if isGenderOk(userId, campaign.Campaign.TargetGroup.Gender) {
-				if isDateOfBirthOk(userId, campaign.Campaign.TargetGroup.DateOne, campaign.Campaign.TargetGroup.DateTwo) {
-					if isLocationOk(userId, campaign.Campaign.TargetGroup.Location) {
-						contentType := app.GetFileTypeByPostId(campaign.Id)
-						campaignResponse = append(campaignResponse, campaignToResponseInfluencerMultiple(campaign, contentType))
+		if campaign.Campaign.Type==typeString {
+			if isTimeForExposureMultiple(campaign.StartTime, campaign.EndTime, campaign.DesiredNumber) {
+				if isGenderOk(userId, campaign.Campaign.TargetGroup.Gender) {
+					if isDateOfBirthOk(userId, campaign.Campaign.TargetGroup.DateOne, campaign.Campaign.TargetGroup.DateTwo) {
+						if isLocationOk(userId, campaign.Campaign.TargetGroup.Location) {
+							contentType := app.GetFileTypeByPostId(campaign.Id)
+							campaignResponse = append(campaignResponse, campaignToResponseInfluencerMultiple(campaign, contentType))
+						}
 					}
 				}
 			}
@@ -404,6 +408,8 @@ func isTimeForExposureMultiple(startTime string, endTime string, number int) boo
 func (app *application) getMultipleHomePagePromote(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	userId := vars["userId"]
+	typeString := vars["type"]
+
 	userIdPrimitive, _ := primitive.ObjectIDFromHex(userId)
 	allPosts, _ :=app.multipleTimeCampaign.All()
 	campaigns,err :=findNotMyMultipleCampaigns(allPosts,userIdPrimitive)
@@ -412,17 +418,20 @@ func (app *application) getMultipleHomePagePromote(w http.ResponseWriter, r *htt
 	}
 	campaignResponse := []dtos.CampaignMultipleDTO{}
 	for _, campaign := range campaigns {
-		if isTimeForExposureMultiple(campaign.StartTime, campaign.EndTime,campaign.DesiredNumber) {
+		if campaign.Campaign.Type==typeString {
 
-			if campaignHasPartnerships(campaign.Campaign.Partnerships) {
+			if isTimeForExposureMultiple(campaign.StartTime, campaign.EndTime, campaign.DesiredNumber) {
 
-				if isGenderOk(userId, campaign.Campaign.TargetGroup.Gender) {
-					if isDateOfBirthOk(userId, campaign.Campaign.TargetGroup.DateOne, campaign.Campaign.TargetGroup.DateTwo) {
-						if isLocationOk(userId, campaign.Campaign.TargetGroup.Location) {
-							for _, partnership := range campaign.Campaign.Partnerships {
-								if partnership.Approved {
-									contentType := app.GetFileTypeByPostId(campaign.Id)
-									campaignResponse = append(campaignResponse, campaignToResponseInfluencerMultipleHomePage(campaign, contentType, partnership.Influencer))
+				if campaignHasPartnerships(campaign.Campaign.Partnerships) {
+
+					if isGenderOk(userId, campaign.Campaign.TargetGroup.Gender) {
+						if isDateOfBirthOk(userId, campaign.Campaign.TargetGroup.DateOne, campaign.Campaign.TargetGroup.DateTwo) {
+							if isLocationOk(userId, campaign.Campaign.TargetGroup.Location) {
+								for _, partnership := range campaign.Campaign.Partnerships {
+									if partnership.Approved {
+										contentType := app.GetFileTypeByPostId(campaign.Id)
+										campaignResponse = append(campaignResponse, campaignToResponseInfluencerMultipleHomePage(campaign, contentType, partnership.Influencer))
+									}
 								}
 							}
 						}

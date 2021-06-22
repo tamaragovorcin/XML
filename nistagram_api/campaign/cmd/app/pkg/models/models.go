@@ -21,6 +21,8 @@ type Campaign struct {
 	Likes    []primitive.ObjectID `bson:"likes"`
 	Dislikes []primitive.ObjectID `bson:"dislikes"`
 	Comments []Comment `bson:"comments"`
+	Type string `bson:"type"`
+
 }
 
 type MultipleTimeCampaign struct {

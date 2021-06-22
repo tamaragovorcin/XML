@@ -82,5 +82,6 @@ func (m *OneTimeCampaignModel) Update(user models.OneTimeCampaign) (*mongo.Updat
 		"campaign.comments":user.Campaign.Comments,
 		"date":user.Date,
 		"time":user.Time,
+		"campaign.type" : user.Campaign.Type,
 		}}})
 }
