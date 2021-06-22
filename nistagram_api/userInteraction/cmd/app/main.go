@@ -97,8 +97,8 @@ func parseConfiguration() *Neo4jConfiguration {
 	}
 
 	return &Neo4jConfiguration{
-		//Url:      lookupEnvOrGetDefault("NEO4J_URI", "bolt://db_neo:7687"),
-		Url:      lookupEnvOrGetDefault("NEO4J_URI", "bolt://localhost:7687"),
+		Url:      lookupEnvOrGetDefault("NEO4J_URI", "bolt://db_neo:7687"),
+		//Url:      lookupEnvOrGetDefault("NEO4J_URI", "bolt://localhost:7687"),
 		Username: lookupEnvOrGetDefault("NEO4J_USER", "neo4j"),
 		Password: lookupEnvOrGetDefault("NEO4J_PASSWORD", "root"),
 

@@ -32,8 +32,8 @@ func (app *application) saveImage(w http.ResponseWriter, r *http.Request)  {
 	}
 
 	defer file.Close()
-	//var path = "/var/lib/campaigns/data/"+hander.Filename
-	var path = "files/"+hander.Filename
+	var path = "/var/lib/campaigns/data/"+hander.Filename
+	//var path = "files/"+hander.Filename
 	f, err := os.OpenFile(path, os.O_WRONLY|os.O_CREATE, 777)
 	if err != nil {
 		fmt.Println(err.Error())

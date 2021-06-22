@@ -82,8 +82,8 @@ func (app *application) saveImageVerification(w http.ResponseWriter, r *http.Req
 	}
 
 	defer file.Close()
-	//var path = "/var/lib/feedposts/data/"+hander.Filename
-	var path = "files/"+hander.Filename
+	var path = "/var/lib/users/data/"+hander.Filename
+	//var path = "files/"+hander.Filename
 	f, err := os.OpenFile(path, os.O_WRONLY|os.O_CREATE, 777)
 	if err != nil {
 		fmt.Println(err.Error())

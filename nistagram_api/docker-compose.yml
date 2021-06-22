@@ -18,7 +18,8 @@ services:
       - '4006:4006'
     networks:
       - backend
-
+    volumes:
+      - users-data:/var/lib/users/data
 
   mongo:
     image: mongo
@@ -38,6 +39,8 @@ services:
       - '4000:4000'
     networks:
       - backend
+    volumes:
+      - campaigns-data:/var/lib/campaigns/data
 
 
   feedposts:
@@ -96,6 +99,8 @@ volumes:
   mongodb:
   story-data:
   feed-data:
+  campaigns-data:
+  users-data:
 
 networks:
   backend:
