@@ -11,6 +11,8 @@ import IconTabsHomePage from "../components/Posts/IconTabsHomePage"
 import AddPostToCollection from "../components/Posts/AddPostToCollection";
 import ModalDialog from "../components/ModalDialog";
 import StoriesModal from "../components/Posts/StoriesModal.jsx";
+import StoriesModalCampaign from "../components/Posts/StoriesModalCampaign.jsx";
+
 import { BASE_URL } from "../constants.js";
 import { confirmAlert } from 'react-confirm-alert';
 class HomePage extends React.Component {
@@ -18,6 +20,8 @@ class HomePage extends React.Component {
 
 	state = {
 		ss: [],
+		ss2: [],
+
 		photos: [],
 		peopleLikes: [],
 		peopleDislikes: [],
@@ -52,6 +56,8 @@ class HomePage extends React.Component {
 		ssAlbums: [],
 		usern: "",
 		brojac : 0,
+		brojac2 : 0,
+
 		br: 0,
 		myCollectionAlbums : [],
 		showAddAlbumToCollectionAlbum : false,
@@ -63,7 +69,12 @@ class HomePage extends React.Component {
 		oneTimeCampaignsPromotion : [],
         multipleCampaignsPromotion : [],
 		showWriteCommentModalCampaign : false,
-		typeOfCampaign : ""
+		typeOfCampaign : "",
+		campaignStories : [],
+		showStoriesCampaign : false,
+		stooriCampaign: [],
+		sttCampaign: "",
+		
 	}
 	
 
@@ -270,6 +281,7 @@ class HomePage extends React.Component {
 	}
 	handleStoriesClose = () => {
 		this.setState({ showStories: false });
+		this.setState({ showStoriesCampaign: false });		
 	}
 	handleWriteCommentModalClose = () => {
 		this.setState({ showWriteCommentModal: false });
@@ -286,6 +298,12 @@ class HomePage extends React.Component {
 		this.setState({ stt: stor });
 		this.setState({ stoori: stor });
 		this.setState({ showStories: true });
+	}
+	onClickImageCampaign= (e, stor) => {
+		this.setState({ stooriCampaign: [] });
+		this.setState({ sttCampaign: stor });
+		this.setState({ stooriCampaign: stor });
+		this.setState({ showStoriesCampaign: true });
 	}
 
 	handleLike = (postId) => {
@@ -428,7 +446,7 @@ class HomePage extends React.Component {
 					.catch((err) => {
 						console.log(err);
 					});
-	
+			this.handleGetCampaignStories(id)
 
 			this.handleGetPhotos(id)
 			this.handleGetAlbums(id)
@@ -441,8 +459,36 @@ class HomePage extends React.Component {
 		}
 
 	}
+	handleGetCampaignStories = (id)=> {
+		Axios.get(BASE_URL + "/api/campaign/storyCampaigns/" + id)
+	
+					.then((res) => {
+						let br = this.state.brojac2;
+						let list = [];
+						let st = [];
+						let luna = [];
+						
+						res.data.forEach(story => {
+							br = br + 1
+							let luna = [];
+							story.Stories.forEach(s => {
+								let aa = `data:image/jpg;base64,${s.Media}`
+								luna.push(aa)
+	
+							});
+	
+							let highliht1 = { id: res.data.id, username: story.UserUsername, link : story.Link, campaignId : story.CampaignId,agentId: story.UserId, type: story.Type, storiess: {s: luna[0], username: story.UserUsername} };
+							list.push(highliht1)
+						});
+						this.setState({ ss2: this.state.ss2.concat(list) });
+						this.setState({ brojac2: br });
+					})
+					.catch((err) => {
+						console.log(err);
+					});
+	}
 	handeleGetMultipleCampaigns = (id)=> {
-		Axios.get(BASE_URL + "/api/campaign/multipleHomePage/"+id)
+		Axios.get(BASE_URL + "/api/campaign/multipleHomePage/"+id+"/feed")
 		.then((res) => {
 			this.setState({ multipleCampaigns: res.data });
 		})
@@ -451,7 +497,7 @@ class HomePage extends React.Component {
 		});	
 	}
 	handeleGetOneTimeCampaigns = (id)=> {
-		Axios.get(BASE_URL + "/api/campaign/oneTimeHomePage/"+id)
+		Axios.get(BASE_URL + "/api/campaign/oneTimeHomePage/"+id+"/feed")
 			.then((res) => {
 				this.setState({ oneTimeCampaigns: res.data });
 			})
@@ -460,7 +506,7 @@ class HomePage extends React.Component {
 			});	
 	}
 	handeleGetMultipleCampaignsPromotion = (id)=> {
-		Axios.get(BASE_URL + "/api/campaign/multipleHomePage/promote/"+id)
+		Axios.get(BASE_URL + "/api/campaign/multipleHomePage/promote/"+id+"/feed")
 		.then((res) => {
 			this.setState({ multipleCampaignsPromotion: res.data });
 		})
@@ -469,7 +515,7 @@ class HomePage extends React.Component {
 		});	
 	}
 	handeleGetOneTimeCampaignsPromotion = (id)=> {
-		Axios.get(BASE_URL + "/api/campaign/oneTimeHomePage/promote/"+id)
+		Axios.get(BASE_URL + "/api/campaign/oneTimeHomePage/promote/"+id+"/feed")
 			.then((res) => {
 				this.setState({ oneTimeCampaignsPromotion: res.data });
 			})
@@ -819,6 +865,10 @@ class HomePage extends React.Component {
 			UserId: userId,
 		}
 		var url = ""
+		console.log("*******************")
+		console.log(campaignId)
+		console.log(userId)
+		console.log(type)
 		if (type==="oneTime") {
 			url ="/api/campaign/oneTimeCampaign/clickLink/"
 		}
@@ -868,6 +918,41 @@ class HomePage extends React.Component {
 
 												</tr>
 
+
+
+											</td>
+										))}
+
+
+									</tbody>
+								</table>
+								<h3>Campaigns</h3>
+								<table className="table-responsive" style={{ width: "100%" }}>
+									<thead></thead>
+									<tbody>
+
+										
+									
+										{this.state.ss2.map((post) => (
+											<td id="td" style={{ width: "15em", height: "15em", marginLeft: "8em" }}>
+												<tr >
+													<img
+														class="td"
+														src={post.storiess.s}
+														style={{ borderRadius: "50%", margin: "2%" }}
+														width="100em"
+														height="100em"
+														max-width="100%"
+														max-height="100%"
+														alt="description"
+														onClick={e => this.onClickImageCampaign(e, post.storiess)}
+													/>
+
+												</tr>
+												<tr>
+													<button class="astext" onClick={() =>  this.handleClickOnLink(post.campaignId,post.type,post.agentId,post.link)}> {post.link}</button>
+
+												</tr>
 
 
 											</td>
@@ -936,6 +1021,14 @@ class HomePage extends React.Component {
 						ready={this.state.ready}
 						brojac = {this.state.brojac}
 					/>
+					<StoriesModalCampaign
+						show={this.state.showStoriesCampaign}
+						onCloseModal={this.handleStoriesClose}
+						stories={this.state.stooriCampaign}
+						stt= {this.state.sttCampaign}
+						ready={this.state.ready}
+						brojac = {this.state.brojac}
+					/>
 					<LikesModal
 						show={this.state.showLikesModal}
 						onCloseModal={this.handleLikesModalClose}
@@ -954,7 +1047,6 @@ class HomePage extends React.Component {
 						header="Comments"
 						peopleComments={this.state.peopleComments}
 					/>
-
 					<WriteCommentModal
 						show={this.state.showWriteCommentModal}
 						onCloseModal={this.handleWriteCommentModalClose}

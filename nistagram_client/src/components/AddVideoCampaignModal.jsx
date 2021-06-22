@@ -66,7 +66,7 @@ class AddVideoCampaignModal extends Component {
 								
 							</div>
 						</div>
-						<div className="form-group text-center" hidden={this.props.noPicture}>
+						<div className="form-group text-center" >
 
 									<button style={{ width: "10rem", margin : "1rem" }}  onClick={this.props.handleAddInfluencersModal} className="btn btn-outline-secondary btn-sm">Add influencers<br/> <CgFeed/> </button>		
 									<button style={{ width: "10rem", margin : "1rem" }}  onClick={this.props.handleDefineTargetGroupModal} className="btn btn-outline-secondary btn-sm">Define target group<br/> <CgFeed/> </button>		

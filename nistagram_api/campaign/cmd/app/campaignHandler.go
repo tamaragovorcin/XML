@@ -1,11 +1,14 @@
 package main
 
 import (
+	"bytes"
 	"campaigns/pkg/dtos"
 	"campaigns/pkg/models"
 	"encoding/json"
 	"github.com/gorilla/mux"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	"image"
+	"image/jpeg"
 	"io"
 	"io/ioutil"
 	"log"
@@ -349,3 +352,133 @@ func getAllStatistics(app *application) []models.Statistic {
 	}
 	return allStatistics
 }
+
+
+
+func (app *application) getStoryCampaignsForHomePage(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	userId := vars["userId"]
+	userIdPrimitive, _ := primitive.ObjectIDFromHex(userId)
+
+	allImages, _ := app.images.All()
+	storiesForHomePage := findCampaignStoriesForHomePage(app, userIdPrimitive)
+
+	storyPostsResponse := []dtos.StoryPostInfoHomePageDTO{}
+	for _, storyPost := range storiesForHomePage {
+
+
+						images, err := findImageByCampaignId(allImages, storyPost.CampaignId)
+						if err != nil {
+							app.serverError(w, err)
+						}
+						userInList := getIndexInListOfUsersStories(userIdPrimitive, storyPostsResponse)
+						if userInList == -1 {
+							userUsername := getUserUsername(storyPost.UserId)
+
+							stories := []dtos.StoryPostInfoDTO{}
+							var dto = dtos.StoryPostInfoHomePageDTO{
+								Link : storyPost.Link,
+								Type : storyPost.Type,
+								CampaignId: storyPost.CampaignId,
+								UserId: storyPost.UserId,
+								UserUsername: userUsername,
+								Stories:      append(stories, toResponseStoryPost2(storyPost, images.Media)),
+							}
+							storyPostsResponse = append(storyPostsResponse, dto)
+						} else if userInList != -1 {
+							existingDto := storyPostsResponse[userInList]
+							existingDto.Stories = append(existingDto.Stories, toResponseStoryPost2(storyPost, images.Media))
+						}
+					}
+
+
+	imagesMarshaled, err := json.Marshal(storyPostsResponse)
+	if err != nil {
+		app.serverError(w, err)
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	w.Write(imagesMarshaled)
+}
+
+func toResponseStoryPost2(storyPost dtos.CampaignStoriesDTO, image2 string) dtos.StoryPostInfoDTO {
+	f, _ := os.Open(image2)
+	defer f.Close()
+	image,_,_:= image.Decode(f)
+	buffer := new(bytes.Buffer)
+	if err := jpeg.Encode(buffer, image, nil); err != nil {
+		log.Println("unable to encode image.")
+	}
+
+
+
+
+	return dtos.StoryPostInfoDTO{
+		Id: storyPost.CampaignId,
+		Link : storyPost.Link,
+		Media : buffer.Bytes(),
+
+	}
+}
+func getIndexInListOfUsersStories(idPrimitive primitive.ObjectID, listStories []dtos.StoryPostInfoHomePageDTO) int {
+	for num, story := range listStories {
+		if story.UserId.String()==idPrimitive.String() {
+			return num
+		}
+	}
+	return -1
+}
+func findCampaignStoriesForHomePage(app *application, idPrimitive primitive.ObjectID) []dtos.CampaignStoriesDTO {
+	oneTimeCampaigns, _ := app.oneTimeCampaign.All()
+	multipleTimeCampaigns, _ := app.multipleTimeCampaign.All()
+	allCampaigns :=[]dtos.CampaignStoriesDTO{}
+	for _, campaign := range oneTimeCampaigns {
+		if	campaign.Campaign.User.Hex()!=idPrimitive.Hex() {
+
+			if campaign.Campaign.Type == "story" {
+				if isTimeForExposure(campaign.Time, campaign.Date) {
+					if isGenderOk(campaign.Campaign.User.Hex(), campaign.Campaign.TargetGroup.Gender) {
+						if isDateOfBirthOk(campaign.Campaign.User.Hex(), campaign.Campaign.TargetGroup.DateOne, campaign.Campaign.TargetGroup.DateTwo) {
+							if isLocationOk(campaign.Campaign.User.Hex(), campaign.Campaign.TargetGroup.Location) {
+								var CampaignStoriesDTO = dtos.CampaignStoriesDTO{
+									CampaignId: campaign.Id,
+									UserId:     campaign.Campaign.User,
+									Type:      "oneTime",
+									Link:       campaign.Campaign.Link,
+								}
+								allCampaigns = append(allCampaigns, CampaignStoriesDTO)
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+	for _, campaign := range multipleTimeCampaigns {
+		if	campaign.Campaign.User.Hex()!=idPrimitive.Hex() {
+
+			if campaign.Campaign.Type == "story" {
+				if isTimeForExposureMultiple(campaign.StartTime, campaign.EndTime, campaign.DesiredNumber) {
+					if isGenderOk(campaign.Campaign.User.Hex(), campaign.Campaign.TargetGroup.Gender) {
+						if isDateOfBirthOk(campaign.Campaign.User.Hex(), campaign.Campaign.TargetGroup.DateOne, campaign.Campaign.TargetGroup.DateTwo) {
+							if isLocationOk(campaign.Campaign.User.Hex(), campaign.Campaign.TargetGroup.Location) {
+								var CampaignStoriesDTO = dtos.CampaignStoriesDTO{
+									CampaignId: campaign.Id,
+									UserId:     campaign.Campaign.User,
+									Type:       "multiple",
+									Link:       campaign.Campaign.Link,
+								}
+								allCampaigns = append(allCampaigns, CampaignStoriesDTO)
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+	return allCampaigns
+}
+
+
+
+

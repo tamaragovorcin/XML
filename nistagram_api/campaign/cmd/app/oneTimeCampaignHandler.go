@@ -120,6 +120,7 @@ func (app *application) insertOneTimeCampaign(w http.ResponseWriter, req *http.R
 		Link : dto.Link,
 		Description :dto.Description,
 		Partnerships :getPartnerships(dto.PartnershipsRequests),
+		Type : dto.Type,
 	}
 	var oneTimeCampaign = models.OneTimeCampaign{
 		Campaign:   campaign,
@@ -298,6 +299,7 @@ func (app *application) acceptPartnershipRequestOneTime(w http.ResponseWriter, r
 		Likes : campaign.Campaign.Likes,
 		Dislikes: campaign.Campaign.Dislikes,
 		Comments: campaign.Campaign.Comments,
+		Type : campaign.Campaign.Type,
 	}
 	var oneTimeCampaign = models.OneTimeCampaign{
 		Id: campaign.Id,
@@ -357,6 +359,8 @@ func (app *application) deletePartnershipRequestOneTime(w http.ResponseWriter, r
 		Likes : campaign.Campaign.Likes,
 		Dislikes: campaign.Campaign.Dislikes,
 		Comments: campaign.Campaign.Comments,
+		Type : campaign.Campaign.Type,
+
 	}
 
 
@@ -394,6 +398,8 @@ func handleDeletePartnerships(partnerships []models.Partnership, id primitive.Ob
 func (app *application) getOneTimeHomePage(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	userId := vars["userId"]
+	typeString := vars["type"]
+
 	userIdPrimitive, _ := primitive.ObjectIDFromHex(userId)
 	allPosts, _ :=app.oneTimeCampaign.All()
 	campaigns,err :=findNotMyOneTimeCampaigns(allPosts,userIdPrimitive)
@@ -402,18 +408,18 @@ func (app *application) getOneTimeHomePage(w http.ResponseWriter, r *http.Reques
 	}
 	campaignResponse := []dtos.CampaignDTO{}
 	for _, campaign := range campaigns {
-		if isTimeForExposure(campaign.Time,campaign.Date){
-			if isGenderOk(userId,campaign.Campaign.TargetGroup.Gender) {
-				if isDateOfBirthOk(userId,campaign.Campaign.TargetGroup.DateOne,campaign.Campaign.TargetGroup.DateTwo) {
-					if isLocationOk(userId,campaign.Campaign.TargetGroup.Location) {
-						contentType := app.GetFileTypeByPostId(campaign.Id)
-						campaignResponse = append(campaignResponse, campaignToResponseInfluencer(campaign,contentType))
+		if campaign.Campaign.Type==typeString {
+			if isTimeForExposure(campaign.Time,campaign.Date){
+				if isGenderOk(userId,campaign.Campaign.TargetGroup.Gender) {
+					if isDateOfBirthOk(userId,campaign.Campaign.TargetGroup.DateOne,campaign.Campaign.TargetGroup.DateTwo) {
+						if isLocationOk(userId,campaign.Campaign.TargetGroup.Location) {
+							contentType := app.GetFileTypeByPostId(campaign.Id)
+							campaignResponse = append(campaignResponse, campaignToResponseInfluencer(campaign,contentType))
+						}
 					}
 				}
 			}
 		}
-
-
 	}
 
 	imagesMarshaled, err := json.Marshal(campaignResponse)
@@ -446,6 +452,7 @@ func datePlusTime(date, timeOfDay string) (time.Time, error) {
 func (app *application) getOneTimeHomePagePromote(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	userId := vars["userId"]
+	typeString := vars["type"]
 	userIdPrimitive, _ := primitive.ObjectIDFromHex(userId)
 	allPosts, _ :=app.oneTimeCampaign.All()
 	campaigns,err :=findNotMyOneTimeCampaigns(allPosts,userIdPrimitive)
@@ -454,24 +461,27 @@ func (app *application) getOneTimeHomePagePromote(w http.ResponseWriter, r *http
 	}
 	campaignResponse := []dtos.CampaignDTO{}
 	for _, campaign := range campaigns {
-		if isTimeForExposure(campaign.Time,campaign.Date){
+		if campaign.Campaign.Type==typeString {
+			if isTimeForExposure(campaign.Time,campaign.Date){
 
-			if campaignHasPartnerships(campaign.Campaign.Partnerships) {
-				if isGenderOk(userId, campaign.Campaign.TargetGroup.Gender) {
-					if isDateOfBirthOk(userId, campaign.Campaign.TargetGroup.DateOne, campaign.Campaign.TargetGroup.DateTwo) {
-						if isLocationOk(userId, campaign.Campaign.TargetGroup.Location) {
-							for _, partnership := range campaign.Campaign.Partnerships {
-								if partnership.Approved {
-									contentType := app.GetFileTypeByPostId(campaign.Id)
-									campaignResponse = append(campaignResponse, campaignToResponseInfluencerHomePage(campaign, contentType, partnership.Influencer))
+				if campaignHasPartnerships(campaign.Campaign.Partnerships) {
+					if isGenderOk(userId, campaign.Campaign.TargetGroup.Gender) {
+						if isDateOfBirthOk(userId, campaign.Campaign.TargetGroup.DateOne, campaign.Campaign.TargetGroup.DateTwo) {
+							if isLocationOk(userId, campaign.Campaign.TargetGroup.Location) {
+								for _, partnership := range campaign.Campaign.Partnerships {
+									if partnership.Approved {
+										contentType := app.GetFileTypeByPostId(campaign.Id)
+										campaignResponse = append(campaignResponse, campaignToResponseInfluencerHomePage(campaign, contentType, partnership.Influencer))
+									}
 								}
 							}
-						}
 
+						}
 					}
 				}
 			}
 		}
+
 	}
 
 	imagesMarshaled, err := json.Marshal(campaignResponse)

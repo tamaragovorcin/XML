@@ -51,11 +51,11 @@ func (app *application) routes() *mux.Router {
 	r.HandleFunc("/promoteMultiple/{userId}", app.getInfluecnersMultipleCampaigns).Methods("GET")
 	r.HandleFunc("/promoteOneTime/{userId}", app.getInfluencersOneTimeCampaigns).Methods("GET")
 
-	r.HandleFunc("/multipleHomePage/{userId}", app.getMultipleHomePage).Methods("GET")
-	r.HandleFunc("/oneTimeHomePage/{userId}", app.getOneTimeHomePage).Methods("GET")
+	r.HandleFunc("/multipleHomePage/{userId}/{type}", app.getMultipleHomePage).Methods("GET")
+	r.HandleFunc("/oneTimeHomePage/{userId}/{type}", app.getOneTimeHomePage).Methods("GET")
 
-	r.HandleFunc("/multipleHomePage/promote/{userId}", app.getMultipleHomePagePromote).Methods("GET")
-	r.HandleFunc("/oneTimeHomePage/promote/{userId}", app.getOneTimeHomePagePromote).Methods("GET")
+	r.HandleFunc("/multipleHomePage/promote/{userId}/{type}", app.getMultipleHomePagePromote).Methods("GET")
+	r.HandleFunc("/oneTimeHomePage/promote/{userId}/{type}", app.getOneTimeHomePagePromote).Methods("GET")
 
 	r.HandleFunc("/oneTimeCampaign/like/", app.likeOneTimeCampaign).Methods("POST")
 	r.HandleFunc("/oneTimeCampaign/dislike/", app.dislikeOneTimeCampaign).Methods("POST")
@@ -78,6 +78,7 @@ func (app *application) routes() *mux.Router {
 	r.HandleFunc("/oneTimeCampaign/clickLink/", app.clickLinkOneTimeCampaign).Methods("POST")
 
 	r.HandleFunc("/bestPromoters/", app.getBestInfluencers).Methods("GET")
+	r.HandleFunc("/storyCampaigns/{userId}", app.getStoryCampaignsForHomePage).Methods("GET")
 
 	return r
 }

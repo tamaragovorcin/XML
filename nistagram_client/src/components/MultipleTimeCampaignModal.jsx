@@ -76,12 +76,21 @@ class MultipleTimeCampaignModal extends Component {
                               
                                 <Button
 									style={{ background: "#1977cc", marginTop: "15px", marginLeft: "40%", width: "20%" }}
-									onClick={() => this.props.handleAddMultipleTimeCampaign(this.state.campaignStartDate,this.state.campaignEndDate,this.state.campaignNumberOfRepetition)}
+									onClick={() => this.props.handleAddMultipleTimeCampaign(this.state.campaignStartDate,this.state.campaignEndDate,this.state.campaignNumberOfRepetition,"feed")}
 									className="btn btn-primary btn-md"
 									id="sendMessageButton"
 									type="button"
 								>
-									Publish
+									Publish ass feed 
+								</Button>
+									<Button
+									style={{ background: "#1977cc", marginTop: "15px", marginLeft: "40%", width: "20%" }}
+									onClick={() => this.props.handleAddMultipleTimeCampaign(this.state.campaignStartDate,this.state.campaignEndDate,this.state.campaignNumberOfRepetition,"story")}
+									className="btn btn-primary btn-md"
+									id="sendMessageButton"
+									type="button"
+								>
+									Publish as story
 									</Button>
 								
 							</div>
