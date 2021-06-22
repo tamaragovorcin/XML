@@ -45,7 +45,9 @@ class TShirtsMen extends Component {
 		}
 		return false;
 	};
-
+	handleModalClose = ()=>{
+		this.setState({openModal: false})
+	}
 	handleNameChange = (event) => {
 		this.setState({ name: event.target.value });
 	};
@@ -216,6 +218,8 @@ class TShirtsMen extends Component {
 					header="Success"
 					text="You have successfully removed the item."
 				/>
+
+				
 
 				<Address
 					buttonName="Add"
