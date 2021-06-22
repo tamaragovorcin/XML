@@ -60,10 +60,8 @@ func (m *ProductModel) Insert(product models.Product) (*mongo.InsertOneResult, e
 }
 
 // Delete will be used to delete a user
-func (m *ProductModel) Delete(id string) (*mongo.DeleteResult, error) {
-	p, err := primitive.ObjectIDFromHex(id)
-	if err != nil {
-		return nil, err
-	}
-	return m.C.DeleteOne(context.TODO(), bson.M{"_id": p})
+func (m *ProductModel) Delete(id primitive.ObjectID) (*mongo.DeleteResult, error) {
+
+
+	return m.C.DeleteOne(context.TODO(), bson.M{"_id": id})
 }
