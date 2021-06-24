@@ -194,6 +194,7 @@ func campaignMultipleToResponse(campaing models.MultipleTimeCampaign, contentTyp
 		Likes : getLikesDTOS(campaing.Campaign.Likes),
 		Dislikes : getDislikesDTOS(campaing.Campaign.Dislikes),
 		Comments: getCommentDtos(campaing.Campaign.Comments),
+		TimesShownTotal : campaing.TimesShownTotal,
 	}
 }
 

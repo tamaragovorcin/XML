@@ -272,6 +272,7 @@ func (app *application) acceptPartnershipRequestMultiple(w http.ResponseWriter, 
 		DesiredNumber: campaign.DesiredNumber,
 		ModifiedTime: campaign.ModifiedTime,
 		TimesShown: campaign.TimesShown,
+		TimesShownTotal: campaign.TimesShownTotal,
 	}
 
 
@@ -317,6 +318,8 @@ func (app *application) deletePartnershipRequestMultiple(w http.ResponseWriter, 
 		DesiredNumber: campaign.DesiredNumber,
 		TimesShown: campaign.TimesShown,
 		ModifiedTime: campaign.ModifiedTime,
+		TimesShownTotal: campaign.TimesShownTotal,
+
 	}
 	insertResult, err := app.multipleTimeCampaign.Update(oneTimeCampaign)
 	if err != nil {
@@ -465,15 +468,19 @@ func updateMultipleCampaignTimesShown(app *application, id primitive.ObjectID) {
 		Comments: campaign.Campaign.Comments,
 	}
 
-
+	timesShown :=campaign.TimesShown+1
+	if campaign.DesiredNumber==timesShown {
+		timesShown=0
+	}
 	var oneTimeCampaign = models.MultipleTimeCampaign{
 		Id: campaign.Id,
 		Campaign:   campaignOne,
 		StartTime: campaign.StartTime,
 		EndTime : campaign.EndTime,
 		DesiredNumber: campaign.DesiredNumber,
-		TimesShown: campaign.TimesShown +1,
+		TimesShown: timesShown,
 		ModifiedTime: campaign.ModifiedTime,
+		TimesShownTotal: campaign.TimesShownTotal +1,
 	}
 	_, _ = app.multipleTimeCampaign.Update(oneTimeCampaign)
 
@@ -585,8 +592,10 @@ func (app *application) likeMultipleCampaign(w http.ResponseWriter, r *http.Requ
 		StartTime: campaign.StartTime,
 		EndTime : campaign.EndTime,
 		DesiredNumber: campaign.DesiredNumber,
-		TimesShown: campaign.TimesShown +1,
+		TimesShown: campaign.TimesShown,
 		ModifiedTime: campaign.ModifiedTime,
+		TimesShownTotal: campaign.TimesShownTotal,
+
 	}
 
 	insertResult, err := app.multipleTimeCampaign.Update(oneTimeCampaign)
@@ -624,8 +633,9 @@ func (app *application) dislikeMultipleCampaign(w http.ResponseWriter, r *http.R
 		StartTime: campaign.StartTime,
 		EndTime : campaign.EndTime,
 		DesiredNumber: campaign.DesiredNumber,
-		TimesShown: campaign.TimesShown +1,
+		TimesShown: campaign.TimesShown,
 		ModifiedTime: campaign.ModifiedTime,
+		TimesShownTotal: campaign.TimesShownTotal,
 	}
 
 	insertResult, err := app.multipleTimeCampaign.Update(oneTimeCampaign)
@@ -667,8 +677,10 @@ func (app *application) commentMultipleCampaign(w http.ResponseWriter, r *http.R
 		StartTime: campaign.StartTime,
 		EndTime : campaign.EndTime,
 		DesiredNumber: campaign.DesiredNumber,
-		TimesShown: campaign.TimesShown +1,
+		TimesShown: campaign.TimesShown,
 		ModifiedTime: campaign.ModifiedTime,
+		TimesShownTotal: campaign.TimesShownTotal,
+
 	}
 
 	insertResult, err := app.multipleTimeCampaign.Update(oneTimeCampaign)
@@ -796,6 +808,11 @@ func (app *application) clickLinkMultipleCampaign(w http.ResponseWriter, r *http
 		StartTime: campaign.StartTime,
 		EndTime : campaign.EndTime,
 		DesiredNumber: campaign.DesiredNumber,
+		TimesShownTotal: campaign.TimesShownTotal,
+		TimesShown: campaign.TimesShown,
+		ModifiedTime: campaign.ModifiedTime,
+
+
 	}
 
 	insertResult, err := app.multipleTimeCampaign.Update(oneTimeCampaign)

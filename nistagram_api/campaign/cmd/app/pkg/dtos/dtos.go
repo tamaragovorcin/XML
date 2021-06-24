@@ -68,7 +68,7 @@ type CampaignDTO struct {
 	Likes []LikeDTO
 	Dislikes []LikeDTO
 	Comments []CommentDTO
-
+	TimesShownTotal int
 }
 
 type CampaignMultipleDTO struct {
