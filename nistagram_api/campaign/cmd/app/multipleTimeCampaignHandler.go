@@ -61,7 +61,6 @@ func (app *application) updateMultipleTimeCampaign(w http.ResponseWriter, req *h
 					EndTime : dto.EndTime,
 					DesiredNumber:   number,
 					ModifiedTime: time.Now(),
-
 				}
 
 				insertResult, err := app.multipleTimeCampaign.Update(oneTimeCampaign)
@@ -271,6 +270,8 @@ func (app *application) acceptPartnershipRequestMultiple(w http.ResponseWriter, 
 		StartTime: campaign.StartTime,
 		EndTime : campaign.EndTime,
 		DesiredNumber: campaign.DesiredNumber,
+		ModifiedTime: campaign.ModifiedTime,
+		TimesShown: campaign.TimesShown,
 	}
 
 
@@ -314,6 +315,8 @@ func (app *application) deletePartnershipRequestMultiple(w http.ResponseWriter, 
 		StartTime: campaign.StartTime,
 		EndTime : campaign.EndTime,
 		DesiredNumber: campaign.DesiredNumber,
+		TimesShown: campaign.TimesShown,
+		ModifiedTime: campaign.ModifiedTime,
 	}
 	insertResult, err := app.multipleTimeCampaign.Update(oneTimeCampaign)
 	if err != nil {
@@ -364,12 +367,17 @@ func (app *application) getMultipleHomePage(w http.ResponseWriter, r *http.Reque
 	campaignResponse := []dtos.CampaignMultipleDTO{}
 	for _, campaign := range campaigns {
 		if campaign.Campaign.Type==typeString {
-			if isTimeForExposureMultiple(campaign.StartTime, campaign.EndTime, campaign.DesiredNumber) {
-				if isGenderOk(userId, campaign.Campaign.TargetGroup.Gender) {
-					if isDateOfBirthOk(userId, campaign.Campaign.TargetGroup.DateOne, campaign.Campaign.TargetGroup.DateTwo) {
-						if isLocationOk(userId, campaign.Campaign.TargetGroup.Location) {
-							contentType := app.GetFileTypeByPostId(campaign.Id)
-							campaignResponse = append(campaignResponse, campaignToResponseInfluencerMultiple(campaign, contentType))
+			if isTimeForExposureMultiple(app,campaign,"agent") {
+				if iAmFollowingThisUser(userId,campaign.Campaign.User.Hex()) {
+					contentType := app.GetFileTypeByPostId(campaign.Id)
+					campaignResponse = append(campaignResponse, campaignToResponseInfluencerMultiple(campaign, contentType))
+				}else {
+					if isGenderOk(userId, campaign.Campaign.TargetGroup.Gender) {
+						if isDateOfBirthOk(userId, campaign.Campaign.TargetGroup.DateOne, campaign.Campaign.TargetGroup.DateTwo) {
+							if isLocationOk(userId, campaign.Campaign.TargetGroup.Location) {
+								contentType := app.GetFileTypeByPostId(campaign.Id)
+								campaignResponse = append(campaignResponse, campaignToResponseInfluencerMultiple(campaign, contentType))
+							}
 						}
 					}
 				}
@@ -387,23 +395,88 @@ func (app *application) getMultipleHomePage(w http.ResponseWriter, r *http.Reque
 	w.Write(imagesMarshaled)
 }
 
-func isTimeForExposureMultiple(startTime string, endTime string, number int) bool {
-	stringDateOne := startTime+"T11:45:26.371Z"
-	stringDateTwo := endTime+"T11:45:26.371Z"
+func isTimeForExposureMultiple(app *application,campaign models.MultipleTimeCampaign, typeOfUser string) bool {
+	stringDateOne := campaign.StartTime+"T11:45:26.371Z"
+	stringDateTwo := campaign.EndTime+"T00:00:01.371Z"
 	layout := "2006-01-02T15:04:05.000Z"
 
 	timeDateOne, err := time.Parse(layout, stringDateOne)
 	timeDateTwo, err := time.Parse(layout, stringDateTwo)
+
 	if err != nil {
 		fmt.Println(err)
 	}
 	timeNow :=time.Now().UTC().Add(2*time.Hour)
 
 	if timeDateOne.Before(timeNow) && timeDateTwo.After(timeNow) {
-		return true
+		n:=(24*60)/campaign.DesiredNumber
+		num:= n*(campaign.TimesShown+1)
+		fmt.Println(n)
+
+		month := timeNow.Month()
+		year :=timeNow.Year()
+		date := timeNow.Day()
+		monthInt := int(month)
+		monthString :=strconv.Itoa(monthInt)
+		if monthInt<10 {
+			monthString = "0"+monthString
+		}
+
+		dateString := strconv.Itoa(date)
+		if date<10 {
+			dateString = "0"+dateString
+		}
+		stringToday := strconv.Itoa(year)+"-"+monthString+"-"+dateString
+
+		stringTodayDateTime:= stringToday+"T00:00:01.371Z"
+		timeDateTimeToday, err := time.Parse(layout, stringTodayDateTime)
+
+		if err != nil {
+			fmt.Println(err)
+		}
+		var timeTime = timeDateTimeToday.Add(time.Duration(num)*time.Minute)
+
+		before5 := time.Now().UTC().Add(-5*time.Minute + 2*time.Hour)
+		after5 := time.Now().UTC().Add(5*time.Minute+2*time.Hour)
+
+		if timeTime.Before(after5) && timeTime.After(before5) {
+			if typeOfUser=="agent" {
+				updateMultipleCampaignTimesShown(app,campaign.Id)
+			}
+			return true
+		}
+		return false
 	}
 
 	return false
+}
+
+func updateMultipleCampaignTimesShown(app *application, id primitive.ObjectID) {
+	campaign, _ := app.multipleTimeCampaign.FindByID(id.Hex())
+	var campaignOne = models.Campaign{
+		User : campaign.Campaign.User,
+		TargetGroup : campaign.Campaign.TargetGroup,
+		Statistic  : campaign.Campaign.Statistic,
+		Link : campaign.Campaign.Link,
+		Description :campaign.Campaign.Description,
+		Partnerships: campaign.Campaign.Partnerships,
+		Likes : campaign.Campaign.Likes,
+		Dislikes: campaign.Campaign.Dislikes,
+		Comments: campaign.Campaign.Comments,
+	}
+
+
+	var oneTimeCampaign = models.MultipleTimeCampaign{
+		Id: campaign.Id,
+		Campaign:   campaignOne,
+		StartTime: campaign.StartTime,
+		EndTime : campaign.EndTime,
+		DesiredNumber: campaign.DesiredNumber,
+		TimesShown: campaign.TimesShown +1,
+		ModifiedTime: campaign.ModifiedTime,
+	}
+	_, _ = app.multipleTimeCampaign.Update(oneTimeCampaign)
+
 }
 func (app *application) getMultipleHomePagePromote(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
@@ -420,17 +493,23 @@ func (app *application) getMultipleHomePagePromote(w http.ResponseWriter, r *htt
 	for _, campaign := range campaigns {
 		if campaign.Campaign.Type==typeString {
 
-			if isTimeForExposureMultiple(campaign.StartTime, campaign.EndTime, campaign.DesiredNumber) {
+			if isTimeForExposureMultiple(app,campaign,"promote") {
 
 				if campaignHasPartnerships(campaign.Campaign.Partnerships) {
+					for _, partnership := range campaign.Campaign.Partnerships {
+						if partnership.Approved {
+							if iAmFollowingThisUser(userId,partnership.Influencer.Hex()) {
+								contentType := app.GetFileTypeByPostId(campaign.Id)
+								campaignResponse = append(campaignResponse, campaignToResponseInfluencerMultipleHomePage(campaign, contentType, partnership.Influencer))
+							}else {
+								if isGenderOk(userId, campaign.Campaign.TargetGroup.Gender) {
+									if isDateOfBirthOk(userId, campaign.Campaign.TargetGroup.DateOne, campaign.Campaign.TargetGroup.DateTwo) {
+										if isLocationOk(userId, campaign.Campaign.TargetGroup.Location) {
 
-					if isGenderOk(userId, campaign.Campaign.TargetGroup.Gender) {
-						if isDateOfBirthOk(userId, campaign.Campaign.TargetGroup.DateOne, campaign.Campaign.TargetGroup.DateTwo) {
-							if isLocationOk(userId, campaign.Campaign.TargetGroup.Location) {
-								for _, partnership := range campaign.Campaign.Partnerships {
-									if partnership.Approved {
-										contentType := app.GetFileTypeByPostId(campaign.Id)
-										campaignResponse = append(campaignResponse, campaignToResponseInfluencerMultipleHomePage(campaign, contentType, partnership.Influencer))
+											contentType := app.GetFileTypeByPostId(campaign.Id)
+											campaignResponse = append(campaignResponse, campaignToResponseInfluencerMultipleHomePage(campaign, contentType, partnership.Influencer))
+
+										}
 									}
 								}
 							}
@@ -506,6 +585,8 @@ func (app *application) likeMultipleCampaign(w http.ResponseWriter, r *http.Requ
 		StartTime: campaign.StartTime,
 		EndTime : campaign.EndTime,
 		DesiredNumber: campaign.DesiredNumber,
+		TimesShown: campaign.TimesShown +1,
+		ModifiedTime: campaign.ModifiedTime,
 	}
 
 	insertResult, err := app.multipleTimeCampaign.Update(oneTimeCampaign)
@@ -543,6 +624,8 @@ func (app *application) dislikeMultipleCampaign(w http.ResponseWriter, r *http.R
 		StartTime: campaign.StartTime,
 		EndTime : campaign.EndTime,
 		DesiredNumber: campaign.DesiredNumber,
+		TimesShown: campaign.TimesShown +1,
+		ModifiedTime: campaign.ModifiedTime,
 	}
 
 	insertResult, err := app.multipleTimeCampaign.Update(oneTimeCampaign)
@@ -584,6 +667,8 @@ func (app *application) commentMultipleCampaign(w http.ResponseWriter, r *http.R
 		StartTime: campaign.StartTime,
 		EndTime : campaign.EndTime,
 		DesiredNumber: campaign.DesiredNumber,
+		TimesShown: campaign.TimesShown +1,
+		ModifiedTime: campaign.ModifiedTime,
 	}
 
 	insertResult, err := app.multipleTimeCampaign.Update(oneTimeCampaign)
