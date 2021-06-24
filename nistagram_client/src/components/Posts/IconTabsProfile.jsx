@@ -774,7 +774,12 @@ render(){
                             </tr>
                             <tr hidden={ post.CampaignType === "oneTime"}>
                                 <td colSpan="3">
-                                <label>Desired number of publishing: &nbsp;</label>{post.DesiredNumber}
+                                <label>Desired number of publishing in one day: &nbsp;</label>{post.DesiredNumber}
+                                </td>
+                            </tr>
+                            <tr hidden={ post.CampaignType === "oneTime"}>
+                                <td colSpan="3">
+                                <label>Number of publishments: &nbsp;</label>{post.TimesShownTotal}
                                 </td>
                             </tr>
                             <tr>

@@ -410,14 +410,20 @@ func (app *application) getOneTimeHomePage(w http.ResponseWriter, r *http.Reques
 	for _, campaign := range campaigns {
 		if campaign.Campaign.Type==typeString {
 			if isTimeForExposure(campaign.Time,campaign.Date){
-				if isGenderOk(userId,campaign.Campaign.TargetGroup.Gender) {
-					if isDateOfBirthOk(userId,campaign.Campaign.TargetGroup.DateOne,campaign.Campaign.TargetGroup.DateTwo) {
-						if isLocationOk(userId,campaign.Campaign.TargetGroup.Location) {
-							contentType := app.GetFileTypeByPostId(campaign.Id)
-							campaignResponse = append(campaignResponse, campaignToResponseInfluencer(campaign,contentType))
+				if iAmFollowingThisUser(userId,campaign.Campaign.User.Hex()) {
+					contentType := app.GetFileTypeByPostId(campaign.Id)
+					campaignResponse = append(campaignResponse, campaignToResponseInfluencer(campaign, contentType))
+				} else {
+						if isGenderOk(userId, campaign.Campaign.TargetGroup.Gender) {
+							if isDateOfBirthOk(userId, campaign.Campaign.TargetGroup.DateOne, campaign.Campaign.TargetGroup.DateTwo) {
+								if isLocationOk(userId, campaign.Campaign.TargetGroup.Location) {
+									contentType := app.GetFileTypeByPostId(campaign.Id)
+									campaignResponse = append(campaignResponse, campaignToResponseInfluencer(campaign, contentType))
+								}
+							}
 						}
 					}
-				}
+
 			}
 		}
 	}
@@ -437,7 +443,7 @@ func isTimeForExposure(timeDate string, dateDate string) bool {
 	if err != nil {
 		fmt.Println(err)
 	}
-
+fmt.Println()
 	before5 := time.Now().UTC().Add(-5*time.Minute + 2*time.Hour)
 	after5 := time.Now().UTC().Add(5*time.Minute+2*time.Hour)
 
@@ -465,19 +471,26 @@ func (app *application) getOneTimeHomePagePromote(w http.ResponseWriter, r *http
 			if isTimeForExposure(campaign.Time,campaign.Date){
 
 				if campaignHasPartnerships(campaign.Campaign.Partnerships) {
-					if isGenderOk(userId, campaign.Campaign.TargetGroup.Gender) {
-						if isDateOfBirthOk(userId, campaign.Campaign.TargetGroup.DateOne, campaign.Campaign.TargetGroup.DateTwo) {
-							if isLocationOk(userId, campaign.Campaign.TargetGroup.Location) {
-								for _, partnership := range campaign.Campaign.Partnerships {
-									if partnership.Approved {
-										contentType := app.GetFileTypeByPostId(campaign.Id)
-										campaignResponse = append(campaignResponse, campaignToResponseInfluencerHomePage(campaign, contentType, partnership.Influencer))
+					for _, partnership := range campaign.Campaign.Partnerships {
+						if partnership.Approved {
+							if iAmFollowingThisUser(userId,partnership.Influencer.Hex()) {
+								contentType := app.GetFileTypeByPostId(campaign.Id)
+								campaignResponse = append(campaignResponse, campaignToResponseInfluencerHomePage(campaign, contentType, partnership.Influencer))
+							}else {
+								if isGenderOk(userId, campaign.Campaign.TargetGroup.Gender) {
+									if isDateOfBirthOk(userId, campaign.Campaign.TargetGroup.DateOne, campaign.Campaign.TargetGroup.DateTwo) {
+										if isLocationOk(userId, campaign.Campaign.TargetGroup.Location) {
+											contentType := app.GetFileTypeByPostId(campaign.Id)
+											campaignResponse = append(campaignResponse, campaignToResponseInfluencerHomePage(campaign, contentType, partnership.Influencer))
+
+										}
+
 									}
 								}
 							}
-
 						}
 					}
+
 				}
 			}
 		}

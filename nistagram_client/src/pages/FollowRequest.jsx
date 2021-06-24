@@ -14,7 +14,7 @@ class FollowRequest extends Component {
         blockedUsers : [],
         textSuccessfulModal : "",
         openModal : false,
-
+        followRecommendations : []
     };
 
     componentDidMount() {
@@ -23,6 +23,7 @@ class FollowRequest extends Component {
         this.getFollowing()
         this.getFollowRequestsByMe()
         this.getBlockedUsers()
+        this.getFollowRecommendations()
 	}
     handleAccept  = (followerId) => {
         let id = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length-1);
@@ -122,9 +123,58 @@ class FollowRequest extends Component {
             console.log(err);
         });
     }
+    getFollowRecommendations = ()=> {
+        let id = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length-1);
+        const dto = {id: id}
+        Axios.post(BASE_URL + "/api/userInteraction/followRecommendations", dto)
+			.then((res) => {
+				this.setState({ followRecommendations: res.data });
+			})
+			.catch((err) => {
+				console.log(err)
+			});
+    }
     handleModalClose = () => {
 		this.setState({ openModal: false });
 	};
+
+    handleFollowUser = (userId, privacy)=> {
+        let id = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length-1);
+	
+		const followReguestDTO = { follower: id, following : userId};
+		if(privacy==="private") {
+
+			Axios.post(BASE_URL + "/api/userInteraction/api/followRequest", followReguestDTO)
+			.then((res) => {
+				                this.getFollowRequestsByMe()
+                this.getFollowRecommendations()
+
+				this.setState({ textSuccessfulModal: "You have successfully sent follow request." });
+				this.setState({ openModal: true });
+
+			})
+			.catch ((err) => {
+				console.log(err);
+			});
+		}else {
+			Axios.post(BASE_URL + "/api/userInteraction/api/followPublic", followReguestDTO)
+			.then((res) => {
+				
+                this.getFollowing()
+                this.getFollowRecommendations()
+				this.setState({ textSuccessfulModal: "You are now following this user." });
+				this.setState({ openModal: true });
+
+			})
+			.catch ((err) => {
+				console.log(err);
+			});
+		}
+    }
+    handleTransferToFollowerPage = (userId) => {
+        window.location = "#/followerProfilePage/" + userId;
+    }
+
 	render() {
 		return (
             <React.Fragment>
@@ -268,6 +318,39 @@ class FollowRequest extends Component {
                                                     <td>
                                                     <button  className="btn btn-success mt-1" onClick={() => this.handleUnblock(follower.Id)} type="button"><i className="icofont-subscribe mr-1"></i>Unblock</button>
 
+                                                    </td>
+                                                </tr>
+
+                                            ))}
+                                            <tr>
+                                                <td></td>
+                                                <td></td>
+                                                <td></td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                            </div>
+                        </div>
+                        <div className="container">
+                        <div className="container" style={{ marginTop: "10rem", marginRight: "10rem" }}>
+                            <h3>
+                               Follow recommendations:
+                            </h3>
+                            <table className="table" style={{ width: "100%" }}>
+                                        <tbody>
+                                        {this.state.followRecommendations.map((user) => (
+                                                <tr id={user.Id} key={user.Id}>
+                                                    
+                                                    <td >
+                                                        <div style={{ marginTop: "1rem"}}>
+                                                            <b>Username: </b> {user.Username}
+                                                        </div>
+                                                    </td>
+                                                    <td>
+                                                        <button  className="btn btn-success mt-1" onClick={() => this.handleTransferToFollowerPage(user.Id)} type="button"><i className="icofont-subscribe mr-1"></i>See profile</button>
+                                                    </td>
+                                                    <td>
+                                                        <button  className="btn btn-success mt-1" onClick={() => this.handleFollowUser(user.Id, user.Privacy)} type="button"><i className="icofont-subscribe mr-1"></i>Follow</button>
                                                     </td>
                                                 </tr>
 

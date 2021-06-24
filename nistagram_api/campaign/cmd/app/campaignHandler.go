@@ -5,6 +5,7 @@ import (
 	"campaigns/pkg/dtos"
 	"campaigns/pkg/models"
 	"encoding/json"
+	"fmt"
 	"github.com/gorilla/mux"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"image"
@@ -16,6 +17,7 @@ import (
 	"os"
 	"sort"
 	"strconv"
+	"strings"
 )
 
 
@@ -192,6 +194,7 @@ func campaignMultipleToResponse(campaing models.MultipleTimeCampaign, contentTyp
 		Likes : getLikesDTOS(campaing.Campaign.Likes),
 		Dislikes : getDislikesDTOS(campaing.Campaign.Dislikes),
 		Comments: getCommentDtos(campaing.Campaign.Comments),
+		TimesShownTotal : campaing.TimesShownTotal,
 	}
 }
 
@@ -432,21 +435,37 @@ func findCampaignStoriesForHomePage(app *application, idPrimitive primitive.Obje
 	oneTimeCampaigns, _ := app.oneTimeCampaign.All()
 	multipleTimeCampaigns, _ := app.multipleTimeCampaign.All()
 	allCampaigns :=[]dtos.CampaignStoriesDTO{}
+	fmt.Println("1")
 	for _, campaign := range oneTimeCampaigns {
 		if	campaign.Campaign.User.Hex()!=idPrimitive.Hex() {
 
 			if campaign.Campaign.Type == "story" {
+
 				if isTimeForExposure(campaign.Time, campaign.Date) {
-					if isGenderOk(campaign.Campaign.User.Hex(), campaign.Campaign.TargetGroup.Gender) {
-						if isDateOfBirthOk(campaign.Campaign.User.Hex(), campaign.Campaign.TargetGroup.DateOne, campaign.Campaign.TargetGroup.DateTwo) {
-							if isLocationOk(campaign.Campaign.User.Hex(), campaign.Campaign.TargetGroup.Location) {
-								var CampaignStoriesDTO = dtos.CampaignStoriesDTO{
-									CampaignId: campaign.Id,
-									UserId:     campaign.Campaign.User,
-									Type:      "oneTime",
-									Link:       campaign.Campaign.Link,
+
+					if iAmFollowingThisUser(idPrimitive.Hex(),campaign.Campaign.User.Hex()) {
+
+						var CampaignStoriesDTO = dtos.CampaignStoriesDTO{
+							CampaignId: campaign.Id,
+							UserId:     campaign.Campaign.User,
+							Type:      "oneTime",
+							Link:       campaign.Campaign.Link,
+						}
+						allCampaigns = append(allCampaigns, CampaignStoriesDTO)
+					} else {
+
+						if isGenderOk(idPrimitive.Hex(), campaign.Campaign.TargetGroup.Gender) {
+							if isDateOfBirthOk(idPrimitive.Hex(), campaign.Campaign.TargetGroup.DateOne, campaign.Campaign.TargetGroup.DateTwo) {
+								if isLocationOk(idPrimitive.Hex(), campaign.Campaign.TargetGroup.Location) {
+
+									var CampaignStoriesDTO = dtos.CampaignStoriesDTO{
+										CampaignId: campaign.Id,
+										UserId:     campaign.Campaign.User,
+										Type:       "oneTime",
+										Link:       campaign.Campaign.Link,
+									}
+									allCampaigns = append(allCampaigns, CampaignStoriesDTO)
 								}
-								allCampaigns = append(allCampaigns, CampaignStoriesDTO)
 							}
 						}
 					}
@@ -458,17 +477,105 @@ func findCampaignStoriesForHomePage(app *application, idPrimitive primitive.Obje
 		if	campaign.Campaign.User.Hex()!=idPrimitive.Hex() {
 
 			if campaign.Campaign.Type == "story" {
-				if isTimeForExposureMultiple(campaign.StartTime, campaign.EndTime, campaign.DesiredNumber) {
-					if isGenderOk(campaign.Campaign.User.Hex(), campaign.Campaign.TargetGroup.Gender) {
-						if isDateOfBirthOk(campaign.Campaign.User.Hex(), campaign.Campaign.TargetGroup.DateOne, campaign.Campaign.TargetGroup.DateTwo) {
-							if isLocationOk(campaign.Campaign.User.Hex(), campaign.Campaign.TargetGroup.Location) {
+				if isTimeForExposureMultiple(app,campaign,"agent") {
+					if iAmFollowingThisUser(idPrimitive.Hex(), campaign.Campaign.User.Hex()) {
+						var CampaignStoriesDTO = dtos.CampaignStoriesDTO{
+							CampaignId: campaign.Id,
+							UserId:     campaign.Campaign.User,
+							Type:       "multiple",
+							Link:       campaign.Campaign.Link,
+						}
+						allCampaigns = append(allCampaigns, CampaignStoriesDTO)
+					} else {
+						if isGenderOk(idPrimitive.Hex(), campaign.Campaign.TargetGroup.Gender) {
+							if isDateOfBirthOk(idPrimitive.Hex(), campaign.Campaign.TargetGroup.DateOne, campaign.Campaign.TargetGroup.DateTwo) {
+								if isLocationOk(idPrimitive.Hex(), campaign.Campaign.TargetGroup.Location) {
+
+									var CampaignStoriesDTO = dtos.CampaignStoriesDTO{
+										CampaignId: campaign.Id,
+										UserId:     campaign.Campaign.User,
+										Type:       "multiple",
+										Link:       campaign.Campaign.Link,
+									}
+									allCampaigns = append(allCampaigns, CampaignStoriesDTO)
+								}
+							}
+						}
+					}
+				}
+
+			}
+		}
+	}
+	for _, campaign := range oneTimeCampaigns {
+		if campaign.Campaign.Type=="story" {
+
+			if isTimeForExposure(campaign.Time, campaign.Date) {
+
+				if campaignHasPartnerships(campaign.Campaign.Partnerships) {
+					for _, partnership := range campaign.Campaign.Partnerships {
+						if partnership.Approved {
+							if iAmFollowingThisUser(idPrimitive.Hex(), partnership.Influencer.Hex()) {
 								var CampaignStoriesDTO = dtos.CampaignStoriesDTO{
 									CampaignId: campaign.Id,
-									UserId:     campaign.Campaign.User,
-									Type:       "multiple",
+									UserId:     partnership.Influencer,
+									Type:      "oneTime",
 									Link:       campaign.Campaign.Link,
 								}
 								allCampaigns = append(allCampaigns, CampaignStoriesDTO)
+							} else {
+								if isGenderOk(idPrimitive.Hex(), campaign.Campaign.TargetGroup.Gender) {
+									if isDateOfBirthOk(idPrimitive.Hex(), campaign.Campaign.TargetGroup.DateOne, campaign.Campaign.TargetGroup.DateTwo) {
+										if isLocationOk(idPrimitive.Hex(), campaign.Campaign.TargetGroup.Location) {
+
+											var CampaignStoriesDTO = dtos.CampaignStoriesDTO{
+												CampaignId: campaign.Id,
+												UserId:     partnership.Influencer,
+												Type:      "oneTime",
+												Link:       campaign.Campaign.Link,
+											}
+											allCampaigns = append(allCampaigns, CampaignStoriesDTO)
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+		for _, campaign := range multipleTimeCampaigns {
+			if campaign.Campaign.Type == "story" {
+
+				if isTimeForExposureMultiple(app,campaign,"promote") {
+
+					if campaignHasPartnerships(campaign.Campaign.Partnerships) {
+						for _, partnership := range campaign.Campaign.Partnerships {
+							if partnership.Approved {
+								if iAmFollowingThisUser(idPrimitive.Hex(), partnership.Influencer.Hex()) {
+									var CampaignStoriesDTO = dtos.CampaignStoriesDTO{
+										CampaignId: campaign.Id,
+										UserId:     partnership.Influencer,
+										Type:       "multiple",
+										Link:       campaign.Campaign.Link,
+									}
+									allCampaigns = append(allCampaigns, CampaignStoriesDTO)
+								} else {
+									if isGenderOk(idPrimitive.Hex(), campaign.Campaign.TargetGroup.Gender) {
+										if isDateOfBirthOk(idPrimitive.Hex(), campaign.Campaign.TargetGroup.DateOne, campaign.Campaign.TargetGroup.DateTwo) {
+											if isLocationOk(idPrimitive.Hex(), campaign.Campaign.TargetGroup.Location) {
+
+												var CampaignStoriesDTO = dtos.CampaignStoriesDTO{
+													CampaignId: campaign.Id,
+													UserId:     partnership.Influencer,
+													Type:       "multiple",
+													Link:       campaign.Campaign.Link,
+												}
+												allCampaigns = append(allCampaigns, CampaignStoriesDTO)
+											}
+										}
+									}
+								}
 							}
 						}
 					}
@@ -479,6 +586,34 @@ func findCampaignStoriesForHomePage(app *application, idPrimitive primitive.Obje
 	return allCampaigns
 }
 
+func iAmFollowingThisUser(logged string, userWithPost string) bool {
+
+	postBody, _ := json.Marshal(map[string]string{
+		"follower":  logged,
+		"following": userWithPost,
+	})
+	responseBody := bytes.NewBuffer(postBody)
+	//Leverage Go's HTTP Post function to make request
+	resp, err := http.Post("http://localhost:80/api/userInteraction/api/checkInteraction", "application/json", responseBody)
+	//Handle Error
+	if err != nil {
+		log.Fatalf("An Error Occured %v", err)
+	}
+	defer resp.Body.Close()
+	//Read the response body
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		log.Fatalln(err)
+	}
+	sb := string(body)
+	sbbtext := strings.ToLower(strings.Trim(sb," \r\n"))
+
+	if sbbtext=="true" {
+		return true
+	} else {
+		return false
+	}
+}
 
 
 

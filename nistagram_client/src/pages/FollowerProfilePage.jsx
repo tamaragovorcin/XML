@@ -16,6 +16,7 @@ import { Lock } from "@material-ui/icons";
 import { Icon } from "@material-ui/core";
 import { BASE_URL } from "../constants.js";
 import {IoMdNotificationsOutline} from 'react-icons/io'
+import {GoVerified} from 'react-icons/go'
 
 class FollowerProfilePage extends React.Component {
 	
@@ -90,6 +91,8 @@ class FollowerProfilePage extends React.Component {
 		isInfluencer : false,
 		oneTimeCampaignsInfluencer : [],
         multipleCampaignsInfluencer : [],
+		isVerified : false,
+		categoryString : "",
 	}
 	hasRole = (reqRole) => {
 		let roles = JSON.parse(localStorage.getItem("keyRole"));
@@ -130,8 +133,8 @@ class FollowerProfilePage extends React.Component {
 					biography : res.data.Biography,
 					private : res.data.Private,
 					numberOfPosts : res.data.numberOfPosts,
-					numberOfFollowers : res.data.numberOfFollowers,
-					numberOfFollowings : res.data.numberOfFollowings
+					isVerified : res.data.Verified,
+					categoryString : res.data.Category,
 				});
 
 			})
@@ -883,7 +886,14 @@ class FollowerProfilePage extends React.Component {
 														<label >{this.state.webSite}</label>
 													</td>
 												</div>
-
+												<div hidden={!this.state.isVerified}>
+													<td>
+														<GoVerified />
+													</td>
+													<td>
+														<label >{this.state.categoryString}</label>
+													</td>
+												</div>
 
 											</td>
 
