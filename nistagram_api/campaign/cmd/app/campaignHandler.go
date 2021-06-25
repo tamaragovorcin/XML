@@ -157,6 +157,27 @@ func(app *application) GetFileByCampaignId(w http.ResponseWriter, r *http.Reques
 	io.Copy(w,file)
 	return
 }
+func campaignToResponseAgentApp(campaing models.OneTimeCampaign, contentType string) dtos.CampaignAgentAppDTO {
+	return dtos.CampaignAgentAppDTO{
+		Id: campaing.Id.Hex(),
+		User: campaing.Campaign.User.Hex(),
+		Description: campaing.Campaign.Description,
+		Time: campaing.Time,
+		Date: campaing.Date,
+		Link: campaing.Campaign.Link,
+		ContentType: contentType,
+		CampaignType:  "oneTime",
+		NumberOfLikes : len(campaing.Campaign.Likes),
+		NumberOfDislikes : len(campaing.Campaign.Dislikes),
+		NumberOfComments : len(campaing.Campaign.Comments),
+		Likes : getLikesAsStrings(campaing.Campaign.Likes),
+		Dislikes : getLikesAsStrings(campaing.Campaign.Dislikes),
+		Comments: getCommentAsStrings(campaing.Campaign.Comments),
+		BestInfluencer: getBestInfluencersUsername(campaing.Campaign.Statistic),
+		HiredInfluencers: getAllHiredInfluencers(campaing.Campaign.Statistic,campaing.Campaign.Partnerships),
+	}
+
+}
 func campaignToResponse(campaing models.OneTimeCampaign, contentType string) dtos.CampaignDTO {
 	return dtos.CampaignDTO{
 		Id: campaing.Id.Hex(),
@@ -171,10 +192,106 @@ func campaignToResponse(campaing models.OneTimeCampaign, contentType string) dto
 		NumberOfDislikes : len(campaing.Campaign.Dislikes),
 		NumberOfComments : len(campaing.Campaign.Comments),
 		Likes : getLikesDTOS(campaing.Campaign.Likes),
-		Dislikes : getDislikesDTOS(campaing.Campaign.Dislikes),
+		Dislikes : getLikesDTOS(campaing.Campaign.Dislikes),
 		Comments: getCommentDtos(campaing.Campaign.Comments),
+		BestInfluencer: getBestInfluencersUsername(campaing.Campaign.Statistic),
+		HiredInfluencers: getAllHiredInfluencers(campaing.Campaign.Statistic,campaing.Campaign.Partnerships),
 	}
 
+}
+func getCommentAsStrings(commentss []models.Comment) string {
+	commentString := ""
+	for _, comment := range commentss {
+
+		userUsername := getUserUsername(comment.Writer)
+		commentString +=userUsername + " - " + comment.Content + ","
+	}
+	if len(commentString)>1 {
+		commentString = commentString[:len(commentString)-1]
+	}
+	return commentString
+}
+
+func getLikesAsStrings(likes []primitive.ObjectID) string {
+	likesDtos := ""
+	for _, user := range likes {
+
+		userUsername := getUserUsername(user)
+		likesDtos +=userUsername
+	}
+	if len(likesDtos)>1 {
+		likesDtos = likesDtos[:len(likesDtos)-1]
+	}
+	return likesDtos
+}
+
+func getAllHiredInfluencers(statistics []models.Statistic,partnerships []models.Partnership) string {
+	allInfluencersOnCampaign :=""
+	for _, partnership := range partnerships {
+		if partnership.Approved==true {
+			allInfluencersOnCampaign += getUserUsername(partnership.Influencer)
+			numberOfClicks := getNumberOfClicksForINfluencerInCampaign(statistics,partnership.Influencer)
+			if numberOfClicks!=0 {
+				allInfluencersOnCampaign+=" ("+strconv.Itoa(numberOfClicks)+" clicks )"
+			}
+			allInfluencersOnCampaign+=","
+		}
+
+	}
+	if len(allInfluencersOnCampaign)>1 {
+		allInfluencersOnCampaign = allInfluencersOnCampaign[:len(allInfluencersOnCampaign)-1]
+
+	}
+	return allInfluencersOnCampaign
+}
+
+func getNumberOfClicksForINfluencerInCampaign(statistics []models.Statistic, influencer primitive.ObjectID) int {
+	num:=0
+	for _, statisticOne := range statistics {
+		if statisticOne.Influencer.Hex()==influencer.Hex() {
+			num = statisticOne.NumberOfClicks
+		}
+	}
+	return num
+}
+func getBestInfluencersUsername(statistic []models.Statistic) string {
+	numberOfClicks := 0
+	statisticNum := 0
+	for i, statisticOne := range statistic {
+		if statisticOne.NumberOfClicks>numberOfClicks {
+			numberOfClicks = statisticOne.NumberOfClicks
+			statisticNum = i
+		}
+	}
+
+	if numberOfClicks>0 {
+		userUsername := getUserUsername(statistic[statisticNum].Influencer)
+		return userUsername + " ("+strconv.Itoa(numberOfClicks)+" clicks )"
+	}
+	return ""
+}
+
+func campaignMultipleToResponseAgentApp(campaing models.MultipleTimeCampaign, contentType string) dtos.CampaignAgentAppDTO {
+	return dtos.CampaignAgentAppDTO{
+		Id: campaing.Id.Hex(),
+		User: campaing.Campaign.User.Hex(),
+		Description: campaing.Campaign.Description,
+		StartTime: campaing.StartTime,
+		EndTime: campaing.EndTime,
+		Link: campaing.Campaign.Link,
+		ContentType: contentType,
+		CampaignType:  "multiple",
+		DesiredNumber:  campaing.DesiredNumber,
+		NumberOfLikes : len(campaing.Campaign.Likes),
+		NumberOfDislikes : len(campaing.Campaign.Dislikes),
+		NumberOfComments : len(campaing.Campaign.Comments),
+		Likes : getLikesAsStrings(campaing.Campaign.Likes),
+		Dislikes : getLikesAsStrings(campaing.Campaign.Dislikes),
+		Comments: getCommentAsStrings(campaing.Campaign.Comments),
+		TimesShownTotal : campaing.TimesShownTotal,
+		BestInfluencer: getBestInfluencersUsername(campaing.Campaign.Statistic),
+		HiredInfluencers: getAllHiredInfluencers(campaing.Campaign.Statistic,campaing.Campaign.Partnerships),
+	}
 }
 
 func campaignMultipleToResponse(campaing models.MultipleTimeCampaign, contentType string) dtos.CampaignDTO {
@@ -192,9 +309,11 @@ func campaignMultipleToResponse(campaing models.MultipleTimeCampaign, contentTyp
 		NumberOfDislikes : len(campaing.Campaign.Dislikes),
 		NumberOfComments : len(campaing.Campaign.Comments),
 		Likes : getLikesDTOS(campaing.Campaign.Likes),
-		Dislikes : getDislikesDTOS(campaing.Campaign.Dislikes),
+		Dislikes : getLikesDTOS(campaing.Campaign.Dislikes),
 		Comments: getCommentDtos(campaing.Campaign.Comments),
 		TimesShownTotal : campaing.TimesShownTotal,
+		BestInfluencer: getBestInfluencersUsername(campaing.Campaign.Statistic),
+		HiredInfluencers: getAllHiredInfluencers(campaing.Campaign.Statistic,campaing.Campaign.Partnerships),
 	}
 }
 
@@ -615,5 +734,59 @@ func iAmFollowingThisUser(logged string, userWithPost string) bool {
 	}
 }
 
+func (app *application) getBestUsersCampaign(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	userId := vars["userId"]
+	userIdPrimitive, _ := primitive.ObjectIDFromHex(userId)
+	allPosts, _ :=app.oneTimeCampaign.All()
+	usersCampaigns,err :=findCampaignByUserId(allPosts,userIdPrimitive)
+	allMultiple, _ :=app.multipleTimeCampaign.All()
+	usersMultipeCampaigns,_ :=findMultipleTimeCampaignByUserId(allMultiple,userIdPrimitive)
+	if err != nil {
+		app.serverError(w, err)
+	}
+	campaignResponse := []dtos.CampaignAgentAppDTO{}
+	for _, campaign := range usersCampaigns {
 
+		if err != nil {
+			app.serverError(w, err)
+		}
+		contentType := app.GetFileTypeByPostId(campaign.Id)
+		campaignResponse = append(campaignResponse, campaignToResponseAgentApp(campaign,contentType))
 
+	}
+	for _, campaign := range usersMultipeCampaigns {
+
+		if err != nil {
+			app.serverError(w, err)
+		}
+		contentType := app.GetFileTypeByPostId(campaign.Id)
+		campaignResponse = append(campaignResponse, campaignMultipleToResponseAgentApp(campaign,contentType))
+
+	}
+	sort.SliceStable(campaignResponse, func(i, j int) bool {
+		return campaignResponse[i].NumberOfClicks+ campaignResponse[i].NumberOfLikes + campaignResponse[i].NumberOfComments >
+			campaignResponse[j].NumberOfClicks+ campaignResponse[j].NumberOfLikes + campaignResponse[j].NumberOfComments
+	})
+	campaignResponse3 := []dtos.CampaignAgentAppDTO{}
+
+	if len(campaignResponse)>3 {
+
+		campaignResponse2 := []dtos.CampaignAgentAppDTO{}
+		campaignResponse2 =append(campaignResponse2, campaignResponse[0])
+		campaignResponse2 =append(campaignResponse2, campaignResponse[1])
+		campaignResponse2 =append(campaignResponse2, campaignResponse[2])
+		campaignResponse3 = campaignResponse2
+	}else {
+		campaignResponse3 = campaignResponse
+
+	}
+	imagesMarshaled, err := json.Marshal(campaignResponse3)
+
+	if err != nil {
+		app.serverError(w, err)
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	w.Write(imagesMarshaled)
+}

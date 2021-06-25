@@ -782,6 +782,17 @@ render(){
                                 <label>Number of publishments: &nbsp;</label>{post.TimesShownTotal}
                                 </td>
                             </tr>
+                         
+                            <tr >
+                                <td colSpan="3">
+                                <label>Partnerships with influencers: &nbsp;</label>{post.HiredInfluencers}
+                                </td>
+                            </tr>
+                            <tr >
+                                <td colSpan="3">
+                                <label>Best influencer: &nbsp;</label>{post.BestInfluencer}
+                                </td>
+                            </tr>
                             <tr>
                                 <td>
                                   <label>Number of likes &nbsp;</label>{post.NumberOfLikes}
