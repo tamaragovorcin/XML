@@ -35,7 +35,8 @@
         <comments>comments</comments>
         <timesShownTotal>timesShownTotal</timesShownTotal>
         <bestInfluencer>bestInfluencer</bestInfluencer>
-        <HiredInfluencers>HiredInfluencers</HiredInfluencers>
+        <hiredInfluencers>hiredInfluencers</hiredInfluencers>
+        <media>media</media>
     </firstCampaign>
 
     <secondCampaign>
@@ -71,7 +72,8 @@
         <comments>comments</comments>
         <timesShownTotal>timesShownTotal</timesShownTotal>
         <bestInfluencer>bestInfluencer</bestInfluencer>
-        <HiredInfluencers>HiredInfluencers</HiredInfluencers>
+        <hiredInfluencers>hiredInfluencers</hiredInfluencers>
+        <media>media</media>
     </secondCampaign>
     <thirdCampaign>
         <id>ID</id>
@@ -106,6 +108,8 @@
         <comments>comments</comments>
         <timesShownTotal>timesShownTotal</timesShownTotal>
         <bestInfluencer>bestInfluencer</bestInfluencer>
-        <HiredInfluencers>HiredInfluencers</HiredInfluencers>
+        <hiredInfluencers>hiredInfluencers</hiredInfluencers>
+        <media>media</media>
+
     </thirdCampaign>
 </bestCampaigns>

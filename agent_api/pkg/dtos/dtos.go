@@ -131,18 +131,22 @@ type CampaignDTO struct {
 	TimesShownTotal int `xml:"timesShownTotal"`
 	BestInfluencer  string `xml:"bestInfluencer"`
 	HiredInfluencers string `xml:"hiredInfluencers"`
+	Media [] byte `xml:"media"`
 }
 
 type TargetGroup struct {
 	Gender string `xml:"gender"`
 	DateOne string `xml:"dateOne"`
 	DateTwo string `xml:"dateTwo"`
-	LocationTarget  LocationTarget `xml:"locationTarget"`
+	Location  LocationTarget `xml:"locationTarget"`
 }
 type LocationTarget struct {
+	Id primitive.ObjectID
 	Country string `xml:"country"`
 	Town string `xml:"town"`
 	Street string `xml:"street"`
+	Number int
+	PostalCode int
 }
 
 type BestCampaigns struct {
@@ -175,6 +179,8 @@ type Campaign struct {
 	TimesShownTotal int `xml:"timesShownTotal"`
 	BestInfluencer  string `xml:"bestInfluencer"`
 	HiredInfluencers string `xml:"hiredInfluencers"`
+	Media []byte `xml:"media"`
+
 }
 
 type LikeDTO struct {

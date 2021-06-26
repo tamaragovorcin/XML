@@ -406,11 +406,15 @@ func (app *application) getOneTimeHomePage(w http.ResponseWriter, r *http.Reques
 	if err != nil {
 		app.serverError(w, err)
 	}
+
 	campaignResponse := []dtos.CampaignDTO{}
 	for _, campaign := range campaigns {
+
 		if campaign.Campaign.Type==typeString {
+
 			if isTimeForExposure(campaign.Time,campaign.Date){
 				if iAmFollowingThisUser(userId,campaign.Campaign.User.Hex()) {
+
 					contentType := app.GetFileTypeByPostId(campaign.Id)
 					campaignResponse = append(campaignResponse, campaignToResponseInfluencer(campaign, contentType))
 				} else {

@@ -98,6 +98,7 @@ type CampaignAgentAppDTO struct {
 	BestInfluencer  string
 	HiredInfluencers string
 	NumberOfClicks int
+	Media []byte
 }
 
 type CampaignMultipleDTO struct {

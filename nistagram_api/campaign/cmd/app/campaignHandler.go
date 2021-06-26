@@ -157,7 +157,14 @@ func(app *application) GetFileByCampaignId(w http.ResponseWriter, r *http.Reques
 	io.Copy(w,file)
 	return
 }
-func campaignToResponseAgentApp(campaing models.OneTimeCampaign, contentType string) dtos.CampaignAgentAppDTO {
+func campaignToResponseAgentApp(campaing models.OneTimeCampaign, contentType string, media string) dtos.CampaignAgentAppDTO {
+	f, _ := os.Open(media)
+	defer f.Close()
+	image,_,_:= image.Decode(f)
+	buffer := new(bytes.Buffer)
+	if err := jpeg.Encode(buffer, image, nil); err != nil {
+		log.Println("unable to encode image.")
+	}
 	return dtos.CampaignAgentAppDTO{
 		Id: campaing.Id.Hex(),
 		User: campaing.Campaign.User.Hex(),
@@ -175,6 +182,8 @@ func campaignToResponseAgentApp(campaing models.OneTimeCampaign, contentType str
 		Comments: getCommentAsStrings(campaing.Campaign.Comments),
 		BestInfluencer: getBestInfluencersUsername(campaing.Campaign.Statistic),
 		HiredInfluencers: getAllHiredInfluencers(campaing.Campaign.Statistic,campaing.Campaign.Partnerships),
+		TargetGroup: campaing.Campaign.TargetGroup,
+		Media : buffer.Bytes(),
 	}
 
 }
@@ -217,7 +226,7 @@ func getLikesAsStrings(likes []primitive.ObjectID) string {
 	for _, user := range likes {
 
 		userUsername := getUserUsername(user)
-		likesDtos +=userUsername
+		likesDtos +=userUsername + ","
 	}
 	if len(likesDtos)>1 {
 		likesDtos = likesDtos[:len(likesDtos)-1]
@@ -271,7 +280,14 @@ func getBestInfluencersUsername(statistic []models.Statistic) string {
 	return ""
 }
 
-func campaignMultipleToResponseAgentApp(campaing models.MultipleTimeCampaign, contentType string) dtos.CampaignAgentAppDTO {
+func campaignMultipleToResponseAgentApp(campaing models.MultipleTimeCampaign, contentType string, media string) dtos.CampaignAgentAppDTO {
+	f, _ := os.Open(media)
+	defer f.Close()
+	image,_,_:= image.Decode(f)
+	buffer := new(bytes.Buffer)
+	if err := jpeg.Encode(buffer, image, nil); err != nil {
+		log.Println("unable to encode image.")
+	}
 	return dtos.CampaignAgentAppDTO{
 		Id: campaing.Id.Hex(),
 		User: campaing.Campaign.User.Hex(),
@@ -291,6 +307,9 @@ func campaignMultipleToResponseAgentApp(campaing models.MultipleTimeCampaign, co
 		TimesShownTotal : campaing.TimesShownTotal,
 		BestInfluencer: getBestInfluencersUsername(campaing.Campaign.Statistic),
 		HiredInfluencers: getAllHiredInfluencers(campaing.Campaign.Statistic,campaing.Campaign.Partnerships),
+		TargetGroup: campaing.Campaign.TargetGroup,
+		Media : buffer.Bytes(),
+
 	}
 }
 
@@ -742,6 +761,7 @@ func (app *application) getBestUsersCampaign(w http.ResponseWriter, r *http.Requ
 	usersCampaigns,err :=findCampaignByUserId(allPosts,userIdPrimitive)
 	allMultiple, _ :=app.multipleTimeCampaign.All()
 	usersMultipeCampaigns,_ :=findMultipleTimeCampaignByUserId(allMultiple,userIdPrimitive)
+	allImages,_ := app.images.All()
 	if err != nil {
 		app.serverError(w, err)
 	}
@@ -752,7 +772,8 @@ func (app *application) getBestUsersCampaign(w http.ResponseWriter, r *http.Requ
 			app.serverError(w, err)
 		}
 		contentType := app.GetFileTypeByPostId(campaign.Id)
-		campaignResponse = append(campaignResponse, campaignToResponseAgentApp(campaign,contentType))
+		image,_ := findImageByCampaignId(allImages, campaign.Id)
+		campaignResponse = append(campaignResponse, campaignToResponseAgentApp(campaign,contentType,image.Media))
 
 	}
 	for _, campaign := range usersMultipeCampaigns {
@@ -761,7 +782,9 @@ func (app *application) getBestUsersCampaign(w http.ResponseWriter, r *http.Requ
 			app.serverError(w, err)
 		}
 		contentType := app.GetFileTypeByPostId(campaign.Id)
-		campaignResponse = append(campaignResponse, campaignMultipleToResponseAgentApp(campaign,contentType))
+		image,_ := findImageByCampaignId(allImages, campaign.Id)
+
+		campaignResponse = append(campaignResponse, campaignMultipleToResponseAgentApp(campaign,contentType,image.Media))
 
 	}
 	sort.SliceStable(campaignResponse, func(i, j int) bool {
