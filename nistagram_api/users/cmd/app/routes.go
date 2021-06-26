@@ -12,6 +12,7 @@ func (app *application) routes() *mux.Router {
 	r.HandleFunc("/api/all/{userId}", app.getAllUsersWithoutLogged).Methods("GET")
 
 	r.HandleFunc("/api/{id}", app.findUserByID).Methods("GET")
+
 	r.HandleFunc("/api/user/update/", app.updateUser).Methods("POST")
 	r.HandleFunc("/api/", app.insertUser).Methods("POST")
 	r.HandleFunc("/admin/", app.insertAdmin).Methods("POST")
@@ -56,6 +57,8 @@ func (app *application) routes() *mux.Router {
 
 	r.HandleFunc("/api/user/privacySettings/", app.changePrivacySettings).Methods("POST")
 	r.HandleFunc("/api/user/privacySettings/{userId}",app.getUsersPrivacySettings).Methods("GET")
+	r.HandleFunc("/api/user/notificationSettings/{userId}",app.getUsersNotificationSettings).Methods("GET")
+
 	r.HandleFunc("/api/mute/",app.muteUser).Methods("POST")
 	r.HandleFunc("/api/block/",app.blockUser).Methods("POST")
 	r.HandleFunc("/api/unmute/",app.unmuteUser).Methods("POST")

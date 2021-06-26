@@ -221,6 +221,7 @@ func(app *application) GetFileTypeByPostId(feedId primitive.ObjectID) string {
 
 
 }
+
 func(app *application) GetFileByPostId(w http.ResponseWriter, r *http.Request){
 	fmt.Println("")
 	vars := mux.Vars(r)
@@ -249,6 +250,150 @@ func(app *application) GetFileByPostId(w http.ResponseWriter, r *http.Request){
 	file.Seek(0,0)
 	io.Copy(w,file)
 	return
+}
+func findFeedByPostId(feeds []models.FeedPost, idFeedPost primitive.ObjectID) (models.FeedPost, error) {
+	feedPost := models.FeedPost{}
+
+	for _, feed := range feeds {
+		if	feed.Id==idFeedPost {
+			feedPost = feed
+		}
+	}
+	return feedPost, nil
+}
+func(app *application) GetFileMessageByPostId(w http.ResponseWriter, r *http.Request){
+	vars := mux.Vars(r)
+	feedId := vars["feedId"]
+	userId := vars["userId"]
+	feedIdPrim, _ := primitive.ObjectIDFromHex(feedId)
+
+	allImages,_ := app.images.All()
+	allFeeds, _:= app.feedPosts.All()
+	feedPost, _ := findFeedByPostId(allFeeds,feedIdPrim)
+	privacy := getUsersPrivacy(feedPost.Post.User)
+	if iAmFollowingThisUser(userId,feedPost.Post.User.Hex()) || privacy == "public" {
+		images, err := findImageByPostId(allImages,feedIdPrim)
+
+		file, err:=os.Open(images.Media)
+		if err!=nil{
+			http.Error(w,"file not found",404)
+			return
+		}
+
+
+		FileHeader:=make([]byte,512)
+		file.Read(FileHeader)
+		ContentType:= http.DetectContentType(FileHeader)
+		FileStat,_:= file.Stat()
+		FileSize:= strconv.FormatInt(FileStat.Size(),10)
+		w.Header().Set("Content-Disposition", "attachment; filename="+images.Media)
+		w.Header().Set("Content-Type", ContentType)
+		w.Header().Set("Content-Length", FileSize)
+
+		file.Seek(0,0)
+		io.Copy(w,file)
+		return
+	}
+	response := dtos.ResponseDTO{
+		Message: "You can not see this picture because you don't follow this user",
+	}
+	b, _ := json.Marshal(response)
+	w.WriteHeader(http.StatusForbidden)
+	w.Write(b)
+
+	return
+
+
+
+
+}
+func toResponseImageMedia(feed models.Image) dtos.ImageMediaDTO {
+
+	return dtos.ImageMediaDTO{
+		Id: feed.Id,
+		Media: feed.Media,
+	}
+}
+func(app *application) getUsername(w http.ResponseWriter, r *http.Request){
+	fmt.Println("")
+	vars := mux.Vars(r)
+	feedId := vars["feedId"]
+	feedIdPrim, _ := primitive.ObjectIDFromHex(feedId)
+
+	allFeeds,_ := app.feedPosts.All()
+	feedPost, _ := findFeedByPostId(allFeeds,feedIdPrim)
+	username := getUserUsername(feedPost.Post.User)
+
+	imagesMarshaled, err := json.Marshal(username)
+	if err != nil {
+		app.serverError(w, err)
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	w.Write(imagesMarshaled)
+
+
+
+}
+func(app *application) GetImagesByAlbumId(w http.ResponseWriter, r *http.Request){
+	fmt.Println("")
+	vars := mux.Vars(r)
+	feedId := vars["feedId"]
+	feedIdPrim, _ := primitive.ObjectIDFromHex(feedId)
+
+	allImages,_ := app.images.All()
+	images, _ := findImagesByPostId(allImages,feedIdPrim)
+
+	imagesResponse := []dtos.ImageMediaDTO{}
+	for _, img := range images {
+		imagesResponse = append(imagesResponse, toResponseImageMedia(img))
+
+	}
+	imagesMarshaled, err := json.Marshal(imagesResponse)
+	if err != nil {
+		app.serverError(w, err)
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	w.Write(imagesMarshaled)
+
+
+
+}
+func(app *application) GetFilesByAlbumPostId(w http.ResponseWriter, r *http.Request){
+	fmt.Println("")
+	vars := mux.Vars(r)
+	feedId := vars["feedId"]
+	feedIdPrim, _ := primitive.ObjectIDFromHex(feedId)
+
+	allImages,_ := app.images.All()
+	for _, image := range allImages {
+		if  image.Id == feedIdPrim{
+			file, err:=os.Open(image.Media)
+			if err!=nil{
+				http.Error(w,"file not found",404)
+				return
+			}
+			FileHeader:=make([]byte,512)
+			file.Read(FileHeader)
+			ContentType:= http.DetectContentType(FileHeader)
+			FileStat,_:= file.Stat()
+			FileSize:= strconv.FormatInt(FileStat.Size(),10)
+			w.Header().Set("Content-Disposition", "attachment; filename="+image.Media)
+			w.Header().Set("Content-Type", ContentType)
+			w.Header().Set("Content-Length", FileSize)
+
+			file.Seek(0,0)
+			io.Copy(w,file)
+			return
+
+		}
+
+	}
+
+
+
+
 
 
 
@@ -675,7 +820,25 @@ func getUserUsername(user primitive.ObjectID) string {
 	sb = sb[:len(sb)-1]
 	return sb
 }
+func getUsersPrivacy(user primitive.ObjectID) string {
 
+	stringObjectID := user.Hex()
+	resp, err := http.Get("http://localhost:80/api/users/api/user/privacy/"+stringObjectID)
+	if err != nil {
+		log.Fatalln(err)
+	}
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	sb := string(body)
+	sb = sb[1:]
+	sb = sb[:len(sb)-1]
+	fmt.Println("PRIVACY:")
+	fmt.Println(sb)
+	return sb
+}
 func findFeedPostsForHomePage(posts []models.FeedPost, idPrimitive primitive.ObjectID) ([]models.FeedPost, error) {
 	feedPostUser := []models.FeedPost{}
 

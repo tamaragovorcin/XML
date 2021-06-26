@@ -29,6 +29,11 @@ func (m *DisposableImageModel) GetAll() ([]models.DisposableImage, error) {
 
 	return mm, err
 }
+func (m *DisposableImageModel) Update(chat models.DisposableImage)  (*mongo.UpdateResult, error) {
+	return m.C.UpdateOne(context.TODO(),bson.M{"_id":chat.Id},bson.D{{"$set",bson.M{"media":chat.Media,
+		"opened":chat.Opened,
+		}}})
+}
 
 func (m *DisposableImageModel) FindByID(id string) (*models.DisposableImage, error) {
 	p, err := primitive.ObjectIDFromHex(id)

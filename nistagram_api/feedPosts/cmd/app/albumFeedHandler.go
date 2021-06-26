@@ -37,8 +37,36 @@ func (app *application) getAllAlbumFeeds(w http.ResponseWriter, r *http.Request)
 	w.WriteHeader(http.StatusOK)
 	w.Write(b)
 }
+func findAlbumFeedByPostId(feeds []models.AlbumFeed, idFeedPost primitive.ObjectID) (models.AlbumFeed, error) {
+	feedPost := models.AlbumFeed{}
+
+	for _, feed := range feeds {
+		if	feed.Id==idFeedPost {
+			feedPost = feed
+		}
+	}
+	return feedPost, nil
+}
+func(app *application) getUsernameAlbum(w http.ResponseWriter, r *http.Request){
+	vars := mux.Vars(r)
+	feedId := vars["feedId"]
+	feedIdPrim, _ := primitive.ObjectIDFromHex(feedId)
+	fmt.Println(feedId)
+	allFeeds,_ := app.albumFeeds.All()
+	feedPost, _ := findAlbumFeedByPostId(allFeeds,feedIdPrim)
+	username := getUserUsername(feedPost.Post.User)
+
+	imagesMarshaled, err := json.Marshal(username)
+	if err != nil {
+		app.serverError(w, err)
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	w.Write(imagesMarshaled)
 
 
+
+}
 func (app *application) insertAlbumFeed(w http.ResponseWriter, req *http.Request) {
 	vars := mux.Vars(req)
 	userId := vars["userId"]

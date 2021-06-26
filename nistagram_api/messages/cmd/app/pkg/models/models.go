@@ -7,8 +7,8 @@ import (
 
 type Chat struct {
 	Id primitive.ObjectID `bson:"_id,omitempty"`
-	Sender primitive.ObjectID `bson:"sender"`
-	Receiver primitive.ObjectID `bson:"receiver"`
+	User1 primitive.ObjectID `bson:"user1"`
+	User2 primitive.ObjectID `bson:"user2"`
 	Messages []Message `bson:"messages"`
 }
 
@@ -24,8 +24,8 @@ type Message struct {
 	Text string `bson:"text"`
 	FeedPost primitive.ObjectID `bson:"feedPost"`
 	StoryPost primitive.ObjectID`bson:"storyPost"`
+	AlbumPost primitive.ObjectID`bson:"albumPost"`
 	DisposableImage primitive.ObjectID `bson:"disposableImage"`
 	Deleted bool `bson:"deleted"`
 	Sender primitive.ObjectID`bson:"sender"`
-	Receiver primitive.ObjectID`bson:"receiver"`
 }

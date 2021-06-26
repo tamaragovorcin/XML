@@ -22,5 +22,14 @@ func (app *application) routes() *mux.Router {
 	r.HandleFunc("/disposableImage/", app.insertDisposableImage).Methods("POST")
 	r.HandleFunc("/disposableImage/{id}", app.deleteDisposableImage).Methods("DELETE")
 
+	r.HandleFunc("/api/send", app.sendMessage).Methods("POST")
+	r.HandleFunc("/api/send/post", app.sendPostMessage).Methods("POST")
+	r.HandleFunc("/api/send/disposableImage/{sender}/{receiver}", app.sendDisposableImage).Methods("POST")
+
+	r.HandleFunc("/api/getMessages/{sender}/{receiver}", app.getMessages).Methods("GET")
+	r.HandleFunc("/api/disposableImage/file/{path}", app.getDisposableImage).Methods("GET")
+
+	r.HandleFunc("/api/openDisposable/{id}", app.openDisposableImage).Methods("GET")
+
 	return r
 }
