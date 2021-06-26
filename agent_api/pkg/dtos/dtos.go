@@ -2,6 +2,7 @@ package dtos
 
 import (
 	"AgentApp/pkg/models"
+	"encoding/xml"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
@@ -105,4 +106,89 @@ type DeleteImageDTO struct {
 type AddImagesDTO struct {
 	PostId primitive.ObjectID
 	Media []string
+}
+type CampaignDTO struct {
+	Id string `xml:"id"`
+	User string `xml:"user"`
+	TargetGroup TargetGroup `xml:"target_group"`
+	Link string `xml:"link"`
+	Date string `xml:"date"`
+	Time string `xml:"time"`
+	Description string `xml:"description"`
+	ContentType string `xml:"contentType"`
+	AgentUsername string  `xml:"agentUsername"`
+	AgentId primitive.ObjectID `xml:"agentId"`
+	DesiredNumber int `xml:"desiredNumber"`
+	CampaignType string `xml:"campaignType"`
+	StartTime string `xml:"startTime"`
+	EndTime string `xml:"endTime"`
+	NumberOfLikes int `xml:"numberOfLikes"`
+	NumberOfDislikes int `xml:"numberOfDislikes"`
+	NumberOfComments int `xml:"numberOfComments"`
+	Likes string `xml:"likes"`
+	Dislikes string `xml:"dislikes"`
+	Comments string `xml:"comments"`
+	TimesShownTotal int `xml:"timesShownTotal"`
+	BestInfluencer  string `xml:"bestInfluencer"`
+	HiredInfluencers string `xml:"hiredInfluencers"`
+	Media [] byte `xml:"media"`
+}
+
+type TargetGroup struct {
+	Gender string `xml:"gender"`
+	DateOne string `xml:"dateOne"`
+	DateTwo string `xml:"dateTwo"`
+	Location  LocationTarget `xml:"locationTarget"`
+}
+type LocationTarget struct {
+	Id primitive.ObjectID
+	Country string `xml:"country"`
+	Town string `xml:"town"`
+	Street string `xml:"street"`
+	Number int
+	PostalCode int
+}
+
+type BestCampaigns struct {
+	XMLName        xml.Name       `xml:"bestCampaigns"`
+	FirstCampaign Campaign `xml:"firstCampaign"`
+	SecondCampaign Campaign `xml:"secondCampaign"`
+	ThirdCampaign Campaign `xml:"thirdCampaign"`
+}
+type Campaign struct {
+	Id string `xml:"id"`
+	User string `xml:"user"`
+	TargetGroup TargetGroup `xml:"target_group"`
+	Link string `xml:"link"`
+	Date string `xml:"date"`
+	Time string `xml:"time"`
+	Description string `xml:"description"`
+	ContentType string `xml:"contentType"`
+	AgentUsername string  `xml:"agentUsername"`
+	AgentId string `xml:"agentId"`
+	DesiredNumber string `xml:"desiredNumber"`
+	CampaignType string `xml:"campaignType"`
+	StartTime string `xml:"startTime"`
+	EndTime string `xml:"endTime"`
+	NumberOfLikes string `xml:"numberOfLikes"`
+	NumberOfDislikes string `xml:"numberOfDislikes"`
+	NumberOfComments string `xml:"numberOfComments"`
+	Likes string `xml:"likes"`
+	Dislikes string `xml:"dislikes"`
+	Comments string `xml:"comments"`
+	TimesShownTotal int `xml:"timesShownTotal"`
+	BestInfluencer  string `xml:"bestInfluencer"`
+	HiredInfluencers string `xml:"hiredInfluencers"`
+	Media []byte `xml:"media"`
+
+}
+
+type LikeDTO struct {
+	Username string
+}
+
+type CommentDTO struct {
+	Content string
+	Writer string
+	DateTime string
 }

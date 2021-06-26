@@ -149,13 +149,6 @@ type User struct {
 type Users struct {
 	Users []string `json:"users"`
 }
-type Report struct {
-	Id uuid.UUID `json:"_id,omitempty"`
-	ComplainingUser uuid.UUID `json:"complainingUser,omitempty"`
-	ReportedUser uuid.UUID `json:"reportedUser,omitempty"`
-	FeedPost uuid.UUID `json:"feedPost,omitempty"`
-	StoryPost uuid.UUID `json:"storyPost,omitempty"`
-}
 
 type VoteResult struct {
 	Updates int `json:"updates"`
