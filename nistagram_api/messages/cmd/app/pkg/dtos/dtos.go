@@ -32,6 +32,10 @@ type UsernameDTO struct {
 	Username string
 
 }
+type DeletedChatDTO struct {
+	Deleted bool
+	ForUser primitive.ObjectID
+}
 type MessageFrontDTO struct {
 	Id primitive.ObjectID
 	DateTime  time.Time
@@ -42,7 +46,6 @@ type MessageFrontDTO struct {
 	DisposableImage string
 	OpenedDisposable bool
 	DisposableImageId primitive.ObjectID
-	Deleted bool
 	Sender string
 	Receiver string
 }

@@ -59,6 +59,8 @@ class Chat extends React.Component {
 		showDisposable : false,
 		disposableForOpenMedia : "",
 		disposableForOpenId : "",
+		following : false,
+		deletedChat : false
 
 	}
 	
@@ -85,6 +87,24 @@ class Chat extends React.Component {
 	handleMessageChange = (event) => {
 		this.setState({ message: event.target.value });
 	};
+	handleDeleteChat =()=>{
+		let sender = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length-1)
+		var sentence = window.location.toString()
+		var s = []
+		let help = []
+		s = sentence.split("/");
+		const dto = { follower: sender, following : s[6]};
+
+		Axios.get(BASE_URL + "/api/messages/api/deleteChat/"+sender+"/"+s[6])
+		.then((res) => {
+			this.isChatDeleted()
+			this.handleGetChat()
+
+	})
+		.catch((err) => {
+			console.log(err);
+		});	
+	}
 	handleSendDisposable = (event)=>{
 		var sentence = window.location.toString()
 
@@ -170,6 +190,43 @@ class Chat extends React.Component {
         });
 		
     };
+	amIFollowingThisUser() {
+		let sender = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length-1)
+		var sentence = window.location.toString()
+		var s = []
+		let help = []
+		s = sentence.split("/");
+		const dto = { follower: sender, following : s[6]};
+
+		Axios.post(BASE_URL + "/api/userInteraction/api/checkInteraction",dto)
+		.then((res) => {
+			this.setState({ following:res.data });
+
+	})
+		.catch((err) => {
+			console.log(err);
+		});	
+	}
+	isChatDeleted() {
+		let sender = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length-1)
+		var sentence = window.location.toString()
+		var s = []
+		let help = []
+		s = sentence.split("/");
+		const dto = { follower: sender, following : s[6]};
+
+		Axios.get(BASE_URL + "/api/messages/api/isChatDeleted/"+sender+"/"+s[6])
+		.then((res) => {
+			this.setState({ deletedChat:res.data.Deleted });
+			this.setState({ deletedForUser:res.data.ForUser });
+		
+
+
+	})
+		.catch((err) => {
+			console.log(err);
+		});	
+	}
 	handleGetChat(){
 		let sender = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length-1)
 		var sentence = window.location.toString()
@@ -263,10 +320,13 @@ class Chat extends React.Component {
 		});	
 	}
 
+
 	
     componentDidMount() {
 		let sender = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length-1)
 		this.setState({ user1: sender });
+		this.amIFollowingThisUser();
+		this.isChatDeleted();
 		this.handleGetChat();
 
 			};
@@ -280,7 +340,7 @@ class Chat extends React.Component {
                                
 					 <table className="table" style={{ width: "100%",  maxHeight: "200px",
     overflowY: "scroll", marginTop: "10rem" , marginLeft:"15%", marginRight:"15%"}}>
-                            <tbody>
+                            <tbody hidden={this.state.deletedChat && this.state.deletedForUser == this.state.user1}>
                                 {this.state.messages.map((message) => (
 							<tr id={message.id} key={message.id}  style={{ width: "100%",marginTop:"2rem" }}>
 
@@ -422,6 +482,18 @@ class Chat extends React.Component {
 									<FiSend/>
 									</Button>
 							</td>
+							</tr>
+							<tr>
+							<Button
+									hidden ={this.state.following || this.state.deletedChat}
+									style={{marginTop:"2%", marginLeft :"40%" }}
+									onClick={() => this.handleDeleteChat()}
+									className="btn btn-danger btn-md"
+									id="sendMessageButton"
+									type="button"
+								>
+									Delete chat
+									</Button>
 							</tr>
                             </tbody>
                         </table>

@@ -983,7 +983,7 @@ class FollowerProfilePage extends React.Component {
 													<button  className="btn btn-outline-primary mt-1" onClick={() => this.handleOpenNotificationModal()} type="button"><i className="icofont-subscribe mr-1"></i><IoMdNotificationsOutline/></button>
 
 													</td>
-													<td  hidden={!this.state.followingThisUser}>
+													<td>
 													<button  className="btn btn-outline-primary mt-1" onClick={() => this.handleOpenChat()} type="button"><i className="icofont-subscribe mr-1"></i><FiSend/></button>
 
 													</td>

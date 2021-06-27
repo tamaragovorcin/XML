@@ -28,7 +28,8 @@ func (app *application) routes() *mux.Router {
 
 	r.HandleFunc("/api/getMessages/{sender}/{receiver}", app.getMessages).Methods("GET")
 	r.HandleFunc("/api/disposableImage/file/{path}", app.getDisposableImage).Methods("GET")
-
+	r.HandleFunc("/api/deleteChat/{sender}/{receiver}", app.deleteChatBetweenUsers).Methods("GET")
+	r.HandleFunc("/api/isChatDeleted/{sender}/{receiver}", app.isChatDeleted).Methods("GET")
 	r.HandleFunc("/api/openDisposable/{id}", app.openDisposableImage).Methods("GET")
 
 	return r

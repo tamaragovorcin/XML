@@ -10,6 +10,8 @@ type Chat struct {
 	User1 primitive.ObjectID `bson:"user1"`
 	User2 primitive.ObjectID `bson:"user2"`
 	Messages []Message `bson:"messages"`
+	Deleted bool `bson:"deleted"`
+	UserThatDeletedChat primitive.ObjectID`bson:"userThatDeletedChat"`
 }
 
 type DisposableImage struct {

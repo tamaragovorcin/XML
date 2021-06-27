@@ -104,6 +104,8 @@ func (app *application) sendMessage(w http.ResponseWriter, req *http.Request) {
 		User1 : usersChat.User1,
 		User2: usersChat.User2,
 		Messages: append(usersChat.Messages,message),
+		UserThatDeletedChat: primitive.ObjectID{},
+		Deleted: false,
 
 	}
 
@@ -146,6 +148,8 @@ func (app *application) sendPostMessage(w http.ResponseWriter, req *http.Request
 			User1 : usersChat.User1,
 			User2: usersChat.User2,
 			Messages: append(usersChat.Messages,message),
+			UserThatDeletedChat: primitive.ObjectID{},
+			Deleted: false,
 
 		}
 		insertResult, err := app.chats.Update(chatUpdate)
@@ -188,6 +192,8 @@ func insertChat(app *application,user1 primitive.ObjectID,user2 primitive.Object
 		User1: user1,
 		User2:  user2,
 		Messages: []models.Message{},
+		Deleted: false,
+		UserThatDeletedChat: primitive.ObjectID{},
 	}
 	insertResult, _ := app.chats.Insert(chat)
 	idMarshaled, _ := json.Marshal(insertResult.InsertedID)
@@ -216,7 +222,7 @@ func (app *application) getMessages(w http.ResponseWriter, r *http.Request) {
 	chatResponse := []dtos.MessageFrontDTO{}
 	for _, mes := range messages.Messages {
 
-					chatResponse = append(chatResponse, toResponseChat(mes, allImages))
+					chatResponse = append(chatResponse, toResponseChat(mes, allImages,messages.Deleted))
 				}
 
 
@@ -227,6 +233,71 @@ func (app *application) getMessages(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	w.Write(imagesMarshaled)
+}
+func (app *application) deleteChatBetweenUsers(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	senderId := vars["sender"]
+	receiverId := vars["receiver"]
+	senderIdPrimitive, _ := primitive.ObjectIDFromHex(senderId)
+	receiverIdPrimitive, _ := primitive.ObjectIDFromHex(receiverId)
+	allMessages, _ := app.chats.GetAll()
+	usersChat, err := findChatBetweenUsers(allMessages, senderIdPrimitive,receiverIdPrimitive)
+	if err != nil {
+		app.serverError(w, err)
+	}
+
+
+	var chatUpdate = models.Chat{
+		Id : usersChat.Id,
+		User1 : usersChat.User1,
+		User2: usersChat.User2,
+		Messages: usersChat.Messages,
+		Deleted: true,
+		UserThatDeletedChat: senderIdPrimitive,
+
+	}
+
+	insertResult, err := app.chats.Update(chatUpdate)
+	if err != nil {
+		app.serverError(w, err)
+	}
+
+	app.infoLog.Printf("New content have been created, id=%s", insertResult.UpsertedID)
+	//	resp, err := http.Get("http://localhost:80/api/users/api/sendNotificationPost/"+"Feed Post"+"/"+userId)
+	//	fmt.Println(resp)
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+
+	idMarshaled, err := json.Marshal(insertResult.UpsertedID)
+	w.Write(idMarshaled)
+}
+func (app *application) isChatDeleted(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	senderId := vars["sender"]
+	receiverId := vars["receiver"]
+	senderIdPrimitive, _ := primitive.ObjectIDFromHex(senderId)
+	receiverIdPrimitive, _ := primitive.ObjectIDFromHex(receiverId)
+	allMessages, _ := app.chats.GetAll()
+	usersChat, err := findChatBetweenUsers(allMessages, senderIdPrimitive,receiverIdPrimitive)
+	if err != nil {
+		app.serverError(w, err)
+	}
+	chatResponse := dtos.DeletedChatDTO{
+		Deleted: usersChat.Deleted,
+		ForUser: usersChat.UserThatDeletedChat,
+	}
+
+
+
+	imagesMarshaled, err := json.Marshal(chatResponse)
+	if err != nil {
+		app.serverError(w, err)
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	w.Write(imagesMarshaled)
+
+
 }
 func findChatBetweenUsers(messages []models.Chat, user1 primitive.ObjectID, user2 primitive.ObjectID) (models.Chat, error) {
 	chat := models.Chat{}
@@ -254,7 +325,7 @@ func findDisposableById(images []models.DisposableImage, id primitive.ObjectID) 
 	}
 	return image, nil
 }
-func toResponseChat(message models.Message, images []models.DisposableImage) dtos.MessageFrontDTO {
+func toResponseChat(message models.Message, images []models.DisposableImage, deleted bool) dtos.MessageFrontDTO {
 	disposableImg,_ := findDisposableById(images,message.DisposableImage)
 	return dtos.MessageFrontDTO{
 		Id: message.Id,

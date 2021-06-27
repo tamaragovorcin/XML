@@ -110,7 +110,8 @@ func (app *application) sendDisposableImage(w http.ResponseWriter, r *http.Reque
 		User1 : usersChat.User1,
 		User2: usersChat.User2,
 		Messages: append(usersChat.Messages,message),
-
+		UserThatDeletedChat: primitive.ObjectID{},
+		Deleted: false,
 	}
 
 	insertResult, err := app.chats.Update(chatUpdate)

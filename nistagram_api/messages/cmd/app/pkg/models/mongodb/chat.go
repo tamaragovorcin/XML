@@ -58,5 +58,5 @@ func (m *ChatModel) Delete(id string) (*mongo.DeleteResult, error) {
 func (m *ChatModel) Update(chat models.Chat)  (*mongo.UpdateResult, error) {
 	return m.C.UpdateOne(context.TODO(),bson.M{"_id":chat.Id},bson.D{{"$set",bson.M{"user1":chat.User1,
 		"user2":chat.User2,
-		"messages":chat.Messages}}})
+		"messages":chat.Messages,"deleted":chat.Deleted,"userThatDeletedChat":chat.UserThatDeletedChat}}})
 }
