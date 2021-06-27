@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
+	"github.com/go-redis/redis"
 	"github.com/gorilla/mux"
 	"go.mongodb.org/mongo-driver/x/mongo/driver/uuid"
 	"io"
@@ -13,10 +14,153 @@ import (
 	"os"
 	"strings"
 	"time"
+	"userInteraction/saga"
 
 	"github.com/neo4j/neo4j-go-driver/v4/neo4j"
 )
 
+type application struct {
+
+}
+
+func (app *application) RedisConnection() {
+
+
+
+	// create client and ping redis
+	var err error
+	client := redis.NewClient(&redis.Options{Addr: "localhost:6379", Password: "", DB: 0})
+	if _, err = client.Ping().Result(); err != nil {
+		log.Fatalf("error creating redis client %s", err)
+	}
+
+	// subscribe to the required channels
+	pubsub := client.Subscribe(saga.InteractionChannel, saga.ReplyChannel)
+	if _, err = pubsub.Receive(); err != nil {
+		log.Fatalf("error subscribing %s", err)
+	}
+	defer func() { _ = pubsub.Close() }()
+	ch := pubsub.Channel()
+
+	log.Println("starting the stock service")
+	for {
+		select {
+		case msg := <-ch:
+			m := saga.Message{}
+			err := json.Unmarshal([]byte(msg.Payload), &m)
+			if err != nil {
+				log.Println(err)
+				continue
+			}
+
+			switch msg.Channel {
+			case saga.InteractionChannel:
+
+				// Happy Flow
+				if m.Action == saga.ActionStart {
+					// Check quantity of products
+
+					iddd := strings.Split(m.User, "\"")
+					configuration := parseConfiguration()
+					driver, err := configuration.newDriver()
+					session := driver.NewSession(neo4j.SessionConfig{
+						AccessMode:   neo4j.AccessModeWrite,
+						DatabaseName: configuration.Database,
+					})
+					defer unsafeClose(session)
+					m.Ok = true
+
+
+					_, err = session.ReadTransaction(func(tx neo4j.Transaction) (interface{}, error) {
+
+
+
+						records, err := tx.Run(
+							`MATCH (user:User) WHERE user.id = $userId return user.id as id`,
+							map[string]interface{}{ "userId": iddd[1]})
+						if err != nil {
+							fmt.Println(err)
+							return nil, err
+						}
+
+
+						for records.Next() {
+
+							record := records.Record()
+
+							id, _ := record.Get("id")
+							fmt.Println("DOSAO SAM tt" , id)
+							if id.(string)== iddd[1] {
+								fmt.Println("DOSAO SAM rrrr")
+								m.Ok = false
+								return true,nil
+
+							}else{
+								fmt.Println("DOSAO SAM OVDE")
+								m.Ok = true
+								return true,nil
+							}
+						}
+
+						return false,nil
+					})
+					if err != nil {
+						log.Println("error querying search:", err)
+						return
+					}
+
+
+					if m.Ok {
+						log.Println("Ovo je okejj")
+						_, _ = session.WriteTransaction(func(tx neo4j.Transaction) (interface{}, error) {
+							result, err := tx.Run(
+								"CREATE (:User{id:$uId})",
+								map[string]interface{}{
+									"uId": iddd[1],
+								})
+							if err != nil {
+								return nil, err
+							}
+							var summary, _ = result.Consume()
+							var voteResult VoteResult
+							voteResult.Updates = summary.Counters().PropertiesSet()
+
+							sendToReplyChannel(client, &m, saga.ActionDone, saga.ServiceUser, saga.ServiceInteraction)
+							return voteResult, nil
+						})
+
+					}
+
+
+					if !m.Ok{
+						log.Println("Ovo nije okej")
+						sendToReplyChannel(client, &m, saga.ActionError, saga.ServiceUser, saga.ServiceInteraction)
+					}
+
+					// Simulate rollback from stock-service
+					// sendToReplyChannel(client, &m, saga.ActionError, saga.ServiceOrder, saga.ServiceStock)
+				}
+
+				// Rollback flow
+
+
+			}
+		}
+	}
+}
+
+
+func sendToReplyChannel(client *redis.Client, m *saga.Message, action string, service string, senderService string) {
+
+	var err error
+	m.Action = action
+	m.Service = service
+	m.SenderService = senderService
+	if err = client.Publish(saga.ReplyChannel, m).Err(); err != nil {
+		log.Printf("error publishing done-message to %s channel", saga.ReplyChannel)
+	}
+	log.Printf("done message published to channel :%s", saga.ReplyChannel)
+}
 
 func routes() *mux.Router {
 	// Register handler functions.
@@ -83,6 +227,9 @@ func main(){
 
 	serverURI := fmt.Sprintf("%s:%d", *serverAddr, *serverPort)
 	router := routes()
+	app := &application{}
+	go app.RedisConnection()
+
 	http.ListenAndServe(serverURI, setHeaders(router))
 
 	defer unsafeClose(driver)

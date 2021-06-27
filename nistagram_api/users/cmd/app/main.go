@@ -2,15 +2,21 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"flag"
 	"fmt"
+	"github.com/go-redis/redis"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"log"
 	"net/http"
 	"os"
+	"strings"
 	"time"
+	"users/pkg/models"
 	"users/pkg/models/mongodb"
+	"users/saga"
 )
 
 type application struct {
@@ -27,9 +33,9 @@ type application struct {
 	notificationForUser *mongodb.NotificationForUserModel
 	notificationContent *mongodb.NotificationContentModel
 	images   *mongodb.ImageModel
+	orchestrator *saga.Orchestrator
 
 }
-
 func main() {
 
 	fmt.Printf("Found multiple documents (array of pointers): %+v\n")
@@ -115,14 +121,121 @@ func main() {
 		images: &mongodb.ImageModel{
 			C: client.Database(*mongoDatabse).Collection("images"),
 		},
+
+
+
+
+
 	}
 
+
+	go saga.NewOrchestrator().Start()
+	go app.RedisConnection()
 	// Initialize a new http.Server struct.
 	serverURI := fmt.Sprintf("%s:%d", *serverAddr, *serverPort)
-	router := app.routes();
+
+	router := app.routes()
 	http.ListenAndServe(serverURI, setHeaders(router))
 
 }
+
+
+func (app *application) RedisConnection() {
+	// create client and ping redis
+	var err error
+	client := redis.NewClient(&redis.Options{Addr: "localhost:6379", Password: "", DB: 0})
+	if _, err = client.Ping().Result(); err != nil {
+		log.Fatalf("error creating redis client %s", err)
+	}
+
+	// subscribe to the required channels
+	pubsub := client.Subscribe(saga.UserChannel, saga.ReplyChannel)
+	if _, err = pubsub.Receive(); err != nil {
+		log.Fatalf("error subscribing %s", err)
+	}
+	defer func() { _ = pubsub.Close() }()
+	ch := pubsub.Channel()
+
+	log.Println("starting the order service")
+	for {
+		select {
+		case msg := <-ch:
+			m := saga.Message{}
+			err := json.Unmarshal([]byte(msg.Payload), &m)
+			if err != nil {
+				log.Println(err)
+				continue
+			}
+
+			switch msg.Channel {
+			case saga.UserChannel:
+
+				// Happy Flow
+				if m.Action == saga.ActionStart {
+
+
+
+					if m.SenderService == saga.ServiceInteraction {
+						if m.Ok {
+							user := m.User2
+							iddd := strings.Split(user, "\"")
+							id, _ := primitive.ObjectIDFromHex(iddd[1])
+							res, err := app.users.UpdateS(id, models.FINISHED)
+							log.Println(res)
+							if err != nil {
+								return
+							}
+
+							log.Println("FINISHED")
+
+						}} else {
+						user := m.User2
+						iddd := strings.Split(user, "\"")
+						id, _ := primitive.ObjectIDFromHex(iddd[1])
+						res, err := app.users.UpdateS(id, models.CANCELLED)
+						log.Println(res)
+						if err != nil {
+							return
+						}
+
+						log.Println("CANCEL")
+					}
+
+
+				}
+
+				if m.Action == saga.ActionRollback {
+					user := m.User2
+					iddd := strings.Split(user, "\"")
+
+					id, _ := primitive.ObjectIDFromHex(iddd[1])
+					log.Println("lala", id)
+					res, err := app.users.UpdateS(id, models.CANCELLED)
+					log.Println(res)
+					if err != nil {
+						return
+					}
+
+					u,_ := app.users.FindByID(id)
+
+					log.Println("CANCELLED %d", u.Status)
+
+
+				/*	w := http.ResponseWriter
+
+
+					w.Header().Set("Content-Type", "application/json")
+						w.WriteHeader(http.StatusOK)
+						idMarshaled, _ := json.Marshal("ubacili smo")
+
+						w.Write(idMarshaled)*/
+
+				}
+			}
+		}
+	}
+}
+
 
 
 func setHeaders(h http.Handler) http.Handler {

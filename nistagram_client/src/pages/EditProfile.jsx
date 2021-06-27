@@ -7,7 +7,7 @@ import { Redirect } from "react-router-dom";
 import HeadingAlert from "../components/HeadingAlert";
 import HeadingSuccessAlert from "../components/HeadingSuccessAlert"
 import SidebarSettings from "../components/SidebarSettings"
-
+import getAuthHeader from "../GetHeader";
 
 
 class EditProfile extends Component {
@@ -198,7 +198,8 @@ class EditProfile extends Component {
         };
 
         if (this.validateForm(userDTO)) {
-			Axios.post(`${BASE_URL}/api/users/api/user/update/`, userDTO)
+			console.log(getAuthHeader())
+			Axios.post(`${BASE_URL}/api/users/api/user/update/`, userDTO, {  headers: { Authorization: getAuthHeader() } })
 			.then((res) => {
                         if (res.status === 400) {
                             this.setState({ hiddenFailAlert: false, failHeader: "Bad request", failMessage: "Invalid argument." });
@@ -256,12 +257,7 @@ class EditProfile extends Component {
 				<Header />
 
 				<div className="container=fluid" style={{ marginTop: "8%",marginLeft:"5%",marginRight:"5%",background: "#fcfafa"}}>
-					<HeadingAlert
-						hidden={this.state.hiddenErrorAlert}
-						header={this.state.errorHeader}
-						message={this.state.errorMessage}
-						handleCloseAlert={this.handleCloseAlert}
-					/>
+				
                     <br/>
 						<h2 className=" text-center  mb-0 text-uppercase" style={{ marginTop: "0", color:"#2c4964" }}>
 						Profile settings

@@ -9,7 +9,9 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"net/http"
 	"os"
+	"strconv"
 	"strings"
+	"users/saga"
 
 	"errors"
 	//"github.com/labstack/echo"
@@ -20,9 +22,61 @@ import (
 	"users/pkg/models"
 )
 
-type UserHandlers struct {
+
+func IsAuthorized(handler http.HandlerFunc) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+
+		if r.Header["Authorization"] == nil {
+			fmt.Println("No Token Found")
+
+			w.WriteHeader(http.StatusUnauthorized)
+			json.NewEncoder(w).Encode("Unauthorized")
+			return
+		}
+
+
+		authStringHeader := r.Header.Get("Authorization")
+		if authStringHeader == "" {
+			fmt.Errorf("Neki eror za auth")
+		}
+		authHeader := strings.Split(authStringHeader, "Bearer ")
+		jwtToken := authHeader[1]
+
+		token, err := jwt.Parse(jwtToken, func (token *jwt.Token) (interface{}, error){
+			if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+				return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
+			}
+			return []byte("luna") , nil
+		})
+
+		if err != nil {
+			fmt.Println("Your Token has been expired.")
+			w.WriteHeader(http.StatusUnauthorized)
+			json.NewEncoder(w).Encode(err)
+			return
+		}
+
+
+
+		if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
+			rolesString, _ := claims["roles"].(string)
+			fmt.Println(rolesString)
+			var tokenRoles []models.Role
+
+			if err := json.Unmarshal([]byte(rolesString), &tokenRoles); err != nil {
+				fmt.Println("Usercccc.")
+			}
+
+
+
+		} else{
+			fmt.Println("User authorize fail.")
+		}
+	}
+
 
 }
+
 
 func equalPasswords(hashedPwd string, passwordRequest string) bool {
 
@@ -72,8 +126,8 @@ func (app *application) loginUser(w http.ResponseWriter, r *http.Request)  {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 
-
-	userToken := dtos.UserTokenState{ AccessToken: token, Roles: user.ProfileInformation.Roles[0].Name, UserId: user.Id,
+	expireTime := time.Now().Add(time.Hour).Unix() * 1000
+	userToken := dtos.UserTokenState{ AccessToken: token, Roles: user.ProfileInformation.Roles[0].Name, UserId: user.Id, ExpiresIn: expireTime,
 
 	}
 	bb, err := json.Marshal(userToken)
@@ -83,7 +137,7 @@ func (app *application) loginUser(w http.ResponseWriter, r *http.Request)  {
 func generateToken(user *models.User) (string, error) {
 	token := jwt.New(jwt.SigningMethodHS256)
 	rolesString, _ := json.Marshal(user.ProfileInformation.Roles)
-
+	expireTime := time.Now().Add(time.Hour).Unix() * 1000
 	claims := token.Claims.(jwt.MapClaims)
 	claims["email"] = user.ProfileInformation.Email
 	claims["name"] = user.ProfileInformation.Name
@@ -91,9 +145,9 @@ func generateToken(user *models.User) (string, error) {
 	claims["username"] = user.ProfileInformation.Username
 	claims["roles"] = string(rolesString)
 	claims["id"] = user.Id
-	claims["exp"] = time.Now().Add(time.Hour).Unix()
+	claims["exp"] = strconv.FormatInt(expireTime, 10)
 
-	return  token.SignedString([]byte("luna"))
+	return token.SignedString([]byte("luna"))
 }
 
 
@@ -471,19 +525,16 @@ func (app *application) insertUser(w http.ResponseWriter, r *http.Request) {
 
 	for i, s := range users {
 		fmt.Println(i, s)
-		if(s.ProfileInformation.Username == m.Username){
+		if (s.ProfileInformation.Username == m.Username) {
 			app.infoLog.Printf("This username is already taken")
 
 			able = false
-
 
 			var e = errors.New("This username is already taken")
 			b, err := json.Marshal(e)
 			if err != nil {
 				app.serverError(w, err)
 			}
-
-
 
 			w.Header().Set("Content-Type", "text")
 			w.WriteHeader(http.StatusInternalServerError)
@@ -492,8 +543,8 @@ func (app *application) insertUser(w http.ResponseWriter, r *http.Request) {
 			break
 
 		}
-
-		if( s.ProfileInformation.Email == m.Email){
+	}
+		/*if( s.ProfileInformation.Email == m.Email){
 			app.infoLog.Printf("User with this email already exists")
 			able = false
 
@@ -513,7 +564,7 @@ func (app *application) insertUser(w http.ResponseWriter, r *http.Request) {
 
 		}
 
-	}
+	}*/
 
 	if able  {
 		hashAndSalt, err := HashAndSaltPasswordIfStrong(m.Password)
@@ -528,8 +579,10 @@ func (app *application) insertUser(w http.ResponseWriter, r *http.Request) {
 			Gender:      m.Gender, //models.Gender(m.Gender),
 			DateOfBirth: m.DateOfBirth,
 		}
-
+		intId := primitive.NewObjectID()
 		var user = models.User{
+			Id: intId,
+			Status: 0,
 			ProfileInformation: profileInformation,
 			Biography:          m.Biography,
 			Private:            m.Private,
@@ -537,16 +590,66 @@ func (app *application) insertUser(w http.ResponseWriter, r *http.Request) {
 			Website: m.Website,
 			ApprovedAgent: "false",
 		}
+		idd := intId
+		users, err := app.users.GetAll()
+		for _, s := range users {
 
+			if s.ProfileInformation.Email == m.Email {
+
+				idd = s.Id
+			}
+		}
 		insertResult, err := app.users.Insert(user)
+
+
 		if err != nil {
 			app.serverError(w, err)
 		}
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusOK)
-		idMarshaled, err := json.Marshal(insertResult.InsertedID)
 
-		w.Write(idMarshaled)
+
+
+		m := saga.Message{Service: saga.ServiceInteraction, SenderService: saga.ServiceUser, Action: saga.ActionStart, User: idd.String(), User2: intId.String()}
+		fmt.Println(m)
+		saga.NewOrchestrator().Next(saga.InteractionChannel, saga.ServiceInteraction, m)
+
+
+		time.Sleep(2 * time.Second)
+
+		u,_ := app.users.FindByID(intId)
+
+		fmt.Println(u.Status)
+		if(u.Status == 1){
+
+
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusOK)
+			idMarshaled, _ := json.Marshal(insertResult.InsertedID)
+
+			w.Write(idMarshaled)
+
+
+		}
+
+		if(u.Status == 2){
+
+
+
+
+			_, _ = app.users.DeleteId(intId)
+
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusConflict)
+			idMarshaled, _ := json.Marshal(insertResult.InsertedID)
+
+			w.Write(idMarshaled)
+
+
+		}
+
+
+
+
+
 	}
 }
 

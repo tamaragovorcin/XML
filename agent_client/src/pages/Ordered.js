@@ -8,6 +8,7 @@ import { Redirect } from "react-router-dom";
 import Order from "../components/Order";
 import Address from "../components/Address";
 import ModalDialog from "../components/ModalDialog";
+import { NavItem } from "react-bootstrap";
 class Ordered extends Component {
 	state = {
 		products: [],
@@ -160,6 +161,10 @@ class Ordered extends Component {
 										<div>
 											<b>Price: </b> {item.Price}
 										</div>
+										<div>
+											<b>Quantity: </b> {item.Quantity}
+										</div>
+
 
 
 

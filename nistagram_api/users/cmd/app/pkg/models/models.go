@@ -10,7 +10,11 @@ const (
 	Female
 	Other
 )
-
+const (
+	VERIFYING = iota
+	FINISHED
+	CANCELLED
+)
 type Category int
 const (
 	INFLUENCER Category = iota
@@ -54,6 +58,7 @@ type Agent struct {
 
 type User struct {
 	Id                 primitive.ObjectID `bson:"_id,omitempty"`
+	Status int         `bson:"status"`
 	ProfileInformation ProfileInformation `bson:"profileInformation"`
 	Private            bool               `bson:"private"`
 	Website            string             `bson:"webSite"`

@@ -117,12 +117,7 @@ class PasswordChange extends Component {
 				<Header />
 
 				<div className="container=fluid" style={{ marginTop: "8%",marginLeft:"5%",marginRight:"5%",background: "#fcfafa"}}>
-					<HeadingAlert
-						hidden={this.state.hiddenErrorAlert}
-						header={this.state.errorHeader}
-						message={this.state.errorMessage}
-						handleCloseAlert={this.handleCloseAlert}
-					/>
+				
                     <br/>
 						<h2 className=" text-center  mb-0 text-uppercase" style={{ marginTop: "0", color:"#2c4964" }}>
 						Profile settings

@@ -147,8 +147,6 @@ class AllAgents extends React.Component {
 
 				this.setState({ pictures: [] });
 				this.setState({ showImageModal: false, });
-				this.setState({ openModal: true });
-				this.setState({ textSuccessfulModal: "You have successfully added album feed post." });
                 window.location.reload();
 
 			})
@@ -268,7 +266,7 @@ class AllAgents extends React.Component {
             .then((res) => {
 
                 console.log(res.data)
-                alert("success")
+                this.setState({openModal2: true})
 
             })
             .catch((err) => {
@@ -310,7 +308,7 @@ class AllAgents extends React.Component {
                                     <tr id={post.id} key={post.id}>
 
                                         <tr style={{ width: "100%" }}>
-                                            <td colSpan="3">
+                                            <td colSpan="3" style={{ width: "45rem" }}>
                                                 <Carousel dynamicHeight={true}>
                                                     {post.Media.map(img => (<div>
                                                         <img
@@ -338,7 +336,7 @@ class AllAgents extends React.Component {
                                             </td>
                                         </tr>
                                         <tr hidden={this.state.hiddenEditInfo}  style={{ width: "100%" }}>
-                                            <td colSpan="3">
+                                            <td colSpan="3"  style={{ width: "45rem" }}>
                                                 <ImageUploader
                                                     withIcon={false}
                                                     buttonText='Add new photo/video'
@@ -376,7 +374,9 @@ class AllAgents extends React.Component {
                                             <td colSpan="3">
                                                 <div className="form-group controls mb-0 pb-2" style={{ color: "#6c757d", opacity: 1 }}>
                                                     <label>Product price</label>
+                                                    <br></br>
                                                     <input
+                                                     style={{ width: "45rem" }}
                                                         readOnly={this.state.hiddenEditInfo}
                                                         className={!this.state.hiddenEditInfo === false ? "form-control-plaintext" : "form-control"}
                                                         placeholder="Product price"
@@ -391,7 +391,9 @@ class AllAgents extends React.Component {
                                             <td colSpan="3">
                                                 <div className="form-group controls mb-0 pb-2" style={{ color: "#6c757d", opacity: 1 }}>
                                                     <label>Product quantity</label>
+                                                    <br></br>
                                                     <input
+                                                     style={{ width: "45rem" }}
                                                         readOnly={this.state.hiddenEditInfo}
                                                         className={!this.state.hiddenEditInfo === false ? "form-control-plaintext" : "form-control"}
                                                         placeholder="Product quantity"
@@ -432,6 +434,13 @@ class AllAgents extends React.Component {
                     onCloseModal={this.handleModalClose}
                     header="Success"
                     text="You have successfully removed product."
+                />
+
+<ModalDialog
+                    show={this.state.openModal2}
+                    onCloseModal={this.handleModalClose}
+                    header="Success"
+                    text="You have successfully changed product information."
                 />
 
 <ModalDialog
