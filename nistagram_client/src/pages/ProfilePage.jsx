@@ -7,6 +7,7 @@ import LikesModal from "../components/Posts/LikesModal"
 import DislikesModal from "../components/Posts/DislikesModal"
 import CommentsModal from "../components/Posts/CommentsModal"
 import ImageUploader from 'react-images-upload';
+import playerLogo from "../static/coach.png";
 import Axios from "axios";
 import ModalDialog from "../components/ModalDialog";
 import AddPostModal from "../components/Posts/AddPostModal";
@@ -29,6 +30,7 @@ import OneTimeCampaignModal from "../components/OneTimeCampaignModal";
 import MultipleTimeCampaignModal from "../components/MultipleTimeCampaignModal";
 import AddInfluencerModal from "../components/AddInfluencerModal";
 import TargetGroupModal from "../components/TargetGroupModal";
+import {GoVerified} from 'react-icons/go'
 
 class ProfilePage extends React.Component {
 	constructor(props) {
@@ -147,7 +149,9 @@ class ProfilePage extends React.Component {
 		campaignStartTime : "",
 		campaignEndTime : "",
 		campaignDesiredNumber : "",
-		campaignType : ""
+		campaignType : "",
+		isVerified : false,
+		categoryString : "",
 		
 	}
 	hasRole = (reqRole) => {
@@ -436,7 +440,9 @@ class ProfilePage extends React.Component {
 							dateOfBirth  : res.data.ProfileInformation.DateOfBirth,
 							webSite : res.data.WebSite,
 							biography : res.data.Biography,
-							private : res.data.Private
+							private : res.data.Private,
+							isVerified : res.data.Verified,
+							categoryString : res.data.Category, 
 						});
 					}
 				})
@@ -748,7 +754,7 @@ class ProfilePage extends React.Component {
 		});
 		return choosenInfluencersHelp
 	}
-	handleAddOneTimeCampaign =(date,time)=>{
+	handleAddOneTimeCampaign =(date,time, type)=>{
 
         let id = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length-1);
 		let partnershipsRequestsList = this.getpartnershipsRequests();
@@ -759,7 +765,8 @@ class ProfilePage extends React.Component {
 			Date : date,
 			Time : time,
 			Description : this.state.description,
-			PartnershipsRequests : partnershipsRequestsList
+			PartnershipsRequests : partnershipsRequestsList,
+			Type : type
 		}
 		Axios.post(BASE_URL + "/api/campaign/oneTimeCampaign/", campaignDTO)
 			.then((res) => {
@@ -790,7 +797,7 @@ class ProfilePage extends React.Component {
 			});
 
 	}
-	handleAddMultipleTimeCampaign =(startDate,endDate,numberOfRepetitions) =>{
+	handleAddMultipleTimeCampaign =(startDate,endDate,numberOfRepetitions, type) =>{
 
 		let id = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length-1);
 		let partnershipsRequestsList = this.getpartnershipsRequests();
@@ -802,7 +809,8 @@ class ProfilePage extends React.Component {
 			EndTime : endDate,
 			Description : this.state.description,
 			PartnershipsRequests : partnershipsRequestsList,
-			DesiredNumber : numberOfRepetitions
+			DesiredNumber : numberOfRepetitions,
+			Type : type
 		}
 		Axios.post(BASE_URL + "/api/campaign/multipleTimeCampaign/", campaignDTO)
 			.then((res) => {
@@ -2039,7 +2047,7 @@ class ProfilePage extends React.Component {
             selectedFile: event.target.files[0],
             loaded: 0,
         });
-        console.log(event.target.files[0]);
+		
     };
 
     handleSubmit = (event) => {
@@ -2177,19 +2185,12 @@ class ProfilePage extends React.Component {
 
 								<tr>
 									<td width="130em">
-										<img
-											className="img-fluid"
-											src={this.state.profilePhoto}
-											width="70em"
-											alt="description"
-										/>
-										<ImageUploader
-											withIcon={false}
-											buttonText='Add profile picture'
-											onChange={this.handleAddProfileImage}
-											imgExtension={['.jpg', '.gif', '.png', '.gif']}
-											withPreview={true}
-										/>
+									<img
+                                className="img-fluid"
+                                src={playerLogo}
+                                width="100%"
+                                alt="description"
+                              /> 
 									</td>
 
 									<td>
@@ -2230,7 +2231,14 @@ class ProfilePage extends React.Component {
 											</td>
 										</div>
 
-										
+										<div hidden={!this.state.isVerified}>
+											<td>
+												<GoVerified />
+											</td>
+											<td>
+												<label >{this.state.categoryString}</label>
+											</td>
+										</div>
 									</td>
 									
 								</tr>

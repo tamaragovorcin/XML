@@ -22,12 +22,11 @@ type application struct {
 }
 
 func main() {
-
 	// Define command-line flags
 	serverAddr := flag.String("serverAddr", "", "HTTP server network address")
 	serverPort := flag.Int("serverPort", 4002, "HTTP server network port")
-	mongoURI := flag.String("mongoURI", "mongodb://db_users:27017", "Database hostname url")
-	mongoDatabse := flag.String("mongoDatabse", "movies", "Database name")
+	mongoURI := flag.String("mongoURI", "mongodb://localhost:27017", "Database hostname url")
+	mongoDatabse := flag.String("mongoDatabse", "messages", "Database name")
 	enableCredentials := flag.Bool("enableCredentials", false, "Enable the use of credentials for mongo connection")
 	flag.Parse()
 
@@ -65,6 +64,7 @@ func main() {
 
 	infoLog.Printf("Database connection established")
 
+
 	// Initialize a new instance of application containing the dependencies.
 	app := &application{
 		infoLog:  infoLog,
@@ -80,18 +80,27 @@ func main() {
 		},
 	}
 
-	// Initialize a new http.Server struct.
-	serverURI := fmt.Sprintf("%s:%d", *serverAddr, *serverPort)
-	srv := &http.Server{
-		Addr:         serverURI,
-		ErrorLog:     errLog,
-		Handler:      app.routes(),
-		IdleTimeout:  time.Minute,
-		ReadTimeout:  5 * time.Second,
-		WriteTimeout: 10 * time.Second,
-	}
 
-	infoLog.Printf("Starting server on %s", serverURI)
-	err = srv.ListenAndServe()
-	errLog.Fatal(err)
+	serverURI := fmt.Sprintf("%s:%d", *serverAddr, *serverPort)
+	router := app.routes();
+	http.ListenAndServe(serverURI, setHeaders(router))
+}
+func setHeaders(h http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		//anyone can make a CORS request (not recommended in production)
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+		//only allow GET, POST, and OPTIONS
+		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, OPTIONS, FETCH, DELETE")
+		//Since I was building a REST API that returned JSON, I set the content type to JSON here.
+		w.Header().Set("Content-Type", "application/json")
+		//Allow requests to have the following headers
+		w.Header().Set("Access-Control-Allow-Headers", "Origin, Content-Type, Authorization, cache-control")
+		//if it's just an OPTIONS request, nothing other than the headers in the response is needed.
+		//This is essential because you don't need to handle the OPTIONS requests in your handlers now
+		if r.Method == "OPTIONS" {
+			return
+		}
+
+		h.ServeHTTP(w, r)
+	})
 }

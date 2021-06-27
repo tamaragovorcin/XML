@@ -1,30 +1,33 @@
 package models
 
 import (
-	"go.mongodb.org/mongo-driver/x/mongo/driver/uuid"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"time"
 )
 
 type Chat struct {
-	Id uuid.UUID `bson:"_id,omitempty"`
-	User1 uuid.UUID `bson:"user1,omitempty"`
-	User2 uuid.UUID `bson:"user2,omitempty"`
-	Messages []uuid.UUID `bson:"messages,omitempty"`
+	Id primitive.ObjectID `bson:"_id,omitempty"`
+	User1 primitive.ObjectID `bson:"user1"`
+	User2 primitive.ObjectID `bson:"user2"`
+	Messages []Message `bson:"messages"`
+	Deleted bool `bson:"deleted"`
+	UserThatDeletedChat primitive.ObjectID`bson:"userThatDeletedChat"`
 }
 
 type DisposableImage struct {
-	Id uuid.UUID `bson:"_id,omitempty"`
-	Opened bool `bson:"opened,omitempty"`
-	Media string `bson:"media,omitempty"`
+	Id primitive.ObjectID `bson:"_id,omitempty"`
+	Opened bool `bson:"opened"`
+	Media string `bson:"media"`
 }
 
 type Message struct {
-	Id uuid.UUID `bson:"_id,omitempty"`
-	DateTime  time.Time `bson:"time,omitempty"`
-	Text string `bson:"text,omitempty"`
-	FeedPost uuid.UUID `bson:"feedPost,omitempty"`
-	StoryPost uuid.UUID `bson:"storyPost,omitempty"`
-	DisposableImage uuid.UUID `bson:"disposableImage,omitempty"`
-	Deleted bool `bson:"deleted,omitempty"`
-	Sender uuid.UUID `bson:"sender,omitempty"`
+	Id primitive.ObjectID `bson:"_id,omitempty"`
+	DateTime  time.Time `bson:"time"`
+	Text string `bson:"text"`
+	FeedPost primitive.ObjectID `bson:"feedPost"`
+	StoryPost primitive.ObjectID`bson:"storyPost"`
+	AlbumPost primitive.ObjectID`bson:"albumPost"`
+	DisposableImage primitive.ObjectID `bson:"disposableImage"`
+	Deleted bool `bson:"deleted"`
+	Sender primitive.ObjectID`bson:"sender"`
 }

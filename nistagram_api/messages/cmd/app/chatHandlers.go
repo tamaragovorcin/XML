@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"github.com/gorilla/mux"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"gomod/pkg/models"
 	"net/http"
 )
@@ -28,8 +29,9 @@ func (app *application) getAllChats(w http.ResponseWriter, r *http.Request) {
 func (app *application) findChatByID(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	id := vars["id"]
+	userId, _ := primitive.ObjectIDFromHex(id)
 
-	m, err := app.chats.FindByID(id)
+	m, err := app.chats.FindByID(userId)
 	if err != nil {
 		if err.Error() == "ErrNoDocuments" {
 			app.infoLog.Println("Chat not found")

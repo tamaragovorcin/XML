@@ -3,6 +3,7 @@ package mongodb
 import (
 	"context"
 	"errors"
+	"fmt"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -48,6 +49,7 @@ func (m *MessageModel) FindByID(id string) (*models.Message, error) {
 }
 
 func (m *MessageModel) Insert(message models.Message) (*mongo.InsertOneResult, error) {
+	fmt.Println("Upisao")
 	return m.C.InsertOne(context.TODO(), message)
 }
 

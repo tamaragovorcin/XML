@@ -13,6 +13,7 @@ type OneTimeCampaignDTO struct {
 	Time string
 	PartnershipsRequests []string
 	Description string
+	Type string
 }
 type OneTimeCampaignUpdateDTO struct {
 	Id string
@@ -42,6 +43,8 @@ type MultipleTimeCampaignDTO struct {
 	DesiredNumber string
 	PartnershipsRequests []string
 	Description string
+	Type string
+
 }
 
 type CampaignDTO struct {
@@ -65,6 +68,37 @@ type CampaignDTO struct {
 	Likes []LikeDTO
 	Dislikes []LikeDTO
 	Comments []CommentDTO
+	TimesShownTotal int
+	BestInfluencer  string
+	HiredInfluencers string
+	NumberOfClicks int
+}
+type CampaignAgentAppDTO struct {
+	Id string
+	User string
+	TargetGroup models.TargetGroup
+	Link string
+	Date string
+	Time string
+	Description string
+	ContentType string
+	AgentUsername string
+	AgentId primitive.ObjectID
+	DesiredNumber int
+	CampaignType string
+	StartTime string
+	EndTime string
+	NumberOfLikes int
+	NumberOfDislikes int
+	NumberOfComments int
+	Likes string
+	Dislikes string
+	Comments string
+	TimesShownTotal int
+	BestInfluencer  string
+	HiredInfluencers string
+	NumberOfClicks int
+	Media []byte
 }
 
 type CampaignMultipleDTO struct {
@@ -106,4 +140,29 @@ type BestStatisticsDTO struct {
 	NumberOfClicks int
 	NumberOfPartnerships int
 	Username string
+}
+type StoryPostInfoHomePageDTO struct {
+	Link string
+	Type string
+	UserId          primitive.ObjectID
+	UserUsername    string
+	CampaignId primitive.ObjectID
+	Stories    []StoryPostInfoDTO
+}
+
+type StoryPostInfoDTO struct {
+	Id          primitive.ObjectID
+	Media       []byte
+	Type 		string
+	ContentType string
+	Link string
+}
+
+type CampaignStoriesDTO struct{
+	CampaignId primitive.ObjectID
+	UserId          primitive.ObjectID
+	Media       []byte
+	Type 		string
+	ContentType string
+	Link string
 }

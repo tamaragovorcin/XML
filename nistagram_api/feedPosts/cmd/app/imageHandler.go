@@ -64,7 +64,6 @@ func (app *application) findImageByID(w http.ResponseWriter, r *http.Request) {
 }
 func (app *application) saveImage(w http.ResponseWriter, r *http.Request)  {
 	w.Header().Set("Access-Control-Allow-Origin", "*")
-fmt.Println("llllllllllllllllllllll")
 	vars := mux.Vars(r)
 	userId := vars["userIdd"]
 	feedId := vars["feedId"]
@@ -125,6 +124,16 @@ func findImageByPostId(images []models.Image, idFeedPost primitive.ObjectID) (mo
 	for _, image := range images {
 		if	image.PostId==idFeedPost {
 			imageFeedPost = image
+		}
+	}
+	return imageFeedPost, nil
+}
+func findImagesByPostId(images []models.Image, idFeedPost primitive.ObjectID) ([]models.Image, error) {
+	imageFeedPost := []models.Image{}
+
+	for _, image := range images {
+		if	image.PostId==idFeedPost {
+			imageFeedPost = append(imageFeedPost,image)
 		}
 	}
 	return imageFeedPost, nil

@@ -77,9 +77,17 @@ type CollectionAlbumInfoDTO struct {
 	Albums []FeedAlbumInfoDTO
 	Name string
 }
+type ImageMediaDTO struct {
+	Id  primitive.ObjectID
+	Media string
+}
 type SavedPostDTO struct {
 	User       string
 	FeedPost   string
+}
+type ResponseDTO struct {
+	Message string
+	Username string
 }
 type UserCollectionsDTO struct {
 	Id         primitive.ObjectID

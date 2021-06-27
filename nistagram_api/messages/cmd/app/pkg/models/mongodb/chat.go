@@ -30,22 +30,18 @@ func (m *ChatModel) GetAll() ([]models.Chat, error) {
 	return mm, err
 }
 
-func (m *ChatModel) FindByID(id string) (*models.Chat, error) {
-	p, err := primitive.ObjectIDFromHex(id)
+func (m *ChatModel) FindByID(id primitive.ObjectID) (*models.Chat, error) {
+	var user = models.Chat{}
+	err := m.C.FindOne(context.TODO(), bson.M{"_id": id}).Decode(&user)
 	if err != nil {
-		return nil, err
-	}
-
-	var chat = models.Chat{}
-	err = m.C.FindOne(context.TODO(), bson.M{"_id": p}).Decode(&chat)
-	if err != nil {
+		// Checks if the user was not found
 		if err == mongo.ErrNoDocuments {
 			return nil, errors.New("ErrNoDocuments")
 		}
 		return nil, err
 	}
 
-	return &chat, nil
+	return &user, nil
 }
 
 func (m *ChatModel) Insert(chat models.Chat) (*mongo.InsertOneResult, error) {
@@ -58,4 +54,9 @@ func (m *ChatModel) Delete(id string) (*mongo.DeleteResult, error) {
 		return nil, err
 	}
 	return m.C.DeleteOne(context.TODO(), bson.M{"_id": p})
+}
+func (m *ChatModel) Update(chat models.Chat)  (*mongo.UpdateResult, error) {
+	return m.C.UpdateOne(context.TODO(),bson.M{"_id":chat.Id},bson.D{{"$set",bson.M{"user1":chat.User1,
+		"user2":chat.User2,
+		"messages":chat.Messages,"deleted":chat.Deleted,"userThatDeletedChat":chat.UserThatDeletedChat}}})
 }

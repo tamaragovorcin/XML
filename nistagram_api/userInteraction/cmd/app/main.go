@@ -193,6 +193,7 @@ func routes() *mux.Router {
 	r.HandleFunc("/api/createUser", CreateUser(driver, configuration.Database)).Methods("POST")
 	r.HandleFunc("/removeUser", RemoveUser(driver, configuration.Database)).Methods("POST")
 
+	r.HandleFunc("/followRecommendations", ReturnRecommendedUsers(driver, configuration.Database)).Methods("POST")
 
 	return r
 }
@@ -280,8 +281,8 @@ type FollowRequest struct {
 }
 
 type FollowRequestDTO struct {
-	Follower string `json:"follower"`
-	Following string `json:"following"`
+	Follower string
+	Following string
 }
 type FollowDTO struct {
 	FollowerId string `json:"FollowerId"`
@@ -294,13 +295,6 @@ type User struct {
 
 type Users struct {
 	Users []string `json:"users"`
-}
-type Report struct {
-	Id uuid.UUID `json:"_id,omitempty"`
-	ComplainingUser uuid.UUID `json:"complainingUser,omitempty"`
-	ReportedUser uuid.UUID `json:"reportedUser,omitempty"`
-	FeedPost uuid.UUID `json:"feedPost,omitempty"`
-	StoryPost uuid.UUID `json:"storyPost,omitempty"`
 }
 
 type VoteResult struct {
@@ -316,6 +310,11 @@ type Neo4jConfiguration struct {
 type followUserStructDTO struct {
 	Id string
 	Username string
+}
+type RecommendationDTO struct {
+	Id string
+	Username string
+	Privacy string
 }
 type followUserCloseFriendsDTO struct {
 	CloseFriends []followUserStructDTO
@@ -333,8 +332,6 @@ func CreateFollowRequest(driver neo4j.Driver, database string) func(w http.Respo
 		w.Header().Set("Access-Control-Allow-Origin", "*")
 		var m FollowRequestDTO
 
-		fmt.Println(m.Follower)
-		fmt.Println(m.Follower)
 
 
 		err := json.NewDecoder(req.Body).Decode(&m)
@@ -1122,6 +1119,7 @@ func getUserUsernameIfInfluencer(user string) string {
 	sb = sb[:len(sb)-1]
 	return sb
 }
+
 func RemoveUser(driver neo4j.Driver, database string) func(w http.ResponseWriter,r *http.Request) {
 	return func(w http.ResponseWriter, req *http.Request) {
 		var m User
@@ -1159,4 +1157,77 @@ func RemoveUser(driver neo4j.Driver, database string) func(w http.ResponseWriter
 			log.Println("error writing volte result response:", err)
 		}
 	}
+}
+
+func ReturnRecommendedUsers(driver neo4j.Driver, database string) func(w http.ResponseWriter,r *http.Request) {
+	return func(w http.ResponseWriter, req *http.Request) {
+		session := driver.NewSession(neo4j.SessionConfig{
+			AccessMode:   neo4j.AccessModeWrite,
+			DatabaseName: database,
+		})
+		defer unsafeClose(session)
+		var user User
+		err := json.NewDecoder(req.Body).Decode(&user)
+		if err != nil {
+			fmt.Println("Error")
+		}
+
+		movieResults, err := session.ReadTransaction(func(tx neo4j.Transaction) (interface{}, error) {
+
+			records, err := tx.Run(
+				`MATCH (s:User)-[:FOLLOW]->(o:User)-[:FOLLOW]-(r:User) WHERE s.id = $sId AND NOT (s:User)-[:FOLLOW]->(r:User) AND NOT (:User{id:$sId})-[:FOLLOWREQUEST]->(r:User) AND r.id <> $sId WITH r,count(*) as score return r.id as id ORDER BY score DESC LIMIT 20`,
+				map[string]interface{}{ "sId": user.Id})
+			if err != nil {
+				return nil, err
+			}
+
+			var users  []RecommendationDTO
+			for records.Next() {
+				record := records.Record()
+				id, _ := record.Get("id")
+				username:=getUserUsername(id.(string))
+				privacy :=userIsPublic(id.(string))
+				var dto = RecommendationDTO{
+					Id : id.(string),
+					Username: username,
+					Privacy: privacy,
+				}
+				users = append(users,  dto)
+			}
+			if users==nil || len(users)==0 {
+				return []RecommendationDTO{},nil
+			}
+			return users,nil
+
+
+		})
+		if err != nil {
+			log.Println("error querying search:", err)
+			return
+		}
+		err = json.NewEncoder(w).Encode(movieResults)
+		if err != nil {
+			log.Println("error writing search response:", err)
+		}
+	}
+}
+
+func userIsPublic(user string) string {
+
+	resp, err := http.Get("http://localhost:80/api/users/api/user/privacy/"+user)
+	if err != nil {
+		log.Fatalln(err)
+	}
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		log.Fatalln(err)
+	}
+	sb := string(body)
+	sb = sb[1:]
+	sb = sb[:len(sb)-1]
+	if sb == "public" {
+		return "public"
+	}
+
+	return "private"
 }

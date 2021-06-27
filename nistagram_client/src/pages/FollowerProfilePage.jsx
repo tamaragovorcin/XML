@@ -11,11 +11,14 @@ import NotificationModal from "../components/NotificationModal"
 import DislikesModal from "../components/Posts/DislikesModal"
 import CommentsModal from "../components/Posts/CommentsModal"
 import AddPostToCollection from "../components/Posts/AddPostToCollection";
+import ForwardPostModal from "../components/Posts/ForwardPostModal"
 import WriteCommentAlbumModal from "../components/Posts/WriteCommentAlbumModal"
 import { Lock } from "@material-ui/icons";
 import { Icon } from "@material-ui/core";
 import { BASE_URL } from "../constants.js";
 import {IoMdNotificationsOutline} from 'react-icons/io'
+import { FiSend } from 'react-icons/fi';
+import {GoVerified} from 'react-icons/go'
 
 class FollowerProfilePage extends React.Component {
 	
@@ -68,6 +71,8 @@ class FollowerProfilePage extends React.Component {
 		hiddenStoriesForCollection : true,
 		showAddCollectionModal : false,
 		showWriteCommentModalAlbum : false,
+		showForwardPOst : false,
+		postToForward : "",
 		followingThisUser : false,
 		mutedThisUser : false,
 		allowPagePreview : false,
@@ -90,6 +95,11 @@ class FollowerProfilePage extends React.Component {
 		isInfluencer : false,
 		oneTimeCampaignsInfluencer : [],
         multipleCampaignsInfluencer : [],
+		followingUsers : [],
+		forwardTo : [],
+		forwardedType : "",
+		isVerified : false,
+		categoryString : "",
 	}
 	hasRole = (reqRole) => {
 		let roles = JSON.parse(localStorage.getItem("keyRole"));
@@ -130,8 +140,8 @@ class FollowerProfilePage extends React.Component {
 					biography : res.data.Biography,
 					private : res.data.Private,
 					numberOfPosts : res.data.numberOfPosts,
-					numberOfFollowers : res.data.numberOfFollowers,
-					numberOfFollowings : res.data.numberOfFollowings
+					isVerified : res.data.Verified,
+					categoryString : res.data.Category,
 				});
 
 			})
@@ -214,6 +224,17 @@ class FollowerProfilePage extends React.Component {
 		.catch((err) => {
 			console.log(err);
 		});
+	}
+	handleOpenChat =()=>{
+		let loggedId = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length-1)
+		var sentence = window.location.toString()
+
+		var s = []
+		s = sentence.split("/");
+
+		this.fetchData(s[5]);
+		window.location = "#/chat/" + loggedId+"/"+s[5];
+
 	}
 	handleSetAllowPagePreview = (id)=> {
 		if(!this.hasRole("*")) {
@@ -604,6 +625,96 @@ class FollowerProfilePage extends React.Component {
 		this.setState({ selectedPostId: postId });
 		this.setState({showWriteCommentModal : true});
 	}
+	handleOpenForwardModal = (postId,type)=>{
+		this.getFollowing();
+		this.setState({ showForwardPOst: true });
+		this.setState({ postToForward: postId });
+		this.setState({forwardedType : type});
+
+
+	}
+	getFollowing = ()=> {
+		let help = []
+
+        let id = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length-1);
+        const dto = {id: id}
+        Axios.post(BASE_URL + "/api/userInteraction/api/user/following", dto)
+			.then((res) => {
+
+				res.data.forEach((user) => {
+					let optionDTO = { id: user.Id, label: user.Username, value: user.Id }
+					help.push(optionDTO)
+				});
+				
+
+				this.setState({ followingUsers: help });
+			})
+			.catch((err) => {
+				console.log(err)
+			});
+    }
+	handleForwardModalClose = ()=>{
+		this.getFollowing()
+		this.setState({ showForwardPOst: false });
+
+	}
+	handleChangeTags = (event) => {
+	
+		let optionDTO = { id: event.value, label: event.label, value: event.value }
+		let helpDto = this.state.forwardTo.concat(optionDTO)
+		
+		this.setState({ forwardTo: helpDto });
+
+		const newList2 = this.state.followingUsers.filter((item) => item.Id !== event.value);
+		this.setState({ followingUsers: newList2 });		
+	};
+	sendPost = ()=>{
+		let id = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length-1)
+		var forwardToHelp = []
+		this.state.forwardTo.forEach((user) => {
+			forwardToHelp.push(user.id)
+		});
+		if (this.state.forwardedType === "post"){
+		let dto = {
+			FeedPost : this.state.postToForward,
+			Receivers : forwardToHelp,
+			Sender : id,
+		}
+		Axios.post(BASE_URL + "/api/messages/api/send/post", dto, {
+		}).then((res) => {
+			
+			this.setState({ textSuccessfulModal: "You have successfully forwarded post." });
+			this.setState({ openModal: true });
+			this.setState({ showWriteCommentModal: false });
+
+
+		})
+		.catch((err) => {
+			console.log(err);
+		});
+	}else if (this.state.forwardedType === "album"){
+		let dto = {
+			AlbumPost : this.state.postToForward,
+			Receivers : forwardToHelp,
+			Sender : id,
+		}
+		Axios.post(BASE_URL + "/api/messages/api/send/post", dto, {
+		}).then((res) => {
+			
+			this.setState({ textSuccessfulModal: "You have successfully forwarded post." });
+			this.setState({ openModal: true });
+			this.setState({ showWriteCommentModal: false });
+
+
+		})
+		.catch((err) => {
+			console.log(err);
+		});
+	}
+		
+	
+
+	}
 	handleAddComment =(comment) => {
 		let id = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length-1)
 
@@ -715,8 +826,36 @@ class FollowerProfilePage extends React.Component {
 			Axios.post(BASE_URL + "/api/users/api/block/", dto)
 			.then((res) => {
 								
+
 				this.setState({ textSuccessfulModal: "You have successfully blocked this user." });
 				this.setState({ openModal: true });
+				var sentence = window.location.toString()
+
+		var s = []
+		s = sentence.split("/");
+		console.log(window.location.toString())
+
+
+		this.fetchData(s[5]);
+		Axios.get(BASE_URL + "/api/users/api/" + s[5])
+			.then((res) => {
+				this.setState({
+					id: res.data.Id,
+					username : res.data.ProfileInformation.Username,
+					name: res.data.ProfileInformation.Name,
+					lastName : res.data.ProfileInformation.LastName,
+					webSite : res.data.WebSite,
+					biography : res.data.Biography,
+					private : res.data.Private,
+					numberOfPosts : res.data.numberOfPosts,
+					numberOfFollowers : res.data.numberOfFollowers,
+					numberOfFollowings : res.data.numberOfFollowings
+				});
+
+			})
+			.catch((err) => {
+				console.log(err);
+			});
 
 			})
 			.catch ((err) => {
@@ -844,6 +983,10 @@ class FollowerProfilePage extends React.Component {
 													<button  className="btn btn-outline-primary mt-1" onClick={() => this.handleOpenNotificationModal()} type="button"><i className="icofont-subscribe mr-1"></i><IoMdNotificationsOutline/></button>
 
 													</td>
+													<td>
+													<button  className="btn btn-outline-primary mt-1" onClick={() => this.handleOpenChat()} type="button"><i className="icofont-subscribe mr-1"></i><FiSend/></button>
+
+													</td>
 
 												</div>
 											
@@ -855,7 +998,14 @@ class FollowerProfilePage extends React.Component {
 														<label >{this.state.webSite}</label>
 													</td>
 												</div>
-
+												<div hidden={!this.state.isVerified}>
+													<td>
+														<GoVerified />
+													</td>
+													<td>
+														<label >{this.state.categoryString}</label>
+													</td>
+												</div>
 
 											</td>
 
@@ -884,7 +1034,7 @@ class FollowerProfilePage extends React.Component {
 								handleLikesModalOpenAlbum  = {this.handleLikesModalOpenAlbum }
 								handleDislikesModalOpenAlbum  = {this.handleDislikesModalOpenAlbum}
 								handleCommentsModalOpenAlbum  = {this.handleCommentsModalOpenAlbum }
-
+								handleOpenForwardModal = {this.handleOpenForwardModal}
 
 								highlights = {this.state.highlights}
 								seeStoriesInHighlight = {this.seeStoriesInHighlight}
@@ -1012,6 +1162,17 @@ class FollowerProfilePage extends React.Component {
 						  header="Add album to collection album"
 						  addPostToCollection={this.addAlbumToCollectionAlbum}
 						  collections = {this.state.myCollectionAlbums}
+					  />
+					  <ForwardPostModal
+					  show={this.state.showForwardPOst}
+					  onCloseModal={this.handleForwardModalClose}
+					  header="Forward post to"
+					  followingUsers = {this.state.followingUsers}
+					  forwardTo = {this.state.forwardTo}
+					  handleChangeTags = {this.handleChangeTags}
+					  sendPost = {this.sendPost}
+
+					  
 					  />
 
 				</div>

@@ -376,6 +376,17 @@ func getUsersSettings(app *application,settings []models.Settings, logged string
 	usersSettings := insertSettingsForUser(app,logged)
 	return usersSettings
 }
+func getUsersNotificationSettings(app *application,settings []models.Notifications, logged string) models.Notifications {
+	settings1 := models.Notifications{}
+	for _, settingsItem := range settings {
+		user :=settingsItem.User
+		settinsUser:= user.Hex()
+		if settinsUser==logged {
+			settings1 =  settingsItem
+		}
+	}
+	return settings1
+}
 func getUsersNotifications(app *application,notifications []models.Notifications, logged string) models.Notifications {
 	for _, settingsItem := range notifications {
 		user :=settingsItem.User
@@ -408,6 +419,27 @@ func (app *application) getUsersPrivacySettings(w http.ResponseWriter, r *http.R
 	w.WriteHeader(http.StatusOK)
 	w.Write(b)
 }
+func (app *application) getUsersNotificationSettings(w http.ResponseWriter, r *http.Request) {
+
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	vars := mux.Vars(r)
+	userId := vars["userId"]
+	allSettings,_ := app.notification.GetAll()
+
+	settings := getUsersNotificationSettings(app,allSettings,userId)
+
+	b, err := json.Marshal(settings)
+	if err != nil {
+		app.serverError(w, err)
+	}
+
+	app.infoLog.Println("Have been found a user")
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	w.Write(b)
+}
+
 func insertSettingsForUser(app *application,logged string) models.Settings {
 	userId, _ := primitive.ObjectIDFromHex(logged)
 	var settings = models.Settings{

@@ -1,11 +1,15 @@
 package main
 
 import (
+	"bytes"
 	"campaigns/pkg/dtos"
 	"campaigns/pkg/models"
 	"encoding/json"
+	"fmt"
 	"github.com/gorilla/mux"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	"image"
+	"image/jpeg"
 	"io"
 	"io/ioutil"
 	"log"
@@ -13,6 +17,7 @@ import (
 	"os"
 	"sort"
 	"strconv"
+	"strings"
 )
 
 
@@ -152,6 +157,36 @@ func(app *application) GetFileByCampaignId(w http.ResponseWriter, r *http.Reques
 	io.Copy(w,file)
 	return
 }
+func campaignToResponseAgentApp(campaing models.OneTimeCampaign, contentType string, media string) dtos.CampaignAgentAppDTO {
+	f, _ := os.Open(media)
+	defer f.Close()
+	image,_,_:= image.Decode(f)
+	buffer := new(bytes.Buffer)
+	if err := jpeg.Encode(buffer, image, nil); err != nil {
+		log.Println("unable to encode image.")
+	}
+	return dtos.CampaignAgentAppDTO{
+		Id: campaing.Id.Hex(),
+		User: campaing.Campaign.User.Hex(),
+		Description: campaing.Campaign.Description,
+		Time: campaing.Time,
+		Date: campaing.Date,
+		Link: campaing.Campaign.Link,
+		ContentType: contentType,
+		CampaignType:  "oneTime",
+		NumberOfLikes : len(campaing.Campaign.Likes),
+		NumberOfDislikes : len(campaing.Campaign.Dislikes),
+		NumberOfComments : len(campaing.Campaign.Comments),
+		Likes : getLikesAsStrings(campaing.Campaign.Likes),
+		Dislikes : getLikesAsStrings(campaing.Campaign.Dislikes),
+		Comments: getCommentAsStrings(campaing.Campaign.Comments),
+		BestInfluencer: getBestInfluencersUsername(campaing.Campaign.Statistic),
+		HiredInfluencers: getAllHiredInfluencers(campaing.Campaign.Statistic,campaing.Campaign.Partnerships),
+		TargetGroup: campaing.Campaign.TargetGroup,
+		Media : buffer.Bytes(),
+	}
+
+}
 func campaignToResponse(campaing models.OneTimeCampaign, contentType string) dtos.CampaignDTO {
 	return dtos.CampaignDTO{
 		Id: campaing.Id.Hex(),
@@ -166,10 +201,116 @@ func campaignToResponse(campaing models.OneTimeCampaign, contentType string) dto
 		NumberOfDislikes : len(campaing.Campaign.Dislikes),
 		NumberOfComments : len(campaing.Campaign.Comments),
 		Likes : getLikesDTOS(campaing.Campaign.Likes),
-		Dislikes : getDislikesDTOS(campaing.Campaign.Dislikes),
+		Dislikes : getLikesDTOS(campaing.Campaign.Dislikes),
 		Comments: getCommentDtos(campaing.Campaign.Comments),
+		BestInfluencer: getBestInfluencersUsername(campaing.Campaign.Statistic),
+		HiredInfluencers: getAllHiredInfluencers(campaing.Campaign.Statistic,campaing.Campaign.Partnerships),
 	}
 
+}
+func getCommentAsStrings(commentss []models.Comment) string {
+	commentString := ""
+	for _, comment := range commentss {
+
+		userUsername := getUserUsername(comment.Writer)
+		commentString +=userUsername + " - " + comment.Content + ","
+	}
+	if len(commentString)>1 {
+		commentString = commentString[:len(commentString)-1]
+	}
+	return commentString
+}
+
+func getLikesAsStrings(likes []primitive.ObjectID) string {
+	likesDtos := ""
+	for _, user := range likes {
+
+		userUsername := getUserUsername(user)
+		likesDtos +=userUsername + ","
+	}
+	if len(likesDtos)>1 {
+		likesDtos = likesDtos[:len(likesDtos)-1]
+	}
+	return likesDtos
+}
+
+func getAllHiredInfluencers(statistics []models.Statistic,partnerships []models.Partnership) string {
+	allInfluencersOnCampaign :=""
+	for _, partnership := range partnerships {
+		if partnership.Approved==true {
+			allInfluencersOnCampaign += getUserUsername(partnership.Influencer)
+			numberOfClicks := getNumberOfClicksForINfluencerInCampaign(statistics,partnership.Influencer)
+			if numberOfClicks!=0 {
+				allInfluencersOnCampaign+=" ("+strconv.Itoa(numberOfClicks)+" clicks )"
+			}
+			allInfluencersOnCampaign+=","
+		}
+
+	}
+	if len(allInfluencersOnCampaign)>1 {
+		allInfluencersOnCampaign = allInfluencersOnCampaign[:len(allInfluencersOnCampaign)-1]
+
+	}
+	return allInfluencersOnCampaign
+}
+
+func getNumberOfClicksForINfluencerInCampaign(statistics []models.Statistic, influencer primitive.ObjectID) int {
+	num:=0
+	for _, statisticOne := range statistics {
+		if statisticOne.Influencer.Hex()==influencer.Hex() {
+			num = statisticOne.NumberOfClicks
+		}
+	}
+	return num
+}
+func getBestInfluencersUsername(statistic []models.Statistic) string {
+	numberOfClicks := 0
+	statisticNum := 0
+	for i, statisticOne := range statistic {
+		if statisticOne.NumberOfClicks>numberOfClicks {
+			numberOfClicks = statisticOne.NumberOfClicks
+			statisticNum = i
+		}
+	}
+
+	if numberOfClicks>0 {
+		userUsername := getUserUsername(statistic[statisticNum].Influencer)
+		return userUsername + " ("+strconv.Itoa(numberOfClicks)+" clicks )"
+	}
+	return ""
+}
+
+func campaignMultipleToResponseAgentApp(campaing models.MultipleTimeCampaign, contentType string, media string) dtos.CampaignAgentAppDTO {
+	f, _ := os.Open(media)
+	defer f.Close()
+	image,_,_:= image.Decode(f)
+	buffer := new(bytes.Buffer)
+	if err := jpeg.Encode(buffer, image, nil); err != nil {
+		log.Println("unable to encode image.")
+	}
+	return dtos.CampaignAgentAppDTO{
+		Id: campaing.Id.Hex(),
+		User: campaing.Campaign.User.Hex(),
+		Description: campaing.Campaign.Description,
+		StartTime: campaing.StartTime,
+		EndTime: campaing.EndTime,
+		Link: campaing.Campaign.Link,
+		ContentType: contentType,
+		CampaignType:  "multiple",
+		DesiredNumber:  campaing.DesiredNumber,
+		NumberOfLikes : len(campaing.Campaign.Likes),
+		NumberOfDislikes : len(campaing.Campaign.Dislikes),
+		NumberOfComments : len(campaing.Campaign.Comments),
+		Likes : getLikesAsStrings(campaing.Campaign.Likes),
+		Dislikes : getLikesAsStrings(campaing.Campaign.Dislikes),
+		Comments: getCommentAsStrings(campaing.Campaign.Comments),
+		TimesShownTotal : campaing.TimesShownTotal,
+		BestInfluencer: getBestInfluencersUsername(campaing.Campaign.Statistic),
+		HiredInfluencers: getAllHiredInfluencers(campaing.Campaign.Statistic,campaing.Campaign.Partnerships),
+		TargetGroup: campaing.Campaign.TargetGroup,
+		Media : buffer.Bytes(),
+
+	}
 }
 
 func campaignMultipleToResponse(campaing models.MultipleTimeCampaign, contentType string) dtos.CampaignDTO {
@@ -187,8 +328,11 @@ func campaignMultipleToResponse(campaing models.MultipleTimeCampaign, contentTyp
 		NumberOfDislikes : len(campaing.Campaign.Dislikes),
 		NumberOfComments : len(campaing.Campaign.Comments),
 		Likes : getLikesDTOS(campaing.Campaign.Likes),
-		Dislikes : getDislikesDTOS(campaing.Campaign.Dislikes),
+		Dislikes : getLikesDTOS(campaing.Campaign.Dislikes),
 		Comments: getCommentDtos(campaing.Campaign.Comments),
+		TimesShownTotal : campaing.TimesShownTotal,
+		BestInfluencer: getBestInfluencersUsername(campaing.Campaign.Statistic),
+		HiredInfluencers: getAllHiredInfluencers(campaing.Campaign.Statistic,campaing.Campaign.Partnerships),
 	}
 }
 
@@ -348,4 +492,324 @@ func getAllStatistics(app *application) []models.Statistic {
 		}
 	}
 	return allStatistics
+}
+
+
+
+func (app *application) getStoryCampaignsForHomePage(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	userId := vars["userId"]
+	userIdPrimitive, _ := primitive.ObjectIDFromHex(userId)
+
+	allImages, _ := app.images.All()
+	storiesForHomePage := findCampaignStoriesForHomePage(app, userIdPrimitive)
+
+	storyPostsResponse := []dtos.StoryPostInfoHomePageDTO{}
+	for _, storyPost := range storiesForHomePage {
+
+
+						images, err := findImageByCampaignId(allImages, storyPost.CampaignId)
+						if err != nil {
+							app.serverError(w, err)
+						}
+						userInList := getIndexInListOfUsersStories(userIdPrimitive, storyPostsResponse)
+						if userInList == -1 {
+							userUsername := getUserUsername(storyPost.UserId)
+
+							stories := []dtos.StoryPostInfoDTO{}
+							var dto = dtos.StoryPostInfoHomePageDTO{
+								Link : storyPost.Link,
+								Type : storyPost.Type,
+								CampaignId: storyPost.CampaignId,
+								UserId: storyPost.UserId,
+								UserUsername: userUsername,
+								Stories:      append(stories, toResponseStoryPost2(storyPost, images.Media)),
+							}
+							storyPostsResponse = append(storyPostsResponse, dto)
+						} else if userInList != -1 {
+							existingDto := storyPostsResponse[userInList]
+							existingDto.Stories = append(existingDto.Stories, toResponseStoryPost2(storyPost, images.Media))
+						}
+					}
+
+
+	imagesMarshaled, err := json.Marshal(storyPostsResponse)
+	if err != nil {
+		app.serverError(w, err)
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	w.Write(imagesMarshaled)
+}
+
+func toResponseStoryPost2(storyPost dtos.CampaignStoriesDTO, image2 string) dtos.StoryPostInfoDTO {
+	f, _ := os.Open(image2)
+	defer f.Close()
+	image,_,_:= image.Decode(f)
+	buffer := new(bytes.Buffer)
+	if err := jpeg.Encode(buffer, image, nil); err != nil {
+		log.Println("unable to encode image.")
+	}
+
+
+
+
+	return dtos.StoryPostInfoDTO{
+		Id: storyPost.CampaignId,
+		Link : storyPost.Link,
+		Media : buffer.Bytes(),
+
+	}
+}
+func getIndexInListOfUsersStories(idPrimitive primitive.ObjectID, listStories []dtos.StoryPostInfoHomePageDTO) int {
+	for num, story := range listStories {
+		if story.UserId.String()==idPrimitive.String() {
+			return num
+		}
+	}
+	return -1
+}
+func findCampaignStoriesForHomePage(app *application, idPrimitive primitive.ObjectID) []dtos.CampaignStoriesDTO {
+	oneTimeCampaigns, _ := app.oneTimeCampaign.All()
+	multipleTimeCampaigns, _ := app.multipleTimeCampaign.All()
+	allCampaigns :=[]dtos.CampaignStoriesDTO{}
+	fmt.Println("1")
+	for _, campaign := range oneTimeCampaigns {
+		if	campaign.Campaign.User.Hex()!=idPrimitive.Hex() {
+
+			if campaign.Campaign.Type == "story" {
+
+				if isTimeForExposure(campaign.Time, campaign.Date) {
+
+					if iAmFollowingThisUser(idPrimitive.Hex(),campaign.Campaign.User.Hex()) {
+
+						var CampaignStoriesDTO = dtos.CampaignStoriesDTO{
+							CampaignId: campaign.Id,
+							UserId:     campaign.Campaign.User,
+							Type:      "oneTime",
+							Link:       campaign.Campaign.Link,
+						}
+						allCampaigns = append(allCampaigns, CampaignStoriesDTO)
+					} else {
+
+						if isGenderOk(idPrimitive.Hex(), campaign.Campaign.TargetGroup.Gender) {
+							if isDateOfBirthOk(idPrimitive.Hex(), campaign.Campaign.TargetGroup.DateOne, campaign.Campaign.TargetGroup.DateTwo) {
+								if isLocationOk(idPrimitive.Hex(), campaign.Campaign.TargetGroup.Location) {
+
+									var CampaignStoriesDTO = dtos.CampaignStoriesDTO{
+										CampaignId: campaign.Id,
+										UserId:     campaign.Campaign.User,
+										Type:       "oneTime",
+										Link:       campaign.Campaign.Link,
+									}
+									allCampaigns = append(allCampaigns, CampaignStoriesDTO)
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+	for _, campaign := range multipleTimeCampaigns {
+		if	campaign.Campaign.User.Hex()!=idPrimitive.Hex() {
+
+			if campaign.Campaign.Type == "story" {
+				if isTimeForExposureMultiple(app,campaign,"agent") {
+					if iAmFollowingThisUser(idPrimitive.Hex(), campaign.Campaign.User.Hex()) {
+						var CampaignStoriesDTO = dtos.CampaignStoriesDTO{
+							CampaignId: campaign.Id,
+							UserId:     campaign.Campaign.User,
+							Type:       "multiple",
+							Link:       campaign.Campaign.Link,
+						}
+						allCampaigns = append(allCampaigns, CampaignStoriesDTO)
+					} else {
+						if isGenderOk(idPrimitive.Hex(), campaign.Campaign.TargetGroup.Gender) {
+							if isDateOfBirthOk(idPrimitive.Hex(), campaign.Campaign.TargetGroup.DateOne, campaign.Campaign.TargetGroup.DateTwo) {
+								if isLocationOk(idPrimitive.Hex(), campaign.Campaign.TargetGroup.Location) {
+
+									var CampaignStoriesDTO = dtos.CampaignStoriesDTO{
+										CampaignId: campaign.Id,
+										UserId:     campaign.Campaign.User,
+										Type:       "multiple",
+										Link:       campaign.Campaign.Link,
+									}
+									allCampaigns = append(allCampaigns, CampaignStoriesDTO)
+								}
+							}
+						}
+					}
+				}
+
+			}
+		}
+	}
+	for _, campaign := range oneTimeCampaigns {
+		if campaign.Campaign.Type=="story" {
+
+			if isTimeForExposure(campaign.Time, campaign.Date) {
+
+				if campaignHasPartnerships(campaign.Campaign.Partnerships) {
+					for _, partnership := range campaign.Campaign.Partnerships {
+						if partnership.Approved {
+							if iAmFollowingThisUser(idPrimitive.Hex(), partnership.Influencer.Hex()) {
+								var CampaignStoriesDTO = dtos.CampaignStoriesDTO{
+									CampaignId: campaign.Id,
+									UserId:     partnership.Influencer,
+									Type:      "oneTime",
+									Link:       campaign.Campaign.Link,
+								}
+								allCampaigns = append(allCampaigns, CampaignStoriesDTO)
+							} else {
+								if isGenderOk(idPrimitive.Hex(), campaign.Campaign.TargetGroup.Gender) {
+									if isDateOfBirthOk(idPrimitive.Hex(), campaign.Campaign.TargetGroup.DateOne, campaign.Campaign.TargetGroup.DateTwo) {
+										if isLocationOk(idPrimitive.Hex(), campaign.Campaign.TargetGroup.Location) {
+
+											var CampaignStoriesDTO = dtos.CampaignStoriesDTO{
+												CampaignId: campaign.Id,
+												UserId:     partnership.Influencer,
+												Type:      "oneTime",
+												Link:       campaign.Campaign.Link,
+											}
+											allCampaigns = append(allCampaigns, CampaignStoriesDTO)
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+		for _, campaign := range multipleTimeCampaigns {
+			if campaign.Campaign.Type == "story" {
+
+				if isTimeForExposureMultiple(app,campaign,"promote") {
+
+					if campaignHasPartnerships(campaign.Campaign.Partnerships) {
+						for _, partnership := range campaign.Campaign.Partnerships {
+							if partnership.Approved {
+								if iAmFollowingThisUser(idPrimitive.Hex(), partnership.Influencer.Hex()) {
+									var CampaignStoriesDTO = dtos.CampaignStoriesDTO{
+										CampaignId: campaign.Id,
+										UserId:     partnership.Influencer,
+										Type:       "multiple",
+										Link:       campaign.Campaign.Link,
+									}
+									allCampaigns = append(allCampaigns, CampaignStoriesDTO)
+								} else {
+									if isGenderOk(idPrimitive.Hex(), campaign.Campaign.TargetGroup.Gender) {
+										if isDateOfBirthOk(idPrimitive.Hex(), campaign.Campaign.TargetGroup.DateOne, campaign.Campaign.TargetGroup.DateTwo) {
+											if isLocationOk(idPrimitive.Hex(), campaign.Campaign.TargetGroup.Location) {
+
+												var CampaignStoriesDTO = dtos.CampaignStoriesDTO{
+													CampaignId: campaign.Id,
+													UserId:     partnership.Influencer,
+													Type:       "multiple",
+													Link:       campaign.Campaign.Link,
+												}
+												allCampaigns = append(allCampaigns, CampaignStoriesDTO)
+											}
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+	return allCampaigns
+}
+
+func iAmFollowingThisUser(logged string, userWithPost string) bool {
+
+	postBody, _ := json.Marshal(map[string]string{
+		"follower":  logged,
+		"following": userWithPost,
+	})
+	responseBody := bytes.NewBuffer(postBody)
+	//Leverage Go's HTTP Post function to make request
+	resp, err := http.Post("http://localhost:80/api/userInteraction/api/checkInteraction", "application/json", responseBody)
+	//Handle Error
+	if err != nil {
+		log.Fatalf("An Error Occured %v", err)
+	}
+	defer resp.Body.Close()
+	//Read the response body
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		log.Fatalln(err)
+	}
+	sb := string(body)
+	sbbtext := strings.ToLower(strings.Trim(sb," \r\n"))
+
+	if sbbtext=="true" {
+		return true
+	} else {
+		return false
+	}
+}
+
+func (app *application) getBestUsersCampaign(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	userId := vars["userId"]
+	userIdPrimitive, _ := primitive.ObjectIDFromHex(userId)
+	allPosts, _ :=app.oneTimeCampaign.All()
+	usersCampaigns,err :=findCampaignByUserId(allPosts,userIdPrimitive)
+	allMultiple, _ :=app.multipleTimeCampaign.All()
+	usersMultipeCampaigns,_ :=findMultipleTimeCampaignByUserId(allMultiple,userIdPrimitive)
+	allImages,_ := app.images.All()
+	if err != nil {
+		app.serverError(w, err)
+	}
+	campaignResponse := []dtos.CampaignAgentAppDTO{}
+	for _, campaign := range usersCampaigns {
+
+		if err != nil {
+			app.serverError(w, err)
+		}
+		contentType := app.GetFileTypeByPostId(campaign.Id)
+		image,_ := findImageByCampaignId(allImages, campaign.Id)
+		campaignResponse = append(campaignResponse, campaignToResponseAgentApp(campaign,contentType,image.Media))
+
+	}
+	for _, campaign := range usersMultipeCampaigns {
+
+		if err != nil {
+			app.serverError(w, err)
+		}
+		contentType := app.GetFileTypeByPostId(campaign.Id)
+		image,_ := findImageByCampaignId(allImages, campaign.Id)
+
+		campaignResponse = append(campaignResponse, campaignMultipleToResponseAgentApp(campaign,contentType,image.Media))
+
+	}
+	sort.SliceStable(campaignResponse, func(i, j int) bool {
+		return campaignResponse[i].NumberOfClicks+ campaignResponse[i].NumberOfLikes + campaignResponse[i].NumberOfComments >
+			campaignResponse[j].NumberOfClicks+ campaignResponse[j].NumberOfLikes + campaignResponse[j].NumberOfComments
+	})
+	campaignResponse3 := []dtos.CampaignAgentAppDTO{}
+
+	if len(campaignResponse)>3 {
+
+		campaignResponse2 := []dtos.CampaignAgentAppDTO{}
+		campaignResponse2 =append(campaignResponse2, campaignResponse[0])
+		campaignResponse2 =append(campaignResponse2, campaignResponse[1])
+		campaignResponse2 =append(campaignResponse2, campaignResponse[2])
+		campaignResponse3 = campaignResponse2
+	}else {
+		campaignResponse3 = campaignResponse
+
+	}
+	imagesMarshaled, err := json.Marshal(campaignResponse3)
+
+	if err != nil {
+		app.serverError(w, err)
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	w.Write(imagesMarshaled)
 }

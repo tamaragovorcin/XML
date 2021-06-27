@@ -329,6 +329,7 @@ func (app *application) acceptAgentsRequest(w http.ResponseWriter, r *http.Reque
 func (app *application) findUserUsername(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	vars := mux.Vars(r)
+
 	userId := vars["userId"]
 	intVar, err := primitive.ObjectIDFromHex(userId)
 	m, err := app.users.FindByID(intVar)
@@ -341,6 +342,7 @@ func (app *application) findUserUsername(w http.ResponseWriter, r *http.Request)
 	}
 
 	b, err := json.Marshal(m.ProfileInformation.Username)
+	fmt.Println(m.ProfileInformation.Username)
 	if err != nil {
 		app.serverError(w, err)
 	}

@@ -64,14 +64,22 @@ class OneTimeCampaignModal extends Component {
                            
                                 <Button
 									style={{ background: "#1977cc", marginTop: "15px", marginLeft: "40%", width: "20%" }}
-									onClick={() => this.props.handleAddOneTimeCampaign(this.state.campaignDate,this.state.campaignTime)}
+									onClick={() => this.props.handleAddOneTimeCampaign(this.state.campaignDate,this.state.campaignTime, "feed")}
 									className="btn btn-primary btn-md"
 									id="sendMessageButton"
 									type="button"
 								>
-									Publish
+									Publish as feed
 									</Button>
-								
+								<Button
+									style={{ background: "#1977cc", marginTop: "15px", marginLeft: "40%", width: "20%" }}
+									onClick={() => this.props.handleAddOneTimeCampaign(this.state.campaignDate,this.state.campaignTime,"story")}
+									className="btn btn-primary btn-md"
+									id="sendMessageButton"
+									type="button"
+								>
+									Publish as story
+									</Button>
 							</div>
                             </tbody>
                         </table>
