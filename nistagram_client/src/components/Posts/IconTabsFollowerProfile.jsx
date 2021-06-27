@@ -2,7 +2,7 @@
 import React from "react";
 import {Tabs, Tab} from 'react-bootstrap';
 import SavedPosts from "./SavedPosts"
-import { FiHeart } from "react-icons/fi";
+import { FiHeart, FiSend } from "react-icons/fi";
 import {FaHeartBroken,FaRegCommentDots} from "react-icons/fa"
 import {BsBookmark} from "react-icons/bs"
 import "react-responsive-carousel/lib/styles/carousel.min.css"; // requires a loader
@@ -89,6 +89,9 @@ render(){
                                   <button onClick={() =>  this.props.handleWriteCommentModal(post.Id)}  className="btn btn-outline-secondary btn-sm" style={{ marginBottom: "1rem", height:"40px",marginLeft:"6rem" }}><FaRegCommentDots/></button>
                                 </td>
                                 <td>
+                                      <button onClick={() =>  this.props.handleOpenForwardModal(post.Id,"post")} style={{ marginBottom: "1rem", height:"40px" }} className="btn btn-outline-secondary btn-sm"><label ><FiSend/></label></button>
+                                </td>
+                                <td>
                                       <button onClick={() =>  this.props.handleOpenAddPostToCollectionModal(post.Id)} style={{ marginBottom: "1rem", height:"40px" }} className="btn btn-outline-secondary btn-sm"><label ><BsBookmark/></label></button>
                                 </td>
                           </tr>
@@ -170,6 +173,9 @@ render(){
                                 </td>
                                 <td>
                                   <button onClick={() =>  this.props.handleWriteCommentModalAlbum(post.Id)}  className="btn btn-outline-secondary btn-sm" style={{ marginBottom: "1rem", height:"40px",marginLeft:"6rem" }}><FaRegCommentDots/></button>
+                                </td>
+                                <td>
+                                      <button onClick={() =>  this.props.handleOpenForwardModal(post.Id,"album")} style={{ marginBottom: "1rem", height:"40px" }} className="btn btn-outline-secondary btn-sm"><label ><FiSend/></label></button>
                                 </td>
                                 <td>
                                       <button onClick={() =>  this.props.handleOpenAddAlbumToCollectionAlbumModal(post.Id)} style={{ marginBottom: "1rem", height:"40px" }} className="btn btn-outline-secondary btn-sm"><label ><BsBookmark/></label></button>

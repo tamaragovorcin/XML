@@ -62,8 +62,8 @@ class NotificationSettings extends Component {
 				.then((res) => {
 						this.setState({
 							id: res.data.Id,
-                            messages : res.data.AcceptMessages,
-                            tags : res.data.AllowTags
+                            messages : res.data.NotificationsMessages,
+                            comments : res.data.NotificationsComments
 						});
 				})
 				.catch ((err) => {

@@ -45,6 +45,8 @@ func (app *application) routes() *mux.Router {
 
 
 	r.HandleFunc("/api/image/{userIdd}/{feedId}", app.saveImage).Methods("POST")
+	r.HandleFunc("/api/feed/username/{feedId}", app.getUsername).Methods("GET")
+	r.HandleFunc("/api/album/username/{feedId}", app.getUsernameAlbum).Methods("GET")
 	r.HandleFunc("/api/feed/usersImages/{userIdd}", app.getUsersFeedPosts).Methods("GET")
 	r.HandleFunc("/api/feed/searchByLocation/{country}/{city}/{street}", app.getFeedPostsByLocation).Methods("GET")
 	r.HandleFunc("/api/feed/searchByHashTags/", app.getFeedPostsByHashTags).Methods("POST")
@@ -73,6 +75,9 @@ func (app *application) routes() *mux.Router {
 
 	r.HandleFunc("/api/video/{userId}/{feedId}", app.saveVideo).Methods("POST")
 	r.HandleFunc("/api/feed/file/{feedId}", app.GetFileByPostId).Methods("GET")
+	r.HandleFunc("/api/feed/fileMessage/{feedId}/{userId}", app.GetFileMessageByPostId).Methods("GET")
+	r.HandleFunc("/api/feedAlbum/files/{feedId}", app.GetFilesByAlbumPostId).Methods("GET")
+	r.HandleFunc("/api/feedAlbum/images/{feedId}", app.GetImagesByAlbumId).Methods("GET")
 
 	r.HandleFunc("/report", app.reportFeedPost).Methods("POST")
 	r.HandleFunc("/feed/reports", app.getAllFeedReports).Methods("GET")
