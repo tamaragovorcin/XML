@@ -1,16 +1,15 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import { CgProfile } from 'react-icons/cg';
-import { BiBookmark } from 'react-icons/bi';
+
 import Axios from "axios";
 import { FiTruck } from 'react-icons/fi';
 import { VscHome } from 'react-icons/vsc';
-import { FaSearch } from 'react-icons/fa';
 import AddPostModal from "../components/Posts/AddPostModal";
 import { RiAddCircleLine } from 'react-icons/ri';
 import { AiOutlineOrderedList, AiOutlineShoppingCart } from 'react-icons/ai';
-import { BASE_URL_AGENT, BASE_URL_USER } from "../constants.js";
-import { BASE_URL } from "../constants.js";
+import { BASE_URL_AGENT } from "../constants.js";
+import { GiPodiumWinner } from 'react-icons/gi';
+
 import Select from 'react-select';
 import ModalDialog from "../components/ModalDialog";
 class Header extends React.Component {
@@ -67,6 +66,18 @@ class Header extends React.Component {
 
 	};
 
+	hadleGetTopCampaigns = ()=> {
+		let id = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length - 1);
+		Axios.get(BASE_URL_AGENT + "/api/bestCampaigns/" + id)
+			.then(() => {
+				
+			})
+			.catch((err) => {
+				console.log(err);
+			});
+
+	}
+
 
 	
 
@@ -105,6 +116,10 @@ class Header extends React.Component {
 							</li>
 							<li hidden={!this.hasRole("Agent")}>
 							<Link to="/allAgents"><AiOutlineOrderedList /></Link>
+							</li>
+							<li  hidden={!this.hasRole("Agent")}>
+							<button  onClick={this.hadleGetTopCampaigns} className="btn btn-outline-secondary btn-sm" style={{  border: "none", marginBottom: "1rem" }}><GiPodiumWinner /></button>
+
 							</li>
 							<li>
 							<Link to="/orders"><AiOutlineShoppingCart /></Link>

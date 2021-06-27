@@ -30,6 +30,7 @@ import OneTimeCampaignModal from "../components/OneTimeCampaignModal";
 import MultipleTimeCampaignModal from "../components/MultipleTimeCampaignModal";
 import AddInfluencerModal from "../components/AddInfluencerModal";
 import TargetGroupModal from "../components/TargetGroupModal";
+import {GoVerified} from 'react-icons/go'
 
 class ProfilePage extends React.Component {
 	constructor(props) {
@@ -148,7 +149,9 @@ class ProfilePage extends React.Component {
 		campaignStartTime : "",
 		campaignEndTime : "",
 		campaignDesiredNumber : "",
-		campaignType : ""
+		campaignType : "",
+		isVerified : false,
+		categoryString : "",
 		
 	}
 	hasRole = (reqRole) => {
@@ -437,7 +440,9 @@ class ProfilePage extends React.Component {
 							dateOfBirth  : res.data.ProfileInformation.DateOfBirth,
 							webSite : res.data.WebSite,
 							biography : res.data.Biography,
-							private : res.data.Private
+							private : res.data.Private,
+							isVerified : res.data.Verified,
+							categoryString : res.data.Category, 
 						});
 					}
 				})
@@ -2226,7 +2231,14 @@ class ProfilePage extends React.Component {
 											</td>
 										</div>
 
-										
+										<div hidden={!this.state.isVerified}>
+											<td>
+												<GoVerified />
+											</td>
+											<td>
+												<label >{this.state.categoryString}</label>
+											</td>
+										</div>
 									</td>
 									
 								</tr>

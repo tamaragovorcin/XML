@@ -62,7 +62,7 @@ class MultipleTimeCampaignModal extends Component {
 										value={this.state.campaignEndDate}
 									/>
 								</div>
-                                <label>Destired number of campaign repetitions in selected period:</label>
+                                <label>Destired number of campaign repetitions in one day:</label>
 								<div className="form-group controls mb-0 pb-2" style={{ color: "#6c757d", opacity: 1 }}>
 									<input
 										placeholder="Your comment"
