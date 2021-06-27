@@ -306,7 +306,7 @@ class ProfilePage extends React.Component {
                                     <tr id={post.id} key={post.id}>
 
                                         <tr style={{ width: "100%" }}>
-                                            <td colSpan="3">
+                                            <td colSpan="3"  style={{ width: "45rem" }}>
                                                 <Carousel dynamicHeight={true}>
                                                     {post.Media.map(img => (<div>
                                                         <img
@@ -342,7 +342,9 @@ class ProfilePage extends React.Component {
                                             <td colSpan="3">
                                                 <div className="form-group controls mb-0 pb-2" style={{ color: "#6c757d", opacity: 1 }}>
                                                     <label>Product price</label>
+                                                    <br></br>
                                                     <input
+                                                     style={{ width: "45rem" }}
                                                         readOnly={this.state.hiddenEditInfo}
                                                         className={!this.state.hiddenEditInfo === false ? "form-control-plaintext" : "form-control"}
                                                         placeholder="Product price"
@@ -357,7 +359,9 @@ class ProfilePage extends React.Component {
                                             <td colSpan="3">
                                                 <div className="form-group controls mb-0 pb-2" style={{ color: "#6c757d", opacity: 1 }}>
                                                     <label>Product quantity</label>
+                                                    <br></br>
                                                     <input
+                                                     style={{ width: "45rem" }}
                                                         readOnly={this.state.hiddenEditInfo}
                                                         className={!this.state.hiddenEditInfo === false ? "form-control-plaintext" : "form-control"}
                                                         placeholder="Product quantity"

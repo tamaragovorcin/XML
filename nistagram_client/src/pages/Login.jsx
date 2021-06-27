@@ -44,7 +44,7 @@ class Login extends Component {
 						localStorage.setItem("keyToken", res.data.AccessToken);
 						localStorage.setItem("keyRole", JSON.stringify(res.data.Roles));
 						localStorage.setItem("userId", JSON.stringify(res.data.UserId));
-						//localStorage.setItem("expireTime", new Date(new Date().getTime() + res.data.expiresIn).getTime());
+						localStorage.setItem("expireTime", new Date(new Date().getTime() + res.data.ExpiresIn).getTime());
 
 						console.log(res.data)
 						this.setState({ redirect: true });

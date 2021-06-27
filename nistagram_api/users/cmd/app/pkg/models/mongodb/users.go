@@ -3,6 +3,7 @@ package mongodb
 import (
 	"context"
 	"errors"
+	"fmt"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -12,6 +13,20 @@ import (
 // UserModel represent a mgo database session with a user model data.
 type UserModel struct {
 	C *mongo.Collection
+}
+
+	func (m *UserModel) UpdateStatus(id string, status int) (*mongo.UpdateResult, error) {
+		p, err := primitive.ObjectIDFromHex(id)
+		if err != nil {
+			fmt.Println(err)
+			return nil, err
+		}
+	return m.C.UpdateOne(context.TODO(),bson.M{"_id":p},bson.D{{"$set",bson.M{"status":2}}})
+}
+
+func (m *UserModel) UpdateS(id primitive.ObjectID, status int) (*mongo.UpdateResult, error) {
+
+	return m.C.UpdateOne(context.TODO(),bson.M{"_id":id},bson.D{{"$set",bson.M{"status":status}}})
 }
 
 // All method will be used to get all records from the users table.
@@ -78,6 +93,15 @@ func (m *UserModel) Delete(id string) (*mongo.DeleteResult, error) {
 		return nil, err
 	}
 	return m.C.DeleteOne(context.TODO(), bson.M{"_id": p})
+}
+
+func (m *UserModel) DeleteId(id primitive.ObjectID) (*mongo.DeleteResult, error) {
+
+	return m.C.DeleteOne(context.TODO(), bson.M{"_id": id})
+}
+func (m *UserModel) DeleteUsername(id string) (*mongo.DeleteResult, error) {
+
+	return m.C.DeleteOne(context.TODO(), bson.M{"profileInformation.username": id})
 }
 
 func (m *UserModel) Update(user models.User) (*mongo.UpdateResult, error) {

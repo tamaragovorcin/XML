@@ -170,14 +170,14 @@ class RegisterPage extends Component {
 						this.setState({ textSuccessfulModal: "You have successfully registred" });
 						this.setState({ openModal: true });
 					}
-					const user1Id = {id: res.data}				
-					Axios.post(BASE_URL + "/api/userInteraction/api/createUser", user1Id)
-					.then((res) => {
-							console.log(res.data)
-					})
-					.catch ((err) => {
-				console.log(err);
-			});
+					//const user1Id = {id: res.data}				
+					//Axios.post(BASE_URL + "/api/userInteraction/api/createUser", user1Id)
+					//.then((res) => {
+					//		console.log(res.data)
+					//})
+					//.catch ((err) => {
+				//console.log(err);
+			//});
 			Axios.get(BASE_URL + "/api/users/api/addSettings/"+res.data )
 					.then((res2) => {
 						console.log(res2.data)

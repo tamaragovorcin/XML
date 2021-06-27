@@ -47,6 +47,7 @@ class TShirtsMen extends Component {
 	};
 	handleModalClose = ()=>{
 		this.setState({openModal: false})
+		window.location.reload();
 	}
 	handleNameChange = (event) => {
 		this.setState({ name: event.target.value });
@@ -91,7 +92,7 @@ class TShirtsMen extends Component {
 			.then((res) => {
 
 				this.setState({ openModal: true });
-				window.location.reload();
+				
 			})
 			.catch((err) => {
 				console.log(err);
@@ -169,6 +170,9 @@ class TShirtsMen extends Component {
 										</div>
 										<div>
 											<b>Price: </b> {p.Product.Price}
+										</div>
+										<div>
+											<b>Quantity: </b> {p.Quantity}
 										</div>
 
 
