@@ -813,3 +813,20 @@ func (app *application) getBestUsersCampaign(w http.ResponseWriter, r *http.Requ
 	w.WriteHeader(http.StatusOK)
 	w.Write(imagesMarshaled)
 }
+
+func getUserIdWithToken(token string) string {
+
+	resp, err := http.Get("http://localhost:80/api/users/api/user/userId/"+token)
+	if err != nil {
+		log.Fatalln(err)
+	}
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		log.Fatalln(err)
+	}
+	sb := string(body)
+
+	sb = sb[1:]
+	sb = sb[:len(sb)-1]
+	return sb
+}
