@@ -26,7 +26,7 @@ import PartnershipRequests from './pages/PartnershipRequests';
 import BestInfluencers from './pages/BestInfluencers';
 import ChatEnginePreview  from './chat/ChatEngine'
 import Chat  from './pages/Chat'
-
+import Tokens  from './pages/Tokens'
 import './App.css';
 function App() {
   return (
@@ -62,6 +62,7 @@ function App() {
 				<Link exact to="/bestInfluencers" path="/bestInfluencers" component={BestInfluencers} />
 				<Link exact to="/chatEngine" path="/chatEngine" component={ChatEnginePreview} />
 				<Route path="/chat/:sender/:receiver" children={<Chat/>} />
+				<Link exact to="/tokens" path="/tokens" component={Tokens} />
 
 
 			</Switch>

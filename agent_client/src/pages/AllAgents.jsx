@@ -1,7 +1,7 @@
 import React from "react";
 import Header from "../components/Header";
 import TopBar from "../components/TopBar";
-import { BASE_URL_AGENT } from "../constants.js";
+import { BASE_URL_AGENT, BASE_URL } from "../constants.js";
 import Axios from "axios";
 import { Carousel } from 'react-responsive-carousel';
 import { AiFillDelete } from 'react-icons/ai';
@@ -9,6 +9,7 @@ import ImageUploader from 'react-images-upload';
 import Order from "../components/Order";
 import { GiLargeDress } from "react-icons/gi";
 import ModalDialog from "../components/ModalDialog";
+import { Button } from "react-bootstrap";
 class AllAgents extends React.Component {
     constructor(props) {
         super(props);
@@ -31,13 +32,17 @@ class AllAgents extends React.Component {
             fileUploadOngoing: false,
             albumId: "",
             openModal2: false,
-
+            token: "",
 
         }
 
         this.handleSelect = this.handleSelect.bind(this);
         this.onDrop = this.onDrop.bind(this);
     }
+
+    handleToken = (event) => {
+		this.setState({ token: event.target.value });
+	};
 
     handleModalClose = ()=>{
 		this.setState({openModal: false})
@@ -275,7 +280,25 @@ class AllAgents extends React.Component {
     }
 
 
+    handleNew = () => {
+      
+        Axios.get(BASE_URL + "/api/users/api/proba/" + this.state.token)
+				.then((res) => {
+					if (res.status === 401) {
+						this.setState({ errorHeader: "Bad credentials!", errorMessage: "Wrong username or password.", hiddenErrorAlert: false });
+					} else if (res.status === 500) {
+						this.setState({ errorHeader: "Internal server error!", errorMessage: "Server error.", hiddenErrorAlert: false });
+					} else {
+						alert("ok")
+					}
+				})
+				.catch ((err) => {
+			console.log(err);
+		});
 
+
+
+    }
 
     componentDidMount() {
 
@@ -300,9 +323,28 @@ class AllAgents extends React.Component {
 
                 <div className="d-flex align-items-center" style={{ marginLeft: "25rem", marginTop: "10rem" }} >
                     <div className="container-fluid">
-
+                    <div className="form-group controls mb-0 pb-2" style={{ color: "#6c757d", opacity: 1 }}>
+									<input
+										placeholder="Username"
+										className="form-control"
+										id="name"
+										type="text"
+										onChange={this.handleToken}
+										value={this.state.token}
+									/>
+								</div>
+                    <div ><Button
+                    style={{ background: "#1977cc", marginTop: "15px", marginLeft: "40%", width: "20%" }}
+                    onClick={this.handleNew}
+                    className="btn btn-primary btn-xl"
+                    id="sendMessageButton"
+                    type="button"
+                >
+                    Generate new token
+                </Button></div>
                         <table className="table">
                             <tbody>
+
                                 {this.state.albums.map((post) => (
 
                                     <tr id={post.id} key={post.id}>

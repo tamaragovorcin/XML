@@ -113,7 +113,25 @@ func (app *application) loginUser(w http.ResponseWriter, r *http.Request)  {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusForbidden)
 	}
-	token, err := generateToken(user)
+
+
+	token := ""
+
+	if(user.Token == ""){
+		token, _ = generateToken(user)
+
+		user.Token = token
+		_, _ = app.users.Update(*user)
+	} else {
+		token = user.Token
+	}
+
+
+
+
+
+
+
 
 
 	//rolesString, _ := json.Marshal(user.ProfileInformation.Roles[0].Name)
@@ -204,6 +222,94 @@ func getUsersWithoutAdmin(users []models.User) interface{} {
 	}
 	return usersList
 }
+
+
+func (app *application) proba(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	vars := mux.Vars(r)
+
+	token := vars["token"]
+	users, _ := app.users.GetAll()
+	for _, oneUser := range users {
+
+		if oneUser.Token==token {
+			app.infoLog.Println("Token je okej")
+		} else{
+			app.infoLog.Println("Nije okej")
+		}
+	}
+
+
+
+}
+
+func (app *application) getToken(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	vars := mux.Vars(r)
+
+	user := vars["userId"]
+	users, err := app.users.GetAll()
+	if err != nil {
+		app.serverError(w, err)
+	}
+
+	token := ""
+	for _, oneUser := range users {
+
+		if oneUser.Id.Hex()==user {
+			token = oneUser.Token
+		}
+	}
+
+	b, err := json.Marshal(token)
+	if err != nil {
+		app.serverError(w, err)
+	}
+
+	app.infoLog.Println("Found token")
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	w.Write(b)
+}
+
+
+
+func (app *application) generateNewToken(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	vars := mux.Vars(r)
+
+	user := vars["userId"]
+	users, err := app.users.GetAll()
+	if err != nil {
+		app.serverError(w, err)
+	}
+
+	token := ""
+	for _, oneUser := range users {
+
+		if oneUser.Id.Hex()==user {
+
+				token, _ = generateToken(&oneUser)
+
+				oneUser.Token = token
+				_, _ = app.users.Update(oneUser)
+
+		}
+	}
+
+	b, err := json.Marshal(token)
+	if err != nil {
+		app.serverError(w, err)
+	}
+
+	app.infoLog.Println("Found token")
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	w.Write(b)
+}
+
 
 func (app *application) getAllUsersWithoutLogged(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Access-Control-Allow-Origin", "*")

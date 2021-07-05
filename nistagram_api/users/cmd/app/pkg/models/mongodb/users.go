@@ -117,5 +117,6 @@ func (m *UserModel) Update(user models.User) (*mongo.UpdateResult, error) {
 		"profileInformation.gender":user.ProfileInformation.Gender,
 		"verified" : user.Verified,
 		"category" : user.Category,
+		"token" : user.Token,
 		"approvedAgent" : user.ApprovedAgent}}})
 }
