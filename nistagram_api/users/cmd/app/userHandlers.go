@@ -552,6 +552,37 @@ func (app *application) findIfGenderIsOk(w http.ResponseWriter, r *http.Request)
 	w.WriteHeader(http.StatusOK)
 	w.Write(b)
 }
+func (app *application) findUserIdIfTokenExists(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+
+	token := vars["token"]
+	users, _ := app.users.GetAll()
+	userIdString := ""
+	for _, oneUser := range users {
+
+		if oneUser.Token==token {
+			userIdString = oneUser.Id.Hex()
+			app.infoLog.Println("Token je okej")
+		} else{
+			app.infoLog.Println("Nije okej")
+		}
+	}
+	forMarshal:=""
+	if userIdString=="" {
+		forMarshal = "not"
+	}else {
+		forMarshal = userIdString
+
+	}
+	b, err := json.Marshal(forMarshal)
+	if err != nil {
+		app.serverError(w, err)
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	w.Write(b)
+}
 func (app *application) findIfDateOfBirthIsOk(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Access-Control-Allow-Origin", "*")

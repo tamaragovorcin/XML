@@ -142,6 +142,52 @@ func (app *application) insertOneTimeCampaign(w http.ResponseWriter, req *http.R
 	w.Write(idMarshaled)
 }
 
+func (app *application) insertOneTimeCampaignWithToken(w http.ResponseWriter, req *http.Request) {
+	vars := mux.Vars(req)
+
+	token := vars["token"]
+	userId :=getUserIdWithToken(token)
+	if userId=="not" {
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusBadRequest)
+	}
+	var dto dtos.OneTimeCampaignDTO
+
+	err := json.NewDecoder(req.Body).Decode(&dto)
+	if err != nil {
+		app.serverError(w, err)
+	}
+	userIdPrimitive, _ := primitive.ObjectIDFromHex(dto.User)
+
+
+	var campaign = models.Campaign{
+		User : userIdPrimitive,
+		TargetGroup : dto.TargetGroup,
+		Statistic  :[]models.Statistic{},
+		Link : dto.Link,
+		Description :dto.Description,
+		Partnerships :getPartnerships(dto.PartnershipsRequests),
+		Type : dto.Type,
+	}
+	var oneTimeCampaign = models.OneTimeCampaign{
+		Campaign:   campaign,
+		Time: dto.Time,
+		Date : dto.Date,
+
+	}
+
+	insertResult, err := app.oneTimeCampaign.Insert(oneTimeCampaign)
+	if err != nil {
+		app.serverError(w, err)
+	}
+
+	app.infoLog.Printf("New content have been created, id=%s", insertResult.InsertedID)
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+
+	idMarshaled, err := json.Marshal(insertResult.InsertedID)
+	w.Write(idMarshaled)
+}
 func getPartnerships(requests []string) []models.Partnership {
 	partnerships := []models.Partnership{}
 	for _, request := range requests {

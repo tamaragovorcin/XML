@@ -157,6 +157,56 @@ func (app *application) insertMultipleTimeCampaign(w http.ResponseWriter, req *h
 	w.Write(idMarshaled)
 }
 
+func (app *application) insertMultipleTimeCampaignWithToken(w http.ResponseWriter, req *http.Request) {
+	vars := mux.Vars(req)
+
+	token := vars["token"]
+	userId :=getUserIdWithToken(token)
+	if userId=="not" {
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusBadRequest)
+	}
+
+	var dto dtos.MultipleTimeCampaignDTO
+
+	err := json.NewDecoder(req.Body).Decode(&dto)
+	if err != nil {
+		app.serverError(w, err)
+	}
+	userIdPrimitive, _ := primitive.ObjectIDFromHex(userId)
+
+
+	var campaign = models.Campaign{
+		User : userIdPrimitive,
+		TargetGroup : dto.TargetGroup,
+		Statistic  :[]models.Statistic{},
+		Link : dto.Link,
+		Description :dto.Description,
+		Partnerships :getPartnerships(dto.PartnershipsRequests),
+		Type : dto.Type,
+	}
+	number,_ :=strconv.Atoi(dto.DesiredNumber)
+	var multipleTimeCampaign = models.MultipleTimeCampaign{
+		Campaign:   campaign,
+		StartTime: dto.StartTime,
+		EndTime : dto.EndTime,
+		DesiredNumber: number,
+		ModifiedTime: time.Now(),
+
+	}
+
+	insertResult, err := app.multipleTimeCampaign.Insert(multipleTimeCampaign)
+	if err != nil {
+		app.serverError(w, err)
+	}
+
+	app.infoLog.Printf("New content have been created, id=%s", insertResult.InsertedID)
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+
+	idMarshaled, err := json.Marshal(insertResult.InsertedID)
+	w.Write(idMarshaled)
+}
 func (app *application) deleteMultipleTimeCampaign(w http.ResponseWriter, r *http.Request) {
 	// Get id from incoming url
 	vars := mux.Vars(r)

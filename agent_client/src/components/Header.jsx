@@ -9,7 +9,7 @@ import { RiAddCircleLine } from 'react-icons/ri';
 import { AiOutlineOrderedList, AiOutlineShoppingCart } from 'react-icons/ai';
 import { BASE_URL_AGENT } from "../constants.js";
 import { GiPodiumWinner } from 'react-icons/gi';
-
+import {SiCampaignmonitor} from 'react-icons/si'
 import Select from 'react-select';
 import ModalDialog from "../components/ModalDialog";
 class Header extends React.Component {
@@ -115,11 +115,14 @@ class Header extends React.Component {
 							<button  onClick={this.handlePostModalOpen} className="btn btn-outline-secondary btn-sm" style={{  border: "none", marginBottom: "1rem" }}><RiAddCircleLine /></button>
 							</li>
 							<li hidden={!this.hasRole("Agent")}>
-							<Link to="/allAgents"><AiOutlineOrderedList /></Link>
+								<Link to="/allAgents"><AiOutlineOrderedList /></Link>
 							</li>
 							<li  hidden={!this.hasRole("Agent")}>
-							<button  onClick={this.hadleGetTopCampaigns} className="btn btn-outline-secondary btn-sm" style={{  border: "none", marginBottom: "1rem" }}><GiPodiumWinner /></button>
+								<button  onClick={this.hadleGetTopCampaigns} className="btn btn-outline-secondary btn-sm" style={{  border: "none", marginBottom: "1rem" }}><GiPodiumWinner /></button>
+							</li>
 
+							<li hidden={!this.hasRole("Agent")}>
+								<Link to="/newCampaigns"><SiCampaignmonitor /></Link>
 							</li>
 							<li>
 							<Link to="/orders"><AiOutlineShoppingCart /></Link>
