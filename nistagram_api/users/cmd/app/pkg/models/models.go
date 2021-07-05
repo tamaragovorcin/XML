@@ -54,6 +54,7 @@ type Agent struct {
 	Verified           bool               `bson:"verified"`
 	Category           Category           `bson:"category"`
 	ApprovedAgent bool `bson:"approvedAgent"`
+	Token string  `bson:"token"`
 }
 
 type User struct {
@@ -66,7 +67,7 @@ type User struct {
 	Verified           bool               `bson:"verified"`
 
 	ApprovedAgent string `bson:"approvedAgent"`
-
+	Token string  `bson:"token"`
 	Category           string           `bson:"category"`
 
 }

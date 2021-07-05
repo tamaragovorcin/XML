@@ -13,6 +13,9 @@ func (app *application) routes() *mux.Router {
 
 	r := mux.NewRouter()
 
+	r.HandleFunc("/api/proba/{token}", app.proba).Methods("GET")
+	r.HandleFunc("/api/token/{userId}", app.getToken).Methods("GET")
+	r.HandleFunc("/api/generateToken/{userId}", app.generateNewToken).Methods("GET")
 	r.HandleFunc("/api/", app.getAllUsers).Methods("GET")
 	r.HandleFunc("/api/all/{userId}", app.getAllUsersWithoutLogged).Methods("GET")
 
