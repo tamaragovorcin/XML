@@ -190,7 +190,6 @@ func routes() *mux.Router {
 	r.HandleFunc("/api/user/following/tagged", ReturnUsersFollowingsThatAllowTags(driver, configuration.Database)).Methods("POST")
 	r.HandleFunc("/api/user/following/category", ReturnUsersFollowingsInfluencers(driver, configuration.Database)).Methods("POST")
 	r.HandleFunc("/api/user/following/category/token", ReturnUsersFollowingsInfluencersWithToken(driver, configuration.Database)).Methods("POST")
-
 	r.HandleFunc("/api/createUser", CreateUser(driver, configuration.Database)).Methods("POST")
 	r.HandleFunc("/removeUser", RemoveUser(driver, configuration.Database)).Methods("POST")
 
@@ -691,6 +690,7 @@ func ReturnUsersFollowings(driver neo4j.Driver, database string) func(http.Respo
 
 func ReturnUsersFollowingsInfluencersWithToken(driver neo4j.Driver, database string) func(http.ResponseWriter, *http.Request) {
 	return func(w http.ResponseWriter, req *http.Request) {
+		fmt.Println("POGODIOOOOOOOOOOOOOO JE METODU")
 		var m User
 		err := json.NewDecoder(req.Body).Decode(&m)
 		if err != nil {

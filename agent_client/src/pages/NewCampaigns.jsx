@@ -64,6 +64,11 @@ class NewCampaigns extends React.Component {
 		
 		
 	};
+		
+	handleInfluencersModalClose = () =>{
+		this.setState({ showInfluencersModal: false });
+
+	}
     handlePostModalClose = () => {
 		this.setState({ showImageModal: false });
 	};
@@ -227,9 +232,8 @@ class NewCampaigns extends React.Component {
 				this.setState({ showOneTimeCampaignModal: false, showCampaignModal : false });
 				this.setState({ openModal: true });
 				this.setState({ textSuccessfulModal: "Campaign is successfully created." });
-				
+
 				let campaignId = res.data;
-			
 				let userid = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length-1)
 				let pics = [];
 
@@ -237,11 +241,11 @@ class NewCampaigns extends React.Component {
 					pics.push(p.name);
 				}); 
 				this.state.pictures.forEach((pic) => {
-					this.testCampaign(pic, userid, campaignId);
+					this.testCampaign(pic, campaignId);
 				});
 				
 				if(this.state.selectedFile != ""){
-				this.testVideoCampaign(this.state.selectedFile, userid, campaignId)
+				this.testVideoCampaign(this.state.selectedFile, campaignId)
 				}
 				this.setState({selectedFile : ""});
 				this.setState({ pictures: [] });
@@ -320,9 +324,9 @@ class NewCampaigns extends React.Component {
 		};
 
 	
-		fetch( BASE_URL + "/api/campaign/api/image/token/"+this.state.token+"/"+campaignId, options);
+		fetch( BASE_URL + "/api/campaign/api/image/"+this.state.token+"/"+campaignId, options);
 	}
-    testVideoCampaign(pic,userId, campaignId) {
+    testVideoCampaign(pic, campaignId) {
 		const formData = new FormData();
 
 		formData.append("file", pic);
@@ -333,7 +337,7 @@ class NewCampaigns extends React.Component {
 			body: formData
 
 		};
-		fetch(BASE_URL + "/api/campaign/api/image/token/"+this.state.token+"/"+campaignId , options);
+		fetch(BASE_URL + "/api/campaign/api/image/"+this.state.token+"/"+campaignId , options);
 	}
 	handleTargetGroupModalClose = () =>{
 		console.log(this.addressInput)
