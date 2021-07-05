@@ -34,6 +34,9 @@ func (app *application) routes() *mux.Router {
 	r.HandleFunc("/api/user/genderOk/{userId}/{gender}", app.findIfGenderIsOk).Methods("GET")
 	r.HandleFunc("/api/user/dateOfBirthOk/{userId}/{dateOne}/{dateTwo}", app.findIfDateOfBirthIsOk).Methods("GET")
 
+	r.HandleFunc("/api/user/userId/{token}", app.findUserIdIfTokenExists).Methods("GET")
+
+
 	r.HandleFunc("/api/user/addToCloseFriends/", app.addUserToCloseFriends).Methods("POST")
 	r.HandleFunc("/api/user/removeFromCloseFriends/", app.removeUserFromCloseFriends).Methods("POST")
 

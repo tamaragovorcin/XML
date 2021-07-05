@@ -755,7 +755,12 @@ func iAmFollowingThisUser(logged string, userWithPost string) bool {
 
 func (app *application) getBestUsersCampaign(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
-	userId := vars["userId"]
+	token := vars["token"]
+	userId :=getUserIdWithToken(token)
+	if userId=="not" {
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusBadRequest)
+	}
 	userIdPrimitive, _ := primitive.ObjectIDFromHex(userId)
 	allPosts, _ :=app.oneTimeCampaign.All()
 	usersCampaigns,err :=findCampaignByUserId(allPosts,userIdPrimitive)
@@ -812,4 +817,21 @@ func (app *application) getBestUsersCampaign(w http.ResponseWriter, r *http.Requ
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	w.Write(imagesMarshaled)
+}
+
+func getUserIdWithToken(token string) string {
+
+	resp, err := http.Get("http://localhost:80/api/users/api/user/userId/"+token)
+	if err != nil {
+		log.Fatalln(err)
+	}
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		log.Fatalln(err)
+	}
+	sb := string(body)
+
+	sb = sb[1:]
+	sb = sb[:len(sb)-1]
+	return sb
 }

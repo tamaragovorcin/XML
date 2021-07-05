@@ -12,11 +12,13 @@ func (app *application) routes() *mux.Router {
 	r.HandleFunc("/multipleTimeCampaign/{id}", app.findByIDMultipleTimeCampaign).Methods("GET")
 	r.HandleFunc("/multipleTimeCampaign/", app.insertMultipleTimeCampaign).Methods("POST")
 	r.HandleFunc("/multipleTimeCampaign/{id}", app.deleteMultipleTimeCampaign).Methods("DELETE")
+	r.HandleFunc("/multipleTimeCampaign/{token}", app.insertMultipleTimeCampaignWithToken).Methods("POST")
 
 	r.HandleFunc("/oneTimeCampaign/", app.getAllOneTimeCampaign).Methods("GET")
 	r.HandleFunc("/oneTimeCampaign/{id}", app.findByIDOneTimeCampaign).Methods("GET")
 	r.HandleFunc("/oneTimeCampaign/", app.insertOneTimeCampaign).Methods("POST")
 	r.HandleFunc("/oneTimeCampaign/{id}", app.deleteOneTimeCampaign).Methods("DELETE")
+	r.HandleFunc("/oneTimeCampaign/{token}", app.insertOneTimeCampaignWithToken).Methods("POST")
 
 	r.HandleFunc("/statistic/", app.getAllStatistic).Methods("GET")
 	r.HandleFunc("/statistic/{id}", app.findByIDStatistic).Methods("GET")
@@ -29,6 +31,8 @@ func (app *application) routes() *mux.Router {
 	r.HandleFunc("/partnership/{id}", app.deletePartnership).Methods("DELETE")
 
 	r.HandleFunc("/api/image/{userIdd}/{campaignId}", app.saveImage).Methods("POST")
+	r.HandleFunc("/api/image/{token}/{campaignId}", app.saveImageWithToken).Methods("POST")
+
 	r.HandleFunc("/api/getUsersCampaigns/{userId}", app.getUsersCampaigns).Methods("GET")
 	r.HandleFunc("/api/file/{campaignId}", app.GetFileByCampaignId).Methods("GET")
 	r.HandleFunc("/api/campaign/update", app.updateOneTimeCampaign).Methods("POST")
@@ -80,7 +84,7 @@ func (app *application) routes() *mux.Router {
 	r.HandleFunc("/bestPromoters/", app.getBestInfluencers).Methods("GET")
 	r.HandleFunc("/storyCampaigns/{userId}", app.getStoryCampaignsForHomePage).Methods("GET")
 
-	r.HandleFunc("/bestCampaigns/{userId}", app.getBestUsersCampaign).Methods("GET")
+	r.HandleFunc("/bestCampaigns/{token}", app.getBestUsersCampaign).Methods("GET")
 
 	return r
 }

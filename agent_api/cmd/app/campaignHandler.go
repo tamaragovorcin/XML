@@ -22,9 +22,9 @@ import (
 
 func (app *application) getCampaignMonitoring(w http.ResponseWriter, req *http.Request) {
 	vars := mux.Vars(req)
-	userId := vars["userId"]
+	token := vars["token"]
 
-	err, bestCampaigns := getCampaignsFromInstagram(userId)
+	err, bestCampaigns := getCampaignsFromInstagram(token)
 	if err != nil {
 		fmt.Printf("error: %v\n", err)
 	}
@@ -133,8 +133,8 @@ func getOriginalXmlFiles() (error, dtos.BestCampaigns) {
 	return err, bestCampaigns
 }
 
-func getCampaignsFromInstagram(id string) (error, []dtos.CampaignDTO) {
-	resp, err := http.Get("http://localhost:80/api/campaign/bestCampaigns/" + "60d4329937e9ba767083c03b")
+func getCampaignsFromInstagram(token string) (error, []dtos.CampaignDTO) {
+	resp, err := http.Get("http://localhost:80/api/campaign/bestCampaigns/" + token)
 	if err != nil {
 		log.Fatalln(err)
 	}

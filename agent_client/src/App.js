@@ -9,6 +9,7 @@ import Orders from './pages/Orders'
 import All from './pages/All'
 import AllAgents from './pages/AllAgents'
 import Homepage from './pages/Homepage'
+import NewCampaigns from './pages/NewCampaigns'
 import Ordered from './pages/Ordered'
 function App() {
   return (
@@ -24,6 +25,8 @@ function App() {
 				<Link exact to="/all" path="/all" component={All} />
 				<Link exact to="/orders" path="/orders" component={Orders} />
 				<Link exact to="/ordered" path="/ordered" component={Ordered} />
+				<Link exact to="/newCampaigns" path="/newCampaigns" component={NewCampaigns} />
+
 			</Switch>
 	</Router>
   );

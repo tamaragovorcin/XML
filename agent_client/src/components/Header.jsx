@@ -9,9 +9,10 @@ import { RiAddCircleLine } from 'react-icons/ri';
 import { AiOutlineOrderedList, AiOutlineShoppingCart } from 'react-icons/ai';
 import { BASE_URL_AGENT } from "../constants.js";
 import { GiPodiumWinner } from 'react-icons/gi';
-
+import {SiCampaignmonitor} from 'react-icons/si'
 import Select from 'react-select';
 import ModalDialog from "../components/ModalDialog";
+import TopCampaignsModalToken from "../components/TopCampaignsModalToken";
 class Header extends React.Component {
 
 	state = {
@@ -25,7 +26,8 @@ class Header extends React.Component {
 		openModal: false,
 		hiddenOne: true,
 		hiddenMultiple: true,
-
+		showTopCampaignsModal :false,
+		textSuccessfulModal : ""
 	}
 
 
@@ -56,6 +58,14 @@ class Header extends React.Component {
 		this.setState({ showImageModal: true });
 		this.setState({pictures: []})
 	};
+
+	hadleGetTopCampaignsModalOpen = () => {
+		this.setState({ showTopCampaignsModal: true });
+	};
+	hadleGetTopCampaignsModalClose = () =>{
+		this.setState({ showTopCampaignsModal: false });
+
+	}
 	handleSearchChange = (event) => {
 		this.setState({ search: event.target.value });
 	};
@@ -67,19 +77,25 @@ class Header extends React.Component {
 	};
 
 	hadleGetTopCampaigns = ()=> {
-		let id = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length - 1);
-		Axios.get(BASE_URL_AGENT + "/api/bestCampaigns/" + id)
+		Axios.get(BASE_URL_AGENT + "/api/bestCampaigns/" + this.state.token)
 			.then(() => {
-				
+				this.setState({ openModal: true });
+				this.setState({ textSuccessfulModal: "Top campaigns are successfully stored" });
 			})
 			.catch((err) => {
+				this.setState({ openModal: true });
+				this.setState({ textSuccessfulModal: "Top campaigns can not be stored" });
 				console.log(err);
 			});
 
 	}
 
-
-	
+	handleTokenChange = (event) => {
+		this.setState({ token: event.target.value });
+	};
+	handleModalClose = () => {
+		this.setState({ openModal: false });
+	};
 
 	render() {
 
@@ -115,11 +131,14 @@ class Header extends React.Component {
 							<button  onClick={this.handlePostModalOpen} className="btn btn-outline-secondary btn-sm" style={{  border: "none", marginBottom: "1rem" }}><RiAddCircleLine /></button>
 							</li>
 							<li hidden={!this.hasRole("Agent")}>
-							<Link to="/allAgents"><AiOutlineOrderedList /></Link>
+								<Link to="/allAgents"><AiOutlineOrderedList /></Link>
 							</li>
 							<li  hidden={!this.hasRole("Agent")}>
-							<button  onClick={this.hadleGetTopCampaigns} className="btn btn-outline-secondary btn-sm" style={{  border: "none", marginBottom: "1rem" }}><GiPodiumWinner /></button>
+								<button  onClick={this.hadleGetTopCampaignsModalOpen} className="btn btn-outline-secondary btn-sm" style={{  border: "none", marginBottom: "1rem" }}><GiPodiumWinner /></button>
+							</li>
 
+							<li hidden={!this.hasRole("Agent")}>
+								<Link to="/newCampaigns"><SiCampaignmonitor /></Link>
 							</li>
 							<li>
 							<Link to="/orders"><AiOutlineShoppingCart /></Link>
@@ -178,7 +197,14 @@ class Header extends React.Component {
 
 					/>
 
-
+			<TopCampaignsModalToken
+				show={this.state.showTopCampaignsModal}
+				onCloseModal={this.hadleGetTopCampaignsModalClose}
+				header="Get top campaigns"
+				token = {this.state.token}
+				handleTokenChange ={this.handleTokenChange}
+				hadleGetTopCampaigns = {this.hadleGetTopCampaigns}
+			/>
 			</React.Fragment>
 
 );
