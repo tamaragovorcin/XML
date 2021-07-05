@@ -44,5 +44,8 @@ func (app *application) routes() *mux.Router {
 	r.HandleFunc("/api/story/file/{storyId}", app.GetFileByPostId).Methods("GET")
 	r.HandleFunc("/removeUserId/{id}", app.removeEverythingFromUser).Methods("DELETE")
 
+	r.HandleFunc("/api/story/username/{feedId}", app.getUsername).Methods("GET")
+	r.HandleFunc("/api/story/fileMessage/{feedId}/{userId}", app.GetFileMessageByPostId).Methods("GET")
+
 	return r
 }

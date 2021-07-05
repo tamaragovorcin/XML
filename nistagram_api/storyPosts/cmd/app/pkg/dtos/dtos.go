@@ -65,8 +65,12 @@ type StoryPostInfoHomePageDTO struct {
 	UserUsername    string
 	Stories    []StoryPostInfoDTO
 	CloseFriends bool
+	Id primitive.ObjectID
 }
-
+type ResponseDTO struct {
+	Message string
+	Username string
+}
 type StoryAlbumInfoDTO struct {
 	Id          primitive.ObjectID
 	DateTime    string

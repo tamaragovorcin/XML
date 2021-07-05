@@ -560,7 +560,7 @@ func (app *application) findUserIdIfTokenExists(w http.ResponseWriter, r *http.R
 	userIdString := ""
 	for _, oneUser := range users {
 
-		if oneUser.Token==token {
+		if strings.ToLower(oneUser.Token) == strings.ToLower(token) {
 			userIdString = oneUser.Id.Hex()
 			app.infoLog.Println("Token je okej")
 		} else{
@@ -568,6 +568,7 @@ func (app *application) findUserIdIfTokenExists(w http.ResponseWriter, r *http.R
 		}
 	}
 	forMarshal:=""
+	fmt.Println(userIdString)
 	if userIdString=="" {
 		forMarshal = "not"
 	}else {

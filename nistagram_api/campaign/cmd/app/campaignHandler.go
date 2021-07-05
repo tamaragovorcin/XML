@@ -833,5 +833,7 @@ func getUserIdWithToken(token string) string {
 
 	sb = sb[1:]
 	sb = sb[:len(sb)-1]
+	fmt.Println("METODA GETUSER")
+	fmt.Println(sb)
 	return sb
 }

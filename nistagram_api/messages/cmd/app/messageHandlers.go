@@ -134,7 +134,7 @@ func (app *application) sendPostMessage(w http.ResponseWriter, req *http.Request
 		Sender:  m.Sender,
 		FeedPost: m.FeedPost,
 		AlbumPost: m.AlbumPost,
-		StoryPost:  primitive.ObjectID{},
+		StoryPost:  m.StoryPost,
 		DisposableImage: primitive.ObjectID{},
 		DateTime: time.Now(),
 		Deleted: false,
