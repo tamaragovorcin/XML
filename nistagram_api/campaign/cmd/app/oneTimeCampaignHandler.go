@@ -157,7 +157,7 @@ func (app *application) insertOneTimeCampaignWithToken(w http.ResponseWriter, re
 	if err != nil {
 		app.serverError(w, err)
 	}
-	userIdPrimitive, _ := primitive.ObjectIDFromHex(dto.User)
+	userIdPrimitive, _ := primitive.ObjectIDFromHex(userId)
 
 
 	var campaign = models.Campaign{
