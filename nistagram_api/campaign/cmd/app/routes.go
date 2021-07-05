@@ -84,7 +84,7 @@ func (app *application) routes() *mux.Router {
 	r.HandleFunc("/bestPromoters/", app.getBestInfluencers).Methods("GET")
 	r.HandleFunc("/storyCampaigns/{userId}", app.getStoryCampaignsForHomePage).Methods("GET")
 
-	r.HandleFunc("/bestCampaigns/{userId}", app.getBestUsersCampaign).Methods("GET")
+	r.HandleFunc("/bestCampaigns/{token}", app.getBestUsersCampaign).Methods("GET")
 
 	return r
 }

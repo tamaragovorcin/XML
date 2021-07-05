@@ -57,7 +57,7 @@ func (app *application) routes() *mux.Router {
 	r.HandleFunc("/content/", app.insertContent).Methods("POST")
 	r.HandleFunc("/content/{id}", app.deleteContent).Methods("DELETE")
 
-	r.HandleFunc("/api/bestCampaigns/{userId}", app.getCampaignMonitoring).Methods("GET")
+	r.HandleFunc("/api/bestCampaigns/{token}", app.getCampaignMonitoring).Methods("GET")
 
 	return r
 }

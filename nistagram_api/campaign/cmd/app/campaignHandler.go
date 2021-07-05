@@ -755,7 +755,12 @@ func iAmFollowingThisUser(logged string, userWithPost string) bool {
 
 func (app *application) getBestUsersCampaign(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
-	userId := vars["userId"]
+	token := vars["token"]
+	userId :=getUserIdWithToken(token)
+	if userId=="not" {
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusBadRequest)
+	}
 	userIdPrimitive, _ := primitive.ObjectIDFromHex(userId)
 	allPosts, _ :=app.oneTimeCampaign.All()
 	usersCampaigns,err :=findCampaignByUserId(allPosts,userIdPrimitive)
