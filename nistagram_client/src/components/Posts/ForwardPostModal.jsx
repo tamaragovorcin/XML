@@ -38,7 +38,7 @@ class ForwardPostModal extends Component {
                     </div>
                     <div>
                         <label className="logo mr-auto" style={{ fontFamily: "Trattatello, fantasy" }}>
-                            Tagged:
+                            Forward to:
                         </label>
                          <table className="table" style={{ width: "100%" }}>
                              <tbody>

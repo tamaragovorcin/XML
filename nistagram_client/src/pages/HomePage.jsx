@@ -12,8 +12,9 @@ import AddPostToCollection from "../components/Posts/AddPostToCollection";
 import ModalDialog from "../components/ModalDialog";
 import StoriesModal from "../components/Posts/StoriesModal.jsx";
 import StoriesModalCampaign from "../components/Posts/StoriesModalCampaign.jsx";
-
+import { FiHeart, FiSend } from "react-icons/fi";
 import { BASE_URL } from "../constants.js";
+import ForwardPostModal from "../components/Posts/ForwardPostModal"
 import { confirmAlert } from 'react-confirm-alert';
 class HomePage extends React.Component {
 
@@ -74,6 +75,13 @@ class HomePage extends React.Component {
 		showStoriesCampaign : false,
 		stooriCampaign: [],
 		sttCampaign: "",
+		showForwardPOst : false,
+		postToForward : "",
+		forwardedType : "",
+		followingUsers : [],
+		forwardTo : [],
+		forwardedType : "",
+
 		
 	}
 	
@@ -198,7 +206,117 @@ class HomePage extends React.Component {
 			console.log(hh)
 		}
 	}
+	handleOpenForwardModal = (postId,type)=>{
+		this.getFollowing();
+		this.setState({ showForwardPOst: true });
+		this.setState({ postToForward: postId });
+		this.setState({forwardedType : type});
 
+
+	}
+	handleForwardModalClose = ()=>{
+		this.getFollowing()
+		this.setState({ showForwardPOst: false });
+		this.setState({ forwardTo: [] });
+
+	}
+	handleChangeTags = (event) => {
+	
+		let optionDTO = { id: event.value, label: event.label, value: event.value }
+		let helpDto = this.state.forwardTo.concat(optionDTO)
+		
+		this.setState({ forwardTo: helpDto });
+
+		const newList2 = this.state.followingUsers.filter((item) => item.Id !== event.value);
+		this.setState({ followingUsers: newList2 });		
+	};
+	sendPost = ()=>{
+		let id = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length-1)
+		var forwardToHelp = []
+		this.state.forwardTo.forEach((user) => {
+			forwardToHelp.push(user.id)
+		});
+		if (this.state.forwardedType === "post"){
+		let dto = {
+			FeedPost : this.state.postToForward,
+			Receivers : forwardToHelp,
+			Sender : id,
+		}
+		Axios.post(BASE_URL + "/api/messages/api/send/post", dto, {
+		}).then((res) => {
+			
+			this.setState({ textSuccessfulModal: "You have successfully forwarded post." });
+			this.setState({ openModal: true });
+			this.handleForwardModalClose()
+
+
+		})
+		.catch((err) => {
+			console.log(err);
+		});
+	}else if (this.state.forwardedType === "album"){
+		let dto = {
+			AlbumPost : this.state.postToForward,
+			Receivers : forwardToHelp,
+			Sender : id,
+		}
+		Axios.post(BASE_URL + "/api/messages/api/send/post", dto, {
+		}).then((res) => {
+			
+			this.setState({ textSuccessfulModal: "You have successfully forwarded post." });
+			this.setState({ openModal: true });
+			this.handleForwardModalClose()
+
+
+		})
+		.catch((err) => {
+			console.log(err);
+		});
+	}
+	else if (this.state.forwardedType === "story"){
+		let dto = {
+			StoryPost : this.state.postToForward,
+			Receivers : forwardToHelp,
+			Sender : id,
+		}
+		Axios.post(BASE_URL + "/api/messages/api/send/post", dto, {
+		}).then((res) => {
+			
+			this.setState({ textSuccessfulModal: "You have successfully forwarded post." });
+			this.setState({ openModal: true });
+			this.handleForwardModalClose()
+
+
+		})
+		.catch((err) => {
+			console.log(err);
+		});
+	}
+		
+		
+	
+
+	}
+	getFollowing = ()=> {
+		let help = []
+
+        let id = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length-1);
+        const dto = {id: id}
+        Axios.post(BASE_URL + "/api/userInteraction/api/user/following", dto)
+			.then((res) => {
+
+				res.data.forEach((user) => {
+					let optionDTO = { id: user.Id, label: user.Username, value: user.Id }
+					help.push(optionDTO)
+				});
+				
+
+				this.setState({ followingUsers: help });
+			})
+			.catch((err) => {
+				console.log(err)
+			});
+    }
 	handleLikesModalOpen = (postId) => {
 		Axios.get(BASE_URL + "/api/feedPosts/api/feed/likes/" + postId)
 			.then((res) => {
@@ -436,9 +554,10 @@ class HomePage extends React.Component {
 								luna.push(aa)
 	
 							});
-	
-							let highliht1 = { id: res.data.id, username: story.UserUsername, storiess: {s: luna[0], username: story.UserUsername} };
+							let highliht1 = { id: res.data.id, username: story.UserUsername, storiess: {s: luna[0], username: story.UserUsername,storyId : story.Id} };
+							console.log(highliht1)
 							list.push(highliht1)
+							
 						});
 						this.setState({ ss: this.state.ss.concat(list) });
 						this.setState({ brojac: br });
@@ -915,9 +1034,12 @@ class HomePage extends React.Component {
 														alt="description"
 														onClick={e => this.onClickImage(e, post.storiess)}
 													/>
+												<tr>
+													<button class="astext" onClick={() =>  this.handleOpenForwardModal(post.storiess.storyId, "story")}><FiSend/></button>
 
 												</tr>
-
+												</tr>
+												
 
 
 											</td>
@@ -1001,6 +1123,7 @@ class HomePage extends React.Component {
 								handleCommentsModalOpenCampaign={this.handleCommentsModalOpenCampaign}
 
 								handleClickOnLink = {this.handleClickOnLink}
+								handleOpenForwardModal = {this.handleOpenForwardModal}
 							/>
 						</div>
 
@@ -1087,6 +1210,17 @@ class HomePage extends React.Component {
 						header="Successful"
 						text={this.state.textSuccessfulModal}
 					/>
+					 <ForwardPostModal
+					  show={this.state.showForwardPOst}
+					  onCloseModal={this.handleForwardModalClose}
+					  header="Forward post to"
+					  followingUsers = {this.state.followingUsers}
+					  forwardTo = {this.state.forwardTo}
+					  handleChangeTags = {this.handleChangeTags}
+					  sendPost = {this.sendPost}
+
+					  
+					  />
 
 				</div>
 			</React.Fragment>

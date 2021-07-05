@@ -282,7 +282,26 @@ class Chat extends React.Component {
 					console.log(err);
 				});	
 			}
-			else if(mess.FeedPost === "000000000000000000000000" && mess.AlbumPost == "000000000000000000000000"){
+			else if( mess.StoryPost != "000000000000000000000000"){
+				Axios.get(BASE_URL + "/api/storyPosts/api/story/username/"+mess.StoryPost)
+				.then((res2) => {
+					feedUser = res2.data
+					Axios.get(BASE_URL + "/api/users/api/user/username/"+mess.Sender)
+				.then((res1) => {
+					let optionDTO = { id: mess.Id, username: res1.data , text: mess.Text, time : time, feedPost : mess.FeedPost,feedUser : feedUser, storyPost : mess.StoryPost, disposableImage : mess.DisposableImage, albumPost: mess.AlbumPost, media : mess.DisposableImage.split("/")[1]}
+					help.push(optionDTO)
+				this.setState({ messages: help });
+				})
+				.catch((err) => {
+					console.log(err);
+				});	
+					
+				})
+				.catch((err) => {
+					console.log(err);
+				});	
+			}
+			else if(mess.FeedPost === "000000000000000000000000" && mess.AlbumPost == "000000000000000000000000" && mess.StoryPost == "000000000000000000000000"){
 				Axios.get(BASE_URL + "/api/users/api/user/username/"+mess.Sender)
 				.then((res1) => {
 					let optionDTO = { id: mess.Id,senderId:mess.Sender, username: res1.data , text: mess.Text, time : time, feedPost : mess.FeedPost, storyPost : mess.StoryPost, disposableImage : mess.DisposableImageId,openedDisposable : mess.OpenedDisposable, albumPost: mess.AlbumPost, media : mess.DisposableImage.split("/")[1]}
@@ -355,6 +374,16 @@ class Chat extends React.Component {
                                 width="500px"
 								height="500px"
                                 alt="You can not see this picture. This account is private."
+                              />
+							</div>
+							<div hidden ={message.storyPost=="000000000000000000000000"} style={{margin:"5%" }}>
+							<label style={{color:"blueviolet" }}>{message.feedUser}</label><br/>
+							<img
+                                className="img-fluid"
+                                src={"http://localhost:80/api/storyPosts/api/story/fileMessage/"+message.storyPost+"/"+this.state.user1}
+                                width="500px"
+								height="500px"
+                                alt="You can not see this picture. This account is private or this story is expired."
                               />
 							</div>
 
