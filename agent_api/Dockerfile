@@ -1,13 +1,13 @@
-FROM golang:1.16-alpine3.13
-WORKDIR app
-RUN apk update \
-    && apk add sqlite \
-    && apk add socat \
-    && apk add build-base
-COPY go.mod .
-COPY go.sum .
+FROM golang:latest as builder
+WORKDIR /app
+COPY go.mod go.sum ./
 RUN go mod download
 COPY . .
-RUN go build -o AgentApp
-EXPOSE 8080
-CMD ["./AgentApp"]
+RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o agentApp .
+
+######## Start a new stage from scratch #######
+FROM alpine:latest
+WORKDIR /root/
+COPY --from=builder /app/agentApp .
+EXPOSE 4007
+CMD ["./agentApp"]

@@ -2,9 +2,11 @@ package main
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"feedPosts/pkg/dtos"
 	"feedPosts/pkg/models"
+	"feedPosts/tracer"
 	"fmt"
 	"github.com/gorilla/mux"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -64,62 +66,54 @@ func (app *application) findFeedPostByID(w http.ResponseWriter, r *http.Request)
 }
 
 func (app *application) insertFeedPost(w http.ResponseWriter, req *http.Request) {
+	span := tracer.StartSpanFromRequest("insertUser", app.tracer, req)
+	defer span.Finish()
+
+	span.LogFields(
+		tracer.LogString("handler", fmt.Sprintf("handling insert user at %s\n", req.URL.Path)),
+	)
+
+	ctx := tracer.ContextWithSpan(context.Background(), span)
+	rt, err := decodeBody(ctx, req.Body)
+	if err != nil {
+		tracer.LogError(span, err)
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+
+
+
 	vars := mux.Vars(req)
 	userId := vars["userIdd"]
-	var m dtos.FeedPostDTO
+	//var m dtos.FeedPostDTO
 	res1 := strings.HasPrefix(userId, "\"")
 	if res1 == true {
 		userId = userId[1:]
 		userId = userId[:len(userId)-1]
 	}
 
-	err := json.NewDecoder(req.Body).Decode(&m)
+	/*err := json.NewDecoder(req.Body).Decode(&m)
 	if err != nil {
 		app.serverError(w, err)
-	}
+	}*/
 	userIdPrimitive, _ := primitive.ObjectIDFromHex(userId)
 
-	listTagged := taggedUsersToPrimitiveObject(m)
-	var post = models.Post{
-		User:        userIdPrimitive,
-		DateTime:    time.Now(),
-		Tagged:      listTagged,
-		Description: m.Description,
-		Hashtags:    parseHashTags(m.Hashtags),
-		Location:    m.Location,
-		Blocked:     false,
-	}
-	var feedPost = models.FeedPost{
-		Post:     post,
-		Likes:    []primitive.ObjectID{},
-		Dislikes: []primitive.ObjectID{},
-		Comments: []models.Comment{},
-	}
+	id, _ := createPost(ctx, rt, userIdPrimitive, *app)
 
-	insertResult, err := app.feedPosts.Insert(feedPost)
-	if err != nil {
-		app.serverError(w, err)
-	}
 
-	app.infoLog.Printf("New content have been created, id=%s", insertResult.InsertedID)
+
+	//app.infoLog.Printf("New content have been created, id=%s", insertResult.InsertedID)
 	resp, err := http.Get("http://localhost:80/api/users/api/sendNotificationPost/"+"Feed Post"+"/"+userId)
 	fmt.Println(resp)
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 
-	idMarshaled, err := json.Marshal(insertResult.InsertedID)
+	idMarshaled, err := json.Marshal(id)
 	w.Write(idMarshaled)
 }
 
-func taggedUsersToPrimitiveObject(m dtos.FeedPostDTO) []primitive.ObjectID {
-	listTagged := []primitive.ObjectID{}
-	for _, tag := range m.Tagged {
-		primitiveTag, _ := primitive.ObjectIDFromHex(tag)
 
-		listTagged = append(listTagged, primitiveTag)
-	}
-	return listTagged
-}
 
 func parseHashTags(hashtags string) []string {
 	if hashtags=="" {

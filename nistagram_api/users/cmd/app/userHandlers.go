@@ -3,6 +3,7 @@ package main
 import (
 	//"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gorilla/mux"
@@ -12,8 +13,6 @@ import (
 	"strconv"
 	"strings"
 	"users/saga"
-
-	"errors"
 	//"github.com/labstack/echo"
 	"golang.org/x/crypto/bcrypt"
 	"log"
@@ -650,6 +649,9 @@ func HashAndSaltPasswordIfStrong(password string) (string, error) {
 
 func (app *application) insertUser(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Access-Control-Allow-Origin", "*")
+
+
+
 	var m dtos.UserRequest
 	var able = true
 	err := json.NewDecoder(r.Body).Decode(&m)
