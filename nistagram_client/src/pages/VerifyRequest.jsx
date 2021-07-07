@@ -5,7 +5,7 @@ import Axios from "axios";
 import TopBar from "../components/TopBar";
 import Header from "../components/Header";
 import ModalDialog from "../components/ModalDialog";
-
+import getAuthHeader from "../GetHeader";
 class VerifyRequest extends React.Component {
     state = {
 		verifications : [],
@@ -34,7 +34,7 @@ class VerifyRequest extends React.Component {
             RequestId : requestId,
             UserId : userId
         }
-        Axios.post(BASE_URL + "/api/users/verificationRequest/accept/",dto)
+        Axios.post(BASE_URL + "/api/users/verificationRequest/accept/",dto, {  headers: { Authorization: getAuthHeader() } })
                 .then((res) => {
                     this.setState({ openModal: true });
                     this.setState({ textSuccessfulModal: "You have successfully accepted verification request." });
@@ -48,7 +48,7 @@ class VerifyRequest extends React.Component {
     }
 
     handleDelete  = (id) => {
-        Axios.delete(BASE_URL + "/api/users/verificationRequest/"+id)
+        Axios.delete(BASE_URL + "/api/users/verificationRequest/"+id, {  headers: { Authorization: getAuthHeader() } })
         .then((res) => {
             this.setState({ openModal: true });
 			this.setState({ textSuccessfulModal: "You have successfully removed verification request." });

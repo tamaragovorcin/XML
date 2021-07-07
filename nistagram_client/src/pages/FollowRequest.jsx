@@ -5,6 +5,7 @@ import TopBar from "../components/TopBar";
 import { BASE_URL_USER_INTERACTION, BASE_URL_USER } from "../constants.js";
 import ModalDialog from "../components/ModalDialog";
 import { BASE_URL } from "../constants.js";
+import getAuthHeader from "../GetHeader";
 class FollowRequest extends Component {
 	state = {
         followerRequests: [],
@@ -25,10 +26,21 @@ class FollowRequest extends Component {
         this.getBlockedUsers()
         this.getFollowRecommendations()
 	}
+    hasRole = (reqRole) => {
+		let roles = JSON.parse(localStorage.getItem("keyRole"));
+		if (roles === null) return false;
+
+		if (reqRole === "*") return true;
+
+		for (let role of roles) {
+			if (role === reqRole) return true;
+		}
+		return false;
+	};
     handleAccept  = (followerId) => {
         let id = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length-1);
             const acceptedDTO = { following: id, follower: followerId};
-            Axios.post(BASE_URL  + "/api/userInteraction/api/acceptFollowRequest", acceptedDTO)
+            Axios.post(BASE_URL  + "/api/userInteraction/api/acceptFollowRequest", acceptedDTO,  {  headers: { Authorization: getAuthHeader() } })
                     .then((res) => {
                         this.setState({ openModal: true });
                         this.setState({ textSuccessfulModal: "You have successfully accepted follow request." });			
@@ -43,7 +55,7 @@ class FollowRequest extends Component {
     handleDelete  = (followerId) => {
         let id = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length-1);
         const dto = { following: id, follower: followerId};
-        Axios.post(BASE_URL  + "/api/userInteraction/api/deleteFollowRequest", dto)
+        Axios.post(BASE_URL  + "/api/userInteraction/api/deleteFollowRequest", dto,  {  headers: { Authorization: getAuthHeader() } })
                 .then((res) => {
                     this.setState({ openModal: true });
                     this.setState({ textSuccessfulModal: "You have successfully deleted follow request." });			
@@ -57,7 +69,7 @@ class FollowRequest extends Component {
 	getFollowRequests = ()=> {
         let id = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length-1);
         const dto = {id: id}
-        Axios.post(BASE_URL + "/api/userInteraction/api/user/followRequests", dto)
+        Axios.post(BASE_URL + "/api/userInteraction/api/user/followRequests", dto,  {  headers: { Authorization: getAuthHeader() } })
 			.then((res) => {
 				this.setState({ followerRequests: res.data });
 			})
@@ -68,7 +80,7 @@ class FollowRequest extends Component {
     getFollowRequestsByMe = ()=> {
         let id = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length-1);
         const dto = {id: id}
-        Axios.post(BASE_URL + "/api/userInteraction/api/user/followRequestsByMe", dto)
+        Axios.post(BASE_URL + "/api/userInteraction/api/user/followRequestsByMe", dto,  {  headers: { Authorization: getAuthHeader() } })
 			.then((res) => {
 				this.setState({ followerRequestsByMe: res.data });
 			})
@@ -79,7 +91,7 @@ class FollowRequest extends Component {
     getFollowers = ()=> {
         let id = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length-1);
         const dto = {id: id}
-        Axios.post(BASE_URL + "/api/userInteraction/api/user/followers", dto)
+        Axios.post(BASE_URL + "/api/userInteraction/api/user/followers", dto,  {  headers: { Authorization: getAuthHeader() } })
 			.then((res) => {
 				this.setState({ followers: res.data });
 			})
@@ -91,7 +103,7 @@ class FollowRequest extends Component {
     getFollowing = ()=> {
         let id = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length-1);
         const dto = {id: id}
-        Axios.post(BASE_URL + "/api/userInteraction/api/user/following", dto)
+        Axios.post(BASE_URL + "/api/userInteraction/api/user/following", dto, {  headers: { Authorization: getAuthHeader() } })
 			.then((res) => {
 				this.setState({ following: res.data });
 			})
@@ -101,7 +113,7 @@ class FollowRequest extends Component {
     }
     getBlockedUsers = ()=> {
         let id = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length-1);
-        Axios.get(BASE_URL + "/api/users/api/user/blockedUsers/"+id)
+        Axios.get(BASE_URL + "/api/users/api/user/blockedUsers/"+id,  {  headers: { Authorization: getAuthHeader() } })
 			.then((res) => {
 				this.setState({ blockedUsers: res.data });
                 console.log(res.data)
@@ -113,7 +125,7 @@ class FollowRequest extends Component {
     handleUnblock = (followerId) =>{
         let id = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length-1);
         const dto = { Subject: id, Object: followerId};
-        Axios.post(BASE_URL_USER  + "/api/unblock/", dto)
+        Axios.post(BASE_URL_USER  + "/api/unblock/", dto,  {  headers: { Authorization: getAuthHeader() } })
                 .then((res) => {
                     this.setState({ openModal: true });
                     this.setState({ textSuccessfulModal: "You have successfully unblocked user" });			
@@ -126,7 +138,7 @@ class FollowRequest extends Component {
     getFollowRecommendations = ()=> {
         let id = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length-1);
         const dto = {id: id}
-        Axios.post(BASE_URL + "/api/userInteraction/followRecommendations", dto)
+        Axios.post(BASE_URL + "/api/userInteraction/followRecommendations", dto,  {  headers: { Authorization: getAuthHeader() } })
 			.then((res) => {
 				this.setState({ followRecommendations: res.data });
 			})
@@ -144,7 +156,7 @@ class FollowRequest extends Component {
 		const followReguestDTO = { follower: id, following : userId};
 		if(privacy==="private") {
 
-			Axios.post(BASE_URL + "/api/userInteraction/api/followRequest", followReguestDTO)
+			Axios.post(BASE_URL + "/api/userInteraction/api/followRequest", followReguestDTO,  {  headers: { Authorization: getAuthHeader() } })
 			.then((res) => {
 				                this.getFollowRequestsByMe()
                 this.getFollowRecommendations()
@@ -157,7 +169,7 @@ class FollowRequest extends Component {
 				console.log(err);
 			});
 		}else {
-			Axios.post(BASE_URL + "/api/userInteraction/api/followPublic", followReguestDTO)
+			Axios.post(BASE_URL + "/api/userInteraction/api/followPublic", followReguestDTO,  {  headers: { Authorization: getAuthHeader() } })
 			.then((res) => {
 				
                 this.getFollowing()

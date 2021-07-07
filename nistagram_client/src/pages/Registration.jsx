@@ -9,6 +9,7 @@ import ModalDialog from "../components/ModalDialog";
 import { constants } from "../constants.js";
 import { BASE_URL_USER_INTERACTION } from "../constants.js";
 import { BASE_URL } from "../constants.js";
+import getAuthHeader from "../GetHeader";
 class RegisterPage extends Component {
 	state = {
 		errorHeader: "",
@@ -41,6 +42,17 @@ class RegisterPage extends Component {
 		private : false,
 		textSuccessfulModal : ""
 
+	};
+	hasRole = (reqRole) => {
+		let roles = JSON.parse(localStorage.getItem("keyRole"));
+		if (roles === null) return false;
+
+		if (reqRole === "*") return true;
+
+		for (let role of roles) {
+			if (role === reqRole) return true;
+		}
+		return false;
 	};
 
 	handleDateChange = (event) => {
@@ -155,7 +167,7 @@ class RegisterPage extends Component {
 		};
 
 		if (this.validateForm(userDTO)) {
-			Axios.post(BASE_URL + "/api/users/api/", userDTO)
+			Axios.post(BASE_URL + "/api/users/api/", userDTO, {  headers: { Authorization: getAuthHeader() } })
 				.then((res) => {
 
 					if (res.status === 409) {
@@ -178,7 +190,7 @@ class RegisterPage extends Component {
 					//.catch ((err) => {
 				//console.log(err);
 			//});
-			Axios.get(BASE_URL + "/api/users/api/addSettings/"+res.data )
+			Axios.get(BASE_URL + "/api/users/api/addSettings/"+res.data, {  headers: { Authorization: getAuthHeader() } })
 					.then((res2) => {
 						console.log(res2.data)
 					})
@@ -220,7 +232,7 @@ class RegisterPage extends Component {
 		};
 
 		if (this.validateForm(userDTO)) {
-			Axios.post(BASE_URL + "/api/users/agent", userDTO)
+			Axios.post(BASE_URL + "/api/users/agent", userDTO, {  headers: { Authorization: getAuthHeader() } })
 				.then((res) => {
 
 					if (res.status === 409) {
@@ -237,7 +249,7 @@ class RegisterPage extends Component {
 
 					}
 					const user1Id = {id: res.data}
-					Axios.post(BASE_URL + "/api/userInteraction/api/createUser", user1Id)
+					Axios.post(BASE_URL + "/api/userInteraction/api/createUser", user1Id, {  headers: { Authorization: getAuthHeader() } })
 					.then((res) => {
 							console.log(res.data)
 					})

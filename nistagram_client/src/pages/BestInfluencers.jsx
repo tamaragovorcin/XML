@@ -6,20 +6,32 @@ import Header from "../components/Header";
 import Axios from "axios";
 import { BASE_URL } from "../constants.js";
 import ModalDialog from "../components/ModalDialog";
+import getAuthHeader from "../GetHeader";
 
 class BestInfluencers extends React.Component {
     state = {
         bestInfluencers : []
     }
 
-    
+    hasRole = (reqRole) => {
+		let roles = JSON.parse(localStorage.getItem("keyRole"));
+		if (roles === null) return false;
+
+		if (reqRole === "*") return true;
+
+		for (let role of roles) {
+			if (role === reqRole) return true;
+		}
+		return false;
+	};
+
     componentDidMount() {
         this.handleGetBestInfluencers()
     }
     
     handleGetBestInfluencers = ()=> {
       
-		Axios.get(BASE_URL + "/api/campaign/bestPromoters/" )
+		Axios.get(BASE_URL + "/api/campaign/bestPromoters/", {  headers: { Authorization: getAuthHeader() } } )
 			.then((res) => {
 				this.setState({ bestInfluencers: res.data });
 			})

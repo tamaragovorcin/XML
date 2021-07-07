@@ -8,56 +8,56 @@ func (app *application) routes() *mux.Router {
 	// Register handler functions.
 	r := mux.NewRouter()
 
-	r.HandleFunc("/api/user/", app.getAllUsers).Methods("GET")
-	r.HandleFunc("/api/user/{id}", app.findUserByID).Methods("GET")
-	r.HandleFunc("/api/user/", app.insertUser).Methods("POST")
-	r.HandleFunc("/api/user/{id}", app.deleteUser).Methods("DELETE")
-	r.HandleFunc("/api/login", app.loginUser).Methods("POST")
-	r.HandleFunc("/location/", app.getAllLocations).Methods("GET")
-	r.HandleFunc("/location/{id}", app.findLocationByID).Methods("GET")
-	r.HandleFunc("/location/", app.insertLocation).Methods("POST")
-	r.HandleFunc("/location/{id}", app.deleteLocation).Methods("DELETE")
+	r.HandleFunc("/api/user/", IsAuthorized(app.getAllUsers)).Methods("GET")
+	r.HandleFunc("/api/user/{id}", IsAuthorized(app.findUserByID)).Methods("GET")
+	r.HandleFunc("/api/user/", IsAuthorized(app.insertUser)).Methods("POST")
+	r.HandleFunc("/api/user/{id}", IsAuthorized(app.deleteUser)).Methods("DELETE")
+	r.HandleFunc("/api/login", IsAuthorized(app.loginUser)).Methods("POST")
+	r.HandleFunc("/location/", IsAuthorized(app.getAllLocations)).Methods("GET")
+	r.HandleFunc("/location/{id}", IsAuthorized(app.findLocationByID)).Methods("GET")
+	r.HandleFunc("/location/", IsAuthorized(app.insertLocation)).Methods("POST")
+	r.HandleFunc("/location/{id}", IsAuthorized(app.deleteLocation)).Methods("DELETE")
 
-	r.HandleFunc("/api/image/{userIdd}", app.saveImage).Methods("POST")
-	r.HandleFunc("/api/removeImage", app.deleteImage).Methods("POST")
-	r.HandleFunc("/api/addImages", app.addImages).Methods("POST")
-
-
-	r.HandleFunc("/api/feedAlbum/edit/{userIdd}", app.edit).Methods("POST")
-	r.HandleFunc("/product/", app.getAllProducts).Methods("GET")
-	r.HandleFunc("/product/{id}", app.findProductByID).Methods("GET")
-	r.HandleFunc("/api/product/remove/{id}", app.deleteProduct).Methods("GET")
-	r.HandleFunc("/api/product/{userId}", app.insertProduct).Methods("POST")
-
-	r.HandleFunc("/api/feedAlbum/usersAlbums/{userIdd}", app.getUsersFeedAlbums).Methods("GET")
-	r.HandleFunc("/api/feedAlbum/all/{userIdd}", app.getPosts).Methods("GET")
+	r.HandleFunc("/api/image/{userIdd}", IsAuthorized(app.saveImage)).Methods("POST")
+	r.HandleFunc("/api/removeImage", IsAuthorized(app.deleteImage)).Methods("POST")
+	r.HandleFunc("/api/addImages", IsAuthorized(app.addImages)).Methods("POST")
 
 
+	r.HandleFunc("/api/feedAlbum/edit/{userIdd}", IsAuthorized(app.edit)).Methods("POST")
+	r.HandleFunc("/product/", IsAuthorized(app.getAllProducts)).Methods("GET")
+	r.HandleFunc("/product/{id}", IsAuthorized(app.findProductByID)).Methods("GET")
+	r.HandleFunc("/api/product/remove/{id}", IsAuthorized(app.deleteProduct)).Methods("GET")
+	r.HandleFunc("/api/product/{userId}", IsAuthorized(app.insertProduct)).Methods("POST")
 
-	r.HandleFunc("/api/addToCart", app.addToCart).Methods("POST")
-	r.HandleFunc("/api/getAllCart/{userIdd}", app.getCart).Methods("GET")
-	r.HandleFunc("/api/getOrder/{userIdd}", app.getOrder).Methods("GET")
-	r.HandleFunc("/api/cart/remove/{id}", app.deleteCart).Methods("GET")
-	r.HandleFunc("/api/removeCart/{id}", app.removeCart).Methods("GET")
-
-	r.HandleFunc("/chosenProduct/", app.getAllChosenProducts).Methods("GET")
-	r.HandleFunc("/chosenProduct/{id}", app.findCHosenProductByID).Methods("GET")
-	r.HandleFunc("/chosenProduct/", app.insertChosenProduct).Methods("POST")
-	r.HandleFunc("/chosenProduct/{id}", app.deleteChosenProduct).Methods("DELETE")
+	r.HandleFunc("/api/feedAlbum/usersAlbums/{userIdd}", IsAuthorized(app.getUsersFeedAlbums)).Methods("GET")
+	r.HandleFunc("/api/feedAlbum/all/{userIdd}", IsAuthorized(app.getPosts)).Methods("GET")
 
 
-	r.HandleFunc("/api/purchase/{id}", app.getAllPurchases).Methods("GET")
-	r.HandleFunc("/purchase/{id}", app.findPurchaseByID).Methods("GET")
-	r.HandleFunc("/api/purchase", app.insertPurchase).Methods("POST")
-	r.HandleFunc("/purchase/{id}", app.deletePurchase).Methods("DELETE")
+
+	r.HandleFunc("/api/addToCart", IsAuthorized(app.addToCart)).Methods("POST")
+	r.HandleFunc("/api/getAllCart/{userIdd}", IsAuthorized(app.getCart)).Methods("GET")
+	r.HandleFunc("/api/getOrder/{userIdd}", IsAuthorized(app.getOrder)).Methods("GET")
+	r.HandleFunc("/api/cart/remove/{id}", IsAuthorized(app.deleteCart)).Methods("GET")
+	r.HandleFunc("/api/removeCart/{id}", IsAuthorized(app.removeCart)).Methods("GET")
+
+	r.HandleFunc("/chosenProduct/", IsAuthorized(app.getAllChosenProducts)).Methods("GET")
+	r.HandleFunc("/chosenProduct/{id}", IsAuthorized(app.findCHosenProductByID)).Methods("GET")
+	r.HandleFunc("/chosenProduct/", IsAuthorized(app.insertChosenProduct)).Methods("POST")
+	r.HandleFunc("/chosenProduct/{id}", IsAuthorized(app.deleteChosenProduct)).Methods("DELETE")
 
 
-	r.HandleFunc("/content/", app.getAllContents).Methods("GET")
-	r.HandleFunc("/content/{id}", app.findContentByID).Methods("GET")
-	r.HandleFunc("/content/", app.insertContent).Methods("POST")
-	r.HandleFunc("/content/{id}", app.deleteContent).Methods("DELETE")
+	r.HandleFunc("/api/purchase/{id}", IsAuthorized(app.getAllPurchases)).Methods("GET")
+	r.HandleFunc("/purchase/{id}", IsAuthorized(app.findPurchaseByID)).Methods("GET")
+	r.HandleFunc("/api/purchase", IsAuthorized(app.insertPurchase)).Methods("POST")
+	r.HandleFunc("/purchase/{id}", IsAuthorized(app.deletePurchase)).Methods("DELETE")
 
-	r.HandleFunc("/api/bestCampaigns/{token}", app.getCampaignMonitoring).Methods("GET")
+
+	r.HandleFunc("/content/", IsAuthorized(app.getAllContents)).Methods("GET")
+	r.HandleFunc("/content/{id}", IsAuthorized(app.findContentByID)).Methods("GET")
+	r.HandleFunc("/content/", IsAuthorized(app.insertContent)).Methods("POST")
+	r.HandleFunc("/content/{id}", IsAuthorized(app.deleteContent)).Methods("DELETE")
+
+	r.HandleFunc("/api/bestCampaigns/{token}", IsAuthorized(app.getCampaignMonitoring)).Methods("GET")
 
 	return r
 }

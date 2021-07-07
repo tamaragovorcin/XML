@@ -6,7 +6,7 @@ import { BASE_URL_AGENT, BASE_URL_USER } from "../constants.js";
 import { Button } from "react-bootstrap";
 import { Redirect } from "react-router-dom";
 import HeadingAlert from "../components/HeadingAlert";
-
+import getAuthHeader from "../GetHeader";
 
 class Login extends Component {
 	state = {
@@ -26,13 +26,24 @@ class Login extends Component {
 	handlePasswordChange = (event) => {
 		this.setState({ password: event.target.value });
 	};
+	hasRole = (reqRole) => {
+		let roles = JSON.parse(localStorage.getItem("keyRole"));
+		if (roles === null) return false;
+
+		if (reqRole === "*") return true;
+
+		for (let role of roles) {
+			if (role === reqRole) return true;
+		}
+		return false;
+	};
 
 	handleLogin = () => {
 		this.setState({ hiddenErrorAlert: true, emailError: "none", passwordError: "none" });
 
 		if (this.validateForm()) {
 			let loginDTO = { username: this.state.email, password: this.state.password };
-			Axios.post(BASE_URL_AGENT + "/api/login", loginDTO)
+			Axios.post(BASE_URL_AGENT + "/api/login", loginDTO,  {  headers: { Authorization: getAuthHeader() } })
 				.then((res) => {
 					if (res.status === 401) {
 						this.setState({ errorHeader: "Bad credentials!", errorMessage: "Wrong username or password.", hiddenErrorAlert: false });

@@ -7,7 +7,7 @@ import { Redirect } from "react-router-dom";
 import HeadingAlert from "../components/HeadingAlert";
 import HeadingSuccessAlert from "../components/HeadingSuccessAlert"
 import SidebarSettings from "../components/SidebarSettings"
-
+import getAuthHeader from "../GetHeader";
 
 
 class NotificationSettings extends Component {
@@ -58,7 +58,7 @@ class NotificationSettings extends Component {
 	componentDidMount() {
 	
 		let id = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length-1)
-	Axios.get(BASE_URL + "/api/users/api/user/notificationSettings/" + id)
+	Axios.get(BASE_URL + "/api/users/api/user/notificationSettings/" + id, {  headers: { Authorization: getAuthHeader() } })
 				.then((res) => {
 						this.setState({
 							id: res.data.Id,
@@ -95,7 +95,7 @@ class NotificationSettings extends Component {
                         Comments : this.state.comments
         };
 
-		Axios.post(BASE_URL + "/api/users/api/updateNotifications", dto)
+		Axios.post(BASE_URL + "/api/users/api/updateNotifications", dto, {  headers: { Authorization: getAuthHeader() } })
 		.then((res2) => {
 			alert("success")	
 		})

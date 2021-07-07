@@ -13,6 +13,7 @@ import {SiCampaignmonitor} from 'react-icons/si'
 import Select from 'react-select';
 import ModalDialog from "../components/ModalDialog";
 import TopCampaignsModalToken from "../components/TopCampaignsModalToken";
+import getAuthHeader from "../GetHeader";
 class Header extends React.Component {
 
 	state = {
@@ -77,7 +78,7 @@ class Header extends React.Component {
 	};
 
 	hadleGetTopCampaigns = ()=> {
-		Axios.get(BASE_URL_AGENT + "/api/bestCampaigns/" + this.state.token)
+		Axios.get(BASE_URL_AGENT + "/api/bestCampaigns/" + this.state.token, {  headers: { Authorization: getAuthHeader() } })
 			.then(() => {
 				this.setState({ openModal: true });
 				this.setState({ textSuccessfulModal: "Top campaigns are successfully stored" });
@@ -155,6 +156,8 @@ class Header extends React.Component {
 					</nav>
 				</div>
 			</header>
+
+
 
 
 

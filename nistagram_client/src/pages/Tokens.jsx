@@ -8,6 +8,7 @@ import Axios from "axios";
 import { BASE_URL } from "../constants.js";
 import { Carousel } from 'react-responsive-carousel';
 import { Button } from "react-bootstrap";
+import getAuthHeader from "../GetHeader";
 class Tokens extends React.Component {
     state = {
         token: "",
@@ -15,11 +16,22 @@ class Tokens extends React.Component {
 
 
 
+	hasRole = (reqRole) => {
+		let roles = JSON.parse(localStorage.getItem("keyRole"));
+		if (roles === null) return false;
+
+		if (reqRole === "*") return true;
+
+		for (let role of roles) {
+			if (role === reqRole) return true;
+		}
+		return false;
+	};
 
     componentDidMount() {
 
         let id = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length - 1)
-        Axios.get(BASE_URL + "/api/users/api/token/" + id)
+        Axios.get(BASE_URL + "/api/users/api/token/" + id, {  headers: { Authorization: getAuthHeader() } })
 				.then((res) => {
 					if (res.status === 401) {
 						this.setState({ errorHeader: "Bad credentials!", errorMessage: "Wrong username or password.", hiddenErrorAlert: false });
@@ -43,7 +55,7 @@ class Tokens extends React.Component {
 
     handleNew = () => {
         let id = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length - 1)
-        Axios.get(BASE_URL + "/api/users/api/generateToken/" + id)
+        Axios.get(BASE_URL + "/api/users/api/generateToken/" + id, {  headers: { Authorization: getAuthHeader() } })
 				.then((res) => {
 					if (res.status === 401) {
 						this.setState({ errorHeader: "Bad credentials!", errorMessage: "Wrong username or password.", hiddenErrorAlert: false });

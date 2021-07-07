@@ -2,11 +2,12 @@ import React, { Component } from "react";
 import { Button, Modal } from "react-bootstrap";
 import { BASE_URL } from "../constants.js";
 import Axios from "axios";
+
 class EditCampaignModal extends Component {
     state = {
       
 	};
-   
+	
 
 	render() {
 		return (

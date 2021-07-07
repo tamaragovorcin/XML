@@ -113,7 +113,7 @@ class Address extends Component {
 						this.setState({ addressNotFoundError: "initial" });
 					} else {
 						console.log(userDTO);
-						Axios.post(BASE_URL_AGENT + "/api/purchase", userDTO)
+						Axios.post(BASE_URL_AGENT + "/api/purchase", userDTO, {  headers: { Authorization: getAuthHeader() } })
 							.then((res) => {
 								if (res.status === 409) {
 									this.setState({
@@ -127,7 +127,7 @@ class Address extends Component {
 									
 									this.setState({openModal : true})
 
-									Axios.get(BASE_URL_AGENT + "/api/removeCart/"+ id)
+									Axios.get(BASE_URL_AGENT + "/api/removeCart/"+ id, {  headers: { Authorization: getAuthHeader() } })
 									.then((res) => {
 										if (res.status === 409) {
 											this.setState({

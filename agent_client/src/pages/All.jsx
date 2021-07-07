@@ -8,6 +8,8 @@ import { AiFillDelete } from 'react-icons/ai';
 import ImageUploader from 'react-images-upload';
 import Order from "../components/Order";
 import { GiLargeDress } from "react-icons/gi";
+import getAuthHeader from "../GetHeader";
+
 class ProfilePage extends React.Component {
     constructor(props) {
         super(props);
@@ -38,6 +40,17 @@ class ProfilePage extends React.Component {
     }
 
 
+    hasRole = (reqRole) => {
+		let roles = JSON.parse(localStorage.getItem("keyRole"));
+		if (roles === null) return false;
+
+		if (reqRole === "*") return true;
+
+		for (let role of roles) {
+			if (role === reqRole) return true;
+		}
+		return false;
+	};
 
     delete = (e, name, id) => {
         let help = this.state.albums
@@ -77,7 +90,7 @@ class ProfilePage extends React.Component {
             AlbumId: id,
         }
 
-        Axios.post(BASE_URL_AGENT + "/api/removeImage", deleteDTO)
+        Axios.post(BASE_URL_AGENT + "/api/removeImage", deleteDTO,  {  headers: { Authorization: getAuthHeader() } })
             .then((res) => {
 
                 console.log(res.data)
@@ -128,7 +141,7 @@ class ProfilePage extends React.Component {
     sendRequestForFeedAlbum(feedPostDTO) {
         let id = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length - 1)
 
-		Axios.post(BASE_URL_AGENT + "/api/addImages" , feedPostDTO)
+		Axios.post(BASE_URL_AGENT + "/api/addImages" , feedPostDTO,  {  headers: { Authorization: getAuthHeader() } })
 			.then((res) => {
 			
 					//this.props.openModal=true 
@@ -171,7 +184,7 @@ class ProfilePage extends React.Component {
             body: formData
 
         };
-        fetch(BASE_URL_AGENT + "/api/image/" + userIdd, options);
+        fetch(BASE_URL_AGENT + "/api/image/" + userIdd, options,  {  headers: { Authorization: getAuthHeader() } });
     }
 
     AddToCart = (id) => {
@@ -223,7 +236,7 @@ class ProfilePage extends React.Component {
 
     removeProduct = (idd) => {
 
-        Axios.get(BASE_URL_AGENT + "/api/product/remove/" + idd)
+        Axios.get(BASE_URL_AGENT + "/api/product/remove/" + idd,  {  headers: { Authorization: getAuthHeader() } })
             .then((res) => {
 
                 console.log(res.data)
@@ -260,7 +273,7 @@ class ProfilePage extends React.Component {
 
 
         let id = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length - 1);
-        Axios.post(BASE_URL_AGENT + "/api/feedAlbum/edit/" + id, this.state.albums)
+        Axios.post(BASE_URL_AGENT + "/api/feedAlbum/edit/" + id, this.state.albums,  {  headers: { Authorization: getAuthHeader() } })
             .then((res) => {
 
                 console.log(res.data)
@@ -278,7 +291,7 @@ class ProfilePage extends React.Component {
     componentDidMount() {
 
         let id = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length - 1);
-        Axios.get(BASE_URL_AGENT + "/api/feedAlbum/all/" + id)
+        Axios.get(BASE_URL_AGENT + "/api/feedAlbum/all/" + id,  {  headers: { Authorization: getAuthHeader() } })
             .then((res) => {
                 this.setState({ albums: res.data });
                 console.log(res.data)

@@ -63,7 +63,7 @@ class EditProfile extends Component {
 	componentDidMount() {
 	
 		let id = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length-1)
-	Axios.get(BASE_URL + "/api/users/api/" + id)
+	Axios.get(BASE_URL + "/api/users/api/" + id,  {  headers: { Authorization: getAuthHeader() } })
 				.then((res) => {
 					if (res.status === 401) {
 						this.setState({ errorHeader: "Bad credentials!", errorMessage: "Wrong username or password.", hiddenErrorAlert: false });

@@ -7,7 +7,7 @@ import Axios from "axios";
 import { BASE_URL } from "../constants.js";
 import { Carousel } from 'react-responsive-carousel';
 import ModalDialog from "../components/ModalDialog";
-
+import getAuthHeader from "../GetHeader";
 class ReportedPosts extends React.Component {
     state = {
         posts : [],
@@ -15,7 +15,17 @@ class ReportedPosts extends React.Component {
         openModal : false,
 
     }
+	hasRole = (reqRole) => {
+		let roles = JSON.parse(localStorage.getItem("keyRole"));
+		if (roles === null) return false;
 
+		if (reqRole === "*") return true;
+
+		for (let role of roles) {
+			if (role === reqRole) return true;
+		}
+		return false;
+	};
     
     componentDidMount() {
         this.handleGetReportedPosts()
@@ -25,7 +35,7 @@ class ReportedPosts extends React.Component {
 		this.setState({ openModal: false });
 	};
     handleGetReportedPosts = () => {
-        Axios.get(BASE_URL + "/api/feedPosts/feed/reports")
+        Axios.get(BASE_URL + "/api/feedPosts/feed/reports", {  headers: { Authorization: getAuthHeader() } })
             .then((res) => {
                 this.setState({ posts: res.data });
             })
@@ -36,7 +46,7 @@ class ReportedPosts extends React.Component {
             
     }
     handleGetReporteddAlbums = () => {
-        Axios.get(BASE_URL + "/api/feedPosts/albumFeed/reports")
+        Axios.get(BASE_URL + "/api/feedPosts/albumFeed/reports", {  headers: { Authorization: getAuthHeader() } })
             .then((res) => {
                 this.setState({ albums: res.data });
             })
@@ -47,7 +57,7 @@ class ReportedPosts extends React.Component {
 
     ignoreReport = (reportId) => {
        
-        Axios.delete(BASE_URL + "/api/feedPosts/report/remove/"+reportId)
+        Axios.delete(BASE_URL + "/api/feedPosts/report/remove/"+reportId, {  headers: { Authorization: getAuthHeader() } })
         .then((res) => {
             this.setState({ openModal: true });
 			this.setState({ textSuccessfulModal: "You have successfully removed this report" });
@@ -60,20 +70,20 @@ class ReportedPosts extends React.Component {
     }
     removeUser = (userId,username,reportId) => {
        
-        Axios.delete(BASE_URL + "/api/users/remove/"+userId)
+        Axios.delete(BASE_URL + "/api/users/remove/"+userId, {  headers: { Authorization: getAuthHeader() } })
         .then((res) => {
             this.setState({ openModal: true });
 			this.setState({ textSuccessfulModal: "You have successfully removed user "+username });
             Axios.delete(BASE_URL + "/api/feedPosts/report/remove/"+reportId)
                 .then((res) => {
                     
-                    Axios.delete(BASE_URL + "/api/feedPosts/removeUserId/"+userId)
+                    Axios.delete(BASE_URL + "/api/feedPosts/removeUserId/"+userId, {  headers: { Authorization: getAuthHeader() } })
                     .then((res) => {
-                        Axios.delete(BASE_URL + "/api/storyPosts/removeUserId/"+userId)
+                        Axios.delete(BASE_URL + "/api/storyPosts/removeUserId/"+userId, {  headers: { Authorization: getAuthHeader() } })
                             .then((res) => {
                                 const userDTO = { Id: userId};
 
-                                Axios.post(BASE_URL + "/api/userInteraction/removeUser",userDTO)
+                                Axios.post(BASE_URL + "/api/userInteraction/removeUser",userDTO, {  headers: { Authorization: getAuthHeader() } })
                                     .then((res) => {
                                         this.handleGetReporteddAlbums()
                                         this.handleGetReportedPosts()
@@ -101,7 +111,7 @@ class ReportedPosts extends React.Component {
     }
     removePost = (postId,reportId) => {
       
-        Axios.delete(BASE_URL + "/api/feedPosts/feed/remove/"+postId+"/"+reportId)
+        Axios.delete(BASE_URL + "/api/feedPosts/feed/remove/"+postId+"/"+reportId, {  headers: { Authorization: getAuthHeader() } })
         .then((res) => {
             this.setState({ openModal: true });
 			this.setState({ textSuccessfulModal: "You have successfully removed this feed post" });
@@ -114,7 +124,7 @@ class ReportedPosts extends React.Component {
     }
     removeAlbum = (postId,reportId) => {
       
-        Axios.delete(BASE_URL + "/api/feedPosts/albumFeed/remove/"+postId+"/"+reportId)
+        Axios.delete(BASE_URL + "/api/feedPosts/albumFeed/remove/"+postId+"/"+reportId, {  headers: { Authorization: getAuthHeader() } })
         .then((res) => {
             this.setState({ openModal: true });
 			this.setState({ textSuccessfulModal: "You have successfully removed this album" });

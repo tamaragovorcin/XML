@@ -7,7 +7,7 @@ import Header from "../components/Header";
 import Axios from "axios";
 import { BASE_URL } from "../constants.js";
 import { Carousel } from 'react-responsive-carousel';
-
+import getAuthHeader from "../GetHeader";
 class LikedPosts extends React.Component {
     state = {
         likedPhotos : [],
@@ -25,8 +25,19 @@ componentDidMount() {
     this.handleGetLikedAlbums(id)
 
 }
+hasRole = (reqRole) => {
+    let roles = JSON.parse(localStorage.getItem("keyRole"));
+    if (roles === null) return false;
+
+    if (reqRole === "*") return true;
+
+    for (let role of roles) {
+        if (role === reqRole) return true;
+    }
+    return false;
+};
 handleGetLikedPosts = (id) => {
-    Axios.get(BASE_URL + "/api/feedPosts/feed/liked/"+id)
+    Axios.get(BASE_URL + "/api/feedPosts/feed/liked/"+id,  {  headers: { Authorization: getAuthHeader() } })
         .then((res) => {
             this.setState({ likedPhotos: res.data });
         })
@@ -38,7 +49,7 @@ handleGetLikedPosts = (id) => {
 }
 
 handleGetLikedAlbums = (id) => {
-    Axios.get(BASE_URL + "/api/feedPosts/albumFeed/liked/"+id)
+    Axios.get(BASE_URL + "/api/feedPosts/albumFeed/liked/"+id,  {  headers: { Authorization: getAuthHeader() } })
         .then((res) => {
             this.setState({ likedAlbums: res.data });
         })

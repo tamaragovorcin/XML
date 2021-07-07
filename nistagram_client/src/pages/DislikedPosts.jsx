@@ -7,6 +7,7 @@ import Header from "../components/Header";
 import Axios from "axios";
 import { BASE_URL } from "../constants.js";
 import { Carousel } from 'react-responsive-carousel';
+import getAuthHeader from "../GetHeader";
 
 class DislikedPosts extends React.Component {
     state = {
@@ -25,8 +26,20 @@ componentDidMount() {
     this.handleGetDislikedPosts(id)
     this.handleGetDislikedAlbums(id)
 }
+hasRole = (reqRole) => {
+    let roles = JSON.parse(localStorage.getItem("keyRole"));
+    if (roles === null) return false;
+
+    if (reqRole === "*") return true;
+
+    for (let role of roles) {
+        if (role === reqRole) return true;
+    }
+    return false;
+};
+
 handleGetDislikedPosts = (id) => {
-    Axios.get(BASE_URL + "/api/feedPosts/feed/disliked/"+id)
+    Axios.get(BASE_URL + "/api/feedPosts/feed/disliked/"+id,  {  headers: { Authorization: getAuthHeader() } })
         .then((res) => {
             this.setState({ dislikedPhotos: res.data });
         })
@@ -37,7 +50,7 @@ handleGetDislikedPosts = (id) => {
         
 }
 handleGetDislikedAlbums = (id) => {
-    Axios.get(BASE_URL + "/api/feedPosts/albumFeed/disliked/"+id)
+    Axios.get(BASE_URL + "/api/feedPosts/albumFeed/disliked/"+id,  {  headers: { Authorization: getAuthHeader() } })
         .then((res) => {
             this.setState({ dislikedAlbums: res.data });
         })

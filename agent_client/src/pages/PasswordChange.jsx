@@ -7,7 +7,7 @@ import { Button, Modal } from "react-bootstrap";
 import { Redirect } from "react-router-dom";
 import HeadingAlert from "../components/HeadingAlert";
 import SidebarSettings from "../components/SidebarSettings"
-
+import getAuthHeader from "../GetHeader";
 
 class PasswordChange extends Component {
 	state = {
@@ -27,7 +27,17 @@ class PasswordChange extends Component {
 		newPassword: "",
 		newPasswordRetype: "",
 	};
+	hasRole = (reqRole) => {
+		let roles = JSON.parse(localStorage.getItem("keyRole"));
+		if (roles === null) return false;
 
+		if (reqRole === "*") return true;
+
+		for (let role of roles) {
+			if (role === reqRole) return true;
+		}
+		return false;
+	};
 	handleOldPasswordChange = (event) => {
 		this.setState({ oldPassword: event.target.value });
 	};
@@ -70,7 +80,7 @@ class PasswordChange extends Component {
 			let passwordChangeDTO = { oldPassword, newPassword };
 			Axios.post(BASE_URL + "/api/user/changePassword", passwordChangeDTO, {
 				validateStatus: () => true,
-				// headers: { Authorization: getAuthHeader() },
+				 headers: { Authorization: getAuthHeader() },
 			})
 				.then((res) => {
 					if (res.status === 403) {

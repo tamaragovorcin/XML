@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
+	"github.com/dgrijalva/jwt-go"
 	"github.com/go-redis/redis"
 	"github.com/gorilla/mux"
 	"go.mongodb.org/mongo-driver/x/mongo/driver/uuid"
@@ -15,11 +16,65 @@ import (
 	"strings"
 	"time"
 	"userInteraction/saga"
+	"users/pkg/models"
 
 	"github.com/neo4j/neo4j-go-driver/v4/neo4j"
 )
 
 type application struct {
+
+}
+func IsAuthorized(handler http.HandlerFunc) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+
+		if r.Header["Authorization"] == nil {
+			fmt.Println("No Token Found")
+
+			w.WriteHeader(http.StatusUnauthorized)
+			json.NewEncoder(w).Encode("Unauthorized")
+			return
+		}
+
+
+		authStringHeader := r.Header.Get("Authorization")
+		if authStringHeader == "" {
+			fmt.Errorf("Neki eror za auth")
+		}
+		authHeader := strings.Split(authStringHeader, "Bearer ")
+		jwtToken := authHeader[1]
+
+		token, err := jwt.Parse(jwtToken, func (token *jwt.Token) (interface{}, error){
+			if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+				return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
+			}
+			return []byte("luna") , nil
+		})
+
+		if err != nil {
+			fmt.Println("Your Token has been expired.")
+			w.WriteHeader(http.StatusUnauthorized)
+			json.NewEncoder(w).Encode(err)
+			return
+		}
+
+
+
+		if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
+			rolesString, _ := claims["roles"].(string)
+			fmt.Println(rolesString)
+			var tokenRoles []models.Role
+
+			if err := json.Unmarshal([]byte(rolesString), &tokenRoles); err != nil {
+				fmt.Println("Usercccc.")
+			}
+
+
+
+		} else{
+			fmt.Println("User authorize fail.")
+		}
+	}
+
 
 }
 
@@ -172,28 +227,28 @@ func routes() *mux.Router {
 	}
 	r := mux.NewRouter()
 
-	r.HandleFunc("/api/followRequest", CreateFollowRequest(driver, configuration.Database)).Methods("POST")
-	r.HandleFunc("/api/followPublic", CreateFollowPublicProfile(driver, configuration.Database)).Methods("POST")
+	r.HandleFunc("/api/followRequest", IsAuthorized(CreateFollowRequest(driver, configuration.Database))).Methods("POST")
+	r.HandleFunc("/api/followPublic", IsAuthorized(CreateFollowPublicProfile(driver, configuration.Database))).Methods("POST")
 
-	r.HandleFunc("/api/acceptFollowRequest", AcceptFollowRequest(driver, configuration.Database)).Methods("POST")
-	r.HandleFunc("/api/deleteFollowRequest", DeleteFollowRequest(driver, configuration.Database)).Methods("POST")
-	r.HandleFunc("/api/deleteFollow/{subjectId}/{objectId}", DeleteFollow(driver, configuration.Database)).Methods("GET")
-	r.HandleFunc("/api/createUser", CreateUser(driver, configuration.Database)).Methods("POST")
-	r.HandleFunc("/api/user/followRequests", ReturnUsersFollowRequests(driver, configuration.Database)).Methods("POST")
-	r.HandleFunc("/api/user/followRequestsByMe", ReturnUsersFollowRequestsByMe(driver, configuration.Database)).Methods("POST")
-	r.HandleFunc("/api/user/following", ReturnUsersFollowings(driver, configuration.Database)).Methods("POST")
-	r.HandleFunc("/api/user/followers", ReturnUsersFollowers(driver, configuration.Database)).Methods("POST")
-	r.HandleFunc("/api/checkInteraction", ReturnUsersInteraction(driver, configuration.Database)).Methods("POST")
-	r.HandleFunc("/api/checkIfSentRequest", ReturnIfRequestSent(driver, configuration.Database)).Methods("POST")
-	r.HandleFunc("/api/user/followingCloseFriends", ReturnUsersCloseFriends(driver, configuration.Database)).Methods("POST")
-	r.HandleFunc("/api/deleteFollow", ReturnUsersCloseFriends(driver, configuration.Database)).Methods("POST")
-	r.HandleFunc("/api/user/following/tagged", ReturnUsersFollowingsThatAllowTags(driver, configuration.Database)).Methods("POST")
-	r.HandleFunc("/api/user/following/category", ReturnUsersFollowingsInfluencers(driver, configuration.Database)).Methods("POST")
-	r.HandleFunc("/api/user/following/category/token", ReturnUsersFollowingsInfluencersWithToken(driver, configuration.Database)).Methods("POST")
-	r.HandleFunc("/api/createUser", CreateUser(driver, configuration.Database)).Methods("POST")
-	r.HandleFunc("/removeUser", RemoveUser(driver, configuration.Database)).Methods("POST")
+	r.HandleFunc("/api/acceptFollowRequest", IsAuthorized(AcceptFollowRequest(driver, configuration.Database))).Methods("POST")
+	r.HandleFunc("/api/deleteFollowRequest", IsAuthorized(DeleteFollowRequest(driver, configuration.Database))).Methods("POST")
+	r.HandleFunc("/api/deleteFollow/{subjectId}/{objectId}", IsAuthorized(DeleteFollow(driver, configuration.Database))).Methods("GET")
+	r.HandleFunc("/api/createUser", IsAuthorized(CreateUser(driver, configuration.Database))).Methods("POST")
+	r.HandleFunc("/api/user/followRequests", IsAuthorized(ReturnUsersFollowRequests(driver, configuration.Database))).Methods("POST")
+	r.HandleFunc("/api/user/followRequestsByMe", IsAuthorized(ReturnUsersFollowRequestsByMe(driver, configuration.Database))).Methods("POST")
+	r.HandleFunc("/api/user/following", IsAuthorized(ReturnUsersFollowings(driver, configuration.Database))).Methods("POST")
+	r.HandleFunc("/api/user/followers", IsAuthorized(ReturnUsersFollowers(driver, configuration.Database))).Methods("POST")
+	r.HandleFunc("/api/checkInteraction", IsAuthorized(ReturnUsersInteraction(driver, configuration.Database))).Methods("POST")
+	r.HandleFunc("/api/checkIfSentRequest", IsAuthorized(ReturnIfRequestSent(driver, configuration.Database))).Methods("POST")
+	r.HandleFunc("/api/user/followingCloseFriends", IsAuthorized(ReturnUsersCloseFriends(driver, configuration.Database))).Methods("POST")
+	r.HandleFunc("/api/deleteFollow", IsAuthorized(ReturnUsersCloseFriends(driver, configuration.Database))).Methods("POST")
+	r.HandleFunc("/api/user/following/tagged", IsAuthorized(ReturnUsersFollowingsThatAllowTags(driver, configuration.Database))).Methods("POST")
+	r.HandleFunc("/api/user/following/category", IsAuthorized(ReturnUsersFollowingsInfluencers(driver, configuration.Database))).Methods("POST")
+	r.HandleFunc("/api/user/following/category/token", IsAuthorized(ReturnUsersFollowingsInfluencersWithToken(driver, configuration.Database))).Methods("POST")
+	r.HandleFunc("/api/createUser", IsAuthorized(CreateUser(driver, configuration.Database))).Methods("POST")
+	r.HandleFunc("/removeUser", IsAuthorized(RemoveUser(driver, configuration.Database))).Methods("POST")
 
-	r.HandleFunc("/followRecommendations", ReturnRecommendedUsers(driver, configuration.Database)).Methods("POST")
+	r.HandleFunc("/followRecommendations", IsAuthorized(ReturnRecommendedUsers(driver, configuration.Database))).Methods("POST")
 
 	return r
 }
