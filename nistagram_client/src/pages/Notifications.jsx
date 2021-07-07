@@ -5,6 +5,7 @@ import TopBar from "../components/TopBar";
 import { BASE_URL_USER_INTERACTION, BASE_URL_USER } from "../constants.js";
 import ModalDialog from "../components/ModalDialog";
 import { BASE_URL } from "../constants.js";
+import getAuthHeader from "../GetHeader";
 class Notifications extends Component {
 	state = {
         postsNotifications : [],
@@ -16,14 +17,14 @@ class Notifications extends Component {
 
     componentDidMount() {
         let id = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length-1);
-        Axios.get(BASE_URL + "/api/users/api/getPostNotifications/"+ id)
+        Axios.get(BASE_URL + "/api/users/api/getPostNotifications/"+ id, {  headers: { Authorization: getAuthHeader() } })
 			.then((res) => {
                 this.setState({ postsNotifications: res.data });
 			})
 			.catch((err) => {
 				console.log(err)
 			});	
-            Axios.get(BASE_URL + "/api/users/api/getCommentNotification/"+ id)
+            Axios.get(BASE_URL + "/api/users/api/getCommentNotification/"+ id, {  headers: { Authorization: getAuthHeader() } })
 			.then((res) => {
                 this.setState({ commentsNotifications: res.data });
 			})
@@ -36,7 +37,17 @@ class Notifications extends Component {
         
         }
    
-  
+        hasRole = (reqRole) => {
+            let roles = JSON.parse(localStorage.getItem("keyRole"));
+            if (roles === null) return false;
+    
+            if (reqRole === "*") return true;
+    
+            for (let role of roles) {
+                if (role === reqRole) return true;
+            }
+            return false;
+        };
 
    
     handleModalClose = () => {

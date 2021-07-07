@@ -5,7 +5,7 @@ import Axios from "axios";
 import { Redirect } from "react-router-dom";
 import HeadingAlert from "../components/HeadingAlert";
 import ModalDialog from "../components/ModalDialog";
-
+import getAuthHeader from "../GetHeader";
 import { BASE_URL } from "../constants.js";
 class RegisterNewAgent extends Component {
 	state = {
@@ -39,6 +39,17 @@ class RegisterNewAgent extends Component {
 		private : false,
         textSuccessfulModal: ""
 
+	};
+	hasRole = (reqRole) => {
+		let roles = JSON.parse(localStorage.getItem("keyRole"));
+		if (roles === null) return false;
+
+		if (reqRole === "*") return true;
+
+		for (let role of roles) {
+			if (role === reqRole) return true;
+		}
+		return false;
 	};
 
 	handleDateChange = (event) => {
@@ -154,7 +165,7 @@ class RegisterNewAgent extends Component {
 		};
 
 		if (this.validateForm(userDTO)) {
-			Axios.post(BASE_URL + "/api/users/agent/byAdmin/", userDTO)
+			Axios.post(BASE_URL + "/api/users/agent/byAdmin/", userDTO, {  headers: { Authorization: getAuthHeader() } })
 				.then((res) => {
 
 					if (res.status === 409) {
@@ -171,7 +182,7 @@ class RegisterNewAgent extends Component {
 
 					}
 					const user1Id = {id: res.data}
-					Axios.post(BASE_URL + "/api/userInteraction/api/createUser", user1Id)
+					Axios.post(BASE_URL + "/api/userInteraction/api/createUser", user1Id, {  headers: { Authorization: getAuthHeader() } })
 					.then((res) => {
 							console.log(res.data)
 					})

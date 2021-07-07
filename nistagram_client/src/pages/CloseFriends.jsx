@@ -6,6 +6,7 @@ import PharmacyLogo from "../static/coach.png";
 import "../App.js";
 import { Redirect } from "react-router-dom";
 import { BASE_URL } from "../constants.js";
+import getAuthHeader from "../GetHeader";
 
 import ModalDialog from "../components/ModalDialog";
 class CloseFriends extends Component {
@@ -35,7 +36,7 @@ class CloseFriends extends Component {
 	getCloseFriendsDTO = ()=> {
 		let id = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length-1);
 		const dto = {id: id}
-		Axios.post(BASE_URL + "/api/userInteraction/api/user/followingCloseFriends", dto)
+		Axios.post(BASE_URL + "/api/userInteraction/api/user/followingCloseFriends", dto, {  headers: { Authorization: getAuthHeader() } })
 			.then((res) => {
 				this.setState({ closeFriends: res.data.CloseFriends });
 				this.setState({ notCloseFriends: res.data.NotCloseFriends });
@@ -57,7 +58,7 @@ class CloseFriends extends Component {
             IdLogged: userid,
             IdClose: id 
         }
-        Axios.post(BASE_URL + "/api/users/api/user/addToCloseFriends/", CloseFriendsDTO)
+        Axios.post(BASE_URL + "/api/users/api/user/addToCloseFriends/", CloseFriendsDTO, {  headers: { Authorization: getAuthHeader() } })
         .then((res) => {
 			this.setState({ openModal: true });
 			this.setState({ textSuccessfulModal: "You have successfully added user to close friends." });
@@ -79,7 +80,7 @@ class CloseFriends extends Component {
             IdLogged: userid,
             IdClose: id 
         }
-        Axios.post(BASE_URL + "/api/users/api/user/removeFromCloseFriends/", CloseFriendsDTO)
+        Axios.post(BASE_URL + "/api/users/api/user/removeFromCloseFriends/", CloseFriendsDTO, {  headers: { Authorization: getAuthHeader() } })
         .then((res) => {
 
 			this.setState({ openModal: true });

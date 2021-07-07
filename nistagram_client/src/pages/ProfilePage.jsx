@@ -31,6 +31,7 @@ import MultipleTimeCampaignModal from "../components/MultipleTimeCampaignModal";
 import AddInfluencerModal from "../components/AddInfluencerModal";
 import TargetGroupModal from "../components/TargetGroupModal";
 import {GoVerified} from 'react-icons/go'
+import getAuthHeader from "../GetHeader";
 
 class ProfilePage extends React.Component {
 	constructor(props) {
@@ -305,7 +306,7 @@ class ProfilePage extends React.Component {
 			body: formData
 
 		};
-		fetch(BASE_URL + "/api/feedPosts/api/image/"+userId+"/"+feedId , options);
+		fetch(BASE_URL + "/api/feedPosts/api/image/"+userId+"/"+feedId , options,  {  headers: { Authorization: getAuthHeader() } });
 	}
 	testVideoCampaign(pic,userId, campaignId) {
 		const formData = new FormData();
@@ -318,7 +319,7 @@ class ProfilePage extends React.Component {
 			body: formData
 
 		};
-		fetch(BASE_URL + "/api/campaign/api/image/"+userId+"/"+campaignId , options);
+		fetch(BASE_URL + "/api/campaign/api/image/"+userId+"/"+campaignId , options,  {  headers: { Authorization: getAuthHeader() } });
 	}
 	test(pic,userId, feedId) {
 		this.setState({
@@ -338,7 +339,7 @@ class ProfilePage extends React.Component {
 		};
 
 	
-		fetch( BASE_URL + "/api/feedPosts/api/image/"+userId+"/"+feedId, options);
+		fetch( BASE_URL + "/api/feedPosts/api/image/"+userId+"/"+feedId, options,  {  headers: { Authorization: getAuthHeader() } });
 	}
 	testCampaign(pic,userId, campaignId) {
 		this.setState({
@@ -358,7 +359,7 @@ class ProfilePage extends React.Component {
 		};
 
 	
-		fetch( BASE_URL + "/api/campaign/api/image/"+userId+"/"+campaignId, options);
+		fetch( BASE_URL + "/api/campaign/api/image/"+userId+"/"+campaignId, options,  {  headers: { Authorization: getAuthHeader() } });
 	}
 	
 	testVerification(pic,userId, requestId) {
@@ -379,7 +380,7 @@ class ProfilePage extends React.Component {
 		};
 
 	
-		fetch( BASE_URL + "/api/users/api/image/"+userId+"/"+requestId, options);
+		fetch( BASE_URL + "/api/users/api/image/"+userId+"/"+requestId, options,  {  headers: { Authorization: getAuthHeader() } });
 	}
 	testProfileImage(pic,userId) {
 		
@@ -398,7 +399,7 @@ class ProfilePage extends React.Component {
 			body: formData
 
 		};
-		fetch(BASE_URL + "/api/users/api/user/profileImage/"+userId , options);
+		fetch(BASE_URL + "/api/users/api/user/profileImage/"+userId , options,  {  headers: { Authorization: getAuthHeader() } });
 	}
 	testStory(pic,userId, storyId) {
 		this.setState({
@@ -416,7 +417,7 @@ class ProfilePage extends React.Component {
 			body: formData
 
 		};
-		fetch(BASE_URL + "/api/storyPosts/api/image/"+userId+"/"+storyId , options);
+		fetch(BASE_URL + "/api/storyPosts/api/image/"+userId+"/"+storyId , options,  {  headers: { Authorization: getAuthHeader() } });
 	}
 
 
@@ -466,7 +467,7 @@ class ProfilePage extends React.Component {
 
 	}
 	handeleGetMultipleCampaignsInfluencer = (id)=> {
-		Axios.get(BASE_URL + "/api/campaign/promoteMultiple/"+id)
+		Axios.get(BASE_URL + "/api/campaign/promoteMultiple/"+id,  {  headers: { Authorization: getAuthHeader() } })
 		.then((res) => {
 			this.setState({ multipleCampaignsInfluencer: res.data });
 		})
@@ -475,7 +476,7 @@ class ProfilePage extends React.Component {
 		});	
 	}
 	handeleGetOneTimeCampaignsInfluencer = (id)=> {
-		Axios.get(BASE_URL + "/api/campaign/promoteOneTime/"+id)
+		Axios.get(BASE_URL + "/api/campaign/promoteOneTime/"+id,  {  headers: { Authorization: getAuthHeader() } })
 			.then((res) => {
 				this.setState({ oneTimeCampaignsInfluencer: res.data });
 			})
@@ -488,7 +489,7 @@ class ProfilePage extends React.Component {
 		var role = this.hasRole("AGENT")
 		this.setState({isAgent : role});
 
-		Axios.get(BASE_URL + "/api/users/api/user/username/category/"+id)
+		Axios.get(BASE_URL + "/api/users/api/user/username/category/"+id,  {  headers: { Authorization: getAuthHeader() } })
 				.then((res) => {
 					
 					if (res.data.trim()!=="not") {
@@ -504,7 +505,7 @@ class ProfilePage extends React.Component {
 
 	}
 	handleGetStories = (id)=> {
-		Axios.get(BASE_URL + "/api/storyPosts/api/story/user/"+id)
+		Axios.get(BASE_URL + "/api/storyPosts/api/story/user/"+id,  {  headers: { Authorization: getAuthHeader() } })
 		.then((res) => {
 			this.setState({ stories: res.data });
 		})
@@ -514,7 +515,7 @@ class ProfilePage extends React.Component {
 	}
 
 	handleGetHighlights = (id) => {
-		Axios.get(BASE_URL + "/api/storyPosts/api/highlight/user/"+id)
+		Axios.get(BASE_URL + "/api/storyPosts/api/highlight/user/"+id,  {  headers: { Authorization: getAuthHeader() } })
 			.then((res) => {
 				this.setState({ highlights: res.data });
 			})
@@ -523,7 +524,7 @@ class ProfilePage extends React.Component {
 			});
 	}
 	handleGetHighlightAlbums = (id) => {
-		Axios.get(BASE_URL + "/api/storyPosts/api/highlight/user/album/"+id)
+		Axios.get(BASE_URL + "/api/storyPosts/api/highlight/user/album/"+id,  {  headers: { Authorization: getAuthHeader() } })
 			.then((res) => {
 				this.setState({ highlightsAlbums: res.data });
 			})
@@ -533,7 +534,7 @@ class ProfilePage extends React.Component {
 	}
 	
 	handleGetCollectionAlbums = (id) => {
-		Axios.get(BASE_URL + "/api/feedPosts/api/collection/user/album/"+id)
+		Axios.get(BASE_URL + "/api/feedPosts/api/collection/user/album/"+id,  {  headers: { Authorization: getAuthHeader() } })
 			.then((res) => {
 				this.setState({ collectionAlbums: res.data });
 			})
@@ -542,7 +543,7 @@ class ProfilePage extends React.Component {
 			});
 	}
 	handleGetCollections = (id) => {
-		Axios.get(BASE_URL + "/api/feedPosts/api/collection/user/"+id)
+		Axios.get(BASE_URL + "/api/feedPosts/api/collection/user/"+id,  {  headers: { Authorization: getAuthHeader() } })
 			.then((res) => {
 				this.setState({ collections: res.data });
 			})
@@ -552,7 +553,7 @@ class ProfilePage extends React.Component {
 	}
 
 	handleGetPhotos = (id) => {
-		Axios.get(BASE_URL + "/api/feedPosts/api/feed/usersImages/"+id)
+		Axios.get(BASE_URL + "/api/feedPosts/api/feed/usersImages/"+id,  {  headers: { Authorization: getAuthHeader() } })
 			.then((res) => {
 				this.setState({ photos: res.data });
 			})
@@ -563,7 +564,7 @@ class ProfilePage extends React.Component {
 			
 	}
 	handeleGetCampaigns = (id) => {
-		Axios.get(BASE_URL + "/api/campaign/api/getUsersCampaigns/"+id)
+		Axios.get(BASE_URL + "/api/campaign/api/getUsersCampaigns/"+id,  {  headers: { Authorization: getAuthHeader() } })
 			.then((res) => {
 				this.setState({ campaigns: res.data });
 			})
@@ -574,7 +575,7 @@ class ProfilePage extends React.Component {
 			
 	}
 	handleGetVideos = (id)=>{
-		Axios.get(BASE_URL + "/api/feedPosts/api/feed/usersVideos/" + id)
+		Axios.get(BASE_URL + "/api/feedPosts/api/feed/usersVideos/" + id,  {  headers: { Authorization: getAuthHeader() } })
 			.then((res) => {
 				this.setState({ videos: res.data });
 
@@ -585,7 +586,7 @@ class ProfilePage extends React.Component {
 	}
 	
 	handleGetAlbums = (id) => {
-		Axios.get(BASE_URL + "/api/feedPosts/api/feedAlbum/usersAlbums/"+id)
+		Axios.get(BASE_URL + "/api/feedPosts/api/feedAlbum/usersAlbums/"+id,  {  headers: { Authorization: getAuthHeader() } })
 			.then((res) => {
 				this.setState({ albums: res.data });
 				console.log("sfsfsf" + res.data)
@@ -595,7 +596,7 @@ class ProfilePage extends React.Component {
 			});
 	}
 	handleGetStoryAlbums = (id) => {
-		Axios.get(BASE_URL + "/api/storyPosts/api/storyAlbum/usersAlbums/"+id)
+		Axios.get(BASE_URL + "/api/storyPosts/api/storyAlbum/usersAlbums/"+id,  {  headers: { Authorization: getAuthHeader() } })
 			.then((res) => {
 				this.setState({ storyAlbums: res.data });
 			})
@@ -672,7 +673,7 @@ class ProfilePage extends React.Component {
 
         let id = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length-1);
         const dto = {id: id}
-        Axios.post(BASE_URL + "/api/userInteraction/api/user/following", dto)
+        Axios.post(BASE_URL + "/api/userInteraction/api/user/following", dto,  {  headers: { Authorization: getAuthHeader() } })
 			.then((res) => {
 
 				res.data.forEach((user) => {
@@ -692,7 +693,7 @@ class ProfilePage extends React.Component {
 
         let id = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length-1);
         const dto = {id: id}
-        Axios.post(BASE_URL + "/api/userInteraction/api/user/following/tagged", dto)
+        Axios.post(BASE_URL + "/api/userInteraction/api/user/following/tagged", dto,  {  headers: { Authorization: getAuthHeader() } })
 			.then((res) => {
 				res.data.forEach((user) => {
 					let optionDTO = { id: user.Id, label: user.Username, value: user.Id }
@@ -711,7 +712,7 @@ class ProfilePage extends React.Component {
 
         let id = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length-1);
         const dto = {id: id}
-        Axios.post(BASE_URL + "/api/userInteraction/api/user/following/category", dto)
+        Axios.post(BASE_URL + "/api/userInteraction/api/user/following/category", dto,  {  headers: { Authorization: getAuthHeader() } })
 			.then((res) => {
 
 				res.data.forEach((user) => {
@@ -768,7 +769,7 @@ class ProfilePage extends React.Component {
 			PartnershipsRequests : partnershipsRequestsList,
 			Type : type
 		}
-		Axios.post(BASE_URL + "/api/campaign/oneTimeCampaign/", campaignDTO)
+		Axios.post(BASE_URL + "/api/campaign/oneTimeCampaign/", campaignDTO,  {  headers: { Authorization: getAuthHeader() } })
 			.then((res) => {
 				this.setState({ showOneTimeCampaignModal: false, showCampaignModal : false });
 				this.setState({ openModal: true });
@@ -812,7 +813,7 @@ class ProfilePage extends React.Component {
 			DesiredNumber : numberOfRepetitions,
 			Type : type
 		}
-		Axios.post(BASE_URL + "/api/campaign/multipleTimeCampaign/", campaignDTO)
+		Axios.post(BASE_URL + "/api/campaign/multipleTimeCampaign/", campaignDTO,  {  headers: { Authorization: getAuthHeader() } })
 			.then((res) => {
 				this.setState({ showOneTimeCampaignModal: false, showCampaignModal : false });
 				this.setState({ openModal: true });
@@ -1246,7 +1247,7 @@ class ProfilePage extends React.Component {
 
 	sendRequestForVerification(verificationDTO) {
 				
-		Axios.post(BASE_URL + "/api/users/api/verificationRequest", verificationDTO)
+		Axios.post(BASE_URL + "/api/users/api/verificationRequest", verificationDTO,  {  headers: { Authorization: getAuthHeader() } })
 			.then((res) => {
 				if (res.status === 409) {
 					this.setState({
@@ -1285,7 +1286,7 @@ class ProfilePage extends React.Component {
 	sendRequestForFeed(feedPostDTO) {
 		let id = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length-1)
 				
-		Axios.post(BASE_URL + "/api/feedPosts/api/feed/" + id, feedPostDTO)
+		Axios.post(BASE_URL + "/api/feedPosts/api/feed/" + id, feedPostDTO,  {  headers: { Authorization: getAuthHeader() } })
 			.then((res) => {
 				if (res.status === 409) {
 					this.setState({
@@ -1324,7 +1325,7 @@ class ProfilePage extends React.Component {
 	}
 	sendRequestForFeedAlbum(feedPostDTO){
 		let id = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length-1)
-		Axios.post(BASE_URL + "/api/feedPosts/api/feedAlbum/" + id, feedPostDTO)
+		Axios.post(BASE_URL + "/api/feedPosts/api/feedAlbum/" + id, feedPostDTO,  {  headers: { Authorization: getAuthHeader() } })
 			.then((res) => {
 				if (res.status === 409) {
 					this.setState({
@@ -1360,7 +1361,7 @@ class ProfilePage extends React.Component {
 	sendRequestForStory(storyPostDTO) {
 		let id = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length-1)
 
-		Axios.post(BASE_URL + "/api/storyPosts/api/story/" + id, storyPostDTO)
+		Axios.post(BASE_URL + "/api/storyPosts/api/story/" + id, storyPostDTO,  {  headers: { Authorization: getAuthHeader() } })
 			.then((res) => {
 				if (res.status === 409) {
 					this.setState({
@@ -1472,7 +1473,7 @@ class ProfilePage extends React.Component {
 			let id = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length-1)
 
 			Axios.post(BASE_URL + "/api/storyPosts/api/highlight/"+id, highlightDTO, {
-				}).then((res) => {
+				},  {  headers: { Authorization: getAuthHeader() } }).then((res) => {
 					
                     this.setState({ showAddHighLightModal: false });
                     this.handleGetHighlights(id);
@@ -1496,7 +1497,7 @@ class ProfilePage extends React.Component {
 			let id = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length-1)
 
 			Axios.post(BASE_URL + "/api/storyPosts/api/highlight/album/"+id, highlightDTO, {
-				}).then((res) => {
+				},  {  headers: { Authorization: getAuthHeader() } }).then((res) => {
 					
                     this.setState({ showAddHighLightAlbumModal: false });
                     this.handleGetHighlightAlbums(id);
@@ -1520,7 +1521,7 @@ class ProfilePage extends React.Component {
 			let id = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length-1)
 
 			Axios.post(BASE_URL + "/api/feedPosts/api/collection/"+id, collectionDTO, {
-				}).then((res) => {
+				},  {  headers: { Authorization: getAuthHeader() } }).then((res) => {
 					
                     this.setState({ showAddCollectionModal: false });
                     this.handleGetCollections(id);
@@ -1544,7 +1545,7 @@ class ProfilePage extends React.Component {
 			let id = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length-1)
 
 			Axios.post(BASE_URL + "/api/feedPosts/api/collection/album/"+id, collectionDTO, {
-				}).then((res) => {
+				},  {  headers: { Authorization: getAuthHeader() } }).then((res) => {
 					
                     this.setState({ showAddCollectionModal: false });
 					this.setState({ showAddCollectionAlbumModal: false });
@@ -1588,8 +1589,8 @@ class ProfilePage extends React.Component {
 			StoryId : this.state.selectedStoryId,
 			HighlightId : highlightId
 		}
-		Axios.post(BASE_URL + "/api/storyPosts/api/highlight/addStory/", storyHighlightDTO, {
-		}).then((res) => {
+		Axios.post(BASE_URL + "/api/storyPosts/api/highlight/addStory/", storyHighlightDTO,  {
+		},  {  headers: { Authorization: getAuthHeader() } }).then((res) => {
 			
 			this.setState({ showAddHighLightModal: false });
 			let id = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length-1)
@@ -1609,7 +1610,7 @@ class ProfilePage extends React.Component {
 			HighlightId : highlightId
 		}
 		Axios.post(BASE_URL + "/api/storyPosts/api/highlight/addStoryAlbum/", storyHighlightDTO, {
-		}).then((res) => {
+		},  {  headers: { Authorization: getAuthHeader() } }).then((res) => {
 			
 			this.setState({ showAddHighLightModal: false });
 			this.setState({ showAddHighLightAlbumModal: false });
@@ -1631,7 +1632,7 @@ class ProfilePage extends React.Component {
 			CollectionId : collectionId
 		}
 		Axios.post(BASE_URL + "/api/feedPosts/api/collection/addPost/", postCollectionDTO, {
-		}).then((res) => {
+		},  {  headers: { Authorization: getAuthHeader() } }).then((res) => {
 			
 			this.setState({ showAddCollectionModal: false });
 			let id = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length-1)
@@ -1652,7 +1653,7 @@ class ProfilePage extends React.Component {
 			CollectionId : collectionId
 		}
 		Axios.post(BASE_URL + "/api/feedPosts/api/collection/album/addPost/", postCollectionDTO, {
-		}).then((res) => {
+		},  {  headers: { Authorization: getAuthHeader() } }).then((res) => {
 			
 			this.setState({ showAddCollectionAlbumModal: false });
 			let id = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length-1)
@@ -1684,7 +1685,7 @@ class ProfilePage extends React.Component {
 		this.setState({postsForCollectionAlbum : albums})
 	}
 	handleLikesModalOpen = (postId)=> {
-		Axios.get(BASE_URL + "/api/feedPosts/api/feed/likes/"+postId)
+		Axios.get(BASE_URL + "/api/feedPosts/api/feed/likes/"+postId,  {  headers: { Authorization: getAuthHeader() } })
 			.then((res) => {
 				this.setState({ peopleLikes: res.data });
 			})
@@ -1694,7 +1695,7 @@ class ProfilePage extends React.Component {
 		this.setState({ showLikesModal: true });    
 	}
 	handleDislikesModalOpen = (postId)=> {
-		Axios.get(BASE_URL + "/api/feedPosts/api/feed/dislikes/"+postId)
+		Axios.get(BASE_URL + "/api/feedPosts/api/feed/dislikes/"+postId,  {  headers: { Authorization: getAuthHeader() } })
 			.then((res) => {
 				this.setState({ peopleDislikes: res.data });
 			})
@@ -1704,7 +1705,7 @@ class ProfilePage extends React.Component {
 		this.setState({ showDislikesModal: true });    
 	}
 	handleCommentsModalOpen = (postId)=> {
-		Axios.get(BASE_URL + "/api/feedPosts/api/feed/comments/"+postId)
+		Axios.get(BASE_URL + "/api/feedPosts/api/feed/comments/"+postId,  {  headers: { Authorization: getAuthHeader() } })
 			.then((res) => {
 				this.setState({ peopleComments: res.data });
 			})
@@ -1738,7 +1739,7 @@ class ProfilePage extends React.Component {
 			UserId : id
 		}
 		Axios.post(BASE_URL + "/api/feedPosts/api/feed/like/", postReactionDTO, {
-		}).then((res) => {
+		},  {  headers: { Authorization: getAuthHeader() } }).then((res) => {
 
 			this.setState({ textSuccessfulModal: "You have successfully liked the photo." });
 			this.setState({ openModal: true });
@@ -1756,7 +1757,7 @@ class ProfilePage extends React.Component {
 			UserId : id
 		}
 		Axios.post(BASE_URL + "/api/feedPosts/api/feed/dislike/", postReactionDTO, {
-		}).then((res) => {
+		},  {  headers: { Authorization: getAuthHeader() } }).then((res) => {
 
 			this.setState({ textSuccessfulModal: "You have successfully disliked the photo." });
 			this.setState({ openModal: true });
@@ -1769,7 +1770,7 @@ class ProfilePage extends React.Component {
 	handleDeleteCampaign =(id, type)=>{
 		if (type === "oneTime"){
 		Axios.get(BASE_URL + "/api/campaign/api/campaign/delete/"+ id, {
-		}).then((res) => {
+		},  {  headers: { Authorization: getAuthHeader() } }).then((res) => {
 			
 			this.setState({ textSuccessfulModal: "You have successfully deleted campaign." });
 			this.setState({ openModal: true });
@@ -1785,7 +1786,7 @@ class ProfilePage extends React.Component {
 		this.handeleGetCampaigns(user)
 	}else if(type === "multiple"){
 		Axios.get(BASE_URL + "/api/campaign/api/campaign/delete/multiple/"+ id, {
-		}).then((res) => {
+		},  {  headers: { Authorization: getAuthHeader() } }).then((res) => {
 			
 			this.setState({ textSuccessfulModal: "You have successfully deleted campaign." });
 			this.setState({ openModal: true });
@@ -1831,7 +1832,7 @@ class ProfilePage extends React.Component {
 	handleEditCampaignModal = (id, type) =>{
 		if( type === "oneTime"){
 			this.setState({ campaignType: type });
-		Axios.get(BASE_URL + "/api/campaign/api/campaign/id/"+id)
+		Axios.get(BASE_URL + "/api/campaign/api/campaign/id/"+id,  {  headers: { Authorization: getAuthHeader() } })
 			.then((res) => {
                 this.setState({
                 campaignDate : res.data.Date,
@@ -1847,7 +1848,7 @@ class ProfilePage extends React.Component {
 		this.setState({ showEditCampaignModal: true });
 		}else if(type ==="multiple"){
 			this.setState({campaignType : "multiple"})
-			Axios.get(BASE_URL + "/api/campaign/api/campaign/multiple/id/"+id)
+			Axios.get(BASE_URL + "/api/campaign/api/campaign/multiple/id/"+id,  {  headers: { Authorization: getAuthHeader() } })
 			.then((res) => {
                 this.setState({
                 campaignEndTime : res.data.EndTime,
@@ -1880,7 +1881,7 @@ class ProfilePage extends React.Component {
 			User :  user
 		}
 		Axios.post(BASE_URL + "/api/campaign/api/campaign/update", dto, {
-		}).then((res) => {
+		},  {  headers: { Authorization: getAuthHeader() } }).then((res) => {
 			
 			this.setState({ textSuccessfulModal: "You have successfully updated campaign." });
 			this.setState({ openModal: true });
@@ -1907,7 +1908,7 @@ class ProfilePage extends React.Component {
 			User : user,
 		}
 		Axios.post(BASE_URL + "/api/campaign/api/campaign/multiple/update", dto, {
-		}).then((res) => {
+		},  {  headers: { Authorization: getAuthHeader() } }).then((res) => {
 			
 			this.setState({ textSuccessfulModal: "You have successfully updated campaign." });
 			this.setState({ openModal: true });
@@ -1935,7 +1936,7 @@ class ProfilePage extends React.Component {
 
 		}
 		Axios.post(BASE_URL + "/api/feedPosts/api/feed/comment/", commentDTO, {
-		}).then((res) => {
+		},  {  headers: { Authorization: getAuthHeader() } }).then((res) => {
 			
 			this.setState({ textSuccessfulModal: "You have successfully commented the photo." });
 			this.setState({ openModal: true });
@@ -1948,7 +1949,7 @@ class ProfilePage extends React.Component {
 		});
 	}
 	handleLikesModalOpenAlbum = (postId)=> {
-		Axios.get(BASE_URL + "/api/feedPosts/api/albumFeed/likes/"+postId)
+		Axios.get(BASE_URL + "/api/feedPosts/api/albumFeed/likes/"+postId,  {  headers: { Authorization: getAuthHeader() } })
 			.then((res) => {
 				this.setState({ peopleLikes: res.data });
 			})
@@ -1958,7 +1959,7 @@ class ProfilePage extends React.Component {
 		this.setState({ showLikesModal: true });    
 	}
 	handleDislikesModalOpenAlbum = (postId)=> {
-		Axios.get(BASE_URL + "/api/feedPosts/api/albumFeed/dislikes/"+postId)
+		Axios.get(BASE_URL + "/api/feedPosts/api/albumFeed/dislikes/"+postId,  {  headers: { Authorization: getAuthHeader() } })
 			.then((res) => {
 				this.setState({ peopleDislikes: res.data });
 			})
@@ -1968,7 +1969,7 @@ class ProfilePage extends React.Component {
 		this.setState({ showDislikesModal: true });    
 	}
 	handleCommentsModalOpenAlbum = (postId)=> {
-		Axios.get(BASE_URL + "/api/feedPosts/api/albumFeed/comments/"+postId)
+		Axios.get(BASE_URL + "/api/feedPosts/api/albumFeed/comments/"+postId,  {  headers: { Authorization: getAuthHeader() } })
 			.then((res) => {
 				this.setState({ peopleComments: res.data });
 			})
@@ -1987,7 +1988,7 @@ class ProfilePage extends React.Component {
 
 		}
 		Axios.post(BASE_URL + "/api/feedPosts/api/albumFeed/comment/", commentDTO, {
-		}).then((res) => {
+		},  {  headers: { Authorization: getAuthHeader() } }).then((res) => {
 			
 			this.setState({ textSuccessfulModal: "You have successfully commented the album." });
 			this.setState({ openModal: true });
@@ -2007,7 +2008,7 @@ class ProfilePage extends React.Component {
 			UserId : id
 		}
 		Axios.post(BASE_URL + "/api/feedPosts/api/albumFeed/like/", postReactionDTO, {
-		}).then((res) => {
+		},  {  headers: { Authorization: getAuthHeader() } }).then((res) => {
 
 			this.setState({ textSuccessfulModal: "You have successfully liked the album." });
 			this.setState({ openModal: true });
@@ -2025,7 +2026,7 @@ class ProfilePage extends React.Component {
 			UserId : id
 		}
 		Axios.post(BASE_URL + "/api/feedPosts/api/albumFeed/dislike/", postReactionDTO, {
-		}).then((res) => {
+		},  {  headers: { Authorization: getAuthHeader() } }).then((res) => {
 
 			this.setState({ textSuccessfulModal: "You have successfully disliked the album." });
 			this.setState({ openModal: true });

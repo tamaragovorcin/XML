@@ -9,6 +9,7 @@ import ModalDialog from "../components/ModalDialog";
 import { constants } from "../constants.js";
 import { BASE_URL_USER_INTERACTION } from "../constants.js";
 import { BASE_URL_AGENT } from "../constants.js";
+import getAuthHeader from "../GetHeader";
 class RegisterPage extends Component {
 	state = {
 		errorHeader: "",
@@ -41,7 +42,17 @@ class RegisterPage extends Component {
 		private : false,
 		role: "User",
 	};
+	hasRole = (reqRole) => {
+		let roles = JSON.parse(localStorage.getItem("keyRole"));
+		if (roles === null) return false;
 
+		if (reqRole === "*") return true;
+
+		for (let role of roles) {
+			if (role === reqRole) return true;
+		}
+		return false;
+	};
 	handleDateChange = (event) => {
 		this.setState({ selectedDate: event.target.value });
 	};
@@ -153,7 +164,7 @@ class RegisterPage extends Component {
 		};
 
 		if (this.validateForm(userDTO)) {
-			Axios.post(BASE_URL_AGENT + "/api/user/", userDTO)
+			Axios.post(BASE_URL_AGENT + "/api/user/", userDTO, {  headers: { Authorization: getAuthHeader() } })
 				.then((res) => {
 
 					if (res.status === 409) {

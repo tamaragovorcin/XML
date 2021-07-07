@@ -13,6 +13,7 @@ import OneTimeCampaignModal from "../components/OneTimeCampaignModal";
 import MultipleTimeCampaignModal from "../components/MultipleTimeCampaignModal";
 import AddInfluencerModal from "../components/AddInfluencerModal";
 import TargetGroupModal from "../components/TargetGroupModal";
+import getAuthHeader from "../GetHeader";
 class NewCampaigns extends React.Component {
 
     constructor(props) {
@@ -113,7 +114,7 @@ class NewCampaigns extends React.Component {
 		let help = []
 
         const dto = {id: this.state.token}
-        Axios.post(BASE_URL + "/api/userInteraction/api/user/following/category/token", dto)
+        Axios.post(BASE_URL + "/api/userInteraction/api/user/following/category/token", dto, {  headers: { Authorization: getAuthHeader() } })
 			.then((res) => {
 
 				res.data.forEach((user) => {
@@ -227,7 +228,7 @@ class NewCampaigns extends React.Component {
 			PartnershipsRequests : partnershipsRequestsList,
 			Type : type
 		}
-		Axios.post(BASE_URL + "/api/campaign/oneTimeCampaign/"+this.state.token, campaignDTO)
+		Axios.post(BASE_URL + "/api/campaign/oneTimeCampaign/"+this.state.token, campaignDTO, {  headers: { Authorization: getAuthHeader() } })
 			.then((res) => {
 				this.setState({ showOneTimeCampaignModal: false, showCampaignModal : false });
 				this.setState({ openModal: true });
@@ -277,7 +278,7 @@ class NewCampaigns extends React.Component {
 			DesiredNumber : numberOfRepetitions,
 			Type : type
 		}
-		Axios.post(BASE_URL + "/api/campaign/multipleTimeCampaign/"+this.state.token, campaignDTO)
+		Axios.post(BASE_URL + "/api/campaign/multipleTimeCampaign/"+this.state.token, campaignDTO, {  headers: { Authorization: getAuthHeader() } })
 			.then((res) => {
 				this.setState({ showOneTimeCampaignModal: false, showCampaignModal : false });
 				this.setState({ openModal: true });
@@ -324,7 +325,7 @@ class NewCampaigns extends React.Component {
 		};
 
 	
-		fetch( BASE_URL + "/api/campaign/api/image/"+this.state.token+"/"+campaignId, options);
+		fetch( BASE_URL + "/api/campaign/api/image/"+this.state.token+"/"+campaignId, options, {  headers: { Authorization: getAuthHeader() } });
 	}
     testVideoCampaign(pic, campaignId) {
 		const formData = new FormData();
@@ -337,7 +338,7 @@ class NewCampaigns extends React.Component {
 			body: formData
 
 		};
-		fetch(BASE_URL + "/api/campaign/api/image/"+this.state.token+"/"+campaignId , options);
+		fetch(BASE_URL + "/api/campaign/api/image/"+this.state.token+"/"+campaignId , options, {  headers: { Authorization: getAuthHeader() } });
 	}
 	handleTargetGroupModalClose = () =>{
 		console.log(this.addressInput)

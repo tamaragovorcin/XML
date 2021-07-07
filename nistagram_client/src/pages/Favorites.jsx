@@ -8,6 +8,7 @@ import profileImage from "../static/profileImage.jpg"
 
 import { BASE_URL } from "../constants.js";
 import ImageUploader from 'react-images-upload';
+import getAuthHeader from "../GetHeader";
 
 class Favorites extends React.Component {
 	constructor(props) {
@@ -76,7 +77,7 @@ class Favorites extends React.Component {
 			body: formData
 
 		};
-		fetch(BASE_URL + "/api/items/upload", options);
+		fetch(BASE_URL + "/api/items/upload", options, {  headers: { Authorization: getAuthHeader() } });
 	}
 
 
@@ -85,6 +86,18 @@ class Favorites extends React.Component {
 		this.handleGetFavorites()
 
 	}
+	hasRole = (reqRole) => {
+		let roles = JSON.parse(localStorage.getItem("keyRole"));
+		if (roles === null) return false;
+
+		if (reqRole === "*") return true;
+
+		for (let role of roles) {
+			if (role === reqRole) return true;
+		}
+		return false;
+	};
+
 	handleGetBasicInfo = () => {
 		this.setState({ numberPosts: 10 });
 		this.setState({ numberFollowing: 600 });

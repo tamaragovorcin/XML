@@ -14,7 +14,7 @@ import {BsPersonPlusFill} from 'react-icons/bs'
 import {SiCampaignmonitor} from 'react-icons/si'
 import { BASE_URL } from "../constants.js";
 import Select from 'react-select';
-
+import getAuthHeader from "../GetHeader";
 class Header extends React.Component {
 	state = {
 		search: "",
@@ -42,7 +42,7 @@ class Header extends React.Component {
 	hasCategoryInfluencer = () => {
 		
 		let id = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length-1);
-		Axios.get(BASE_URL + "/api/users/api/user/username/category/"+id)
+		Axios.get(BASE_URL + "/api/users/api/user/username/category/"+id, {  headers: { Authorization: getAuthHeader() } })
 			.then((res) => {
 				if (res.data.trim()!=="not") {
 					return true;
@@ -72,7 +72,7 @@ class Header extends React.Component {
 			let help = []
 			let id = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length-1)
 
-			Axios.get(BASE_URL + "/api/users/api/all/"+id)
+			Axios.get(BASE_URL + "/api/users/api/all/"+id, {  headers: { Authorization: getAuthHeader() } })
 				.then((res) => {
 	
 					console.log(res.data)
@@ -91,7 +91,7 @@ class Header extends React.Component {
 					console.log(err)
 				});
 
-			Axios.get(BASE_URL + "/api/users/api/user/username/category/"+id)
+			Axios.get(BASE_URL + "/api/users/api/user/username/category/"+id, {  headers: { Authorization: getAuthHeader() } })
 				.then((res) => {
 					
 					if (res.data.trim()!=="not") {
@@ -107,7 +107,7 @@ class Header extends React.Component {
 		}
 		else {
 			let help = []
-			Axios.get(BASE_URL + "/api/users/api/")
+			Axios.get(BASE_URL + "/api/users/api/", {  headers: { Authorization: getAuthHeader() } })
 				.then((res) => {
 	
 					console.log(res.data)

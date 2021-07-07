@@ -16,6 +16,7 @@ import { FiHeart, FiSend } from "react-icons/fi";
 import { BASE_URL } from "../constants.js";
 import ForwardPostModal from "../components/Posts/ForwardPostModal"
 import { confirmAlert } from 'react-confirm-alert';
+import getAuthHeader from "../GetHeader";
 class HomePage extends React.Component {
 
 
@@ -243,7 +244,7 @@ class HomePage extends React.Component {
 			Sender : id,
 		}
 		Axios.post(BASE_URL + "/api/messages/api/send/post", dto, {
-		}).then((res) => {
+		}, {  headers: { Authorization: getAuthHeader() } }).then((res) => {
 			
 			this.setState({ textSuccessfulModal: "You have successfully forwarded post." });
 			this.setState({ openModal: true });
@@ -261,7 +262,7 @@ class HomePage extends React.Component {
 			Sender : id,
 		}
 		Axios.post(BASE_URL + "/api/messages/api/send/post", dto, {
-		}).then((res) => {
+		}, {  headers: { Authorization: getAuthHeader() } }).then((res) => {
 			
 			this.setState({ textSuccessfulModal: "You have successfully forwarded post." });
 			this.setState({ openModal: true });
@@ -280,7 +281,7 @@ class HomePage extends React.Component {
 			Sender : id,
 		}
 		Axios.post(BASE_URL + "/api/messages/api/send/post", dto, {
-		}).then((res) => {
+		}, {  headers: { Authorization: getAuthHeader() } }).then((res) => {
 			
 			this.setState({ textSuccessfulModal: "You have successfully forwarded post." });
 			this.setState({ openModal: true });
@@ -302,7 +303,7 @@ class HomePage extends React.Component {
 
         let id = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length-1);
         const dto = {id: id}
-        Axios.post(BASE_URL + "/api/userInteraction/api/user/following", dto)
+        Axios.post(BASE_URL + "/api/userInteraction/api/user/following", dto, {  headers: { Authorization: getAuthHeader() } })
 			.then((res) => {
 
 				res.data.forEach((user) => {
@@ -318,7 +319,7 @@ class HomePage extends React.Component {
 			});
     }
 	handleLikesModalOpen = (postId) => {
-		Axios.get(BASE_URL + "/api/feedPosts/api/feed/likes/" + postId)
+		Axios.get(BASE_URL + "/api/feedPosts/api/feed/likes/" + postId, {  headers: { Authorization: getAuthHeader() } })
 			.then((res) => {
 				this.setState({ peopleLikes: res.data });
 			})
@@ -328,7 +329,7 @@ class HomePage extends React.Component {
 		this.setState({ showLikesModal: true });
 	}
 	handleDislikesModalOpen = (postId) => {
-		Axios.get(BASE_URL + "/api/feedPosts/api/feed/dislikes/" + postId)
+		Axios.get(BASE_URL + "/api/feedPosts/api/feed/dislikes/" + postId, {  headers: { Authorization: getAuthHeader() } })
 			.then((res) => {
 				this.setState({ peopleDislikes: res.data });
 			})
@@ -338,7 +339,7 @@ class HomePage extends React.Component {
 		this.setState({ showDislikesModal: true });
 	}
 	handleCommentsModalOpen = (postId) => {
-		Axios.get(BASE_URL + "/api/feedPosts/api/feed/comments/" + postId)
+		Axios.get(BASE_URL + "/api/feedPosts/api/feed/comments/" + postId, {  headers: { Authorization: getAuthHeader() } })
 			.then((res) => {
 				this.setState({ peopleComments: res.data });
 			})
@@ -348,7 +349,7 @@ class HomePage extends React.Component {
 		this.setState({ showCommentsModal: true });
 	}
 	handleLikesModalOpenAlbum = (postId) => {
-		Axios.get(BASE_URL + "/api/feedPosts/api/albumFeed/likes/" + postId)
+		Axios.get(BASE_URL + "/api/feedPosts/api/albumFeed/likes/" + postId, {  headers: { Authorization: getAuthHeader() } })
 			.then((res) => {
 				this.setState({ peopleLikes: res.data });
 			})
@@ -358,7 +359,7 @@ class HomePage extends React.Component {
 		this.setState({ showLikesModal: true });
 	}
 	handleDislikesModalOpenAlbum = (postId) => {
-		Axios.get(BASE_URL + "/api/feedPosts/api/albumFeed/dislikes/" + postId)
+		Axios.get(BASE_URL + "/api/feedPosts/api/albumFeed/dislikes/" + postId, {  headers: { Authorization: getAuthHeader() } })
 			.then((res) => {
 				this.setState({ peopleDislikes: res.data });
 			})
@@ -368,7 +369,7 @@ class HomePage extends React.Component {
 		this.setState({ showDislikesModal: true });
 	}
 	handleCommentsModalOpenAlbum = (postId) => {
-		Axios.get(BASE_URL + "/api/feedPosts/api/albumFeed/comments/" + postId)
+		Axios.get(BASE_URL + "/api/feedPosts/api/albumFeed/comments/" + postId, {  headers: { Authorization: getAuthHeader() } })
 			.then((res) => {
 				this.setState({ peopleComments: res.data });
 			})
@@ -432,7 +433,7 @@ class HomePage extends React.Component {
 			UserId: id
 		}
 		Axios.post(BASE_URL + "/api/feedPosts/api/feed/like/", postReactionDTO, {
-		}).then((res) => {
+		}, {  headers: { Authorization: getAuthHeader() } }).then((res) => {
 
 			this.setState({ textSuccessfulModal: "You have successfully liked the photo." });
 			this.setState({ openModal: true });
@@ -450,7 +451,7 @@ class HomePage extends React.Component {
 			UserId: id
 		}
 		Axios.post(BASE_URL + "/api/feedPosts/api/albumFeed/like/", postReactionDTO, {
-		}).then((res) => {
+		}, {  headers: { Authorization: getAuthHeader() } }).then((res) => {
 
 			this.setState({ textSuccessfulModal: "You have successfully liked the album." });
 			this.setState({ openModal: true });
@@ -468,7 +469,7 @@ class HomePage extends React.Component {
 			UserId: id
 		}
 		Axios.post(BASE_URL + "/api/feedPosts/api/feed/dislike/", postReactionDTO, {
-		}).then((res) => {
+		}, {  headers: { Authorization: getAuthHeader() } }).then((res) => {
 
 			this.setState({ textSuccessfulModal: "You have successfully disliked the photo." });
 			this.setState({ openModal: true });
@@ -486,7 +487,7 @@ class HomePage extends React.Component {
 			UserId: id
 		}
 		Axios.post(BASE_URL + "/api/feedPosts/api/albumFeed/dislike/", postReactionDTO, {
-		}).then((res) => {
+		}, {  headers: { Authorization: getAuthHeader() } }).then((res) => {
 
 			this.setState({ textSuccessfulModal: "You have successfully disliked the album." });
 			this.setState({ openModal: true });
@@ -538,7 +539,7 @@ class HomePage extends React.Component {
 					console.log(err);
 				});*/
 
-				Axios.get(BASE_URL + "/api/storyPosts/api/story/homePage/" + id)
+				Axios.get(BASE_URL + "/api/storyPosts/api/story/homePage/" + id, {  headers: { Authorization: getAuthHeader() } })
 	
 					.then((res) => {
 						let br = this.state.brojac;
@@ -579,7 +580,7 @@ class HomePage extends React.Component {
 
 	}
 	handleGetCampaignStories = (id)=> {
-		Axios.get(BASE_URL + "/api/campaign/storyCampaigns/" + id)
+		Axios.get(BASE_URL + "/api/campaign/storyCampaigns/" + id, {  headers: { Authorization: getAuthHeader() } })
 	
 					.then((res) => {
 						let br = this.state.brojac2;
@@ -607,7 +608,7 @@ class HomePage extends React.Component {
 					});
 	}
 	handeleGetMultipleCampaigns = (id)=> {
-		Axios.get(BASE_URL + "/api/campaign/multipleHomePage/"+id+"/feed")
+		Axios.get(BASE_URL + "/api/campaign/multipleHomePage/"+id+"/feed", {  headers: { Authorization: getAuthHeader() } })
 		.then((res) => {
 			this.setState({ multipleCampaigns: res.data });
 		})
@@ -616,7 +617,7 @@ class HomePage extends React.Component {
 		});	
 	}
 	handeleGetOneTimeCampaigns = (id)=> {
-		Axios.get(BASE_URL + "/api/campaign/oneTimeHomePage/"+id+"/feed")
+		Axios.get(BASE_URL + "/api/campaign/oneTimeHomePage/"+id+"/feed", {  headers: { Authorization: getAuthHeader() } })
 			.then((res) => {
 				this.setState({ oneTimeCampaigns: res.data });
 			})
@@ -625,7 +626,7 @@ class HomePage extends React.Component {
 			});	
 	}
 	handeleGetMultipleCampaignsPromotion = (id)=> {
-		Axios.get(BASE_URL + "/api/campaign/multipleHomePage/promote/"+id+"/feed")
+		Axios.get(BASE_URL + "/api/campaign/multipleHomePage/promote/"+id+"/feed", {  headers: { Authorization: getAuthHeader() } })
 		.then((res) => {
 			this.setState({ multipleCampaignsPromotion: res.data });
 		})
@@ -634,7 +635,7 @@ class HomePage extends React.Component {
 		});	
 	}
 	handeleGetOneTimeCampaignsPromotion = (id)=> {
-		Axios.get(BASE_URL + "/api/campaign/oneTimeHomePage/promote/"+id+"/feed")
+		Axios.get(BASE_URL + "/api/campaign/oneTimeHomePage/promote/"+id+"/feed", {  headers: { Authorization: getAuthHeader() } })
 			.then((res) => {
 				this.setState({ oneTimeCampaignsPromotion: res.data });
 			})
@@ -643,7 +644,7 @@ class HomePage extends React.Component {
 			});	
 	}
 	handleAddAllDataCollection = (id) => {
-		Axios.post(BASE_URL + "/api/feedPosts/api/collection/allData/" + id)
+		Axios.post(BASE_URL + "/api/feedPosts/api/collection/allData/" + id, {  headers: { Authorization: getAuthHeader() } })
 			.then((res) => {
 				if (res.status === 409) {
 					this.setState({
@@ -664,7 +665,7 @@ class HomePage extends React.Component {
 
 	handleGetPhotos = (id) => {
 
-		Axios.get(BASE_URL + "/api/feedPosts/api/feed/homePage/" + id)
+		Axios.get(BASE_URL + "/api/feedPosts/api/feed/homePage/" + id, {  headers: { Authorization: getAuthHeader() } })
 			.then((res) => {
 				this.setState({ photos: res.data });
 			})
@@ -674,7 +675,7 @@ class HomePage extends React.Component {
 	}
 	handleGetAlbums = (id) => {
 
-		Axios.get(BASE_URL + "/api/feedPosts/api/albumFeed/homePage/" + id)
+		Axios.get(BASE_URL + "/api/feedPosts/api/albumFeed/homePage/" + id, {  headers: { Authorization: getAuthHeader() } })
 			.then((res) => {
 				this.setState({ albums: res.data });
 			})
@@ -691,7 +692,7 @@ class HomePage extends React.Component {
 		this.setState({ selectedPostId: postId });
 	}
 	handleGetCollections = (id) => {
-		Axios.get(BASE_URL + "/api/feedPosts/api/collection/user/" + id)
+		Axios.get(BASE_URL + "/api/feedPosts/api/collection/user/" + id, {  headers: { Authorization: getAuthHeader() } })
 			.then((res) => {
 				this.setState({ collections: res.data });
 			})
@@ -709,7 +710,7 @@ class HomePage extends React.Component {
 			CollectionId: collectionId
 		}
 		Axios.post(BASE_URL + "/api/feedPosts/api/collection/addPost/", postCollectionDTO, {
-		}).then((res) => {
+		}, {  headers: { Authorization: getAuthHeader() } }).then((res) => {
 
 			this.setState({ showAddCollectionModal: false });
 			this.setState({ textSuccessfulModal: "You have successfully added post to collection." });
@@ -734,7 +735,7 @@ class HomePage extends React.Component {
 
 		}
 		Axios.post(BASE_URL + "/api/feedPosts/api/feed/comment/", commentDTO, {
-		}).then((res) => {
+		}, {  headers: { Authorization: getAuthHeader() } }).then((res) => {
 
 			this.setState({ textSuccessfulModal: "You have successfully commented the photo." });
 			this.setState({ openModal: true });
@@ -756,7 +757,7 @@ class HomePage extends React.Component {
 
 		}
 		Axios.post(BASE_URL + "/api/feedPosts/api/albumFeed/comment/", commentDTO, {
-		}).then((res) => {
+		}, {  headers: { Authorization: getAuthHeader() } }).then((res) => {
 
 			this.setState({ textSuccessfulModal: "You have successfully commented the album." });
 			this.setState({ showWriteCommentModalAlbum: false });
@@ -772,7 +773,7 @@ class HomePage extends React.Component {
 	handleOpenAddAlbumToCollectionAlbumModal = (postId)=> {
 		let id = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length-1)
 
-			Axios.get(BASE_URL + "/api/feedPosts/api/collection/user/album/"+id)
+			Axios.get(BASE_URL + "/api/feedPosts/api/collection/user/album/"+id, {  headers: { Authorization: getAuthHeader() } })
 				.then((res) => {
 					this.setState({ myCollectionAlbums: res.data });
 				})
@@ -789,7 +790,7 @@ class HomePage extends React.Component {
 			CollectionId : collectionId
 		}
 		Axios.post(BASE_URL + "/api/feedPosts/api/collection/album/addPost/", postCollectionDTO, {
-		}).then((res) => {
+		}, {  headers: { Authorization: getAuthHeader() } }).then((res) => {
 			
 			this.setState({ showAddCollectionAlbumModal: false });
 			let id = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length-1)
@@ -818,7 +819,7 @@ class HomePage extends React.Component {
 						UserId : id,
 						Type : type
                     };
-                    Axios.post(BASE_URL + "/api/feedPosts/report", report
+                    Axios.post(BASE_URL + "/api/feedPosts/report", report, {  headers: { Authorization: getAuthHeader() } }
 						).then((res) =>{
 							this.setState({
 								textSuccessfulModal: "You have successfully reported this post.",
@@ -859,7 +860,7 @@ class HomePage extends React.Component {
 			url ="/api/campaign/multipleTimeCampaign/like/"
 		}
 		Axios.post(BASE_URL + url, campaignReaction, {
-		}).then((res) => {
+		}, {  headers: { Authorization: getAuthHeader() } }).then((res) => {
 
 			this.setState({ textSuccessfulModal: "You have successfully liked the campaign post." });
 			this.setState({ openModal: true });
@@ -884,7 +885,7 @@ class HomePage extends React.Component {
 			url ="/api/campaign/multipleTimeCampaign/dislike/"
 		}
 		Axios.post(BASE_URL + url, campaignReaction, {
-		}).then((res) => {
+		}, {  headers: { Authorization: getAuthHeader() } }).then((res) => {
 
 			this.setState({ textSuccessfulModal: "You have successfully disliked the campaign post." });
 			this.setState({ openModal: true });
@@ -912,7 +913,7 @@ class HomePage extends React.Component {
 			url ="/api/campaign/multipleTimeCampaign/comment/"
 		}
 		Axios.post(BASE_URL + url, campaignReaction, {
-		}).then((res) => {
+		}, {  headers: { Authorization: getAuthHeader() } }).then((res) => {
 
 			this.setState({ textSuccessfulModal: "You have successfully commented the campaign post." });
 			this.setState({ openModal: true });
@@ -933,7 +934,7 @@ class HomePage extends React.Component {
 		else {
 			url ="/api/campaign/multipleTimeCampaign/likes/"
 		}
-		Axios.get(BASE_URL + url + postId)
+		Axios.get(BASE_URL + url + postId, {  headers: { Authorization: getAuthHeader() } })
 			.then((res) => {
 				this.setState({ peopleLikes: res.data });
 			})
@@ -967,7 +968,7 @@ class HomePage extends React.Component {
 		else {
 			url ="/api/campaign/multipleTimeCampaign/comments/"
 		}
-		Axios.get(BASE_URL + url + postId)
+		Axios.get(BASE_URL + url + postId, {  headers: { Authorization: getAuthHeader() } })
 			.then((res) => {
 				this.setState({ peopleComments: res.data });
 			})
@@ -995,7 +996,7 @@ class HomePage extends React.Component {
 			url ="/api/campaign/multipleTimeCampaign/clickLink/"
 		}
 		Axios.post(BASE_URL + url, linkReaction, {
-		}).then((res) => {
+		}, {  headers: { Authorization: getAuthHeader() } }).then((res) => {
 
 			window.open(link, '_blank');
 		})

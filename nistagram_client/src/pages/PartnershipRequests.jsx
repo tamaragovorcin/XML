@@ -4,6 +4,7 @@ import Header from "../components/Header";
 import TopBar from "../components/TopBar";
 import ModalDialog from "../components/ModalDialog";
 import { BASE_URL } from "../constants.js";
+import getAuthHeader from "../GetHeader";
 class PartnershipRequests extends Component {
 	state = {
         textSuccessfulModal : "",
@@ -19,10 +20,23 @@ class PartnershipRequests extends Component {
         this.handeleGetMultipleCampaigns()
 
 	}
+    
+	hasRole = (reqRole) => {
+		let roles = JSON.parse(localStorage.getItem("keyRole"));
+		if (roles === null) return false;
+
+		if (reqRole === "*") return true;
+
+		for (let role of roles) {
+			if (role === reqRole) return true;
+		}
+		return false;
+	};
+
     handeleGetCampaigns = () => {
         let id = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length-1);
 
-		Axios.get(BASE_URL + "/api/campaign/partnershipRequests/"+id)
+		Axios.get(BASE_URL + "/api/campaign/partnershipRequests/"+id,  {  headers: { Authorization: getAuthHeader() } })
 			.then((res) => {
 				this.setState({ campaigns: res.data });
 			})
@@ -33,7 +47,7 @@ class PartnershipRequests extends Component {
     handeleGetMultipleCampaigns = () => {
         let id = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length-1);
 
-		Axios.get(BASE_URL + "/api/campaign/partnershipRequestsMultiple/"+id)
+		Axios.get(BASE_URL + "/api/campaign/partnershipRequestsMultiple/"+id,  {  headers: { Authorization: getAuthHeader() } })
 			.then((res) => {
 				this.setState({ multipleCampaigns: res.data });
 			})
@@ -44,7 +58,7 @@ class PartnershipRequests extends Component {
     handleAccept  = (postId) => {
         let id = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length-1);
             const acceptedDTO = { CampaignId: postId, UserId: id};
-            Axios.post(BASE_URL  + "/api/campaign/acceptPartnership", acceptedDTO)
+            Axios.post(BASE_URL  + "/api/campaign/acceptPartnership", acceptedDTO,  {  headers: { Authorization: getAuthHeader() } })
                     .then((res) => {
                         this.setState({ openModal: true });
                         this.setState({ textSuccessfulModal: "You have successfully accepted partnership request." });			
@@ -58,7 +72,7 @@ class PartnershipRequests extends Component {
     handleDelete = (postId) => {
         let id = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length-1);
         const dto = { CampaignId: postId, UserId: id};
-        Axios.post(BASE_URL  + "/api/campaign/deletePartnership", dto)
+        Axios.post(BASE_URL  + "/api/campaign/deletePartnership", dto,  {  headers: { Authorization: getAuthHeader() } })
                 .then((res) => {
                     this.setState({ openModal: true });
                     this.setState({ textSuccessfulModal: "You have successfully deleted partnership request." });			
@@ -71,7 +85,7 @@ class PartnershipRequests extends Component {
     handleAcceptMultiple  = (postId) => {
         let id = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length-1);
             const acceptedDTO = { CampaignId: postId, UserId: id};
-            Axios.post(BASE_URL  + "/api/campaign/acceptPartnershipMultiple", acceptedDTO)
+            Axios.post(BASE_URL  + "/api/campaign/acceptPartnershipMultiple", acceptedDTO,  {  headers: { Authorization: getAuthHeader() } })
                     .then((res) => {
                         this.setState({ openModal: true });
                         this.setState({ textSuccessfulModal: "You have successfully accepted partnership request." });			
@@ -85,7 +99,7 @@ class PartnershipRequests extends Component {
     handleDeleteMultiple = (postId) => {
         let id = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length-1);
         const dto = { CampaignId: postId, UserId: id};
-        Axios.post(BASE_URL  + "/api/campaign/deletePartnershipMultiple", dto)
+        Axios.post(BASE_URL  + "/api/campaign/deletePartnershipMultiple", dto,  {  headers: { Authorization: getAuthHeader() } })
                 .then((res) => {
                     this.setState({ openModal: true });
                     this.setState({ textSuccessfulModal: "You have successfully deleted partnership request." });			

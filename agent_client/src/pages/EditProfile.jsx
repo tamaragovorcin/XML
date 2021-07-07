@@ -7,7 +7,7 @@ import { Redirect } from "react-router-dom";
 import HeadingAlert from "../components/HeadingAlert";
 import HeadingSuccessAlert from "../components/HeadingSuccessAlert"
 import SidebarSettings from "../components/SidebarSettings"
-
+import getAuthHeader from "../GetHeader";
 
 
 class EditProfile extends Component {
@@ -63,7 +63,7 @@ class EditProfile extends Component {
 	componentDidMount() {
 	
 		let id = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length-1)
-	Axios.get(BASE_URL + "/api/users/api/" + id)
+	Axios.get(BASE_URL + "/api/users/api/" + id, {  headers: { Authorization: getAuthHeader() } })
 				.then((res) => {
 					if (res.status === 401) {
 						this.setState({ errorHeader: "Bad credentials!", errorMessage: "Wrong username or password.", hiddenErrorAlert: false });
@@ -193,7 +193,7 @@ class EditProfile extends Component {
         };
 
         if (this.validateForm(userDTO)) {
-			Axios.post(`${BASE_URL}/api/users/api/user/update/`, userDTO)
+			Axios.post(`${BASE_URL}/api/users/api/user/update/`, userDTO, {  headers: { Authorization: getAuthHeader() } })
 			.then((res) => {
                         if (res.status === 400) {
                             this.setState({ hiddenFailAlert: false, failHeader: "Bad request", failMessage: "Invalid argument." });

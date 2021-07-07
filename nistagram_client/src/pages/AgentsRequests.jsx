@@ -6,6 +6,7 @@ import Axios from "axios";
 import { BASE_URL } from "../constants.js";
 import { Carousel } from 'react-responsive-carousel';
 import ModalDialog from "../components/ModalDialog";
+import getAuthHeader from "../GetHeader";
 
 class AgentRequests extends React.Component {
     state = {
@@ -20,8 +21,20 @@ class AgentRequests extends React.Component {
         this.handleGetRequestAgents()
         
     }
+    hasRole = (reqRole) => {
+		let roles = JSON.parse(localStorage.getItem("keyRole"));
+		if (roles === null) return false;
+
+		if (reqRole === "*") return true;
+
+		for (let role of roles) {
+			if (role === reqRole) return true;
+		}
+		return false;
+	};
+
     handleGetRequestAgents = () => {
-        Axios.get(BASE_URL + "/api/users/agentRequests/")
+        Axios.get(BASE_URL + "/api/users/agentRequests/", {  headers: { Authorization: getAuthHeader() } })
             .then((res) => {
                 this.setState({ posts: res.data });
             })
@@ -36,7 +49,7 @@ class AgentRequests extends React.Component {
            
             UserId : followerId
         }
-        Axios.post(BASE_URL + "/api/users/agents/accept/",dto)
+        Axios.post(BASE_URL + "/api/users/agents/accept/",dto, {  headers: { Authorization: getAuthHeader() } })
                 .then((res) => {
                     this.setState({ openModal: true });
                     this.setState({ textSuccessfulModal: "You have successfully accepted agent request." });
@@ -51,7 +64,7 @@ class AgentRequests extends React.Component {
     }
 
     handleDelete  = (followerId) => {
-        Axios.delete(BASE_URL + "/api/users/agent/"+followerId)
+        Axios.delete(BASE_URL + "/api/users/agent/"+followerId, {  headers: { Authorization: getAuthHeader() } })
         .then((res) => {
             this.setState({ openModal: true });
 			this.setState({ textSuccessfulModal: "You have successfully removed agent's request." });

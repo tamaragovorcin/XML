@@ -7,6 +7,7 @@ import { Redirect } from "react-router-dom";
 import HeadingAlert from "../components/HeadingAlert";
 import HeadingSuccessAlert from "../components/HeadingSuccessAlert"
 import SidebarSettings from "../components/SidebarSettings"
+import getAuthHeader from "../GetHeader";
 
 
 
@@ -71,7 +72,7 @@ class PrivacySettings extends Component {
 	componentDidMount() {
 	
 		let id = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length-1)
-	Axios.get(BASE_URL + "/api/users/api/user/privacySettings/" + id)
+	Axios.get(BASE_URL + "/api/users/api/user/privacySettings/" + id, {  headers: { Authorization: getAuthHeader() } })
 				.then((res) => {
 					if (res.status === 401) {
 						this.setState({ errorHeader: "Bad credentials!", errorMessage: "Wrong username or password.", hiddenErrorAlert: false });
@@ -114,7 +115,7 @@ class PrivacySettings extends Component {
                          AcceptTags : this.state.tags
         };
 
-			Axios.post(`${BASE_URL}/api/users/api/user/privacySettings/`, dto)
+			Axios.post(`${BASE_URL}/api/users/api/user/privacySettings/`, dto, {  headers: { Authorization: getAuthHeader() } })
 			.then((res) => {
                         if (res.status === 400) {
                             this.setState({ hiddenFailAlert: false, failHeader: "Bad request", failMessage: "Invalid argument." });

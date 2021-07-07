@@ -12,7 +12,7 @@ import Select from 'react-select';
 import { Button, Modal } from "react-bootstrap";
 import { FiSend } from 'react-icons/fi';
 import DisposableImageModal from "../components/DisposableImageModal";
-
+import getAuthHeader from "../GetHeader";
 
 
 
@@ -67,7 +67,7 @@ class Chat extends React.Component {
 	handleOpenDisposable = (media,id)=>{
 		this.setState({ disposableForOpenMedia: media });
 		this.setState({ showDisposable: true });
-		Axios.get(BASE_URL + "/api/messages/api/openDisposable/"+id)
+		Axios.get(BASE_URL + "/api/messages/api/openDisposable/"+id,  {  headers: { Authorization: getAuthHeader() } })
 				.then((res) => {
 					this.handleGetChat();
 					console.log(res)
@@ -95,7 +95,7 @@ class Chat extends React.Component {
 		s = sentence.split("/");
 		const dto = { follower: sender, following : s[6]};
 
-		Axios.get(BASE_URL + "/api/messages/api/deleteChat/"+sender+"/"+s[6])
+		Axios.get(BASE_URL + "/api/messages/api/deleteChat/"+sender+"/"+s[6],  {  headers: { Authorization: getAuthHeader() } })
 		.then((res) => {
 			this.isChatDeleted()
 			this.handleGetChat()
@@ -119,7 +119,7 @@ class Chat extends React.Component {
 			Text : this.state.message,
 		    };
 
-			Axios.post(BASE_URL + "/api/messages/api/send",dto)
+			Axios.post(BASE_URL + "/api/messages/api/send",dto,  {  headers: { Authorization: getAuthHeader() } })
 				.then((res) => {
 
 					this.handleGetChat();
@@ -141,7 +141,7 @@ class Chat extends React.Component {
 						body: formData
 
 					};
-				fetch(BASE_URL + "/api/messages/api/send/disposableImage/"+sender+"/"+s[6], options);
+				fetch(BASE_URL + "/api/messages/api/send/disposableImage/"+sender+"/"+s[6], options,  {  headers: { Authorization: getAuthHeader() } });
 				this.setState({ selectedFile: "" });
 				this.handleGetChat();
 
@@ -198,7 +198,7 @@ class Chat extends React.Component {
 		s = sentence.split("/");
 		const dto = { follower: sender, following : s[6]};
 
-		Axios.post(BASE_URL + "/api/userInteraction/api/checkInteraction",dto)
+		Axios.post(BASE_URL + "/api/userInteraction/api/checkInteraction",dto,  {  headers: { Authorization: getAuthHeader() } })
 		.then((res) => {
 			this.setState({ following:res.data });
 
@@ -215,7 +215,7 @@ class Chat extends React.Component {
 		s = sentence.split("/");
 		const dto = { follower: sender, following : s[6]};
 
-		Axios.get(BASE_URL + "/api/messages/api/isChatDeleted/"+sender+"/"+s[6])
+		Axios.get(BASE_URL + "/api/messages/api/isChatDeleted/"+sender+"/"+s[6],  {  headers: { Authorization: getAuthHeader() } })
 		.then((res) => {
 			this.setState({ deletedChat:res.data.Deleted });
 			this.setState({ deletedForUser:res.data.ForUser });
@@ -237,7 +237,7 @@ class Chat extends React.Component {
 
 		this.setState({ user2: s[6] });
 
-		Axios.get(BASE_URL + "/api/messages/api/getMessages/"+sender+"/"+s[6])
+		Axios.get(BASE_URL + "/api/messages/api/getMessages/"+sender+"/"+s[6],  {  headers: { Authorization: getAuthHeader() } })
 		.then((res) => {
 			res.data.forEach((mess) => {
 				let time = mess.DateTime.split("T")[1].slice(0,5)
@@ -264,10 +264,10 @@ class Chat extends React.Component {
 				});	
 			}else if( mess.AlbumPost != "000000000000000000000000"){
 				
-				Axios.get(BASE_URL + "/api/feedPosts/api/album/username/"+mess.AlbumPost)
+				Axios.get(BASE_URL + "/api/feedPosts/api/album/username/"+mess.AlbumPost,  {  headers: { Authorization: getAuthHeader() } })
 				.then((res2) => {
 					feedUser = res2.data
-					Axios.get(BASE_URL + "/api/users/api/user/username/"+mess.Sender)
+					Axios.get(BASE_URL + "/api/users/api/user/username/"+mess.Sender,  {  headers: { Authorization: getAuthHeader() } })
 				.then((res1) => {
 					let optionDTO = { id: mess.Id, username: res1.data , text: mess.Text, time : time, feedPost : mess.FeedPost,feedUser : feedUser, storyPost : mess.StoryPost, disposableImage : mess.DisposableImage, albumPost: mess.AlbumPost, media : mess.DisposableImage.split("/")[1]}
 					help.push(optionDTO)
@@ -283,10 +283,10 @@ class Chat extends React.Component {
 				});	
 			}
 			else if( mess.StoryPost != "000000000000000000000000"){
-				Axios.get(BASE_URL + "/api/storyPosts/api/story/username/"+mess.StoryPost)
+				Axios.get(BASE_URL + "/api/storyPosts/api/story/username/"+mess.StoryPost,  {  headers: { Authorization: getAuthHeader() } })
 				.then((res2) => {
 					feedUser = res2.data
-					Axios.get(BASE_URL + "/api/users/api/user/username/"+mess.Sender)
+					Axios.get(BASE_URL + "/api/users/api/user/username/"+mess.Sender,  {  headers: { Authorization: getAuthHeader() } })
 				.then((res1) => {
 					let optionDTO = { id: mess.Id, username: res1.data , text: mess.Text, time : time, feedPost : mess.FeedPost,feedUser : feedUser, storyPost : mess.StoryPost, disposableImage : mess.DisposableImage, albumPost: mess.AlbumPost, media : mess.DisposableImage.split("/")[1]}
 					help.push(optionDTO)
@@ -302,7 +302,7 @@ class Chat extends React.Component {
 				});	
 			}
 			else if(mess.FeedPost === "000000000000000000000000" && mess.AlbumPost == "000000000000000000000000" && mess.StoryPost == "000000000000000000000000"){
-				Axios.get(BASE_URL + "/api/users/api/user/username/"+mess.Sender)
+				Axios.get(BASE_URL + "/api/users/api/user/username/"+mess.Sender,  {  headers: { Authorization: getAuthHeader() } })
 				.then((res1) => {
 					let optionDTO = { id: mess.Id,senderId:mess.Sender, username: res1.data , text: mess.Text, time : time, feedPost : mess.FeedPost, storyPost : mess.StoryPost, disposableImage : mess.DisposableImageId,openedDisposable : mess.OpenedDisposable, albumPost: mess.AlbumPost, media : mess.DisposableImage.split("/")[1]}
 					help.push(optionDTO)
@@ -329,7 +329,7 @@ class Chat extends React.Component {
 
 	}
 	handleGetAlbumImages=(id)=>{
-		Axios.get(BASE_URL + "/api/feedPosts/api/feedAlbum/images/"+id)
+		Axios.get(BASE_URL + "/api/feedPosts/api/feedAlbum/images/"+id,  {  headers: { Authorization: getAuthHeader() } })
 		.then((res) => {
 
 		this.setState({ albumImages: res.data });
