@@ -166,6 +166,8 @@ class Header extends React.Component {
 
 
 
+
+
 			<ModalDialog
 						show={this.state.openModal}
 						onCloseModal={this.handleModalClose}
