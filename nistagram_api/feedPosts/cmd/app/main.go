@@ -4,6 +4,7 @@ import (
 	"context"
 	"flag"
 	"fmt"
+	"github.com/opentracing/opentracing-go"
 	"log"
 	"net/http"
 	"os"
@@ -28,7 +29,7 @@ type application struct {
 	videos   *mongodb.VideoModel
 	collectionAlbums *mongodb.CollectionAlbumModel
 	reports *mongodb.ReportModel
-
+	tracer opentracing.Tracer
 }
 
 func main() {

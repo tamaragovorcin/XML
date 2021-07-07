@@ -6,6 +6,7 @@ import (
 	"flag"
 	"fmt"
 	"github.com/go-redis/redis"
+	"github.com/opentracing/opentracing-go"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -34,6 +35,7 @@ type application struct {
 	notificationContent *mongodb.NotificationContentModel
 	images   *mongodb.ImageModel
 	orchestrator *saga.Orchestrator
+	tracer opentracing.Tracer
 
 }
 func main() {
