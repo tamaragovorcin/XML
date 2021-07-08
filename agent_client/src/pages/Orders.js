@@ -8,7 +8,10 @@ import { Redirect } from "react-router-dom";
 import Order from "../components/Order";
 import Address from "../components/Address";
 import ModalDialog from "../components/ModalDialog";
+import getAuthHeader from "../GetHeader";
 class TShirtsMen extends Component {
+
+
 	state = {
 		products: [],
 		formShowed: false,
@@ -68,7 +71,7 @@ class TShirtsMen extends Component {
     };
 	componentDidMount() {
 		let id = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length - 1);
-		Axios.get(BASE_URL_AGENT + "/api/getAllCart/" + id)
+		Axios.get(BASE_URL_AGENT + "/api/getAllCart/" + id, {  headers: { Authorization: getAuthHeader() } })
 			.then((res) => {
 				this.setState({ products: res.data });
 				console.log(res.data);
@@ -88,7 +91,7 @@ class TShirtsMen extends Component {
 	};
 
 	handleDelete = (e, id) => {
-		Axios.get(BASE_URL_AGENT + "/api/cart/remove/" + id)
+		Axios.get(BASE_URL_AGENT + "/api/cart/remove/" + id, {  headers: { Authorization: getAuthHeader() } })
 			.then((res) => {
 
 				this.setState({ openModal: true });

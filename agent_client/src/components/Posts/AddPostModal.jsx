@@ -8,6 +8,7 @@ import { CgFeed } from "react-icons/cg"
 import Axios from "axios";
 import { BASE_URL_AGENT } from "../../constants.js";
 import ModalDialog from "../../components/ModalDialog";
+import getAuthHeader from "../GetHeader";
 class AddPostModal extends Component {
 	constructor(props) {
 		super(props);
@@ -52,12 +53,12 @@ class AddPostModal extends Component {
 			body: formData
 
 		};
-		fetch(BASE_URL_AGENT + "/api/image/" + userIdd , options);
+		fetch(BASE_URL_AGENT + "/api/image/" + userIdd , options, {  headers: { Authorization: getAuthHeader() } });
 	}
 	sendRequestForFeedAlbum(feedPostDTO) {
 		let id = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length - 1)
 
-		Axios.post(BASE_URL_AGENT + "/api/product/" + id, feedPostDTO)
+		Axios.post(BASE_URL_AGENT + "/api/product/" + id, feedPostDTO, {  headers: { Authorization: getAuthHeader() } })
 			.then((res) => {
 			
 					//this.props.redirect=true

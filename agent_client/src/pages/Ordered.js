@@ -9,6 +9,8 @@ import Order from "../components/Order";
 import Address from "../components/Address";
 import ModalDialog from "../components/ModalDialog";
 import { NavItem } from "react-bootstrap";
+import getAuthHeader from "../GetHeader";
+
 class Ordered extends Component {
 	state = {
 		products: [],
@@ -65,7 +67,7 @@ class Ordered extends Component {
     };
 	componentDidMount() {
 		let id = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length - 1);
-		Axios.get(BASE_URL_AGENT + "/api/getOrder/" + id)
+		Axios.get(BASE_URL_AGENT + "/api/getOrder/" + id, {  headers: { Authorization: getAuthHeader() } })
 			.then((res) => {
 				this.setState({ products: res.data });
 				console.log(res.data);
@@ -81,7 +83,7 @@ class Ordered extends Component {
 	};
 
 	handleDelete = (e, id) => {
-		Axios.get(BASE_URL_AGENT + "/api/cart/remove/" + id)
+		Axios.get(BASE_URL_AGENT + "/api/cart/remove/" + id, {  headers: { Authorization: getAuthHeader() } })
 			.then((res) => {
 
 				this.setState({ openModal: true });
