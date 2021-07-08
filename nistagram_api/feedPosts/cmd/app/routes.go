@@ -74,7 +74,7 @@ func (app *application) routes() *mux.Router {
 
 
 	r.HandleFunc("/api/video/{userId}/{feedId}", IsAuthorized(app.saveVideo)).Methods("POST")
-	r.HandleFunc("/api/feed/file/{feedId}", IsAuthorized(app.GetFileByPostId)).Methods("GET")
+	r.HandleFunc("/api/feed/file/{feedId}", app.GetFileByPostId).Methods("GET")
 	r.HandleFunc("/api/feed/fileMessage/{feedId}/{userId}", IsAuthorized(app.GetFileMessageByPostId)).Methods("GET")
 	r.HandleFunc("/api/feedAlbum/files/{feedId}", IsAuthorized(app.GetFilesByAlbumPostId)).Methods("GET")
 	r.HandleFunc("/api/feedAlbum/images/{feedId}", IsAuthorized(app.GetImagesByAlbumId)).Methods("GET")

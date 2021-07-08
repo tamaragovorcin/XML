@@ -78,3 +78,15 @@ func taggedUsersToPrimitiveObject(ctx context.Context, m dtos.FeedPostDTO) []pri
 	}
 	return listTagged
 }
+
+
+func taggedUsersToPrimitiveObject1( m dtos.FeedPostDTO) []primitive.ObjectID {
+
+	listTagged := []primitive.ObjectID{}
+	for _, tag := range m.Tagged {
+		primitiveTag, _ := primitive.ObjectIDFromHex(tag)
+
+		listTagged = append(listTagged, primitiveTag)
+	}
+	return listTagged
+}

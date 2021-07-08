@@ -76,7 +76,7 @@ func (app *application) insertAlbumFeed(w http.ResponseWriter, req *http.Request
 		app.serverError(w, err)
 	}
 	userIdPrimitive, _ := primitive.ObjectIDFromHex(userId)
-	listTagged := taggedUsersToPrimitiveObject(m)
+	listTagged := taggedUsersToPrimitiveObject1(m)
 
 	var post = models.Post{
 		User : userIdPrimitive,

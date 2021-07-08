@@ -41,7 +41,7 @@ func (app *application) routes() *mux.Router {
 	r.HandleFunc("/api/albumStory/{id}", IsAuthorized(app.deleteStory)).Methods("DELETE")
 	r.HandleFunc("/api/highlight/addStoryAlbum/", IsAuthorized(app.insetStoryAlbumInHighlight)).Methods("POST")
 
-	r.HandleFunc("/api/story/file/{storyId}", IsAuthorized(app.GetFileByPostId)).Methods("GET")
+	r.HandleFunc("/api/story/file/{storyId}", app.GetFileByPostId).Methods("GET")
 	r.HandleFunc("/removeUserId/{id}", IsAuthorized(app.removeEverythingFromUser)).Methods("DELETE")
 
 	r.HandleFunc("/api/story/username/{feedId}", IsAuthorized(app.getUsername)).Methods("GET")

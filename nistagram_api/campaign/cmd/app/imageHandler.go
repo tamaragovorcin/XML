@@ -2,6 +2,7 @@ package main
 
 import (
 	"campaigns/pkg/models"
+	"encoding/json"
 	"fmt"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gorilla/mux"
@@ -10,7 +11,6 @@ import (
 	"net/http"
 	"os"
 	"strings"
-	"users/pkg/models"
 )
 func IsAuthorized(handler http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {

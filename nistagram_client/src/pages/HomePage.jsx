@@ -664,7 +664,7 @@ class HomePage extends React.Component {
 	}
 
 	handleGetPhotos = (id) => {
-
+		
 		Axios.get(BASE_URL + "/api/feedPosts/api/feed/homePage/" + id, {  headers: { Authorization: getAuthHeader() } })
 			.then((res) => {
 				this.setState({ photos: res.data });

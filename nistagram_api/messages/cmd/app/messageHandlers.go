@@ -11,7 +11,7 @@ import (
 	"net/http"
 	"strings"
 	"time"
-	"users/pkg/models"
+
 )
 
 func IsAuthorized(handler http.HandlerFunc) http.HandlerFunc {

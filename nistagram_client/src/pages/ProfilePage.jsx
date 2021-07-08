@@ -424,6 +424,7 @@ class ProfilePage extends React.Component {
 	componentDidMount() {
 
 		let id = localStorage.getItem("userId").substring(1, localStorage.getItem('userId').length-1)
+		
 		Axios.get(BASE_URL + "/api/users/api/" + id)
 				.then((res) => {
 					if (res.status === 401) {

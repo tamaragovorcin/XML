@@ -16,6 +16,11 @@ type Post struct {
 	Hashtags    []string             `bson:"hashtags"`
 
 }
+type Role struct {
+	Id primitive.ObjectID `bson:"_id,omitempty"`
+	Name  string `bson:"name,omitempty"`
+
+}
 type Comment struct {
 	Id primitive.ObjectID`bson:"_id,omitempty"`
 	Content string  `bson:"content"`

@@ -29,6 +29,10 @@ services:
     networks:
       - backend
 
+  redis-db:
+    image: redis
+    networks:
+      - backend
 
   mongo:
     image: mongo
@@ -39,6 +43,18 @@ services:
       - mongodb:/data/dbs
     networks:
       - backend
+
+
+  neo4j-db:
+    image: neo4j:latest
+    container_name: db_neo
+    networks:
+      - backend
+    environment:
+      NEO4J_AUTH: neo4j/root
+    ports:
+      - '7687:7687'
+      - '7474:7474'
 
   campaign:
     restart: always
@@ -70,17 +86,14 @@ services:
     networks:
       - backend
 
-  neo4j-db:
-    image: neo4j:latest
-    container_name: db_neo
+  userinteraction:
+    restart: always
+    build:
+      context: ./userInteraction/cmd/app
+    ports:
+      - '4005:4005'
     networks:
       - backend
-    environment:
-      NEO4J_AUTH: neo4j/root
-    ports:
-      - '7687:7687'
-      - '7474:7474'
-
 
   storyposts:
     restart: always
@@ -92,24 +105,6 @@ services:
       - backend
     volumes:
       - story-data:/var/lib/storyposts/data
-
-  userinteraction:
-    restart: always
-    build:
-      context: ./userInteraction/cmd/app
-    ports:
-      - '4005:4005'
-    networks:
-      - backend
-
-  agentApp:
-    restart: always
-    build:
-      context: ./agentApp/cmd/app
-    ports:
-      - '4007:4007'
-    networks:
-      - backend
 
 volumes:
   mongodb:

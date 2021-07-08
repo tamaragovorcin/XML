@@ -13,7 +13,11 @@ type Chat struct {
 	Deleted bool `bson:"deleted"`
 	UserThatDeletedChat primitive.ObjectID`bson:"userThatDeletedChat"`
 }
+type Role struct {
+	Id primitive.ObjectID `bson:"_id,omitempty"`
+	Name  string `bson:"name,omitempty"`
 
+}
 type DisposableImage struct {
 	Id primitive.ObjectID `bson:"_id,omitempty"`
 	Opened bool `bson:"opened"`

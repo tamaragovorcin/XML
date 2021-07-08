@@ -14,19 +14,19 @@ func (app *application) routes() *mux.Router {
 	r := mux.NewRouter()
 
 	r.HandleFunc("/api/proba/{token}", IsAuthorized(app.proba)).Methods("GET")
-	r.HandleFunc("/api/token/{userId}", IsAuthorized(app.getToken)).Methods("GET")
-	r.HandleFunc("/api/generateToken/{userId}", IsAuthorized(app.generateNewToken)).Methods("GET")
-	r.HandleFunc("/api/", IsAuthorized(app.getAllUsers)).Methods("GET")
+	r.HandleFunc("/api/token/{userId}", app.getToken).Methods("GET")
+	r.HandleFunc("/api/generateToken/{userId}", app.generateNewToken).Methods("GET")
+	r.HandleFunc("/api/", app.getAllUsers).Methods("GET")
 	r.HandleFunc("/api/all/{userId}", IsAuthorized(app.getAllUsersWithoutLogged)).Methods("GET")
 
 	r.HandleFunc("/api/{id}", IsAuthorized(app.findUserByID)).Methods("GET")
 	r.HandleFunc("/api/user/update/",  IsAuthorized(app.updateUser)).Methods("POST")
 
-	r.HandleFunc("/api/", IsAuthorized(app.insertUser)).Methods("POST")
-	r.HandleFunc("/admin/", IsAuthorized(app.insertAdmin)).Methods("POST")
+	r.HandleFunc("/api/", app.insertUser).Methods("POST")
+	r.HandleFunc("/admin/", app.insertAdmin).Methods("POST")
 
 	r.HandleFunc("/api/search/{name}", IsAuthorized(app.search)).Methods("GET")
-	r.HandleFunc("/api/login", IsAuthorized(app.loginUser)).Methods("POST")
+	r.HandleFunc("/api/login", app.loginUser).Methods("POST")
 	r.HandleFunc("/api/user/privacy/{userId}", IsAuthorized(app.findUserPrivacy)).Methods("GET")
 	r.HandleFunc("/api/user/username/{userId}", IsAuthorized(app.findUserUsername)).Methods("GET")
 	r.HandleFunc("/api/user/closeFriends/{userId}", IsAuthorized(app.findUserCloseFriends)).Methods("GET")
@@ -56,7 +56,7 @@ func (app *application) routes() *mux.Router {
 	r.HandleFunc("/agent/", IsAuthorized(app.getAllAgents)).Methods("GET")
 	r.HandleFunc("/agentRequests/", IsAuthorized(app.getAllAgentsRequests)).Methods("GET")
 	r.HandleFunc("/agent/{id}", IsAuthorized(app.findAgentByID)).Methods("GET")
-	r.HandleFunc("/agent", IsAuthorized(app.insertAgent)).Methods("POST")
+	r.HandleFunc("/agent", app.insertAgent).Methods("POST")
 	r.HandleFunc("/agent/{id}", IsAuthorized(app.deleteAgent)).Methods("DELETE")
 
 	r.HandleFunc("/api/user/profileImage/{userId}", IsAuthorized(app.saveImage)).Methods("POST")
@@ -92,7 +92,7 @@ func (app *application) routes() *mux.Router {
 	r.HandleFunc("/agent/byAdmin/", IsAuthorized(app.insertAgentByAdmin)).Methods("POST")
 
  	r.HandleFunc("/api/turnOnNotifications", IsAuthorized(app.turnOnNotificationsForUser)).Methods("POST")
-	r.HandleFunc("/api/addSettings/{userId}", IsAuthorized(app.addSettings)).Methods("GET")
+	r.HandleFunc("/api/addSettings/{userId}", app.addSettings).Methods("GET")
 	r.HandleFunc("/api/updateNotifications", IsAuthorized(app.updateNotifications)).Methods("POST")
 	r.HandleFunc("/api/sendNotificationPost/{postType}/{userId}", IsAuthorized(app.sendNotificationPost)).Methods("GET")
 	r.HandleFunc("/api/sendNotificationComment/{writer}/{user}/{content}", IsAuthorized(app.sendNotificationComment)).Methods("GET")

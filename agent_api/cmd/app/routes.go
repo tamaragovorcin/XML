@@ -10,9 +10,9 @@ func (app *application) routes() *mux.Router {
 
 	r.HandleFunc("/api/user/", IsAuthorized(app.getAllUsers)).Methods("GET")
 	r.HandleFunc("/api/user/{id}", IsAuthorized(app.findUserByID)).Methods("GET")
-	r.HandleFunc("/api/user/", IsAuthorized(app.insertUser)).Methods("POST")
+	r.HandleFunc("/api/user/", app.insertUser).Methods("POST")
 	r.HandleFunc("/api/user/{id}", IsAuthorized(app.deleteUser)).Methods("DELETE")
-	r.HandleFunc("/api/login", IsAuthorized(app.loginUser)).Methods("POST")
+	r.HandleFunc("/api/login", app.loginUser).Methods("POST")
 	r.HandleFunc("/location/", IsAuthorized(app.getAllLocations)).Methods("GET")
 	r.HandleFunc("/location/{id}", IsAuthorized(app.findLocationByID)).Methods("GET")
 	r.HandleFunc("/location/", IsAuthorized(app.insertLocation)).Methods("POST")

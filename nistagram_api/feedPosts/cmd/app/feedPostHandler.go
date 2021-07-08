@@ -19,7 +19,7 @@ import (
 	"strconv"
 	"strings"
 	"time"
-	"users/pkg/models"
+
 )
 func IsAuthorized(handler http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {

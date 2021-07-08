@@ -44,7 +44,7 @@ class Login extends Component {
 
 		if (this.validateForm()) {
 			let loginDTO = { username: this.state.email, password: this.state.password };
-			Axios.post(BASE_URL + "/api/users/api/login", loginDTO, {  headers: { Authorization: getAuthHeader() } })
+			Axios.post(BASE_URL + "/api/users/api/login", loginDTO, )
 				.then((res) => {
 					if (res.status === 401) {
 						this.setState({ errorHeader: "Bad credentials!", errorMessage: "Wrong username or password.", hiddenErrorAlert: false });
@@ -55,6 +55,7 @@ class Login extends Component {
 					} else {
 						localStorage.setItem("keyToken", res.data.AccessToken);
 						localStorage.setItem("keyRole", JSON.stringify(res.data.Roles));
+					
 						localStorage.setItem("userId", JSON.stringify(res.data.UserId));
 						localStorage.setItem("expireTime", new Date(new Date().getTime() + res.data.ExpiresIn).getTime());
 

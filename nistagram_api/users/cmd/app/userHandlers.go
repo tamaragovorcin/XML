@@ -58,13 +58,25 @@ func IsAuthorized(handler http.HandlerFunc) http.HandlerFunc {
 
 
 		if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
-			rolesString, _ := claims["roles"].(string)
-			fmt.Println(rolesString)
-			var tokenRoles []models.Role
+			fmt.Println(claims["roles"])
+			if claims["roles"] == "\"AGENT\"" {
 
-			if err := json.Unmarshal([]byte(rolesString), &tokenRoles); err != nil {
-				fmt.Println("Usercccc.")
-			}
+				r.Header.Set("Role", "admin")
+				handler.ServeHTTP(w, r)
+				return
+
+			} else if claims["roles"] == "\"ADMIN\"" {
+				r.Header.Set("Role", "admin")
+
+				handler.ServeHTTP(w, r)
+				return
+			} else if claims["roles"] == "\"USER\"" {
+			r.Header.Set("Role", "user")
+
+			handler.ServeHTTP(w, r)
+			return
+		}
+
 
 
 

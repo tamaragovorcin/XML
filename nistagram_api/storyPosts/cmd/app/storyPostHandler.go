@@ -42,7 +42,6 @@ func (app *application) getAllStoryPosts(w http.ResponseWriter, r *http.Request)
 }
 
 
-
 func (app *application) insertStoryPost(w http.ResponseWriter, req *http.Request) {
 
 

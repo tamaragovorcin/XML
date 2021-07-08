@@ -10,7 +10,11 @@ type StoryPost struct {
 	Post Post `bson:"post"`
 	OnlyCloseFriends bool `bson:"onlyCloseFriends"`
 }
+type Role struct {
+	Id primitive.ObjectID `bson:"_id,omitempty"`
+	Name  string `bson:"name,omitempty"`
 
+}
 type HighLight struct {
 	Id primitive.ObjectID `bson:"_id,omitempty"`
 	User primitive.ObjectID `bson:"user"`

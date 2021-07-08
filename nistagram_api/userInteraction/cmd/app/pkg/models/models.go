@@ -1,6 +1,7 @@
 package models
 
 import (
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/x/mongo/driver/uuid"
 	"time"
 )
@@ -12,7 +13,11 @@ type FollowRequest struct {
 	Approved  bool `bson:"approved,omitempty"`
 	DateTime time.Time `bson:"dateTime,omitempty"`
 }
+type Role struct {
+	Id primitive.ObjectID `bson:"_id,omitempty"`
+	Name  string `bson:"name,omitempty"`
 
+}
 type Person struct {
 	Job  string   `json:"job"`
 	Role []string `json:"role"`

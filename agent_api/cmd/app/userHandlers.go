@@ -12,6 +12,7 @@ import (
 	"golang.org/x/crypto/bcrypt"
 	"log"
 	"net/http"
+	"strconv"
 	"strings"
 	"time"
 
@@ -53,13 +54,20 @@ func IsAuthorized(handler http.HandlerFunc) http.HandlerFunc {
 
 
 		if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
-			rolesString, _ := claims["roles"].(string)
-			fmt.Println(rolesString)
-			var tokenRoles []models.Role
 
-			if err := json.Unmarshal([]byte(rolesString), &tokenRoles); err != nil {
-				fmt.Println("Usercccc.")
+			if claims["roles"] == "\"Agent\"" {
+
+				r.Header.Set("Role", "admin")
+				handler.ServeHTTP(w, r)
+				return
+
+			} else if claims["roles"] == "\"User\"" {
+				r.Header.Set("Role", "user")
+
+				handler.ServeHTTP(w, r)
+				return
 			}
+
 
 
 
@@ -67,6 +75,10 @@ func IsAuthorized(handler http.HandlerFunc) http.HandlerFunc {
 			fmt.Println("User authorize fail.")
 		}
 	}
+
+
+
+
 
 
 }
@@ -257,7 +269,7 @@ func (app *application) loginUser(w http.ResponseWriter, r *http.Request)  {
 	token, err := generateToken(user)
 
 
-	rolesString, _ := json.Marshal(user.ProfileInformation.Roles)
+
 
 	//b, err := json.Marshal(user)
 	if err != nil {
@@ -268,27 +280,29 @@ func (app *application) loginUser(w http.ResponseWriter, r *http.Request)  {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 
-
-	userToken := dtos.UserTokenState{ AccessToken: token, Roles: string(rolesString), UserId: user.Id,
+	expireTime := time.Now().Add(time.Hour).Unix() * 1000
+	userToken := dtos.UserTokenState{ AccessToken: token, Roles: user.ProfileInformation.Roles, UserId: user.Id, ExpiresIn: expireTime,
 
 	}
+
+
+
 	bb, err := json.Marshal(userToken)
 	w.Write(bb)
 }
 
 func generateToken(user *models.User) (string, error) {
 	token := jwt.New(jwt.SigningMethodHS256)
-	//rolesString, _ := json.Marshal(user.ProfileInformation.Roles)
-
+	rolesString, _ := json.Marshal(user.ProfileInformation.Roles)
+	expireTime := time.Now().Add(time.Hour).Unix() * 1000
 	claims := token.Claims.(jwt.MapClaims)
 	claims["email"] = user.ProfileInformation.Email
 	claims["name"] = user.ProfileInformation.Name
 	claims["surname"] = user.ProfileInformation.LastName
 	claims["username"] = user.ProfileInformation.Username
-	claims["roles"] = user.ProfileInformation.Roles
+	claims["roles"] = string(rolesString)
 	claims["id"] = user.Id
-	claims["exp"] = time.Now().Add(time.Hour).Unix()
+	claims["exp"] = strconv.FormatInt(expireTime, 10)
 
-	return  token.SignedString([]byte("luna"))
+	return token.SignedString([]byte("luna"))
 }
-

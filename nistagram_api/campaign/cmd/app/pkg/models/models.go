@@ -10,6 +10,11 @@ type TargetGroup struct {
 	DateTwo string
 	Location  Location
 }
+type Role struct {
+	Id primitive.ObjectID `bson:"_id,omitempty"`
+	Name  string `bson:"name,omitempty"`
+
+}
 type Campaign struct {
 	Id primitive.ObjectID `bson:"_id,omitempty"`
 	User primitive.ObjectID `bson:"user"`

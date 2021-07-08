@@ -46,7 +46,7 @@ class EndEntityCreateModal extends Component {
 
 	
 
-			Axios.post(BASE_URL_AGENT + "/api/addToCart", newOrderDTO, )
+			Axios.post(BASE_URL_AGENT + "/api/addToCart", newOrderDTO, {  headers: { Authorization: getAuthHeader() } })
 				.then((res) => {
 					if (res.status === 500) {
 						this.setState({ errorHeader: "Internal server error!", errorMessage: "Server error.", hiddenErrorAlert: false });

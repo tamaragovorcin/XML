@@ -34,7 +34,7 @@ func (app *application) routes() *mux.Router {
 	r.HandleFunc("/api/image/{token}/{campaignId}", IsAuthorized(app.saveImageWithToken)).Methods("POST")
 
 	r.HandleFunc("/api/getUsersCampaigns/{userId}", IsAuthorized(app.getUsersCampaigns)).Methods("GET")
-	r.HandleFunc("/api/file/{campaignId}", IsAuthorized(app.GetFileByCampaignId)).Methods("GET")
+	r.HandleFunc("/api/file/{campaignId}", app.GetFileByCampaignId).Methods("GET")
 	r.HandleFunc("/api/campaign/update", IsAuthorized(app.updateOneTimeCampaign)).Methods("POST")
 	r.HandleFunc("/api/campaign/multiple/update", IsAuthorized(app.updateMultipleTimeCampaign)).Methods("POST")
 	r.HandleFunc("/api/campaign/delete/{id}", IsAuthorized(app.deleteOneTimeCampaign)).Methods("GET")

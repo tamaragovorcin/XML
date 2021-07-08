@@ -15,8 +15,8 @@ import (
 	"os"
 	"strings"
 	"time"
+	"userInteraction/pkg/models"
 	"userInteraction/saga"
-	"users/pkg/models"
 
 	"github.com/neo4j/neo4j-go-driver/v4/neo4j"
 )
@@ -84,7 +84,7 @@ func (app *application) RedisConnection() {
 
 	// create client and ping redis
 	var err error
-	client := redis.NewClient(&redis.Options{Addr: "localhost:6379", Password: "", DB: 0})
+	client := redis.NewClient(&redis.Options{Addr: "redis-db:6379", Password: "", DB: 0})
 	if _, err = client.Ping().Result(); err != nil {
 		log.Fatalf("error creating redis client %s", err)
 	}
@@ -233,7 +233,7 @@ func routes() *mux.Router {
 	r.HandleFunc("/api/acceptFollowRequest", IsAuthorized(AcceptFollowRequest(driver, configuration.Database))).Methods("POST")
 	r.HandleFunc("/api/deleteFollowRequest", IsAuthorized(DeleteFollowRequest(driver, configuration.Database))).Methods("POST")
 	r.HandleFunc("/api/deleteFollow/{subjectId}/{objectId}", IsAuthorized(DeleteFollow(driver, configuration.Database))).Methods("GET")
-	r.HandleFunc("/api/createUser", IsAuthorized(CreateUser(driver, configuration.Database))).Methods("POST")
+	r.HandleFunc("/api/createUser", CreateUser(driver, configuration.Database)).Methods("POST")
 	r.HandleFunc("/api/user/followRequests", IsAuthorized(ReturnUsersFollowRequests(driver, configuration.Database))).Methods("POST")
 	r.HandleFunc("/api/user/followRequestsByMe", IsAuthorized(ReturnUsersFollowRequestsByMe(driver, configuration.Database))).Methods("POST")
 	r.HandleFunc("/api/user/following", IsAuthorized(ReturnUsersFollowings(driver, configuration.Database))).Methods("POST")
@@ -300,8 +300,8 @@ func parseConfiguration() *Neo4jConfiguration {
 	}
 
 	return &Neo4jConfiguration{
-		//Url:      lookupEnvOrGetDefault("NEO4J_URI", "bolt://db_neo:7687"),
-		Url:      lookupEnvOrGetDefault("NEO4J_URI", "bolt://localhost:7687"),
+		Url:      lookupEnvOrGetDefault("NEO4J_URI", "bolt://db_neo:7687"),
+		//Url:      lookupEnvOrGetDefault("NEO4J_URI", "bolt://localhost:7687"),
 		Username: lookupEnvOrGetDefault("NEO4J_USER", "neo4j"),
 		Password: lookupEnvOrGetDefault("NEO4J_PASSWORD", "root"),
 

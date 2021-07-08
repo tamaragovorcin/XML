@@ -39,8 +39,8 @@ class RegisterPage extends Component {
 		usernameError: "none",
 		usernameNotValid: "none",
 		selectedDate: "",
-		private : false,
-		textSuccessfulModal : ""
+		private: false,
+		textSuccessfulModal: ""
 
 	};
 	hasRole = (reqRole) => {
@@ -101,7 +101,7 @@ class RegisterPage extends Component {
 			repeatPasswordSameError: "none",
 			usernameError: "none",
 			usernameNotValid: "none",
-			website : "",
+			website: "",
 		});
 
 		if (this.state.username === "") {
@@ -163,11 +163,11 @@ class RegisterPage extends Component {
 			Password: this.state.password,
 			Biography: this.state.biography,
 			Private: this.state.private,
-			Website : this.state.website
+			Website: this.state.website
 		};
 
 		if (this.validateForm(userDTO)) {
-			Axios.post(BASE_URL + "/api/users/api/", userDTO, {  headers: { Authorization: getAuthHeader() } })
+			Axios.post(BASE_URL + "/api/users/api/", userDTO)
 				.then((res) => {
 
 					if (res.status === 409) {
@@ -188,15 +188,15 @@ class RegisterPage extends Component {
 					//		console.log(res.data)
 					//})
 					//.catch ((err) => {
-				//console.log(err);
-			//});
-			Axios.get(BASE_URL + "/api/users/api/addSettings/"+res.data, {  headers: { Authorization: getAuthHeader() } })
-					.then((res2) => {
-						console.log(res2.data)
-					})
-					.catch((err) => {
-						console.log(err);
-					});
+					//console.log(err);
+					//});
+					Axios.get(BASE_URL + "/api/users/api/addSettings/" + res.data)
+						.then((res2) => {
+							console.log(res2.data)
+						})
+						.catch((err) => {
+							console.log(err);
+						});
 				})
 				.catch((err) => {
 					if (err.response.status === 409) {
@@ -207,11 +207,12 @@ class RegisterPage extends Component {
 						});
 					}
 					else if (err.response.status === 500) {
-						this.setState({ errorHeader: "Username taken", errorMessage: "User with this username already exists", hiddenErrorAlert: false });}
+						this.setState({ errorHeader: "Username taken", errorMessage: "User with this username already exists", hiddenErrorAlert: false });
+					}
 
 				});
 		}
-		
+
 
 
 	};
@@ -228,11 +229,11 @@ class RegisterPage extends Component {
 			Password: this.state.password,
 			Biography: this.state.biography,
 			Private: this.state.private,
-			Website : this.state.website
+			Website: this.state.website
 		};
 
 		if (this.validateForm(userDTO)) {
-			Axios.post(BASE_URL + "/api/users/agent", userDTO, {  headers: { Authorization: getAuthHeader() } })
+			Axios.post(BASE_URL + "/api/users/agent", userDTO,)
 				.then((res) => {
 
 					if (res.status === 409) {
@@ -248,14 +249,14 @@ class RegisterPage extends Component {
 						this.setState({ textSuccessfulModal: "You have successfully sent request for registration" });
 
 					}
-					const user1Id = {id: res.data}
-					Axios.post(BASE_URL + "/api/userInteraction/api/createUser", user1Id, {  headers: { Authorization: getAuthHeader() } })
-					.then((res) => {
+					const user1Id = { id: res.data }
+					Axios.post(BASE_URL + "/api/userInteraction/api/createUser", user1Id)
+						.then((res) => {
 							console.log(res.data)
-					})
-					.catch ((err) => {
-				console.log(err);
-			});
+						})
+						.catch((err) => {
+							console.log(err);
+						});
 				})
 				.catch((err) => {
 					if (err.response.status === 409) {
@@ -266,7 +267,8 @@ class RegisterPage extends Component {
 						});
 					}
 					else if (err.response.status === 500) {
-						this.setState({ errorHeader: "Username taken", errorMessage: "User with this username already exists", hiddenErrorAlert: false });}
+						this.setState({ errorHeader: "Username taken", errorMessage: "User with this username already exists", hiddenErrorAlert: false });
+					}
 
 				});
 		}
@@ -282,10 +284,10 @@ class RegisterPage extends Component {
 		this.setState({ biography: event.target.value });
 	}
 	handlePrivateChange(event) {
-		if(this.state.private=== true) {
+		if (this.state.private === true) {
 			this.setState({ private: false });
 		}
-		if(this.state.private=== false) {
+		if (this.state.private === false) {
 			this.setState({ private: true });
 		}
 	}
@@ -293,7 +295,7 @@ class RegisterPage extends Component {
 		this.setState({ hiddenErrorAlert: true });
 	};
 	handleWebsiteChange = (event) => {
-		this.setState({website: event.target.value})
+		this.setState({ website: event.target.value })
 	}
 
 	render() {
@@ -433,7 +435,7 @@ class RegisterPage extends Component {
 											value={this.state.website}
 										/>
 									</div>
-									
+
 								</div>
 								<div className="control-group">
 									<div className="form-group controls mb-0 pb-2" style={{ color: "#6c757d", opacity: 1 }}>
