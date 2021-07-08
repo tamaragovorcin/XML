@@ -106,6 +106,16 @@ services:
     volumes:
       - story-data:/var/lib/storyposts/data
 
+
+  xml-db:
+      image: existdb/existdb:latest
+      ports:
+        - 8081:8080
+        - 8443:8443
+      networks:
+        - backend
+
+
 volumes:
   mongodb:
   story-data:

@@ -73,6 +73,7 @@ func createNewXmlFile(campaigns []dtos.CampaignDTO, bestCampaigns dtos.BestCampa
 	if err != nil {
 		fmt.Printf("error: %v\n", err)
 	}
+	//err = XmlDbClient.CreateDocument(output, nil)
 
 	err2 := ioutil.WriteFile("cmd/app/files/agentCampaigns.xml", output, 0644)
 	if err2 != nil {

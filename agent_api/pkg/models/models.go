@@ -1,6 +1,7 @@
 package models
 
 import (
+	"encoding/xml"
 	"github.com/google/uuid"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	_ "html/template"
@@ -33,6 +34,44 @@ type Role struct {
 	Name  string `bson:"name,omitempty"`
 
 }
+
+type CampaignStatisticReport struct {
+	XMLName        xml.Name       `xml:"report"`
+	FileId         string         `json:"fileId" xml:"id,attr"`
+	DateCreating   time.Time	  `json:"dateCreating" xml:"date-creation,attr"`
+	Campaigns 	   []CampaignStatisticInfo `json:"campaigns" xml:"campaign"`
+}
+
+type CampaignStatisticInfo struct {
+	ExposeOnceDate time.Time `json:"exposeOnceDate" xml:"exposeOnceDate"`
+	MinDisplaysForRepeatedly int `json:"minDisplaysForRepeatedly" xml:"minDisplaysForRepeatedly"`
+
+}
+type XmlDatabaseResponse struct {
+	XmlName xml.Name `xml:"exist:result"`
+	Url string `xml:"exist,attr"`
+	XmlDatabaseCollections XmlDatabaseCollection `xml:"collection"`
+}
+
+type XmlDatabaseCollection struct {
+	Name string `xml:"name,attr"`
+	Created string `xml:"created,attr"`
+	Owner string `xml:"owner,attr"`
+	Group string `xml:"group,attr"`
+	Permissions string `xml:"permissions,attr"`
+	Resources []XmlDatabaseResource `xml:"resource,omitempty"`
+}
+
+type XmlDatabaseResource struct {
+	Name string `xml:"name,attr"`
+	Created string `xml:"created,attr"`
+	LastModified string `xml:"last-modified,attr"`
+	Owner string `xml:"owner,attr"`
+	Group string `xml:"group,attr"`
+	Permissions string `xml:"permissions,attr"`
+}
+
+
 type ProfileInformation struct {
 	Id  primitive.ObjectID   `bson:"_id,omitempty"`
 	Name     string             `bson:"name,omitempty"`

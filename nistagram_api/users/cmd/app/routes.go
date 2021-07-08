@@ -31,35 +31,35 @@ func (app *application) routes() *mux.Router {
 	r.HandleFunc("/api/user/username/{userId}", app.findUserUsername).Methods("GET")
 	r.HandleFunc("/api/user/closeFriends/{userId}", app.findUserCloseFriends).Methods("GET")
 	r.HandleFunc("/api/user/username/category/{userId}", app.findUserUsernameIfInfluencer).Methods("GET")
-	r.HandleFunc("/api/user/genderOk/{userId}/{gender}", IsAuthorized(app.findIfGenderIsOk)).Methods("GET")
-	r.HandleFunc("/api/user/dateOfBirthOk/{userId}/{dateOne}/{dateTwo}", IsAuthorized(app.findIfDateOfBirthIsOk)).Methods("GET")
+	r.HandleFunc("/api/user/genderOk/{userId}/{gender}", app.findIfGenderIsOk).Methods("GET")
+	r.HandleFunc("/api/user/dateOfBirthOk/{userId}/{dateOne}/{dateTwo}", app.findIfDateOfBirthIsOk).Methods("GET")
 
-	r.HandleFunc("/api/user/userId/{token}", IsAuthorized(app.findUserIdIfTokenExists)).Methods("GET")
+	r.HandleFunc("/api/user/userId/{token}", app.findUserIdIfTokenExists).Methods("GET")
 
 
-	r.HandleFunc("/api/user/addToCloseFriends/", IsAuthorized(app.addUserToCloseFriends)).Methods("POST")
-	r.HandleFunc("/api/user/removeFromCloseFriends/", IsAuthorized(app.removeUserFromCloseFriends)).Methods("POST")
+	r.HandleFunc("/api/user/addToCloseFriends/", app.addUserToCloseFriends).Methods("POST")
+	r.HandleFunc("/api/user/removeFromCloseFriends/", app.removeUserFromCloseFriends).Methods("POST")
 
 	//r.HandleFunc("/api/getLoggedIn", app.getLoggedIn).Methods("GET")
 
-	r.HandleFunc("/profileInformation/", IsAuthorized(app.getAllProfileInformation)).Methods("GET")
-	r.HandleFunc("/profileInformation/{id}", IsAuthorized(app.findProfileInformationByID)).Methods("GET")
-	r.HandleFunc("/profileInformation/", IsAuthorized(app.insertProfileInformation)).Methods("POST")
-	r.HandleFunc("/profileInformation/{id}", IsAuthorized(app.deleteProfileInformation)).Methods("DELETE")
+	r.HandleFunc("/profileInformation/", app.getAllProfileInformation).Methods("GET")
+	r.HandleFunc("/profileInformation/{id}", app.findProfileInformationByID).Methods("GET")
+	r.HandleFunc("/profileInformation/", app.insertProfileInformation).Methods("POST")
+	r.HandleFunc("/profileInformation/{id}", app.deleteProfileInformation).Methods("DELETE")
 
 
-	r.HandleFunc("/api/role/", IsAuthorized(app.getAllRoles)).Methods("GET")
-	r.HandleFunc("/api/role/{id}", IsAuthorized(app.findRoleByID)).Methods("GET")
-	r.HandleFunc("/api/role/", IsAuthorized(app.insertRole)).Methods("POST")
-	r.HandleFunc("/api/role/{id}", IsAuthorized(app.deleteRole)).Methods("DELETE")
+	r.HandleFunc("/api/role/", app.getAllRoles).Methods("GET")
+	r.HandleFunc("/api/role/{id}", app.findRoleByID).Methods("GET")
+	r.HandleFunc("/api/role/", app.insertRole).Methods("POST")
+	r.HandleFunc("/api/role/{id}", app.deleteRole).Methods("DELETE")
 
-	r.HandleFunc("/agent/", IsAuthorized(app.getAllAgents)).Methods("GET")
-	r.HandleFunc("/agentRequests/", IsAuthorized(app.getAllAgentsRequests)).Methods("GET")
-	r.HandleFunc("/agent/{id}", IsAuthorized(app.findAgentByID)).Methods("GET")
+	r.HandleFunc("/agent/", app.getAllAgents).Methods("GET")
+	r.HandleFunc("/agentRequests/", app.getAllAgentsRequests).Methods("GET")
+	r.HandleFunc("/agent/{id}", app.findAgentByID).Methods("GET")
 	r.HandleFunc("/agent", app.insertAgent).Methods("POST")
-	r.HandleFunc("/agent/{id}", IsAuthorized(app.deleteAgent)).Methods("DELETE")
+	r.HandleFunc("/agent/{id}", app.deleteAgent).Methods("DELETE")
 
-	r.HandleFunc("/api/user/profileImage/{userId}", IsAuthorized(app.saveImage)).Methods("POST")
+	r.HandleFunc("/api/user/profileImage/{userId}", app.saveImage).Methods("POST")
 	r.HandleFunc("/api/user/profileImage/{userId}", app.getUsersProfileImage).Methods("GET")
 
 	r.HandleFunc("/notification/", app.getAllNotification).Methods("GET")

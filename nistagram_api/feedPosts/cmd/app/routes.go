@@ -8,17 +8,17 @@ import (
 func (app *application) routes() *mux.Router {
 	// Register handler functions.
 	r := mux.NewRouter()
-	r.HandleFunc("/comment/", IsAuthorized(app.getAllComments)).Methods("GET")
-	r.HandleFunc("/comment/{id}", IsAuthorized(app.findCommentByID)).Methods("GET")
-	r.HandleFunc("/comment/", IsAuthorized(app.insertComment)).Methods("POST")
-	r.HandleFunc("/comment/{id}", IsAuthorized(app.deleteComment)).Methods("DELETE")
+	r.HandleFunc("/comment/", app.getAllComments).Methods("GET")
+	r.HandleFunc("/comment/{id}", app.findCommentByID).Methods("GET")
+	r.HandleFunc("/comment/", app.insertComment).Methods("POST")
+	r.HandleFunc("/comment/{id}", app.deleteComment).Methods("DELETE")
 
-	r.HandleFunc("/", IsAuthorized(app.getAllFeedPosts)).Methods("GET")
-	r.HandleFunc("/{id}", IsAuthorized(app.findFeedPostByID)).Methods("GET")
-	r.HandleFunc("/api/feedAlbum/{userId}", IsAuthorized(app.insertAlbumFeed)).Methods("POST")
-	r.HandleFunc("/api/feed/{userIdd}", IsAuthorized(app.insertFeedPost)).Methods("POST")
+	r.HandleFunc("/", app.getAllFeedPosts).Methods("GET")
+	r.HandleFunc("/{id}", app.findFeedPostByID).Methods("GET")
+	r.HandleFunc("/api/feedAlbum/{userId}", app.insertAlbumFeed).Methods("POST")
+	r.HandleFunc("/api/feed/{userIdd}", app.insertFeedPost).Methods("POST")
 
-	r.HandleFunc("/location/", IsAuthorized(app.getAllLocations)).Methods("GET")
+	r.HandleFunc("/location/", app.getAllLocations).Methods("GET")
 	r.HandleFunc("/location/{id}", app.findLocationByID).Methods("GET")
 	r.HandleFunc("/location/", app.insertLocation).Methods("POST")
 	r.HandleFunc("/location/{id}", app.deleteLocation).Methods("DELETE")
