@@ -1,6 +1,7 @@
 package models
 
 import (
+	"AgentApp/pkg/dtos"
 	"encoding/xml"
 	"github.com/google/uuid"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -39,7 +40,7 @@ type CampaignStatisticReport struct {
 	XMLName        xml.Name       `xml:"report"`
 	FileId         string         `json:"fileId" xml:"id,attr"`
 	DateCreating   time.Time	  `json:"dateCreating" xml:"date-creation,attr"`
-	Campaigns 	   []CampaignStatisticInfo `json:"campaigns" xml:"campaign"`
+	Campaigns 	   []dtos.Campaign `json:"campaigns" xml:"campaign"`
 }
 
 type CampaignStatisticInfo struct {

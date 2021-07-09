@@ -2,10 +2,13 @@ package main
 
 import (
 	"AgentApp/pkg/dtos"
+	"AgentApp/pkg/models"
 	"bytes"
 	"encoding/json"
 	"encoding/xml"
+	"errors"
 	"fmt"
+	"github.com/beevik/guid"
 	"github.com/gorilla/mux"
 	"github.com/jung-kurt/gofpdf"
 	"image"
@@ -16,6 +19,7 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"time"
 )
 
 
@@ -54,31 +58,76 @@ func (app *application) getCampaignMonitoring(w http.ResponseWriter, req *http.R
 
 
 func createNewXmlFile(campaigns []dtos.CampaignDTO, bestCampaigns dtos.BestCampaigns) {
+	list := models.CampaignStatisticReport{
+		XMLName:   xml.Name{},
+		FileId:    guid.New().String(),
+		Campaigns: nil,
+		DateCreating: time.Now(),
+	}
+
+	campa := []dtos.Campaign{}
 
 	lengthOfList := len(campaigns)
 	if lengthOfList>0 {
 		campaign := campaigns[0]
-		bestCampaigns.FirstCampaign =defineXmlCampaign(bestCampaigns.FirstCampaign, campaign)
+		first := defineXmlCampaign(bestCampaigns.FirstCampaign, campaign)
+		bestCampaigns.FirstCampaign =first
+		campa = append(campa, first)
 		if lengthOfList>1 {
 			campaign2 := campaigns[1]
-			bestCampaigns.SecondCampaign = defineXmlCampaign(bestCampaigns.SecondCampaign, campaign2)
+			second := defineXmlCampaign(bestCampaigns.SecondCampaign, campaign2)
+			bestCampaigns.SecondCampaign = second
+			campa = append(campa, second)
 			if lengthOfList>2 {
 				campaign3 := campaigns[2]
-				bestCampaigns.ThirdCampaign = defineXmlCampaign(bestCampaigns.ThirdCampaign, campaign3)
+				third := defineXmlCampaign(bestCampaigns.ThirdCampaign, campaign3)
+				bestCampaigns.ThirdCampaign = third
+				campa = append(campa, third)
 			}
 		}
 
 	}
-	output, err := xml.MarshalIndent(&bestCampaigns, "  ", "    ")
-	if err != nil {
-		fmt.Printf("error: %v\n", err)
-	}
-	//err = XmlDbClient.CreateDocument(output, nil)
 
-	err2 := ioutil.WriteFile("cmd/app/files/agentCampaigns.xml", output, 0644)
+	list.Campaigns = campa
+	file, _ := xml.MarshalIndent(list, "", "	")
+
+
+	_ = CreateDocument(file, list.FileId)
+
+
+
+	err2 := ioutil.WriteFile("cmd/app/files/agentCampaigns.xml", file, 0644)
 	if err2 != nil {
-		fmt.Println(err)
+		fmt.Println(err2)
 	}
+
+
+}
+
+func CreateDocument(xmlFile []byte, fileId string) error {
+	client := &http.Client{}
+	baseXmlDbUrl = fmt.Sprintf("%s%s:%s/exist/rest", "http://", "xml-db", "8081")
+	fmt.Println(fmt.Sprintf("%s/report/%s", baseXmlDbUrl, fileId))
+	req, err := http.NewRequest("PUT", fmt.Sprintf("%s/report/%s", baseXmlDbUrl , fileId + ".xml"), bytes.NewBuffer(xmlFile))
+	if err != nil {
+		return err
+	}
+	//req.Header.Add("Content-Length", string(len(xmlFile)))
+	req.Header.Add("username", "admin")
+	req.Header.Add("password", "")
+	req.Header.Add("Content-Type", "application/xml")
+
+	resp, err := client.Do(req)
+	if err != nil || resp.StatusCode != 201 {
+		if resp == nil {
+			return err
+		}
+
+		fmt.Println(resp.StatusCode)
+		return errors.New("error while creating document")
+	}
+
+	return nil
 }
 
 func defineXmlCampaign(bestCampaigns dtos.Campaign, campaign dtos.CampaignDTO) dtos.Campaign{

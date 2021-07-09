@@ -12,8 +12,6 @@ import (
 
 type XmlDbClient interface {
 	CreateDocument(xmlFile []byte, fileId string) error
-	GetAllDocument() (*models.XmlDatabaseResponse, error)
-	GetDocumentById(name string) (*models.CampaignStatisticReport, error)
 }
 
 type xmlDbClient struct {
